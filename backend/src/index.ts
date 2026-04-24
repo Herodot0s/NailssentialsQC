@@ -1,0 +1,42 @@
+import express, { Request, Response } from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import authRoutes from './routes/authRoutes';
+import staffRoutes from './routes/staffRoutes';
+import serviceRoutes from './routes/serviceRoutes';
+import appointmentRoutes from './routes/appointmentRoutes';
+import attendanceRoutes from './routes/attendanceRoutes';
+import customerRoutes from './routes/customerRoutes';
+import reportRoutes from './routes/reportRoutes';
+import notificationRoutes from './routes/notificationRoutes';
+
+dotenv.config();
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/staff', staffRoutes);
+app.use('/api/v1/services', serviceRoutes);
+app.use('/api/v1/appointments', appointmentRoutes);
+app.use('/api/v1/attendance', attendanceRoutes);
+app.use('/api/v1/customers', customerRoutes);
+app.use('/api/v1/reports', reportRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
+
+app.get('/', (req: Request, res: Response) => {
+  res.send('NailssentialsQC Backend API is running!');
+});
+
+// Only listen to the port if not in a serverless environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`[server]: Server is running at http://localhost:${port}`);
+  });
+}
+
+export default app;

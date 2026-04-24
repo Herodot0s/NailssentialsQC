@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: nailssentials_qc
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/nailssentials_qc
+      - JWT_SECRET=your_access_token_secret_here
+      - REFRESH_TOKEN_SECRET=your_refresh_token_secret_here
+      - BCRYPT_SALT_ROUNDS=12
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  pg_data:
