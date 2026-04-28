@@ -102,7 +102,7 @@ const Navbar: React.FC = () => {
                 {(user?.role === 'staff' || user?.role === 'manager') && <NotificationBell />}
 
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                  <DropdownMenuTrigger render={>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary/5 transition-colors">
                       <Avatar className="h-10 w-10">
                         <AvatarFallback className="bg-primary-ultra text-primary font-serif font-bold text-sm border-[0.5px] border-primary/20">
@@ -114,7 +114,7 @@ const Navbar: React.FC = () => {
                         </AvatarFallback>
                       </Avatar>
                     </Button>
-                  </DropdownMenuTrigger>
+                  } </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56 mt-4 border-none shadow-xl rounded-none p-2" align="end">
                     <DropdownMenuGroup>
                       <DropdownMenuLabel className="font-normal px-4 py-3">
@@ -127,43 +127,27 @@ const Navbar: React.FC = () => {
                       </DropdownMenuLabel>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator className="bg-primary/5" />
-                    <DropdownMenuItem
-                      className="rounded-none px-4 py-3"
-                      asChild
-                    >
-                      <Link to="/profile">
+                    <DropdownMenuItemrender={<Link to="/profile">
                         <User className="mr-3 h-4 w-4 stroke-[1.5]" />
                         <span className="text-xs font-medium">Profile Settings</span>
                       </Link>
                     </DropdownMenuItem>
                     {user?.role === 'customer' && (
-                      <DropdownMenuItem
-                        className="rounded-none px-4 py-3"
-                        asChild
-                      >
-                        <Link to="/appointments">
+                      <DropdownMenuItemrender={<Link to="/appointments">
                           <Calendar className="mr-3 h-4 w-4 stroke-[1.5]" />
                           <span className="text-xs font-medium">My Appointments</span>
                         </Link>
                       </DropdownMenuItem>
                     )}
                     {user?.role === 'manager' && (
-                      <DropdownMenuItem
-                        className="rounded-none px-4 py-3"
-                        asChild
-                      >
-                        <Link to="/manager">
+                      <DropdownMenuItemrender={<Link to="/manager">
                           <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
                           <span className="text-xs font-medium">Manager Dashboard</span>
                         </Link>
                       </DropdownMenuItem>
                     )}
                     {user?.role === 'staff' && (
-                      <DropdownMenuItem
-                        className="rounded-none px-4 py-3"
-                        asChild
-                      >
-                        <Link to="/dashboard">
+                      <DropdownMenuItemrender={<Link to="/dashboard">
                           <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
                           <span className="text-xs font-medium">Staff Portal</span>
                         </Link>
@@ -219,16 +203,12 @@ const Navbar: React.FC = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 mt-4 border-none shadow-xl rounded-none p-4 space-y-2">
-                <DropdownMenuItem className="rounded-none px-4 py-3 text-xs uppercase tracking-widest" asChild>
-                  <Link to="/services">Services</Link>
+                <DropdownMenuItemrender={<Link to="/services">Services</Link>
                 </DropdownMenuItem>
                 {!isAuthenticated ? (
                   <>
-                    <DropdownMenuItem className="rounded-none px-4 py-3 text-xs uppercase tracking-widest" asChild>
-                      <Link to="/login">Login</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="rounded-none px-4 py-3 text-xs uppercase tracking-widest" asChild>
-                      <Link to="/register">Sign Up</Link>
+                    <DropdownMenuItemrender={<Link to="/login">Login</Link>
+                    } </DropdownMenuItem><DropdownMenuItemrender={<Link to="/register">Sign Up</Link>
                     </DropdownMenuItem>
                   </>
                 ) : (

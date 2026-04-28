@@ -45,11 +45,9 @@ const Home = () => (
         
         <div className="flex flex-col sm:flex-row gap-6 mt-8 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 ease-out fill-mode-forwards">
           <Button
-            asChild
+            render={<Link to="/booking">Book Your Sanctuary</Link>}
             className="h-14 px-10 text-base font-medium tracking-widest uppercase bg-white text-black hover:bg-primary hover:text-white border-none rounded-none transition-all duration-500 shadow-2xl"
-          >
-            <Link to="/booking">Book Your Sanctuary</Link>
-          </Button>
+          />
           <Link 
             to="/services" 
             className="group flex items-center h-14 px-6 text-white text-base font-medium tracking-widest uppercase transition-all duration-300 border-b border-white/30 hover:border-white"
@@ -148,11 +146,9 @@ const Home = () => (
       <div className="container mx-auto px-6 max-w-xl space-y-8">
         <h2 className="font-serif text-3xl font-light text-foreground">Prepare for your visit.</h2>
         <Button
-          asChild
+          render={<Link to="/register">JOIN THE PRIVILEGE CLUB</Link>}
           className="h-14 px-12 tracking-widest bg-black text-white hover:bg-primary border-none rounded-none transition-all duration-500"
-        >
-          <Link to="/register">JOIN THE PRIVILEGE CLUB</Link>
-        </Button>
+        />
       </div>
     </section>
   </div>

@@ -4,6 +4,7 @@ import {
   Pie,
   Cell,
   ResponsiveContainer,
+  Tooltip,
 } from 'recharts';
 import {
   Card,
@@ -13,12 +14,29 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -64,7 +82,6 @@ import {
 import { format } from 'date-fns';
 import DrillDownLineChart from '@/components/DrillDownLineChart';
 import SalarySlipModal from '@/components/SalarySlipModal';
-import ProfilePictureUpload from '@/components/ProfilePictureUpload';
 
 interface SalesStats {
   totalRevenue: number;
@@ -390,40 +407,7 @@ const ManagerDashboard: React.FC = () => {
     setShowSalarySlip(true);
   };
 
-  // Process chart data for drill-down
-  const chartData = useMemo(() => {
-    if (!historicalData.length) return [];
-    
-    return historicalData.map(d => {
-      const entry: any = { date: d.date };
-      if (!selectedCategory) {
-        // Top-level categories
-        Object.keys(d.categories).forEach(cat => {
-          entry[cat] = d.categories[cat];
-        });
-      } else {
-        // Specific services in category
-        Object.keys(d.services).forEach(svc => {
-          entry[svc] = d.services[svc];
-        });
-      }
-      return entry;
-    });
-  }, [historicalData, selectedCategory]);
-
-  const allSeriesNames = useMemo(() => {
-    const names = new Set<string>();
-    historicalData.forEach(d => {
-      if (!selectedCategory) {
-        Object.keys(d.categories).forEach(n => names.add(n));
-      } else {
-        Object.keys(d.services).forEach(n => names.add(n));
-      }
-    });
-    return Array.from(names);
-  }, [historicalData, selectedCategory]);
-
-  const menuItems = [
+    const menuItems = [
     { id: 'analytics', label: 'Dashboard', icon: PieChartIcon },
     { id: 'staff', label: 'Employee Files', icon: Users },
     { id: 'attendance', label: 'Attendance Tool', icon: Clock },

@@ -59,10 +59,10 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
 
       const result = await uploadFile(base64Content, file.name, file.type);
 
-      if (result.success) {
-        onUploadComplete(result.data.url);
+      if (result.data?.success) {
+        onUploadComplete(result.data.data.url);
       } else {
-        setError(result.message || 'Upload failed');
+        setError(result.data?.message || 'Upload failed');
       }
     } catch (err: any) {
       setError(err.message || 'Upload failed. Please try again.');

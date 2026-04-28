@@ -41,11 +41,11 @@ const DrillDownLineChart: React.FC<DrillDownLineChartProps> = ({
       const entry: any = { date: d.date };
       if (!selectedCategory) {
         Object.keys(d.categories || {}).forEach(cat => {
-          entry[cat] = d.categories[cat];
+          entry[cat] = d.categories?.[cat];
         });
       } else {
         Object.keys(d.services || {}).forEach(svc => {
-          entry[svc] = d.services[svc];
+          entry[svc] = d.services?.[svc];
         });
       }
       return entry;
