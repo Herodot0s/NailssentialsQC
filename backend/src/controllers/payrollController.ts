@@ -125,9 +125,9 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       });
 
       // Mark commissions as paid
-      if (commissions.length > 0) {
+      if (prevMonthCommissions.length > 0) {
         await prisma.commission.updateMany({
-          where: { id: { in: commissions.map(c => c.id) } },
+          where: { id: { in: prevMonthCommissions.map(c => c.id) } },
           data: { is_paid: true },
         });
       }
