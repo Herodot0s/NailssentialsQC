@@ -21,6 +21,7 @@
   "type": "commonjs",
   "dependencies": {
     "@prisma/client": "6.4.1",
+    "@vercel/blob": "^2.3.3",
     "axios": "^1.15.2",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",

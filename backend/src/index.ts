@@ -9,6 +9,10 @@ import attendanceRoutes from './routes/attendanceRoutes';
 import customerRoutes from './routes/customerRoutes';
 import reportRoutes from './routes/reportRoutes';
 import notificationRoutes from './routes/notificationRoutes';
+import payrollRoutes from './routes/payrollRoutes';
+import messageRoutes from './routes/messageRoutes';
+import reviewRoutes from './routes/reviewRoutes';
+import uploadRoutes from './routes/uploadRoutes';
 
 dotenv.config();
 
@@ -27,6 +31,10 @@ app.use('/api/v1/attendance', attendanceRoutes);
 app.use('/api/v1/customers', customerRoutes);
 app.use('/api/v1/reports', reportRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/payroll', payrollRoutes);
+app.use('/api/v1/messages', messageRoutes);
+app.use('/api/v1/reviews', reviewRoutes);
+app.use('/api/upload', uploadRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('NailssentialsQC Backend API is running!');
