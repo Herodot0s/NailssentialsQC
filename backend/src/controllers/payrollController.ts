@@ -124,14 +124,6 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
         },
       });
 
-      // Mark commissions as paid
-      if (prevMonthCommissions.length > 0) {
-        await prisma.commission.updateMany({
-          where: { id: { in: prevMonthCommissions.map(c => c.id) } },
-          data: { is_paid: true },
-        });
-      }
-
       // Link manual deductions to this payroll period
       if (manualDeductions.length > 0) {
         await prisma.deductionLog.updateMany({
@@ -152,6 +144,14 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
           },
         });
       }
+    }
+
+    // Mark all previous month's commissions as paid (once, after all staff processed)
+    if (prevMonthCommissions.length > 0) {
+      await prisma.commission.updateMany({
+        where: { id: { in: prevMonthCommissions.map(c => c.id) } },
+        data: { is_paid: true },
+      });
     }
 
     return res.status(201).json({ success: true, data: payrollPeriod });
