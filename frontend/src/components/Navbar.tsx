@@ -12,11 +12,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { LogOut, User, Calendar, Settings, LayoutDashboard, Menu } from 'lucide-react';
+import { LogOut, User, Calendar, Settings, LayoutDashboard, Menu, ShoppingCart } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import { useCart } from '../context/CartContext';
 
 const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const { cart } = useCart();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -49,6 +51,19 @@ const Navbar: React.FC = () => {
             >
               Services
             </Link>
+            {isAuthenticated && user?.role === 'customer' && (
+              <Link
+                to="/booking"
+                className="relative text-muted-foreground hover:text-foreground transition-all p-2"
+              >
+                <ShoppingCart className="h-5 w-5 stroke-[1.5]" />
+                {cart.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-bold h-4 w-4 rounded-full flex items-center justify-center animate-in zoom-in duration-300">
+                    {cart.length}
+                  </span>
+                )}
+              </Link>
+            )}
             {isAuthenticated ? (
               <>
                 {user?.role === 'customer' && (
@@ -87,21 +102,19 @@ const Navbar: React.FC = () => {
                 {(user?.role === 'staff' || user?.role === 'manager') && <NotificationBell />}
 
                 <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
-                      <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary/5 transition-colors">
-                        <Avatar className="h-10 w-10">
-                          <AvatarFallback className="bg-primary-ultra text-primary font-serif font-bold text-sm border-[0.5px] border-primary/20">
-                            {user?.fullName ? (
-                              getInitials(user.fullName)
-                            ) : (
-                              <User className="h-4 w-4 stroke-[1.5]" />
-                            )}
-                          </AvatarFallback>
-                        </Avatar>
-                      </Button>
-                    }
-                  />
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary/5 transition-colors">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback className="bg-primary-ultra text-primary font-serif font-bold text-sm border-[0.5px] border-primary/20">
+                          {user?.fullName ? (
+                            getInitials(user.fullName)
+                          ) : (
+                            <User className="h-4 w-4 stroke-[1.5]" />
+                          )}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56 mt-4 border-none shadow-xl rounded-none p-2" align="end">
                     <DropdownMenuGroup>
                       <DropdownMenuLabel className="font-normal px-4 py-3">
@@ -116,45 +129,45 @@ const Navbar: React.FC = () => {
                     <DropdownMenuSeparator className="bg-primary/5" />
                     <DropdownMenuItem
                       className="rounded-none px-4 py-3"
-                      render={
-                        <Link to="/profile">
-                          <User className="mr-3 h-4 w-4 stroke-[1.5]" />
-                          <span className="text-xs font-medium">Profile Settings</span>
-                        </Link>
-                      }
-                    />
+                      asChild
+                    >
+                      <Link to="/profile">
+                        <User className="mr-3 h-4 w-4 stroke-[1.5]" />
+                        <span className="text-xs font-medium">Profile Settings</span>
+                      </Link>
+                    </DropdownMenuItem>
                     {user?.role === 'customer' && (
                       <DropdownMenuItem
                         className="rounded-none px-4 py-3"
-                        render={
-                          <Link to="/appointments">
-                            <Calendar className="mr-3 h-4 w-4 stroke-[1.5]" />
-                            <span className="text-xs font-medium">My Appointments</span>
-                          </Link>
-                        }
-                      />
+                        asChild
+                      >
+                        <Link to="/appointments">
+                          <Calendar className="mr-3 h-4 w-4 stroke-[1.5]" />
+                          <span className="text-xs font-medium">My Appointments</span>
+                        </Link>
+                      </DropdownMenuItem>
                     )}
                     {user?.role === 'manager' && (
                       <DropdownMenuItem
                         className="rounded-none px-4 py-3"
-                        render={
-                          <Link to="/manager">
-                            <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
-                            <span className="text-xs font-medium">Manager Dashboard</span>
-                          </Link>
-                        }
-                      />
+                        asChild
+                      >
+                        <Link to="/manager">
+                          <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
+                          <span className="text-xs font-medium">Manager Dashboard</span>
+                        </Link>
+                      </DropdownMenuItem>
                     )}
                     {user?.role === 'staff' && (
                       <DropdownMenuItem
                         className="rounded-none px-4 py-3"
-                        render={
-                          <Link to="/dashboard">
-                            <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
-                            <span className="text-xs font-medium">Staff Portal</span>
-                          </Link>
-                        }
-                      />
+                        asChild
+                      >
+                        <Link to="/dashboard">
+                          <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
+                          <span className="text-xs font-medium">Staff Portal</span>
+                        </Link>
+                      </DropdownMenuItem>
                     )}
                     {user?.role === 'manager' && (
                       <DropdownMenuItem
@@ -186,11 +199,13 @@ const Navbar: React.FC = () => {
                 >
                   Login
                 </Link>
-                <Button 
-                  render={<Link to="/register">Sign Up</Link>} 
+                <Button
                   variant="outline"
                   className="h-10 px-8 rounded-none border-primary/40 text-primary hover:bg-primary hover:text-white transition-all duration-500 uppercase tracking-[0.2em] text-[10px] font-bold"
-                />
+                  asChild
+                >
+                  <Link to="/register">Sign Up</Link>
+                </Button>
               </div>
             )}
           </nav>

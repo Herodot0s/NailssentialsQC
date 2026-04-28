@@ -23,41 +23,25 @@ apiClient.interceptors.request.use(
   },
 );
 
-// Response interceptor for handling 401 Unauthorized (Review Finding [HIGH])
+// Response interceptor for handling 401 Unauthorized
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-
-    // If 401 and not already retrying
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-
       try {
         const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) {
-          throw new Error('No refresh token available');
-        }
-
-        // Request new access token
-        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-          refreshToken,
-        });
-
+        if (!refreshToken) throw new Error('No refresh token available');
+        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
         if (response.data.success) {
           const { accessToken, refreshToken: newRefreshToken } = response.data.data.tokens;
-
           localStorage.setItem('accessToken', accessToken);
-          if (newRefreshToken) {
-            localStorage.setItem('refreshToken', newRefreshToken);
-          }
-
-          // Retry original request with new token
+          if (newRefreshToken) localStorage.setItem('refreshToken', newRefreshToken);
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return apiClient(originalRequest);
         }
       } catch (refreshError) {
-        // If refresh fails, logout user
         localStorage.removeItem('user');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
@@ -65,10 +49,13 @@ apiClient.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
   },
 );
+
+// File upload method (base64 upload for Vercel serverless)
+export const uploadFile = (base64Data: string, filename: string, mimeType: string) =>
+  apiClient.post('/upload', { base64Data, filename, mimeType });
 
 // Catalog methods
 export const getCategories = () => apiClient.get('/services/categories');
@@ -84,20 +71,45 @@ export const getServices = (categoryId?: number) =>
 export const createService = (data: any) => apiClient.post('/services', data);
 export const updateService = (id: number, data: any) => apiClient.put(`/services/${id}`, data);
 
+// Staff methods
+export const getAllStaff = () => apiClient.get('/staff');
+export const createStaff = (data: any) => apiClient.post('/staff', data);
+export const updateStaff = (id: number, data: any) => apiClient.put(`/staff/${id}`, data);
+export const getStaffSchedule = (id: number) => apiClient.get(`/staff/${id}/schedule`);
+export const updateStaffSchedule = (id: number, data: { schedules: any[] }) => apiClient.put(`/staff/${id}/schedule`, data);
+
 // Appointment methods
 export const getAvailability = (date: string) =>
   apiClient.get('/appointments/availability', { params: { date } });
-export const createAppointment = (bookingData: {
-  serviceId: number;
-  date: string;
-  time: string;
-  notes?: string;
-}) => apiClient.post('/appointments', bookingData);
+export const createAppointment = (bookingData: any) => apiClient.post('/appointments', bookingData);
 export const getAppointments = () => apiClient.get('/appointments');
 export const completeAppointment = (id: number, data: { paymentMethod: 'cash' | 'gcash' }) =>
   apiClient.post(`/appointments/${id}/complete`, data);
 export const getCommissionSummary = () => apiClient.get('/appointments/commission-summary');
 export const getStaffCommissions = () => apiClient.get('/appointments/staff-commissions');
+
+// Payroll methods
+export const getMyPayroll = () => apiClient.get('/payroll/my-payroll');
+export const getPayrollPeriods = () => apiClient.get('/payroll/periods');
+export const getPayrollDetails = (id: number) => apiClient.get(`/payroll/periods/${id}`);
+export const generatePayroll = (data: { startDate: string; endDate: string; totalSalonSales: number }) => 
+  apiClient.post('/payroll/generate', data);
+export const addDeduction = (data: { staffId: number; type: string; amount: number; notes?: string }) =>
+  apiClient.post('/payroll/deductions', data);
+export const lockPayroll = (id: number) => apiClient.patch(`/payroll/periods/${id}/lock`);
+
+// Message methods
+export const getMyMessages = () => apiClient.get('/messages');
+export const sendMessage = (data: { receiverId: number; subject: string; body: string }) =>
+  apiClient.post('/messages', data);
+export const markMessageRead = (id: number) => apiClient.patch(`/messages/${id}/read`);
+
+// Review methods
+export const submitReview = (data: any) => apiClient.post('/reviews', data);
+export const getStaffReviews = (staffId: number) => apiClient.get(`/reviews/staff/${staffId}`);
+export const getAllReviews = () => apiClient.get('/reviews');
+export const moderateReview = (id: number, isApproved: boolean) => apiClient.patch(`/reviews/${id}/moderate`, { isApproved });
+export const getPublicReviews = () => apiClient.get('/reviews/public');
 
 // Customer CRM methods
 export const searchCustomers = (query: string) =>
@@ -109,12 +121,17 @@ export const updateCustomerProfile = (data: any) => apiClient.put('/customers/pr
 export const getAttendanceStatus = () => apiClient.get('/attendance/status');
 export const checkIn = () => apiClient.post('/attendance/check-in');
 export const checkOut = () => apiClient.post('/attendance/check-out');
+export const getAllAttendance = (params: { startDate?: string; endDate?: string }) => 
+  apiClient.get('/attendance/all', { params });
+export const updateAttendance = (id: number, data: any) => apiClient.put(`/attendance/${id}`, data);
 
 // Report methods
 export const getReports = (params: { startDate?: string; endDate?: string }) =>
   apiClient.get('/reports/payroll', { params });
 export const getDailySales = (date?: string) =>
   apiClient.get('/reports/daily-sales', { params: { date } });
+export const getHistoricalAnalytics = (params: { startDate: string; endDate: string }) =>
+  apiClient.get('/reports/historical-analytics', { params });
 
 // Notification methods
 export const getNotifications = () => apiClient.get('/notifications');

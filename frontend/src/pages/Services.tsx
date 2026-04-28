@@ -11,7 +11,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Clock, Sparkles, AlertCircle, Loader2, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Clock, Sparkles, AlertCircle, Loader2, ArrowRight, CheckCircle2, ShoppingCart } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 interface Category {
   id: number;
@@ -42,13 +43,14 @@ const Services: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { cart, addToCart } = useCart();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [catRes, svcRes] = await Promise.all([getCategories(), getServices()]);
-        setCategories(catRes.data.data);
-        setServices(svcRes.data.data);
+        setCategories(catRes.data.data || []);
+        setServices(svcRes.data.data || []);
       } catch {
         setError('Failed to load services. Please try again later.');
       } finally {
@@ -59,7 +61,7 @@ const Services: React.FC = () => {
   }, []);
 
   const getCategoryName = (id: number) => {
-    return categories.find(c => c.id === id)?.name || 'default';
+    return categories?.find(c => c.id === id)?.name || 'default';
   };
 
   const getServiceImage = (categoryId: number) => {
@@ -69,8 +71,8 @@ const Services: React.FC = () => {
 
   const filteredServices =
     activeCategoryId === 'all'
-      ? services
-      : services.filter((s) => s.category_id === parseInt(activeCategoryId));
+      ? (services || [])
+      : (services || []).filter((s) => s.category_id === parseInt(activeCategoryId));
 
   if (isLoading) {
     return (
@@ -234,12 +236,29 @@ const Services: React.FC = () => {
                       </div>
 
                       <div className="pt-8 sticky bottom-0 bg-white pb-8 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-1000 fill-mode-both">
-                        <Button 
-                          className="w-full h-14 rounded-none text-xs uppercase tracking-[0.2em] font-bold shadow-2xl hover:scale-[1.02] transition-transform duration-500"
-                          onClick={() => navigate(`/booking?serviceId=${svc.id}`)}
-                        >
-                          Confirm & Book Now
-                        </Button>
+                        {cart.find(i => i.serviceId === svc.id) ? (
+                          <Button 
+                            className="w-full h-14 rounded-none text-xs uppercase tracking-[0.2em] font-bold bg-success-color hover:bg-success-color/90 text-white"
+                            onClick={() => navigate('/booking')}
+                          >
+                            <ShoppingCart className="mr-2 h-4 w-4" />
+                            View in Cart
+                          </Button>
+                        ) : (
+                          <Button 
+                            className="w-full h-14 rounded-none text-xs uppercase tracking-[0.2em] font-bold shadow-2xl hover:scale-[1.02] transition-transform duration-500"
+                            onClick={() => {
+                              addToCart({
+                                serviceId: svc.id,
+                                serviceName: svc.name,
+                                price: parseFloat(svc.price),
+                                duration: svc.duration_minutes
+                              });
+                            }}
+                          >
+                            Add to Cart
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </SheetContent>

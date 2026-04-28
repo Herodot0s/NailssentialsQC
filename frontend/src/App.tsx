@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 import { Button } from '@/components/ui/button';
 import Register from './pages/Register';
 import Login from './pages/Login';
@@ -43,11 +44,11 @@ const Home = () => (
         </div>
         
         <div className="flex flex-col sm:flex-row gap-6 mt-8 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 ease-out fill-mode-forwards">
-          <Button 
-            render={<Link to="/booking" />} 
+          <Button
+            asChild
             className="h-14 px-10 text-base font-medium tracking-widest uppercase bg-white text-black hover:bg-primary hover:text-white border-none rounded-none transition-all duration-500 shadow-2xl"
           >
-            Book Your Sanctuary
+            <Link to="/booking">Book Your Sanctuary</Link>
           </Button>
           <Link 
             to="/services" 
@@ -146,11 +147,11 @@ const Home = () => (
     <section className="py-24 text-center border-t border-primary/10">
       <div className="container mx-auto px-6 max-w-xl space-y-8">
         <h2 className="font-serif text-3xl font-light text-foreground">Prepare for your visit.</h2>
-        <Button 
-          render={<Link to="/register" />}
+        <Button
+          asChild
           className="h-14 px-12 tracking-widest bg-black text-white hover:bg-primary border-none rounded-none transition-all duration-500"
         >
-          JOIN THE PRIVILEGE CLUB
+          <Link to="/register">JOIN THE PRIVILEGE CLUB</Link>
         </Button>
       </div>
     </section>
@@ -160,62 +161,64 @@ const Home = () => (
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Navbar />
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/booking" element={<Booking />} />
+      <CartProvider>
+        <Router>
+          <Navbar />
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/booking" element={<Booking />} />
 
-          {/* Protected Routes */}
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute allowedRoles={['staff', 'manager']}>
-                <StaffDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/appointments"
-            element={
-              <ProtectedRoute allowedRoles={['customer']}>
-                <CustomerAppointments />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute allowedRoles={['customer']}>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/manage-services"
-            element={
-              <ProtectedRoute allowedRoles={['manager']}>
-                <ManageServices />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/manager"
-            element={
-              <ProtectedRoute allowedRoles={['manager']}>
-                <ManagerDashboard />
-              </ProtectedRoute>
-            }
-          />
+            {/* Protected Routes */}
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['staff', 'manager']}>
+                  <StaffDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/appointments"
+              element={
+                <ProtectedRoute allowedRoles={['customer']}>
+                  <CustomerAppointments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute allowedRoles={['customer']}>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manage-services"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <ManageServices />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <ManagerDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </CartProvider>
     </AuthProvider>
   );
 }
