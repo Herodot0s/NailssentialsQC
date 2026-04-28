@@ -128,7 +128,9 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
       tardinessMinutes = diffMinutes;
     }
 
-    const deductionAmount = tardinessMinutes * 1; // ₱1 per minute
+    // Roadmap: Clocking in at 16 minutes late generates exactly a ₱1 deduction.
+    // So deduction = tardinessMinutes - gracePeriod if tardinessMinutes > gracePeriod
+    const deductionAmount = tardinessMinutes > gracePeriod ? (tardinessMinutes - gracePeriod) : 0;
 
     const attendance = await prisma.attendance.upsert({
       where: {

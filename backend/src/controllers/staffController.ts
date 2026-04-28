@@ -9,7 +9,7 @@ export const getAllStaff = async (req: Request, res: Response) => {
   try {
     const staff = await prisma.user.findMany({
       where: {
-        role: 'staff',
+        role: { in: ['staff', 'manager'] },
       },
       select: {
         id: true,
@@ -19,10 +19,17 @@ export const getAllStaff = async (req: Request, res: Response) => {
         role: true,
         is_active: true,
         created_at: true,
+        sss_number: true,
+        tin_number: true,
+        gov_id: true,
+        profile_picture_url: true,
         staff_profile: {
           select: {
+            id: true,
             full_name: true,
             specializations: true,
+            base_pay_per_week: true,
+            daily_target: true,
           },
         },
       },
@@ -38,9 +45,17 @@ export const getAllStaff = async (req: Request, res: Response) => {
         username: u.username,
         email: u.email,
         phone: u.phone,
+        role: u.role,
         isActive: u.is_active,
         fullName: u.staff_profile?.full_name,
+        staffProfileId: u.staff_profile?.id,
         specializations: u.staff_profile?.specializations,
+        basePayPerWeek: u.staff_profile?.base_pay_per_week,
+        dailyTarget: u.staff_profile?.daily_target,
+        sssNumber: u.sss_number,
+        tinNumber: u.tin_number,
+        govId: u.gov_id,
+        profilePictureUrl: u.profile_picture_url,
         createdAt: u.created_at,
       })),
     });
@@ -54,7 +69,7 @@ export const getAllStaff = async (req: Request, res: Response) => {
  * Create a new staff member
  */
 export const createStaff = async (req: Request, res: Response) => {
-  const { fullName, email, phone, password, username, specializations } = req.body;
+  const { fullName, email, phone, password, username, specializations, basePayPerWeek, dailyTarget, sssNumber, tinNumber, govId, profilePictureUrl, role } = req.body;
 
   try {
     // Check if user already exists
@@ -83,11 +98,17 @@ export const createStaff = async (req: Request, res: Response) => {
         email,
         phone,
         password_hash: hashedPassword,
-        role: 'staff',
+        role: role || 'staff',
+        sss_number: sssNumber,
+        tin_number: tinNumber,
+        gov_id: govId,
+        profile_picture_url: profilePictureUrl,
         staff_profile: {
           create: {
             full_name: fullName,
             specializations,
+            base_pay_per_week: basePayPerWeek ? parseFloat(basePayPerWeek) : 2500.00,
+            daily_target: dailyTarget ? parseFloat(dailyTarget) : 6000.00,
           },
         },
       },
@@ -116,7 +137,7 @@ export const createStaff = async (req: Request, res: Response) => {
  */
 export const updateStaff = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { fullName, email, phone, isActive, specializations } = req.body;
+  const { fullName, email, phone, isActive, specializations, basePayPerWeek, dailyTarget, sssNumber, tinNumber, govId, profilePictureUrl, role } = req.body;
 
   try {
     const updatedUser = await prisma.user.update({
@@ -125,10 +146,17 @@ export const updateStaff = async (req: Request, res: Response) => {
         email,
         phone,
         is_active: isActive,
+        role,
+        sss_number: sssNumber,
+        tin_number: tinNumber,
+        gov_id: govId,
+        profile_picture_url: profilePictureUrl,
         staff_profile: {
           update: {
             full_name: fullName,
             specializations,
+            base_pay_per_week: basePayPerWeek ? parseFloat(basePayPerWeek) : undefined,
+            daily_target: dailyTarget ? parseFloat(dailyTarget) : undefined,
           },
         },
       },
@@ -149,5 +177,60 @@ export const updateStaff = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Update staff error:', error);
     res.status(500).json({ success: false, message: 'Failed to update staff member' });
+  }
+};
+
+/**
+ * Get schedule for a specific staff member
+ */
+export const getStaffSchedule = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const schedule = await prisma.staffSchedule.findMany({
+      where: { staff_id: parseInt(id as string) },
+    });
+    res.json({ success: true, data: schedule });
+  } catch (error: any) {
+    console.error('Get schedule error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch schedule' });
+  }
+};
+
+/**
+ * Update schedule for a specific staff member
+ */
+export const updateStaffSchedule = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { schedules } = req.body; // Array of { day_of_week, start_time, end_time, is_active }
+
+    // Use a transaction to update all schedules for the staff
+    await prisma.$transaction(
+      schedules.map((s: any) =>
+        prisma.staffSchedule.upsert({
+          where: {
+            id: s.id || -1,
+          },
+          update: {
+            day_of_week: s.day_of_week,
+            start_time: s.start_time,
+            end_time: s.end_time,
+            is_active: s.is_active,
+          },
+          create: {
+            staff_id: parseInt(id as string),
+            day_of_week: s.day_of_week,
+            start_time: s.start_time,
+            end_time: s.end_time,
+            is_active: s.is_active,
+          },
+        })
+      )
+    );
+
+    res.json({ success: true, message: 'Schedule updated successfully' });
+  } catch (error: any) {
+    console.error('Update schedule error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update schedule' });
   }
 };

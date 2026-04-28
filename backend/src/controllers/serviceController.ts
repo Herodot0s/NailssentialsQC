@@ -3,8 +3,18 @@ import prisma from '../utils/prisma';
 
 export const getCategories = async (req: Request, res: Response) => {
   try {
+    const { parentId } = req.query;
+
+    const where: any = { is_active: true };
+    if (parentId !== undefined) {
+      where.parent_id = parentId === 'null' ? null : parseInt(parentId as string);
+    }
+
     const categories = await prisma.serviceCategory.findMany({
-      where: { is_active: true },
+      where,
+      include: {
+        sub_categories: true,
+      },
       orderBy: { name: 'asc' },
     });
 
@@ -46,7 +56,9 @@ export const getServices = async (req: Request, res: Response) => {
     const services = await prisma.service.findMany({
       where,
       include: {
-        category: true,
+        category: {
+          include: { parent: true }
+        },
       },
       orderBy: { name: 'asc' },
     });
@@ -69,12 +81,17 @@ export const getServices = async (req: Request, res: Response) => {
 
 export const createCategory = async (req: Request, res: Response) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, parentId } = req.body;
     const category = await prisma.serviceCategory.create({
-      data: { name, description },
+      data: { 
+        name, 
+        description, 
+        parent_id: parentId ? parseInt(parentId) : null 
+      },
     });
     return res.status(201).json({ success: true, data: category });
   } catch (error: any) {
+    console.error('Create category error:', error);
     return res.status(500).json({ success: false, message: 'Failed to create category' });
   }
 };
@@ -82,13 +99,19 @@ export const createCategory = async (req: Request, res: Response) => {
 export const updateCategory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, description, is_active } = req.body;
+    const { name, description, is_active, parentId } = req.body;
     const category = await prisma.serviceCategory.update({
       where: { id: parseInt(id as string) },
-      data: { name, description, is_active },
+      data: { 
+        name, 
+        description, 
+        is_active,
+        parent_id: parentId !== undefined ? (parentId ? parseInt(parentId) : null) : undefined
+      },
     });
     return res.status(200).json({ success: true, data: category });
   } catch (error: any) {
+    console.error('Update category error:', error);
     return res.status(500).json({ success: false, message: 'Failed to update category' });
   }
 };

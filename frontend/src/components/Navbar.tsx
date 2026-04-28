@@ -213,19 +213,23 @@ const Navbar: React.FC = () => {
           {/* Mobile Menu Trigger */}
           <div className="flex md:hidden">
             <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button variant="ghost" size="icon" className="hover:bg-primary/5">
-                    <Menu className="h-6 w-6 stroke-[1.5]" />
-                  </Button>
-                }
-              />
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="hover:bg-primary/5">
+                  <Menu className="h-6 w-6 stroke-[1.5]" />
+                </Button>
+              </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 mt-4 border-none shadow-xl rounded-none p-4 space-y-2">
-                <DropdownMenuItem className="rounded-none px-4 py-3 text-xs uppercase tracking-widest" render={<Link to="/services">Services</Link>} />
+                <DropdownMenuItem className="rounded-none px-4 py-3 text-xs uppercase tracking-widest" asChild>
+                  <Link to="/services">Services</Link>
+                </DropdownMenuItem>
                 {!isAuthenticated ? (
                   <>
-                    <DropdownMenuItem className="rounded-none px-4 py-3 text-xs uppercase tracking-widest" render={<Link to="/login">Login</Link>} />
-                    <DropdownMenuItem className="rounded-none px-4 py-3 text-xs uppercase tracking-widest" render={<Link to="/register">Sign Up</Link>} />
+                    <DropdownMenuItem className="rounded-none px-4 py-3 text-xs uppercase tracking-widest" asChild>
+                      <Link to="/login">Login</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="rounded-none px-4 py-3 text-xs uppercase tracking-widest" asChild>
+                      <Link to="/register">Sign Up</Link>
+                    </DropdownMenuItem>
                   </>
                 ) : (
                   <>

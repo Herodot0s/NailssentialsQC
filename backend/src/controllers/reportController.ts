@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
-import { startOfDay, endOfDay } from 'date-fns';
+import { startOfDay, endOfDay, format, eachDayOfInterval } from 'date-fns';
 
 export const getPayrollReport = async (req: AuthRequest, res: Response) => {
   try {
@@ -146,5 +146,61 @@ export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
   } catch (error: any) {
     console.error('Get daily sales stats error:', error);
     return res.status(500).json({ success: false, message: 'Failed to fetch sales stats' });
+  }
+};
+
+export const getHistoricalAnalytics = async (req: AuthRequest, res: Response) => {
+  try {
+    const { startDate, endDate } = req.query;
+    if (!startDate || !endDate) {
+      return res.status(400).json({ success: false, message: 'Date range required' });
+    }
+
+    const start = startOfDay(new Date(startDate as string));
+    const end = endOfDay(new Date(endDate as string));
+
+    const commissions = await prisma.commission.findMany({
+      where: {
+        commission_date: { gte: start, lte: end }
+      },
+      include: {
+        service: {
+          include: { category: true }
+        }
+      }
+    });
+
+    // Create a map of date -> category -> total
+    const dailyData: any = {};
+    const interval = eachDayOfInterval({ start, end });
+    
+    interval.forEach(day => {
+      dailyData[format(day, 'yyyy-MM-dd')] = { date: format(day, 'MMM dd'), total: 0, categories: {}, services: {} };
+    });
+
+    commissions.forEach(comm => {
+      const dateKey = format(comm.commission_date, 'yyyy-MM-dd');
+      if (dailyData[dateKey]) {
+        const catName = comm.service.category.name;
+        const svcName = comm.service.name;
+        const amount = Number(comm.base_amount);
+
+        dailyData[dateKey].total += amount;
+        
+        if (!dailyData[dateKey].categories[catName]) dailyData[dateKey].categories[catName] = 0;
+        dailyData[dateKey].categories[catName] += amount;
+
+        if (!dailyData[dateKey].services[svcName]) dailyData[dateKey].services[svcName] = 0;
+        dailyData[dateKey].services[svcName] += amount;
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: Object.values(dailyData)
+    });
+  } catch (error: any) {
+    console.error('Get historical analytics error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch historical analytics' });
   }
 };
