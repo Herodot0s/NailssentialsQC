@@ -14,6 +14,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import type { RegisterRequest } from '@/types/api';
 
 const Register: React.FC = () => {
   const {
@@ -28,7 +29,7 @@ const Register: React.FC = () => {
 
   const password = watch('password');
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: RegisterRequest) => {
     setIsLoading(true);
     setServerError(null);
     try {
@@ -45,9 +46,11 @@ const Register: React.FC = () => {
         localStorage.setItem('user', JSON.stringify(response.data.data.user));
         navigate('/');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message =
-        error.response?.data?.error?.message || 'Registration failed. Please try again.';
+        error instanceof Error
+          ? error.message
+          : 'Registration failed. Please try again.';
       setServerError(message);
     } finally {
       setIsLoading(false);

@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
+import { Prisma, PaymentMethod } from '@prisma/client';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { addMinutes, parse, format, areIntervalsOverlapping, getISOWeek, getMonth, getYear, startOfWeek, endOfWeek, startOfDay, endOfDay, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { sendBookingConfirmation, sendAppointmentCompletion } from '../utils/email';
 import { createNotification } from './notificationController';
+import { AppointmentWithDetails, CreateAppointmentInput, CompleteAppointmentInput } from '../types/appointmentTypes';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 
@@ -96,9 +98,10 @@ export const getCommissionSummary = async (req: AuthRequest, res: Response) => {
         thisWeek: Number(weeklyCommissions._sum.commission_amount || 0),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get commission summary error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to fetch commission summary' });
+    const message = error instanceof Error ? error.message : 'Failed to fetch commission summary';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -125,9 +128,10 @@ export const getStaffCommissions = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(200).json({ success: true, data: commissions });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get staff commissions error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to fetch commissions' });
+    const message = error instanceof Error ? error.message : 'Failed to fetch commissions';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -136,7 +140,7 @@ export const getAppointments = async (req: AuthRequest, res: Response) => {
     const userId = req.user?.sub;
     const { role } = req.user || {};
 
-    let where: any = {};
+    const where: Prisma.AppointmentWhereInput = {};
     if (role === 'customer') {
       const customer = await prisma.customerProfile.findUnique({ where: { user_id: userId } });
       if (!customer) return res.status(404).json({ success: false, message: 'Customer not found' });
@@ -166,15 +170,19 @@ export const getAppointments = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(200).json({ success: true, data: appointments });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get appointments error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to fetch appointments' });
+    const message = error instanceof Error ? error.message : 'Failed to fetch appointments';
+    return res.status(500).json({ success: false, message });
   }
 };
 
 export const completeAppointment = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Appointment ID is required' });
+    }
     const { paymentMethod } = req.body; // 'cash' | 'gcash'
 
     if (!paymentMethod) {
@@ -182,7 +190,7 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
     }
 
     const appointment = await prisma.appointment.findUnique({
-      where: { id: parseInt(id as string) },
+      where: { id: parseInt(id) },
       include: {
         items: {
           include: { service: true }
@@ -219,22 +227,22 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
     const result = await prisma.$transaction(async (tx) => {
       // Update appointment status
       await tx.appointment.update({
-        where: { id: parseInt(id as string) },
+        where: { id: parseInt(id) },
         data: { status: 'completed' },
       });
 
       // Also update all items to completed
       await tx.appointmentItem.updateMany({
-        where: { appointment_id: parseInt(id as string) },
+        where: { appointment_id: parseInt(id) },
         data: { status: 'completed' }
       });
 
       // Create transaction
       const transaction = await tx.transaction.create({
         data: {
-          appointment_id: parseInt(id as string),
+          appointment_id: parseInt(id),
           amount: totalAmount,
-          payment_method: paymentMethod as any,
+          payment_method: paymentMethod as PaymentMethod,
           status: 'completed',
           receipt_number: receiptNumber,
         },
@@ -286,8 +294,9 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
             totalAmount: totalAmount.toFixed(2)
           });
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Post-completion notification error:', err);
+        const message = err instanceof Error ? err.message : 'Unknown error';
       }
     })();
 
@@ -297,11 +306,12 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
       message: 'Appointment completed and commissions calculated!',
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Complete appointment error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to complete appointment';
     return res.status(500).json({
       success: false,
-      error: { code: 'INTERNAL_SERVER_ERROR', message: 'Failed to complete appointment' },
+      error: { code: 'INTERNAL_SERVER_ERROR', message },
     });
   }
 };
@@ -312,6 +322,7 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
     if (!date) {
       return res.status(400).json({ success: false, message: 'Date is required' });
     }
+    const dateStr = Array.isArray(date) ? date[0] : date;
 
     const OPERATING_HOURS = { start: 12, end: 22 }; // 12 PM to 10 PM
     const allSlots = [];
@@ -332,7 +343,7 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
     const appointmentItems = await prisma.appointmentItem.findMany({
       where: {
         appointment: {
-          appointment_date: new Date(date as string),
+          appointment_date: new Date(dateStr),
         },
         status: { in: ['pending', 'confirmed', 'in_progress'] }
       },
@@ -345,15 +356,15 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
 
     // 3. For each slot, check if ANY technician is free
     const slotsWithAvailability = allSlots.map(slotTime => {
-      const slotStart = getFullDate(date as string, slotTime);
+      const slotStart = getFullDate(dateStr, slotTime);
       const slotEnd = addMinutes(slotStart, 59);
 
       const availableTechnicians = technicians.filter(tech => {
         const techItems = appointmentItems.filter(item => item.staff_id === tech.id);
         
         const hasConflict = techItems.some(item => {
-          const itemStart = getFullDate(date as string, item.start_time);
-          const itemEnd = getFullDate(date as string, item.end_time);
+          const itemStart = getFullDate(dateStr, item.start_time);
+          const itemEnd = getFullDate(dateStr, item.end_time);
           
           return areIntervalsOverlapping(
             { start: slotStart, end: slotEnd },
@@ -374,11 +385,12 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
       success: true,
       data: slotsWithAvailability
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get available slots error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to fetch availability';
     return res.status(500).json({
       success: false,
-      error: { code: 'INTERNAL_SERVER_ERROR', message: 'Failed to fetch availability' }
+      error: { code: 'INTERNAL_SERVER_ERROR', message },
     });
   }
 };
@@ -406,7 +418,7 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
     let targetCustomerId: number;
     if (role === 'staff' || role === 'manager') {
       if (customerId) {
-        targetCustomerId = parseInt(customerId as string);
+        targetCustomerId = parseInt(customerId);
       } else if (isWalkIn) {
         let walkInCustomer = await prisma.customerProfile.findFirst({
           where: { full_name: 'Walk-in Customer' }
@@ -515,8 +527,9 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
              );
            }
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Post-booking notification error:', err);
+        const message = err instanceof Error ? err.message : 'Unknown error';
       }
     })();
 
@@ -526,11 +539,12 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
       message: 'Appointment booked successfully!'
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Create appointment error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to create appointment';
     return res.status(500).json({
       success: false,
-      message: error.message || 'Failed to create appointment'
+      message,
     });
   }
 };

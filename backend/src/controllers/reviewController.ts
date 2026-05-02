@@ -2,6 +2,10 @@ import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
 
+interface PrismaError extends Error {
+  code: string;
+}
+
 /**
  * Submit a review for a specific appointment item.
  */
@@ -47,12 +51,12 @@ export const submitReview = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(201).json({ success: true, data: review });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Submit review error:', error);
-    if (error.code === 'P2002') {
+    if (error instanceof Error && 'code' in error && (error as PrismaError).code === 'P2002') {
        return res.status(400).json({ success: false, message: 'You have already reviewed this item' });
     }
-    return res.status(500).json({ success: false, message: 'Failed to submit review' });
+    return res.status(500).json({ success: false, message: Failed to submit review' });
   }
 };
 
@@ -64,7 +68,7 @@ export const getStaffReviews = async (req: AuthRequest, res: Response) => {
     const { staffId } = req.params;
     const reviews = await prisma.review.findMany({
       where: {
-        staff_id: parseInt(staffId as any),
+        staff_id: parseInt(staffId),
         is_approved_for_public: true,
       },
       include: {
@@ -74,7 +78,7 @@ export const getStaffReviews = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(200).json({ success: true, data: reviews });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get staff reviews error:', error);
     return res.status(500).json({ success: false, message: 'Failed to fetch reviews' });
   }
@@ -95,7 +99,7 @@ export const getAllReviews = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(200).json({ success: true, data: reviews });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get all reviews error:', error);
     return res.status(500).json({ success: false, message: 'Failed to fetch reviews' });
   }
@@ -110,12 +114,12 @@ export const moderateReview = async (req: AuthRequest, res: Response) => {
     const { isApproved } = req.body;
 
     const review = await prisma.review.update({
-      where: { id: parseInt(id as any) },
+      where: { id: parseInt(id) },
       data: { is_approved_for_public: isApproved },
     });
 
     return res.status(200).json({ success: true, data: review });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Moderate review error:', error);
     return res.status(500).json({ success: false, message: 'Failed to moderate review' });
   }
@@ -137,7 +141,7 @@ export const getPublicReviews = async (req: Request, res: Response) => {
     });
 
     return res.status(200).json({ success: true, data: reviews });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get public reviews error:', error);
     return res.status(500).json({ success: false, message: 'Failed to fetch public reviews' });
   }

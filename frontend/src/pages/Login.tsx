@@ -16,6 +16,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import type { LoginRequest } from '@/types/api';
 
 const Login: React.FC = () => {
   const {
@@ -29,7 +30,7 @@ const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: LoginRequest) => {
     setIsLoading(true);
     setServerError(null);
     try {
@@ -48,9 +49,11 @@ const Login: React.FC = () => {
           navigate('/dashboard');
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message =
-        error.response?.data?.error?.message || 'Login failed. Please check your credentials.';
+        error instanceof Error
+          ? error.message
+          : 'Login failed. Please check your credentials.';
       setServerError(message);
     } finally {
       setIsLoading(false);

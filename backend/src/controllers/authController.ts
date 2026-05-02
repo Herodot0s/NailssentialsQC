@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
+import { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import prisma from '../utils/prisma';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
+import { AuthRequest } from '../middleware/authMiddleware';
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -106,13 +108,14 @@ export const register = async (req: Request, res: Response) => {
         },
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Registration error:', error);
+    const message = error instanceof Error ? error.message : 'Something went wrong during registration';
     return res.status(500).json({
       success: false,
       error: {
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'Something went wrong during registration',
+        message,
       },
     });
   }
@@ -242,13 +245,14 @@ export const login = async (req: Request, res: Response) => {
         },
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Login error:', error);
+    const message = error instanceof Error ? error.message : 'Something went wrong during login';
     return res.status(500).json({
       success: false,
       error: {
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'Something went wrong during login',
+        message,
       },
     });
   }
@@ -266,7 +270,7 @@ export const refresh = async (req: Request, res: Response) => {
     }
 
     // 1. JWT Signature Check (Review Finding [HIGH])
-    let decoded: any;
+    let decoded: JwtPayload;
     try {
       decoded = verifyRefreshToken(providedToken);
     } catch (err) {
@@ -328,13 +332,14 @@ export const refresh = async (req: Request, res: Response) => {
         },
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Refresh token error:', error);
+    const message = error instanceof Error ? error.message : 'Something went wrong during token refresh';
     return res.status(500).json({
       success: false,
       error: {
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'Something went wrong during token refresh',
+        message,
       },
     });
   }
@@ -354,19 +359,20 @@ export const logout = async (req: Request, res: Response) => {
       success: true,
       message: 'Logged out successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Logout error:', error);
+    const message = error instanceof Error ? error.message : 'Something went wrong during logout';
     return res.status(500).json({
       success: false,
       error: {
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'Something went wrong during logout',
+        message,
       },
     });
   }
 };
 
-export const getMe = async (req: any, res: Response) => {
+export const getMe = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user.sub;
 
@@ -399,13 +405,14 @@ export const getMe = async (req: any, res: Response) => {
         },
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get profile error:', error);
+    const message = error instanceof Error ? error.message : 'Something went wrong while fetching profile';
     return res.status(500).json({
       success: false,
       error: {
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'Something went wrong while fetching profile',
+        message,
       },
     });
   }

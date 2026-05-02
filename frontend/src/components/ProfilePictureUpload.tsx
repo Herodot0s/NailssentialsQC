@@ -64,8 +64,9 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
       } else {
         setError(result.data?.message || 'Upload failed');
       }
-    } catch (err: any) {
-      setError(err.message || 'Upload failed. Please try again.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Upload failed. Please try again.';
+      setError(message);
     } finally {
       setUploading(false);
     }

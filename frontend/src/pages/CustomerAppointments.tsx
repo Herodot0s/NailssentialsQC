@@ -13,6 +13,7 @@ import {
   Star,
 } from 'lucide-react';
 import ReceiptModal from '@/components/ReceiptModal';
+import type { AppointmentItem, SubmitReviewRequest, Appointment } from '@/types/api';
 import {
   Dialog,
   DialogContent,
@@ -23,28 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 
-interface Appointment {
-  id: number;
-  status: string;
-  appointment_date: string;
-  is_walk_in: boolean;
-  items: {
-    id: number;
-    service: { name: string; price: number };
-    staff: { full_name: string };
-    start_time: string;
-    end_time: string;
-    status: string;
-    review?: any;
-  }[];
-  transactions: {
-    id: number;
-    amount: number;
-    payment_method: string;
-    receipt_number: string;
-    transaction_date: string;
-  }[];
-}
+// Appointment type imported from @/types/api
 
 const CustomerAppointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -81,7 +61,7 @@ const CustomerAppointments: React.FC = () => {
     fetchAppointments();
   }, []);
 
-  const handleOpenReview = (item: any) => {
+  const handleOpenReview = (item: AppointmentItem) => {
     setReviewForm({
       appointmentItemId: item.id,
       rating: 5,
@@ -101,8 +81,9 @@ const CustomerAppointments: React.FC = () => {
       });
       setShowReviewModal(false);
       fetchAppointments();
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to submit review.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to submit review.';
+      alert(message);
     }
   };
 
@@ -305,7 +286,7 @@ const CustomerAppointments: React.FC = () => {
         <ReceiptModal
           open={showReceipt}
           onOpenChange={setShowReceipt}
-          appointment={selectedAppointment as any}
+          appointment={selectedAppointment!}
         />
       )}
     </div>

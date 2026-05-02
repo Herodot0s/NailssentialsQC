@@ -28,9 +28,10 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(201).json({ success: true, data: message });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Send message error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to send message' });
+    const message = error instanceof Error ? error.message : 'Failed to send message';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -55,9 +56,10 @@ export const getMyMessages = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(200).json({ success: true, data: messages });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get my messages error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to fetch messages' });
+    const message = error instanceof Error ? error.message : 'Failed to fetch messages';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -71,15 +73,16 @@ export const markAsRead = async (req: AuthRequest, res: Response) => {
 
     const message = await prisma.message.update({
       where: {
-        id: parseInt(id as any),
+        id: parseInt(id),
         receiver_id: userId, // Ensure only the receiver can mark as read
       },
       data: { is_read: true },
     });
 
     return res.status(200).json({ success: true, data: message });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Mark message as read error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to mark message as read' });
+    const message = error instanceof Error ? error.message : 'Failed to mark message as read';
+    return res.status(500).json({ success: false, message });
   }
 };

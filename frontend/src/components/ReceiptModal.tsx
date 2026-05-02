@@ -10,11 +10,12 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Download, Printer, Scissors } from 'lucide-react';
+import type { AppointmentWithServices } from '@/types/api';
 
 interface ReceiptModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  appointment: any;
+  appointment: AppointmentWithServices;
 }
 
 const ReceiptModal: React.FC<ReceiptModalProps> = ({ open, onOpenChange, appointment }) => {
@@ -48,7 +49,8 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ open, onOpenChange, appoint
   if (!appointment || !transaction) return null;
 
   const totalAmount = appointment.services.reduce(
-    (acc: number, s: any) => acc + Number(s.price_at_booking || s.service.price),
+    (acc: number, s: { service?: { name: string; price: number }; price_at_booking?: number }) =>
+      acc + Number(s.price_at_booking || s.service?.price),
     0,
   );
 
@@ -101,7 +103,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ open, onOpenChange, appoint
             <div className="mb-6">
               <p className="text-[10px] font-bold uppercase mb-2 text-zinc-400">Services</p>
               <div className="space-y-2 text-[11px]">
-                {appointment.services.map((s: any, idx: number) => (
+                {appointment.services.map((s: { service: { name: string }; price_at_booking?: number }, idx: number) => (
                   <div key={idx} className="flex justify-between items-start gap-4">
                     <span className="flex-grow">{s.service.name}</span>
                     <span className="font-bold">

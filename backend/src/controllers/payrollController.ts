@@ -159,9 +159,10 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
 
 
     return res.status(201).json({ success: true, data: payrollPeriod });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Generate payroll error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to generate payroll' });
+    const message = error instanceof Error ? error.message : 'Failed to generate payroll';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -180,7 +181,7 @@ export const getPayrollPeriods = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(200).json({ success: true, data: periods });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get payroll periods error:', error);
     return res.status(500).json({ success: false, message: 'Failed to fetch payroll periods' });
   }
@@ -209,7 +210,7 @@ export const getPayrollDetails = async (req: AuthRequest, res: Response) => {
     }
 
     return res.status(200).json({ success: true, data: period });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get payroll details error:', error);
     return res.status(500).json({ success: false, message: 'Failed to fetch payroll details' });
   }
@@ -245,7 +246,7 @@ export const addDeduction = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(201).json({ success: true, data: deduction });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Add deduction error:', error);
     return res.status(500).json({ success: false, message: 'Failed to add deduction' });
   }
@@ -274,7 +275,7 @@ export const getMyPayroll = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(200).json({ success: true, data: payrolls });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get my payroll error:', error);
     return res.status(500).json({ success: false, message: 'Failed to fetch payroll records' });
   }
@@ -304,7 +305,7 @@ export const lockPayroll = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(200).json({ success: true, data: updatedPeriod });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Lock payroll error:', error);
     return res.status(500).json({ success: false, message: 'Failed to lock payroll period' });
   }
