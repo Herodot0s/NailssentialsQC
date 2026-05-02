@@ -82,6 +82,10 @@ import {
 import { format } from 'date-fns';
 import DrillDownLineChart from '@/components/DrillDownLineChart';
 import SalarySlipModal from '@/components/SalarySlipModal';
+import { StaffTable } from '@/components/dashboard/StaffTable';
+import { PayrollTable } from '@/components/dashboard/PayrollTable';
+import { AttendanceLedger } from '@/components/dashboard/AttendanceLedger';
+import { ReviewModeration } from '@/components/dashboard/ReviewModeration';
 import type {
   PayrollPeriod,
   AttendanceRecord,
@@ -95,56 +99,6 @@ import type {
   SalesStats,
   HistoricalData,
 } from '@/types/api';
-
-interface SalesStats {
-  totalRevenue: number;
-  transactionCount: number;
-  onlineCount: number;
-  walkInCount: number;
-  serviceBreakdown: { name: string; amount: number; count: number }[];
-  target: number;
-}
-
-interface PayrollRecord {
-  staffId: number;
-  fullName: string;
-  commissionCount: number;
-  totalCommission: number;
-  attendanceCount: number;
-  totalDeduction: number;
-  basePay: number;
-  netPay: number;
-}
-
-interface StaffMember {
-  id: number; // User ID
-  staffProfileId: number; // Profile ID
-  username: string;
-  email: string | null;
-  phone: string | null;
-  isActive: boolean;
-  fullName: string;
-  specializations: string | null;
-  role: string;
-  basePayPerWeek: number;
-  dailyTarget: number;
-  sssNumber?: string;
-  tinNumber?: string;
-  govId?: string;
-  profilePictureUrl?: string;
-  createdAt: string;
-}
-
-interface Review {
-  id: number;
-  rating: number;
-  tags: string[];
-  is_approved_for_public: boolean;
-  created_at: string;
-  customer: { full_name: string };
-  staff: { full_name: string };
-  appointment_item: { service: { name: string } };
-}
 
 interface ScheduleItem {
   id?: number;
@@ -595,108 +549,17 @@ const ManagerDashboard: React.FC = () => {
         )}
 
         {activeView === 'staff' && (
-          <div className="space-y-8 animate-in fade-in duration-700">
-             <Card className="rounded-none border-none shadow-sm overflow-hidden">
-                <Table>
-                   <TableHeader className="bg-gray-50/50">
-                      <TableRow className="hover:bg-transparent border-gray-100">
-                         <TableHead className="pl-8 py-5 text-[9px] uppercase tracking-[0.2em] font-bold">Employee</TableHead>
-                         <TableHead className="text-[9px] uppercase tracking-[0.2em] font-bold">Role</TableHead>
-                         <TableHead className="text-[9px] uppercase tracking-[0.2em] font-bold">Gov ID Status</TableHead>
-                         <TableHead className="text-[9px] uppercase tracking-[0.2em] font-bold text-right pr-8">Status</TableHead>
-                      </TableRow>
-                   </TableHeader>
-                   <TableBody className="bg-white">
-                      {staffMembers.map(staff => (
-                        <TableRow 
-                          key={staff.id} 
-                          className="hover:bg-primary-ultra/10 cursor-pointer border-gray-50 transition-all duration-300"
-                          onClick={() => handleStaffClick(staff)}
-                        >
-                           <TableCell className="pl-8 py-6">
-                              <div className="flex items-center gap-4">
-                                 <Avatar className="w-12 h-12 rounded-none border border-primary/10">
-                                    <AvatarImage src={staff.profilePictureUrl} className="object-cover" />
-                                    <AvatarFallback className="bg-primary/5 font-serif text-xl text-primary">{staff.fullName.charAt(0)}</AvatarFallback>
-                                 </Avatar>
-                                 <div>
-                                    <p className="font-bold text-sm tracking-tight">{staff.fullName}</p>
-                                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{staff.email || 'No email'}</p>
-                                 </div>
-                              </div>
-                           </TableCell>
-                           <TableCell>
-                              <span className="text-[10px] uppercase font-bold tracking-tighter bg-gray-100 px-2 py-0.5">{staff.role}</span>
-                           </TableCell>
-                           <TableCell>
-                              <div className="flex gap-2">
-                                 {staff.sssNumber ? <Badge className="rounded-none bg-success-color/10 text-success-color text-[8px] font-bold uppercase border-none">SSS</Badge> : <Badge variant="outline" className="rounded-none text-[8px] font-bold uppercase border-dashed opacity-40">SSS</Badge>}
-                                 {staff.tinNumber ? <Badge className="rounded-none bg-success-color/10 text-success-color text-[8px] font-bold uppercase border-none">TIN</Badge> : <Badge variant="outline" className="rounded-none text-[8px] font-bold uppercase border-dashed opacity-40">TIN</Badge>}
-                              </div>
-                           </TableCell>
-                           <TableCell className="text-right pr-8">
-                              <Badge className={`rounded-none border-none text-[8px] font-bold uppercase tracking-widest ${staff.isActive ? 'bg-success-color text-white' : 'bg-gray-100 text-gray-400'}`}>
-                                 {staff.isActive ? 'Active' : 'Archived'}
-                              </Badge>
-                           </TableCell>
-                        </TableRow>
-                      ))}
-                   </TableBody>
-                </Table>
-             </Card>
-          </div>
+          <StaffTable
+            staffMembers={staffMembers}
+            onStaffClick={handleStaffClick}
+          />
         )}
 
         {activeView === 'attendance' && (
-          <div className="space-y-12 animate-in fade-in duration-700">
-             <Card className="rounded-none border-none shadow-sm overflow-hidden bg-white">
-                <CardHeader className="border-b border-gray-50 flex flex-row items-center justify-between">
-                   <div>
-                      <CardTitle className="font-serif text-2xl font-light italic">Daily <span className="not-italic">Ledger</span></CardTitle>
-                      <CardDescription className="text-[9px] uppercase font-bold tracking-[0.2em] mt-1">Manual overrides and attendance tracking</CardDescription>
-                   </div>
-                </CardHeader>
-                <Table>
-                   <TableHeader className="bg-gray-50/50">
-                      <TableRow className="hover:bg-transparent border-gray-100">
-                         <TableHead className="pl-8 py-5 text-[9px] uppercase font-bold">Artisan</TableHead>
-                         <TableHead className="text-[9px] uppercase font-bold">Check In</TableHead>
-                         <TableHead className="text-[9px] uppercase font-bold">Lateness</TableHead>
-                         <TableHead className="text-[9px] uppercase font-bold">Penalty</TableHead>
-                         <TableHead className="text-right pr-8 text-[9px] uppercase font-bold">Override</TableHead>
-                      </TableRow>
-                   </TableHeader>
-                   <TableBody>
-                      {attendance.map(log => (
-                        <TableRow key={log.id} className="hover:bg-gray-50/50 border-gray-50 transition-colors">
-                           <TableCell className="pl-8 py-6">
-                              <p className="font-bold text-sm tracking-tight">{log.staff.full_name}</p>
-                              <p className="text-[9px] text-muted-foreground uppercase font-bold">{format(new Date(log.date), 'MMM dd, yyyy')}</p>
-                           </TableCell>
-                           <TableCell className="font-mono text-xs">
-                              {log.check_in ? format(new Date(log.check_in), 'HH:mm:ss') : <span className="text-destructive font-bold uppercase tracking-tighter opacity-50">No Data</span>}
-                           </TableCell>
-                           <TableCell>
-                              <span className={`text-[10px] font-bold ${log.tardiness_minutes > 0 ? 'text-destructive' : 'text-success-color'}`}>
-                                 {log.tardiness_minutes > 0 ? `${log.tardiness_minutes} MINS` : 'ON TIME'}
-                              </span>
-                           </TableCell>
-                           <TableCell className="font-bold">₱{parseFloat(log.deduction_amount).toLocaleString()}</TableCell>
-                           <TableCell className="text-right pr-8">
-                              <div className="flex justify-end gap-2">
-                                 <Button onClick={() => handleUpdateAttendance(log.id, 'Present')} variant="ghost" size="sm" className="rounded-none h-8 text-[8px] uppercase font-bold tracking-widest border border-success-color/20 text-success-color hover:bg-success-color hover:text-white">Present</Button>
-                                 <Button onClick={() => handleUpdateAttendance(log.id, 'Absent')} variant="ghost" size="sm" className="rounded-none h-8 text-[8px] uppercase font-bold tracking-widest border border-destructive/20 text-destructive hover:bg-destructive hover:text-white">Absent</Button>
-                              </div>
-                           </TableCell>
-                        </TableRow>
-                      ))}
-                      {attendance.length === 0 && (
-                        <TableRow><TableCell colSpan={5} className="py-20 text-center text-muted-foreground italic">No logs found for current period.</TableCell></TableRow>
-                      )}
-                   </TableBody>
-                </Table>
-             </Card>
-          </div>
+          <AttendanceLedger
+            attendance={attendance}
+            onUpdateAttendance={handleUpdateAttendance}
+          />
         )}
 
         {activeView === 'deductions' && (
@@ -773,132 +636,19 @@ const ManagerDashboard: React.FC = () => {
         )}
 
         {activeView === 'payroll' && (
-          <div className="space-y-12 animate-in fade-in duration-700">
-             <Card className="rounded-none border-none shadow-sm overflow-hidden bg-white">
-                <CardHeader className="bg-primary/5 border-b border-primary/5 pb-8 flex flex-row items-center justify-between">
-                   <div>
-                      <CardTitle className="font-serif text-2xl font-light italic">Payroll <span className="not-italic">Register</span></CardTitle>
-                      <CardDescription className="text-[9px] uppercase font-bold tracking-[0.2em] mt-1">Calculated commissions and weekly payouts</CardDescription>
-                   </div>
-                </CardHeader>
-                <Table>
-                   <TableHeader className="bg-gray-50/50">
-                      <TableRow className="hover:bg-transparent border-gray-100">
-                         <TableHead className="pl-8 py-5 text-[9px] uppercase font-bold">Artisan</TableHead>
-                         <TableHead className="text-[9px] uppercase font-bold">Gross Payout</TableHead>
-                         <TableHead className="text-[9px] uppercase font-bold">Deductions</TableHead>
-                         <TableHead className="text-[9px] uppercase font-bold">Status</TableHead>
-                         <TableHead className="text-right pr-8 text-[9px] uppercase font-bold">Net Payable</TableHead>
-                      </TableRow>
-                   </TableHeader>
-                   <TableBody>
-                      {payrollReport.map(row => (
-                        <TableRow 
-                          key={row.staffId} 
-                          className="hover:bg-primary-ultra/10 border-gray-50 transition-colors cursor-pointer group"
-                          onClick={() => handlePayrollRowClick(row)}
-                        >
-                           <TableCell className="pl-8 py-6">
-                              <p className="font-bold text-sm tracking-tight group-hover:text-primary transition-colors">{row.fullName}</p>
-                              <p className="text-[9px] text-muted-foreground uppercase font-bold">{row.commissionCount} Rituals Conducted</p>
-                           </TableCell>
-                           <TableCell className="font-bold text-xs">₱{(row.totalCommission + row.basePay).toLocaleString()}</TableCell>
-                           <TableCell className="text-destructive font-bold text-xs">-₱{row.totalDeduction.toLocaleString()}</TableCell>
-                           <TableCell>
-                              <Badge className="bg-primary-ultra/30 text-primary border-none rounded-none text-[8px] font-bold uppercase tracking-widest">DRAFT</Badge>
-                           </TableCell>
-                           <TableCell className="text-right pr-8 font-serif text-2xl font-light text-primary">₱{row.netPay.toLocaleString()}</TableCell>
-                        </TableRow>
-                      ))}
-                   </TableBody>
-                </Table>
-             </Card>
-
-             <div className="space-y-6">
-                <h3 className="font-serif text-2xl italic px-2">Cycle History</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                   {payrollPeriods.map(period => (
-                     <Card key={period.id} className="rounded-none border-none shadow-sm bg-white overflow-hidden group hover:shadow-xl transition-all duration-500">
-                        <div className={`absolute top-0 left-0 w-full h-1 ${period.is_locked ? 'bg-success-color' : 'bg-primary/20'}`} />
-                        <CardContent className="p-8">
-                           <div className="flex justify-between items-start mb-6">
-                              <Badge className={`rounded-none border-none text-[8px] font-bold uppercase tracking-widest px-3 py-1 ${period.is_locked ? 'bg-success-color/10 text-success-color' : 'bg-primary-ultra/30 text-primary animate-pulse'}`}>
-                                 {period.is_locked ? 'Finalized' : 'Draft Payout'}
-                              </Badge>
-                              <span className="text-[10px] font-bold text-muted-foreground">{format(new Date(period.start_date), 'MMM dd')} — {format(new Date(period.end_date), 'MMM dd')}</span>
-                           </div>
-                           <h4 className="font-serif text-3xl font-light mb-8">₱{parseFloat(period.total_salon_sales).toLocaleString()} <span className="text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest block mt-2 italic opacity-60">Confirmed Salon Sales</span></h4>
-                           
-                           <div className="flex justify-between items-center pt-6 border-t border-gray-50">
-                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">{period._count.payrolls} Employees</p>
-                              {!period.is_locked ? (
-                                <Button onClick={(e) => { e.stopPropagation(); handleLockPayroll(period.id); }} variant="ghost" size="sm" className="rounded-none text-[9px] uppercase font-bold tracking-widest h-8 px-4 border border-primary/20 text-primary hover:bg-primary hover:text-white">
-                                  <Lock className="h-3 w-3 mr-2" /> Finalize
-                                </Button>
-                              ) : (
-                                <span className="text-[9px] font-bold uppercase text-success-color flex items-center gap-1.5">
-                                   <Check className="h-3.5 w-3.5" /> Disbursed
-                                </span>
-                              )}
-                           </div>
-                        </CardContent>
-                     </Card>
-                   ))}
-                </div>
-             </div>
-          </div>
+          <PayrollTable
+            payrollReport={payrollReport}
+            onPayrollRowClick={handlePayrollRowClick}
+            payrollPeriods={payrollPeriods}
+            onLockPayroll={handleLockPayroll}
+          />
         )}
 
         {activeView === 'reviews' && (
-          <div className="animate-in fade-in duration-700">
-             <Card className="rounded-none border-none shadow-sm overflow-hidden bg-white">
-                <Table>
-                   <TableHeader className="bg-gray-50/50">
-                      <TableRow className="hover:bg-transparent border-gray-100">
-                         <TableHead className="pl-8 py-5 text-[9px] uppercase font-bold">Client Feedback</TableHead>
-                         <TableHead className="text-[9px] uppercase font-bold">Artisan</TableHead>
-                         <TableHead className="text-[9px] uppercase font-bold">Rating</TableHead>
-                         <TableHead className="text-[9px] uppercase font-bold">Praise</TableHead>
-                         <TableHead className="text-right pr-8 text-[9px] uppercase font-bold">Curate</TableHead>
-                      </TableRow>
-                   </TableHeader>
-                   <TableBody>
-                      {reviews.map(review => (
-                        <TableRow key={review.id} className="hover:bg-primary-ultra/10 border-gray-50 transition-colors">
-                           <TableCell className="pl-8 py-6">
-                              <p className="font-bold text-sm tracking-tight">{review.customer.full_name}</p>
-                              <p className="text-[9px] text-muted-foreground uppercase font-bold italic opacity-60">On {review.appointment_item.service.name}</p>
-                           </TableCell>
-                           <TableCell className="text-[10px] font-bold tracking-tighter uppercase">{review.staff.full_name}</TableCell>
-                           <TableCell>
-                              <div className="flex gap-0.5">
-                                 {[...Array(5)].map((_, i) => (
-                                   <Star key={i} className={`h-3 w-3 ${i < review.rating ? 'text-primary fill-primary' : 'text-gray-100 stroke-[1]'}`} />
-                                 ))}
-                              </div>
-                           </TableCell>
-                           <TableCell>
-                              <div className="flex flex-wrap gap-1">
-                                 {(review.tags as string[]).map(tag => (
-                                   <Badge key={tag} variant="outline" className="rounded-none text-[8px] uppercase tracking-tighter border-primary/5 bg-gray-50/50 px-2 py-0 text-muted-foreground">{tag}</Badge>
-                                 ))}
-                              </div>
-                           </TableCell>
-                           <TableCell className="pr-8 text-right">
-                              <div className="flex justify-end gap-2">
-                                 {review.is_approved_for_public ? (
-                                   <Button onClick={() => handleModerateReview(review.id, false)} variant="ghost" size="icon" className="h-9 w-9 text-destructive border border-destructive/10 bg-destructive/5 hover:bg-destructive hover:text-white rounded-none transition-all"><X className="h-4 w-4" /></Button>
-                                 ) : (
-                                   <Button onClick={() => handleModerateReview(review.id, true)} variant="ghost" size="icon" className="h-9 w-9 text-success-color border border-success-color/10 bg-success-color/5 hover:bg-success-color hover:text-white rounded-none transition-all"><Check className="h-4 w-4" /></Button>
-                                 )}
-                              </div>
-                           </TableCell>
-                        </TableRow>
-                      ))}
-                   </TableBody>
-                </Table>
-             </Card>
-          </div>
+          <ReviewModeration
+            reviews={reviews}
+            onModerateReview={handleModerateReview}
+          />
         )}
       </main>
 
