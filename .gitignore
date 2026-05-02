@@ -35,3 +35,4 @@ yarn-error.log*
 # Project specific
 backend/dist/
 frontend/dist/
+# .planning/ - commented out: planning files should be tracked
