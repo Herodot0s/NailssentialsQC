@@ -102,20 +102,18 @@ const Navbar: React.FC = () => {
                 {(user?.role === 'staff' || user?.role === 'manager') && <NotificationBell />}
 
                 <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={() => (
-                      <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary/5 transition-colors">
-                        <Avatar className="h-10 w-10">
-                          <AvatarFallback className="bg-primary-ultra text-primary font-serif font-bold text-sm border-[0.5px] border-primary/20">
-                            {user?.fullName ? (
-                              getInitials(user.fullName)
-                            ) : (
-                              <User className="h-4 w-4 stroke-[1.5]" />
-                            )}
-                          </AvatarFallback>
-                        </Avatar>
-                      </Button>
-                    )}
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary/5 transition-colors">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback className="bg-primary-ultra text-primary font-serif font-bold text-sm border-[0.5px] border-primary/20">
+                          {user?.fullName ? (
+                            getInitials(user.fullName)
+                          ) : (
+                            <User className="h-4 w-4 stroke-[1.5]" />
+                          )}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56 mt-4 border-none shadow-xl rounded-none p-2" align="end">
                     <DropdownMenuGroup>
@@ -130,53 +128,47 @@ const Navbar: React.FC = () => {
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator className="bg-primary/5" />
                     <DropdownMenuItem
-                      render={() => (
-                        <Link to="/profile">
-                          <User className="mr-3 h-4 w-4 stroke-[1.5]" />
-                          <span className="text-xs font-medium">Profile Settings</span>
-                        </Link>
-                      )}
-                    />
+                      onClick={() => navigate('/profile')}
+                      className="rounded-none px-4 py-3 cursor-pointer"
+                    >
+                      <User className="mr-3 h-4 w-4 stroke-[1.5]" />
+                      <span className="text-xs font-medium">Profile Settings</span>
+                    </DropdownMenuItem>
                     {user?.role === 'customer' && (
                       <DropdownMenuItem
-                        render={() => (
-                          <Link to="/appointments">
-                            <Calendar className="mr-3 h-4 w-4 stroke-[1.5]" />
-                            <span className="text-xs font-medium">My Appointments</span>
-                          </Link>
-                        )}
-                      />
+                        onClick={() => navigate('/appointments')}
+                        className="rounded-none px-4 py-3 cursor-pointer"
+                      >
+                        <Calendar className="mr-3 h-4 w-4 stroke-[1.5]" />
+                        <span className="text-xs font-medium">My Appointments</span>
+                      </DropdownMenuItem>
                     )}
                     {user?.role === 'manager' && (
                       <DropdownMenuItem
-                        render={() => (
-                          <Link to="/manager">
-                            <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
-                            <span className="text-xs font-medium">Manager Dashboard</span>
-                          </Link>
-                        )}
-                      />
+                        onClick={() => navigate('/manager')}
+                        className="rounded-none px-4 py-3 cursor-pointer"
+                      >
+                        <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
+                        <span className="text-xs font-medium">Manager Dashboard</span>
+                      </DropdownMenuItem>
                     )}
                     {user?.role === 'staff' && (
                       <DropdownMenuItem
-                        render={() => (
-                          <Link to="/dashboard">
-                            <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
-                            <span className="text-xs font-medium">Staff Portal</span>
-                          </Link>
-                        )}
-                      />
+                        onClick={() => navigate('/dashboard')}
+                        className="rounded-none px-4 py-3 cursor-pointer"
+                      >
+                        <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
+                        <span className="text-xs font-medium">Staff Portal</span>
+                      </DropdownMenuItem>
                     )}
                     {user?.role === 'manager' && (
                       <DropdownMenuItem
-                        className="rounded-none px-4 py-3"
-                        render={
-                          <Link to="/manage-services">
-                            <Settings className="mr-3 h-4 w-4 stroke-[1.5]" />
-                            <span className="text-xs font-medium">Manage Services</span>
-                          </Link>
-                        }
-                      />
+                        onClick={() => navigate('/manage-services')}
+                        className="rounded-none px-4 py-3 cursor-pointer"
+                      >
+                        <Settings className="mr-3 h-4 w-4 stroke-[1.5]" />
+                        <span className="text-xs font-medium">Manage Services</span>
+                      </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator className="bg-primary/5" />
                     <DropdownMenuItem
@@ -200,9 +192,9 @@ const Navbar: React.FC = () => {
                 <Button
                   variant="outline"
                   className="h-10 px-8 rounded-none border-primary/40 text-primary hover:bg-primary hover:text-white transition-all duration-500 uppercase tracking-[0.2em] text-[10px] font-bold"
-                  asChild
+                  onClick={() => navigate('/register')}
                 >
-                  <Link to="/register">Sign Up</Link>
+                  Sign Up
                 </Button>
               </div>
             )}
@@ -218,27 +210,33 @@ const Navbar: React.FC = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 mt-4 border-none shadow-xl rounded-none p-4 space-y-2">
                 <DropdownMenuItem
-                  render={() => (
-                    <Link to="/services">Services</Link>
-                  )}
-                />
+                  onClick={() => navigate('/services')}
+                  className="rounded-none px-4 py-3 cursor-pointer"
+                >
+                  Services
+                </DropdownMenuItem>
                 {!isAuthenticated ? (
                   <>
                     <DropdownMenuItem
-                      render={() => (
-                        <Link to="/login">Login</Link>
-                      )}
-                    />
+                      onClick={() => navigate('/login')}
+                      className="rounded-none px-4 py-3 cursor-pointer"
+                    >
+                      Login
+                    </DropdownMenuItem>
                     <DropdownMenuItem
-                      render={() => (
-                        <Link to="/register">Sign Up</Link>
-                      )}
-                    />
+                      onClick={() => navigate('/register')}
+                      className="rounded-none px-4 py-3 cursor-pointer"
+                    >
+                      Sign Up
+                    </DropdownMenuItem>
                   </>
                 ) : (
                   <>
                     <DropdownMenuSeparator className="bg-primary/5" />
-                    <DropdownMenuItem onClick={handleLogout} className="rounded-none px-4 py-3 text-xs uppercase tracking-widest text-destructive">
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="rounded-none px-4 py-3 text-destructive"
+                    >
                       <LogOut className="mr-3 h-4 w-4 stroke-[1.5]" />
                       Logout
                     </DropdownMenuItem>

@@ -191,7 +191,7 @@ export const getPayrollPeriods = async (req: AuthRequest, res: Response) => {
  */
 export const getPayrollDetails = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.validatedParams;
+    const { id } = req.validatedParams ?? {};
     const period = await prisma.payrollPeriod.findUnique({
       where: { id },
       include: {
@@ -285,7 +285,7 @@ export const getMyPayroll = async (req: AuthRequest, res: Response) => {
  */
 export const lockPayroll = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.validatedParams;
+    const { id } = req.validatedParams ?? {};
     const period = await prisma.payrollPeriod.findUnique({
       where: { id },
     });

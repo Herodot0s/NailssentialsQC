@@ -7,6 +7,8 @@ export interface AuthRequest extends Request {
     email: string;
     role: string;
   };
+  validatedParams?: Record<string, any>;
+  validatedBody?: Record<string, any>;
 }
 
 export const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) => {

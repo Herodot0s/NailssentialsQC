@@ -282,7 +282,7 @@ export const getAllAttendance = async (req: AuthRequest, res: Response) => {
 
 export const updateAttendance = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.validatedParams;
+    const { id } = req.validatedParams ?? {};
     const { checkIn, checkOut, tardinessMinutes, deductionAmount, notes } = req.body;
 
     const attendance = await prisma.attendance.update({

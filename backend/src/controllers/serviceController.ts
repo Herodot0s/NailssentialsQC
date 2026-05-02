@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthRequest } from '../middleware/authMiddleware';
 import prisma from '../utils/prisma';
 
 export const getCategories = async (req: Request, res: Response) => {
@@ -96,9 +97,9 @@ export const createCategory = async (req: Request, res: Response) => {
   }
 };
 
-export const updateCategory = async (req: Request, res: Response) => {
+export const updateCategory = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.validatedParams;
+    const { id } = req.validatedParams ?? {};
     const { name, description, is_active, parentId } = req.body;
     const category = await prisma.serviceCategory.update({
       where: { id },
@@ -146,9 +147,9 @@ export const createService = async (req: Request, res: Response) => {
   }
 };
 
-export const updateService = async (req: Request, res: Response) => {
+export const updateService = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.validatedParams;
+    const { id } = req.validatedParams ?? {};
     const { name, description, duration_minutes, price, category_id, is_popular, is_active } = req.body;
 
     const parsedPrice = price !== undefined ? parseFloat(price) : undefined;

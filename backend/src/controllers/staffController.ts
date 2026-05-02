@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthRequest } from '../middleware/authMiddleware';
 import bcrypt from 'bcrypt';
 import prisma from '../utils/prisma';
 
@@ -199,28 +200,31 @@ export const getStaffSchedule = async (req: Request, res: Response) => {
 /**
  * Update schedule for a specific staff member
  */
-export const updateStaffSchedule = async (req: Request, res: Response) => {
+export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.validatedParams || req.params;
-    const { schedules } = req.validatedBody || req.body;
+    const staffIdParam = req.validatedParams?.id ?? req.params.id;
+    const staffId = typeof staffIdParam === 'number' ? staffIdParam : parseInt(String(staffIdParam), 10);
+    const { schedules } = req.validatedBody ?? req.body;
 
     // Use a transaction to update all schedules for the staff
     await prisma.$transaction(
       schedules.map((s: any) =>
         prisma.staffSchedule.upsert({
-          where: {
-            staff_day_unique: {
-              staff_id: typeof id === 'number' ? id : parseInt(id as string),
-              day_of_week: s.day_of_week,
-            }
-          },
+          // NOTE: staff_day_unique key requires prisma generate after migration
+            // Temporary workaround pending prisma generate
+            where: {
+              staff_day_unique: {
+                staff_id: staffId,
+                day_of_week: s.day_of_week,
+              }
+            } as any,
           update: {
             start_time: s.start_time,
             end_time: s.end_time,
             is_active: s.is_active,
           },
           create: {
-            staff_id: typeof id === 'number' ? id : parseInt(id as string),
+            staff_id: staffId,
             day_of_week: s.day_of_week,
             start_time: s.start_time,
             end_time: s.end_time,
