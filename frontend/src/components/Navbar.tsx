@@ -129,31 +129,43 @@ const Navbar: React.FC = () => {
                       </DropdownMenuLabel>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator className="bg-primary/5" />
-                    <DropdownMenuItemrender={<Link to="/profile">
-                        <User className="mr-3 h-4 w-4 stroke-[1.5]" />
-                        <span className="text-xs font-medium">Profile Settings</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    {user?.role === 'customer' && (
-                      <DropdownMenuItemrender={<Link to="/appointments">
-                          <Calendar className="mr-3 h-4 w-4 stroke-[1.5]" />
-                          <span className="text-xs font-medium">My Appointments</span>
+                    <DropdownMenuItem
+                      render={() => (
+                        <Link to="/profile">
+                          <User className="mr-3 h-4 w-4 stroke-[1.5]" />
+                          <span className="text-xs font-medium">Profile Settings</span>
                         </Link>
-                      </DropdownMenuItem>
+                      )}
+                    />
+                    {user?.role === 'customer' && (
+                      <DropdownMenuItem
+                        render={() => (
+                          <Link to="/appointments">
+                            <Calendar className="mr-3 h-4 w-4 stroke-[1.5]" />
+                            <span className="text-xs font-medium">My Appointments</span>
+                          </Link>
+                        )}
+                      />
                     )}
                     {user?.role === 'manager' && (
-                      <DropdownMenuItemrender={<Link to="/manager">
-                          <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
-                          <span className="text-xs font-medium">Manager Dashboard</span>
-                        </Link>
-                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        render={() => (
+                          <Link to="/manager">
+                            <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
+                            <span className="text-xs font-medium">Manager Dashboard</span>
+                          </Link>
+                        )}
+                      />
                     )}
                     {user?.role === 'staff' && (
-                      <DropdownMenuItemrender={<Link to="/dashboard">
-                          <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
-                          <span className="text-xs font-medium">Staff Portal</span>
-                        </Link>
-                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        render={() => (
+                          <Link to="/dashboard">
+                            <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
+                            <span className="text-xs font-medium">Staff Portal</span>
+                          </Link>
+                        )}
+                      />
                     )}
                     {user?.role === 'manager' && (
                       <DropdownMenuItem
@@ -205,13 +217,23 @@ const Navbar: React.FC = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 mt-4 border-none shadow-xl rounded-none p-4 space-y-2">
-                <DropdownMenuItemrender={<Link to="/services">Services</Link>
-                </DropdownMenuItem>
+                <DropdownMenuItem
+                  render={() => (
+                    <Link to="/services">Services</Link>
+                  )}
+                />
                 {!isAuthenticated ? (
                   <>
-                    <DropdownMenuItemrender={<Link to="/login">Login</Link>
-                    } </DropdownMenuItem><DropdownMenuItemrender={<Link to="/register">Sign Up</Link>
-                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      render={() => (
+                        <Link to="/login">Login</Link>
+                      )}
+                    />
+                    <DropdownMenuItem
+                      render={() => (
+                        <Link to="/register">Sign Up</Link>
+                      )}
+                    />
                   </>
                 ) : (
                   <>
