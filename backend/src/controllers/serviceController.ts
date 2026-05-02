@@ -98,10 +98,10 @@ export const createCategory = async (req: Request, res: Response) => {
 
 export const updateCategory = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.validatedParams;
     const { name, description, is_active, parentId } = req.body;
     const category = await prisma.serviceCategory.update({
-      where: { id: parseInt(id as string) },
+      where: { id },
       data: { 
         name, 
         description, 
@@ -148,7 +148,7 @@ export const createService = async (req: Request, res: Response) => {
 
 export const updateService = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.validatedParams;
     const { name, description, duration_minutes, price, category_id, is_popular, is_active } = req.body;
 
     const parsedPrice = price !== undefined ? parseFloat(price) : undefined;
@@ -162,7 +162,7 @@ export const updateService = async (req: Request, res: Response) => {
     }
 
     const service = await prisma.service.update({
-      where: { id: parseInt(id as string) },
+      where: { id },
       data: {
         name,
         description,

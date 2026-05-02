@@ -191,9 +191,9 @@ export const getPayrollPeriods = async (req: AuthRequest, res: Response) => {
  */
 export const getPayrollDetails = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.validatedParams;
     const period = await prisma.payrollPeriod.findUnique({
-      where: { id: parseInt(id as string) },
+      where: { id },
       include: {
         payrolls: {
           include: { staff: { select: { full_name: true, specializations: true } } },
@@ -285,9 +285,9 @@ export const getMyPayroll = async (req: AuthRequest, res: Response) => {
  */
 export const lockPayroll = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.validatedParams;
     const period = await prisma.payrollPeriod.findUnique({
-      where: { id: parseInt(id as string) },
+      where: { id },
     });
 
     if (!period) {
@@ -299,7 +299,7 @@ export const lockPayroll = async (req: AuthRequest, res: Response) => {
     }
 
     const updatedPeriod = await prisma.payrollPeriod.update({
-      where: { id: parseInt(id as string) },
+      where: { id },
       data: { is_locked: true },
     });
 

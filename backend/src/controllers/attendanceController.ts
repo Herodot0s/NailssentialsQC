@@ -282,11 +282,11 @@ export const getAllAttendance = async (req: AuthRequest, res: Response) => {
 
 export const updateAttendance = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.validatedParams;
     const { checkIn, checkOut, tardinessMinutes, deductionAmount, notes } = req.body;
 
     const attendance = await prisma.attendance.update({
-      where: { id: parseInt(id as string) },
+      where: { id },
       data: {
         check_in: checkIn ? new Date(checkIn) : undefined,
         check_out: checkOut ? new Date(checkOut) : undefined,
