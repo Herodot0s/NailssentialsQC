@@ -308,11 +308,8 @@ export const refresh = async (req: Request, res: Response) => {
       sub: storedToken.user.id,
     });
 
-    // Delete old, store new
-    await prisma.refreshToken.delete({
-      where: { id: storedToken.id },
-    });
-
+    // SEC-06: Create new token first, then delete old
+    // This ensures there is always a valid token (no race condition gap)
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
     await prisma.refreshToken.create({
@@ -321,6 +318,10 @@ export const refresh = async (req: Request, res: Response) => {
         token: newRefreshToken,
         expires_at: expiresAt,
       },
+    });
+
+    await prisma.refreshToken.delete({
+      where: { id: storedToken.id },
     });
 
     return res.status(200).json({
@@ -374,10 +375,10 @@ export const logout = async (req: Request, res: Response) => {
 
 export const getMe = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user.sub;
+    const userId = (req.user as { sub: string | number }).sub;
 
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: Number(userId) },
       include: {
         customer_profile: true,
         staff_profile: true,
@@ -391,7 +392,7 @@ export const getMe = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const fullName = user.customer_profile?.full_name || user.staff_profile?.full_name || 'User';
+    const fullName = (user as { customer_profile?: { full_name: string } | null; staff_profile?: { full_name: string } | null }).customer_profile?.full_name || (user as { staff_profile?: { full_name: string } | null }).staff_profile?.full_name || 'User';
 
     return res.status(200).json({
       success: true,
