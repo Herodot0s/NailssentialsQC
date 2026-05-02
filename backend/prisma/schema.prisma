@@ -133,6 +133,7 @@ model StaffSchedule {
 
   staff StaffProfile @relation(fields: [staff_id], references: [id], onDelete: Cascade)
 
+  @@unique([staff_id, day_of_week], name: "staff_day_unique")
   @@index([staff_id])
   @@map("staff_schedules")
 }
