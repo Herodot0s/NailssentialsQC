@@ -88,12 +88,12 @@ Plans:
 **Plans**: 6 plans
 
 Plans:
-- [ ] 03-01: Remove JWT secret fallbacks, fail fast on missing env vars
-- [ ] 03-02: Add password strength validation during registration (min 8 chars, mixed case, numbers)
-- [ ] 03-03: Add role-based permission checks for notification creation endpoint
-- [ ] 03-04: Add rate limiting middleware to auth endpoints using express-rate-limit
-- [ ] 03-05: Validate profile picture URLs against allowlist (Vercel Blob + configured CDN)
-- [ ] 03-06: Fix refresh token rotation race condition (create new before deleting old)
+- [x] 03-01: Remove JWT secret fallbacks, fail fast on missing env vars
+- [x] 03-02: Add password strength validation during registration (min 8 chars, mixed case, numbers)
+- [x] 03-03: Add role-based permission checks for notification creation endpoint
+- [x] 03-04: Add rate limiting middleware to auth endpoints using express-rate-limit
+- [x] 03-05: Validate profile picture URLs against allowlist (Vercel Blob + configured CDN)
+- [x] 03-06: Fix refresh token rotation race condition (create new before deleting old)
 
 ### Phase 4: API Improvements
 **Goal**: Improve API reliability, consistency, and usability with pagination and validation
@@ -226,7 +226,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 |-------|----------------|--------|-----------|
 | 1. Critical Bug Fixes | 5/5 | Complete | 2026-05-02 |
 | 2. Type Safety & Code Quality | 4/4 | Complete | 2026-05-02 |
-| 3. Security Hardening | 0/6 | Ready to plan | - |
+| 3. Security Hardening | 6/6 | Ready to execute | - |
 | 4. API Improvements | 0/3 | Not started | - |
 | 5. Performance Optimization | 0/5 | Not started | - |
 | 6. Missing Features | 0/3 | Not started | - |
