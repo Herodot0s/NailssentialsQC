@@ -30,13 +30,7 @@ import {
   Loader2,
   Trash2,
 } from 'lucide-react';
-
-interface Staff {
-  id: number;
-  fullName: string;
-  specializations: string;
-  role: string;
-}
+import type { Staff } from '@/types/api';
 
 interface Slot {
   time: string;
@@ -70,7 +64,7 @@ const Booking: React.FC = () => {
           getAllStaff(),
           getAvailability(selectedDate)
         ]);
-        setStaffList(staffRes.data.data.filter((s: any) => s.role === 'staff' || s.role === 'manager'));
+        setStaffList(staffRes.data.data.filter((s: Staff) => s.role === 'staff' || s.role === 'manager'));
         setSlots(availRes.data.data);
       } catch (err) {
         setError('Failed to load booking details.');
@@ -108,8 +102,9 @@ const Booking: React.FC = () => {
       setSuccess(true);
       clearCart();
       setTimeout(() => navigate('/appointments'), 3000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to book appointment.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to book appointment.';
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -237,8 +232,8 @@ const Booking: React.FC = () => {
                                    <Select 
                                      value={item.staffId?.toString()} 
                                      onValueChange={(val) => updateCartItem(item.serviceId, { 
-                                       staffId: parseInt(val as any),
-                                       staffName: staffList.find(s => s.id === parseInt(val as any))?.fullName
+                                       staffId: parseInt(val),
+                                       staffName: staffList.find(s => s.id === parseInt(val))?.fullName
                                      })}
                                    >
                                      <SelectTrigger className="rounded-none border-primary/10 h-11 focus:ring-primary bg-white/50">

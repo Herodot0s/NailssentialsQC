@@ -82,6 +82,19 @@ import {
 import { format } from 'date-fns';
 import DrillDownLineChart from '@/components/DrillDownLineChart';
 import SalarySlipModal from '@/components/SalarySlipModal';
+import type {
+  PayrollPeriod,
+  AttendanceRecord,
+  Category,
+  UpdateAttendanceRequest,
+  PayrollRecord,
+  Message,
+  Review,
+  StaffMember,
+  ScheduleItem,
+  SalesStats,
+  HistoricalData,
+} from '@/types/api';
 
 interface SalesStats {
   totalRevenue: number;
@@ -155,11 +168,11 @@ const ManagerDashboard: React.FC = () => {
   const [activeView, setActiveView] = useState<ActiveView>('analytics');
   const [salesStats, setSalesStats] = useState<SalesStats | null>(null);
   const [payrollReport, setPayrollReport] = useState<PayrollRecord[]>([]);
-  const [payrollPeriods, setPayrollPeriods] = useState<any[]>([]);
+  const [payrollPeriods, setPayrollPeriods] = useState<PayrollPeriod[]>([]);
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [attendance, setAttendance] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -237,8 +250,8 @@ const ManagerDashboard: React.FC = () => {
       if (catRes.data.success) setCategories(catRes.data.data);
       if (historyRes.data.success) setHistoricalData(historyRes.data.data);
 
-    } catch (err: any) {
-      console.error('Fetch error:', err);
+    } catch (err: unknown) {
+      console.error('Fetch error:', err instanceof Error ? err.message : err);
     } finally {
       setIsLoading(false);
     }
@@ -254,8 +267,9 @@ const ManagerDashboard: React.FC = () => {
       await createStaff(newStaffForm);
       setShowAddStaffModal(false);
       fetchData();
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to add staff member.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to add staff member.';
+      alert(message);
     }
   };
 
@@ -288,8 +302,9 @@ const ManagerDashboard: React.FC = () => {
       });
       setShowPayrollModal(false);
       fetchData();
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to generate payroll.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to generate payroll.';
+      alert(message);
     }
   };
 
@@ -385,7 +400,7 @@ const ManagerDashboard: React.FC = () => {
 
   const handleUpdateAttendance = async (id: number, status: string) => {
     try {
-      let data: any = {};
+      let data: UpdateAttendanceRequest = {};
       if (status === 'Present') {
         data.checkIn = new Date().toISOString();
         data.tardinessMinutes = 0;
