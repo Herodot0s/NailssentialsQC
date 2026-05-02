@@ -102,19 +102,21 @@ const Navbar: React.FC = () => {
                 {(user?.role === 'staff' || user?.role === 'manager') && <NotificationBell />}
 
                 <DropdownMenu>
-                  <DropdownMenuTrigger render={>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary/5 transition-colors">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-primary-ultra text-primary font-serif font-bold text-sm border-[0.5px] border-primary/20">
-                          {user?.fullName ? (
-                            getInitials(user.fullName)
-                          ) : (
-                            <User className="h-4 w-4 stroke-[1.5]" />
-                          )}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  } </DropdownMenuTrigger>
+                  <DropdownMenuTrigger
+                    render={() => (
+                      <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary/5 transition-colors">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-primary-ultra text-primary font-serif font-bold text-sm border-[0.5px] border-primary/20">
+                            {user?.fullName ? (
+                              getInitials(user.fullName)
+                            ) : (
+                              <User className="h-4 w-4 stroke-[1.5]" />
+                            )}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    )}
+                  </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56 mt-4 border-none shadow-xl rounded-none p-2" align="end">
                     <DropdownMenuGroup>
                       <DropdownMenuLabel className="font-normal px-4 py-3">
