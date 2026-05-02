@@ -4,6 +4,8 @@ import { AuthRequest } from '../middleware/authMiddleware';
 import { addMinutes, parse, format, areIntervalsOverlapping, getISOWeek, getMonth, getYear, startOfWeek, endOfWeek, startOfDay, endOfDay, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { sendBookingConfirmation, sendAppointmentCompletion } from '../utils/email';
 import { createNotification } from './notificationController';
+import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 
 /**
  * Basic helper to convert "HH:mm" and Date to a full Date object for comparison
@@ -380,6 +382,10 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
     });
   }
 };
+
+function generateRandomPassword(length: number = 12): string {
+  return crypto.randomBytes(length).toString('base64').slice(0, length);
+}
 
 export const createAppointment = async (req: AuthRequest, res: Response) => {
   try {
