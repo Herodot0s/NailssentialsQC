@@ -13,7 +13,7 @@ interface PrismaError extends Error {
  */
 export const getAttendanceStatus = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
+    const userId = req.user?.sub as number | undefined;
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -85,7 +85,7 @@ export const getAttendanceStatus = async (req: AuthRequest, res: Response) => {
  */
 export const checkIn = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
+    const userId = req.user?.sub as number | undefined;
     const staffProfile = await prisma.staffProfile.findUnique({
       where: { user_id: userId },
     });
@@ -163,17 +163,26 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
       },
     });
 
+    // SEC-03: Capture caller identity for notification authorization
+    const callerId = userId!;
+    const callerRole = req.user?.role;
+
     // Notify Managers
     (async () => {
       try {
         const managers = await prisma.user.findMany({ where: { role: 'manager' } });
         for (const manager of managers) {
-          createNotification(
-            manager.id,
-            'STAFF_CHECK_IN',
-            'Staff Checked In',
-            `${staffProfile.full_name} checked in at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. ${tardinessMinutes > 0 ? `Late by ${tardinessMinutes}m.` : ''}`
-          );
+          // D-05: Customers cannot notify other users
+          if (callerRole === 'customer' && callerId !== manager.id) {
+            console.warn('[notification] Blocked cross-user notification attempt', { callerId, targetId: manager.id });
+          } else {
+            createNotification(
+              manager.id,
+              'STAFF_CHECK_IN',
+              'Staff Checked In',
+              `${staffProfile.full_name} checked in at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. ${tardinessMinutes > 0 ? `Late by ${tardinessMinutes}m.` : ''}`
+            );
+          }
         }
       } catch (err: unknown) {
         console.error('Manager notification error:', err);
@@ -200,7 +209,7 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
  */
 export const checkOut = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
+    const userId = req.user?.sub as number | undefined;
     const staffProfile = await prisma.staffProfile.findUnique({
       where: { user_id: userId },
     });
@@ -228,17 +237,26 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
       },
     });
 
+    // SEC-03: Capture caller identity for notification authorization
+    const callerId = userId!;
+    const callerRole = req.user?.role;
+
     // Notify Managers
     (async () => {
       try {
         const managers = await prisma.user.findMany({ where: { role: 'manager' } });
         for (const manager of managers) {
-          createNotification(
-            manager.id,
-            'STAFF_CHECK_OUT',
-            'Staff Checked Out',
-            `${staffProfile.full_name} checked out at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`
-          );
+          // D-05: Customers cannot notify other users
+          if (callerRole === 'customer' && callerId !== manager.id) {
+            console.warn('[notification] Blocked cross-user notification attempt', { callerId, targetId: manager.id });
+          } else {
+            createNotification(
+              manager.id,
+              'STAFF_CHECK_OUT',
+              'Staff Checked Out',
+              `${staffProfile.full_name} checked out at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`
+            );
+          }
         }
       } catch (err: unknown) {
         console.error('Manager notification error:', err);
