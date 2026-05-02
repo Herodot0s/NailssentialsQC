@@ -412,12 +412,15 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
           where: { full_name: 'Walk-in Customer' }
         });
         if (!walkInCustomer) {
+           const randomPassword = generateRandomPassword(12);
+           const hashedPassword = await bcrypt.hash(randomPassword, 12);
+
            const walkInUser = await prisma.user.upsert({
              where: { username: 'walkin_guest' },
              update: {},
              create: {
                username: 'walkin_guest',
-               password_hash: 'N/A',
+               password_hash: hashedPassword,
                role: 'customer',
                is_active: false
              }
