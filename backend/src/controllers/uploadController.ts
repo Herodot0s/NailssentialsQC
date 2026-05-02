@@ -29,6 +29,17 @@ export const uploadFile = async (req: Request, res: Response) => {
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
+    // SEC-05: Validate the returned URL against allowlist
+    const allowedPattern = /^https:\/\/.*\.public\.blob\.vercel-storage\.com\/.*$/;
+    if (!allowedPattern.test(blob.url)) {
+      // Reject the upload if URL is not on allowlist
+      await del(blob.url, { token: process.env.BLOB_READ_WRITE_TOKEN });
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid profile picture URL. Only Vercel Blob URLs are allowed.',
+      });
+    }
+
     return res.json({
       success: true,
       data: { url: blob.url },
