@@ -11,6 +11,7 @@ import {
   getMyMessages,
   sendMessage,
 } from '../api/apiClient';
+import type { PayrollRecord, Message } from '@/types/api';
 import {
   Card,
   CardHeader,
@@ -82,8 +83,8 @@ const StaffDashboard: React.FC = () => {
   const [status, setStatus] = useState<AttendanceStatus | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [commission, setCommission] = useState({ today: 0, thisWeek: 0 });
-  const [myPayrolls, setMyPayrolls] = useState<any[]>([]);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [myPayrolls, setMyPayrolls] = useState<PayrollRecord[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -109,8 +110,8 @@ const StaffDashboard: React.FC = () => {
       if (payrollRes.data.success) setMyPayrolls(payrollRes.data.data);
       if (msgRes.data.success) setMessages(msgRes.data.data);
 
-    } catch (err: any) {
-      console.error('Fetch error:', err);
+    } catch (err: unknown) {
+      console.error('Fetch error:', err instanceof Error ? err.message : err);
     } finally {
       setIsLoading(false);
     }

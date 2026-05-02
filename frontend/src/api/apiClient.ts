@@ -1,4 +1,14 @@
 import axios from 'axios';
+import type {
+  CreateStaffRequest,
+  UpdateAttendanceRequest,
+  SubmitReviewRequest,
+  CreateAppointmentRequest,
+  CreateServiceRequest,
+  UpdateServiceRequest,
+  ScheduleItem,
+  UpdateCustomerProfileRequest,
+} from '@/types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
@@ -68,20 +78,20 @@ export const updateCategory = (
 
 export const getServices = (categoryId?: number) =>
   apiClient.get('/services', { params: { categoryId } });
-export const createService = (data: any) => apiClient.post('/services', data);
-export const updateService = (id: number, data: any) => apiClient.put(`/services/${id}`, data);
+export const createService = (data: CreateServiceRequest) => apiClient.post('/services', data);
+export const updateService = (id: number, data: UpdateServiceRequest) => apiClient.put(`/services/${id}`, data);
 
 // Staff methods
 export const getAllStaff = () => apiClient.get('/staff');
-export const createStaff = (data: any) => apiClient.post('/staff', data);
-export const updateStaff = (id: number, data: any) => apiClient.put(`/staff/${id}`, data);
+export const createStaff = (data: CreateStaffRequest) => apiClient.post('/staff', data);
+export const updateStaff = (id: number, data: Partial<CreateStaffRequest>) => apiClient.put(`/staff/${id}`, data);
 export const getStaffSchedule = (id: number) => apiClient.get(`/staff/${id}/schedule`);
-export const updateStaffSchedule = (id: number, data: { schedules: any[] }) => apiClient.put(`/staff/${id}/schedule`, data);
+export const updateStaffSchedule = (id: number, data: { schedules: ScheduleItem[] }) => apiClient.put(`/staff/${id}/schedule`, data);
 
 // Appointment methods
 export const getAvailability = (date: string) =>
   apiClient.get('/appointments/availability', { params: { date } });
-export const createAppointment = (bookingData: any) => apiClient.post('/appointments', bookingData);
+export const createAppointment = (bookingData: CreateAppointmentRequest) => apiClient.post('/appointments', bookingData);
 export const getAppointments = () => apiClient.get('/appointments');
 export const completeAppointment = (id: number, data: { paymentMethod: 'cash' | 'gcash' }) =>
   apiClient.post(`/appointments/${id}/complete`, data);
@@ -105,7 +115,7 @@ export const sendMessage = (data: { receiverId: number; subject: string; body: s
 export const markMessageRead = (id: number) => apiClient.patch(`/messages/${id}/read`);
 
 // Review methods
-export const submitReview = (data: any) => apiClient.post('/reviews', data);
+export const submitReview = (data: SubmitReviewRequest) => apiClient.post('/reviews', data);
 export const getStaffReviews = (staffId: number) => apiClient.get(`/reviews/staff/${staffId}`);
 export const getAllReviews = () => apiClient.get('/reviews');
 export const moderateReview = (id: number, isApproved: boolean) => apiClient.patch(`/reviews/${id}/moderate`, { isApproved });
@@ -115,7 +125,7 @@ export const getPublicReviews = () => apiClient.get('/reviews/public');
 export const searchCustomers = (query: string) =>
   apiClient.get('/customers/search', { params: { query } });
 export const getCustomerHistory = (id: number) => apiClient.get(`/customers/${id}/history`);
-export const updateCustomerProfile = (data: any) => apiClient.put('/customers/profile', data);
+export const updateCustomerProfile = (data: UpdateCustomerProfileRequest) => apiClient.put('/customers/profile', data);
 
 // Attendance methods
 export const getAttendanceStatus = () => apiClient.get('/attendance/status');
@@ -123,7 +133,7 @@ export const checkIn = () => apiClient.post('/attendance/check-in');
 export const checkOut = () => apiClient.post('/attendance/check-out');
 export const getAllAttendance = (params: { startDate?: string; endDate?: string }) => 
   apiClient.get('/attendance/all', { params });
-export const updateAttendance = (id: number, data: any) => apiClient.put(`/attendance/${id}`, data);
+export const updateAttendance = (id: number, data: UpdateAttendanceRequest) => apiClient.put(`/attendance/${id}`, data);
 
 // Report methods
 export const getReports = (params: { startDate?: string; endDate?: string }) =>

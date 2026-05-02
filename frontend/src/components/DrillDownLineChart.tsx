@@ -38,7 +38,7 @@ const DrillDownLineChart: React.FC<DrillDownLineChartProps> = ({
     if (!historicalData.length) return [];
 
     return historicalData.map(d => {
-      const entry: any = { date: d.date };
+      const entry: Record<string, string | number> = { date: d.date };
       if (!selectedCategory) {
         Object.keys(d.categories || {}).forEach(cat => {
           entry[cat] = d.categories?.[cat];
@@ -64,13 +64,13 @@ const DrillDownLineChart: React.FC<DrillDownLineChartProps> = ({
     return Array.from(names);
   }, [historicalData, selectedCategory]);
 
-  const handleLegendClick = (data: any) => {
+  const handleLegendClick = (data: { value: string }) => {
     if (!selectedCategory && data?.value) {
       onCategorySelect(data.value);
     }
   };
 
-  const handleChartClick = (data: any) => {
+  const handleChartClick = (data: { activePayload?: Array<{ payload: { date: string }> }>) => {
     if (data && data.activePayload && !selectedCategory) {
       const payload = data.activePayload[0]?.name;
       if (payload) onCategorySelect(payload);
