@@ -21,33 +21,36 @@ function DropdownMenuTrigger({ asChild, ...props }: MenuPrimitive.Trigger.Props 
 }
 
 function DropdownMenuContent({
-  align = 'start',
+  align = 'bottom',
   alignOffset = 0,
   side = 'bottom',
   sideOffset = 4,
   className,
+  children,
   asChild,
   ...props
-}: MenuPrimitive.Popup.Props &
-  Pick<MenuPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'side' | 'sideOffset'> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot : MenuPrimitive.Positioner;
+}: MenuPrimitive.Positioner.Props & { children?: React.ReactNode; asChild?: boolean }) {
   return (
-    <Comp
-      className="isolate z-50 outline-none"
-      align={align}
-      alignOffset={alignOffset}
-      side={side}
-      sideOffset={sideOffset}
-    >
-      <MenuPrimitive.Popup
+    <MenuPrimitive.Portal>
+      <MenuPrimitive.Positioner
         data-slot="dropdown-menu-content"
-        className={cn(
-          'z-50 max-h-(--available-height) w-(--anchor-width) min-w-48 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-none bg-popover p-1.5 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 outline-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
-          className,
-        )}
-        {...props}
-      />
-    </Comp>
+        className="isolate z-50 outline-none"
+        align={align}
+        alignOffset={alignOffset}
+        side={side}
+        sideOffset={sideOffset}
+      >
+        <MenuPrimitive.Popup
+          className={cn(
+            'z-50 max-h-(--available-height) w-(--anchor-width) min-w-48 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-none bg-popover p-1.5 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 outline-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+            className,
+          )}
+          {...props}
+        >
+          {children}
+        </MenuPrimitive.Popup>
+      </MenuPrimitive.Positioner>
+    </MenuPrimitive.Portal>
   );
 }
 
@@ -115,19 +118,16 @@ function DropdownMenuSubTrigger({
   asChild,
   children,
   ...props
-}: MenuPrimitive.SubTrigger.Props & {
+}: MenuPrimitive.SubmenuTrigger.Props & {
   inset?: boolean;
   asChild?: boolean;
 }) {
-  const Comp = asChild ? Slot : MenuPrimitive.SubTrigger;
+  const Comp = asChild ? Slot : MenuPrimitive.SubmenuTrigger;
   return (
     <Comp
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
-      className={cn(
-        'group',
-        className,
-      )}
+      className={cn('group', className)}
       {...props}
     >
       {children}
@@ -142,27 +142,38 @@ function DropdownMenuSubContent({
   side = 'right',
   sideOffset = 0,
   className,
+  children,
   asChild,
   ...props
-}: React.ComponentProps<typeof DropdownMenuContent> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot : MenuPrimitive.Popup;
+}: MenuPrimitive.SubmenuRoot.Props & {
+  align?: 'top' | 'bottom' | 'left' | 'right' | 'center' | 'start' | 'end';
+  alignOffset?: number;
+  side?: 'top' | 'bottom' | 'left' | 'right';
+  sideOffset?: number;
+  children?: React.ReactNode;
+  asChild?: boolean;
+}) {
   return (
-    <Comp
-      className="isolate z-50 outline-none"
-      align={align}
-      alignOffset={alignOffset}
-      side={side}
-      sideOffset={sideOffset}
-    >
-      <MenuPrimitive.Popup
-        data-slot="dropdown-menu-sub-content"
-        className={cn(
-          'z-50 min-w-36 max-h-(--available-height) w-(--anchor-width) origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-none bg-popover p-1.5 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 outline-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
-          className,
-        )}
-        {...props}
-      />
-    </Comp>
+    <MenuPrimitive.Portal>
+      <MenuPrimitive.Positioner
+        align={align}
+        alignOffset={alignOffset}
+        side={side}
+        sideOffset={sideOffset}
+        className="isolate z-50 outline-none"
+      >
+        <MenuPrimitive.Popup
+          data-slot="dropdown-menu-sub-content"
+          className={cn(
+            'z-50 min-w-36 max-h-(--available-height) w-(--anchor-width) origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-none bg-popover p-1.5 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 outline-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+            className,
+          )}
+          {...props}
+        >
+          {children}
+        </MenuPrimitive.Popup>
+      </MenuPrimitive.Positioner>
+    </MenuPrimitive.Portal>
   );
 }
 
