@@ -151,7 +151,8 @@ interface HistoricalData {
 const COLORS = ['#B8794E', '#D9A07E', '#E6B69E', '#F2CCBE', '#9A6440'];
 
 const ManagerDashboard: React.FC = () => {
-  const [activeView, setActiveView] = useState<'analytics' | 'staff' | 'attendance' | 'deductions' | 'payroll' | 'reviews'>('analytics');
+  type ActiveView = 'analytics' | 'staff' | 'attendance' | 'deductions' | 'payroll' | 'reviews';
+  const [activeView, setActiveView] = useState<ActiveView>('analytics');
   const [salesStats, setSalesStats] = useState<SalesStats | null>(null);
   const [payrollReport, setPayrollReport] = useState<PayrollRecord[]>([]);
   const [payrollPeriods, setPayrollPeriods] = useState<any[]>([]);
