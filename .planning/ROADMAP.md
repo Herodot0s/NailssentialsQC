@@ -12,8 +12,8 @@ NailssentialsQC is a production-ready nail salon management system that needs co
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Critical Bug Fixes** - Fix all critical bugs preventing normal operation (JSX errors, hardcoded passwords, type mismatches, parseInt errors, schedule upsert)
-- [ ] **Phase 2: Type Safety & Code Quality** - Replace any types with proper interfaces and split large files into manageable components
+- [x] **Phase 1: Critical Bug Fixes** - Fix all critical bugs preventing normal operation (JSX errors, hardcoded passwords, type mismatches, parseInt errors, schedule upsert)
+- [x] **Phase 2: Type Safety & Code Quality** - Replace any types with proper interfaces and split large files into manageable components
 - [ ] **Phase 3: Security Hardening** - Address JWT secrets, password validation, authorization checks, rate limiting, XSS prevention, and token rotation
 - [ ] **Phase 4: API Improvements** - Add pagination, extract duplicate code, and implement Zod validation
 - [ ] **Phase 5: Performance Optimization** - Fix sequential awaits, N+1 queries, missing indexes, memory issues, and transaction handling
@@ -58,10 +58,19 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 02-01: Replace `any` type with proper interfaces across frontend (50+ occurrences)
-- [ ] 02-02: Replace `any` type with proper interfaces in backend controllers
-- [ ] 02-03: Split ManagerDashboard.tsx into StaffTable, PayrollTable, AttendanceLedger, ReviewModeration
-- [ ] 02-04: Split appointmentController.ts into booking, completion, and availability modules
+
+**Wave 1** *(parallel, no dependencies)*
+- [x] 02-01: Replace `any` type with proper interfaces across frontend (50+ occurrences)
+- [x] 02-02: Replace `any` type with proper interfaces in backend controllers
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [x] 02-03: Split ManagerDashboard.tsx into StaffTable, PayrollTable, AttendanceLedger, ReviewModeration
+- [x] 02-04: Split appointmentController.ts into booking, completion, and availability modules
+
+**Cross-cutting constraints:**
+- `must_haves.truths`: Frontend has no `any` type usage (DEBT-01), backend controllers have no `any` type (DEBT-01), ManagerDashboard.tsx under 700 lines (DEBT-02), appointmentController.ts under 200 lines (DEBT-03)
+- `must_haves.key_links`: `frontend/src/types/api.ts` shared across 02-01/02-03, `backend/src/types/appointmentTypes.ts` shared across 02-02/02-04
+- `must_haves.artifacts`: `frontend/src/components/dashboard/types.ts` (02-03), `frontend/src/types/User.ts` (02-01), `backend/src/types/appointmentTypes.ts` (02-02)
 
 **UI hint**: yes
 
@@ -215,9 +224,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Critical Bug Fixes | 0/5 | Not started | - |
-| 2. Type Safety & Code Quality | 0/4 | Not started | - |
-| 3. Security Hardening | 0/6 | Not started | - |
+| 1. Critical Bug Fixes | 5/5 | Complete | 2026-05-02 |
+| 2. Type Safety & Code Quality | 4/4 | Complete | 2026-05-02 |
+| 3. Security Hardening | 0/6 | Ready to plan | - |
 | 4. API Improvements | 0/3 | Not started | - |
 | 5. Performance Optimization | 0/5 | Not started | - |
 | 6. Missing Features | 0/3 | Not started | - |
