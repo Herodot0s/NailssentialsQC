@@ -219,6 +219,14 @@ export interface UpdateServiceRequest {
   is_active?: boolean;
 }
 
+// Customer API types
+export interface UpdateCustomerProfileRequest {
+  fullName?: string;
+  email?: string | null;
+  phone?: string | null;
+  profilePictureUrl?: string;
+}
+
 // Message API types
 export interface Message {
   id: number;

@@ -1,13 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import apiClient from '../api/apiClient';
-
-interface User {
-  id: number;
-  email: string | null;
-  phone: string | null;
-  role: string;
-  fullName: string;
-}
+import type { User } from '@/types/User';
 
 interface AuthContextType {
   user: User | null;
@@ -38,8 +31,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(response.data.data.user);
           localStorage.setItem('user', JSON.stringify(response.data.data.user));
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Session verification failed:', error);
+        if (error instanceof Error) {
+          console.error('Error details:', error.message);
+        }
         // Error interceptor in apiClient will handle 401s and refresh
       } finally {
         setIsLoading(false);
