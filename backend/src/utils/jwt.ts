@@ -3,8 +3,15 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const ACCESS_TOKEN_SECRET = process.env.JWT_SECRET || 'access_secret_fallback';
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'refresh_secret_fallback';
+const ACCESS_TOKEN_SECRET = process.env.JWT_SECRET;
+if (!ACCESS_TOKEN_SECRET) {
+  throw new Error('[jwt] JWT_SECRET environment variable is required but not set. Server cannot start.');
+}
+
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
+if (!REFRESH_TOKEN_SECRET) {
+  throw new Error('[jwt] REFRESH_TOKEN_SECRET environment variable is required but not set. Server cannot start.');
+}
 
 export const generateAccessToken = (payload: object): string => {
   return jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: '2h' });
