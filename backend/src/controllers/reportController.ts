@@ -3,6 +3,13 @@ import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { startOfDay, endOfDay, format, eachDayOfInterval } from 'date-fns';
 
+interface DailyData {
+  date: string;
+  total: number;
+  categories: Record<string, number>;
+  services: Record<string, number>;
+}
+
 export const getPayrollReport = async (req: AuthRequest, res: Response) => {
   try {
     const { startDate, endDate } = req.query; // YYYY-MM-DD
@@ -72,9 +79,10 @@ export const getPayrollReport = async (req: AuthRequest, res: Response) => {
       }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get payroll report error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to generate payroll report' });
+    const message = error instanceof Error ? error.message : 'Failed to generate payroll report';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -143,9 +151,10 @@ export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
       }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get daily sales stats error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to fetch sales stats' });
+    const message = error instanceof Error ? error.message : 'Failed to fetch sales stats';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -171,7 +180,7 @@ export const getHistoricalAnalytics = async (req: AuthRequest, res: Response) =>
     });
 
     // Create a map of date -> category -> total
-    const dailyData: any = {};
+    const dailyData: Record<string, DailyData> = {};
     const interval = eachDayOfInterval({ start, end });
     
     interval.forEach(day => {
@@ -199,8 +208,9 @@ export const getHistoricalAnalytics = async (req: AuthRequest, res: Response) =>
       success: true,
       data: Object.values(dailyData)
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get historical analytics error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to fetch historical analytics' });
+    const message = error instanceof Error ? error.message : 'Failed to fetch historical analytics';
+    return res.status(500).json({ success: false, message });
   }
 };

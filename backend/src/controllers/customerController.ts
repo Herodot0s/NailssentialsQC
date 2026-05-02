@@ -14,8 +14,9 @@ export const getMyProfile = async (req: AuthRequest, res: Response) => {
     }
 
     return res.status(200).json({ success: true, data: profile });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, message: 'Failed to fetch profile' });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch profile';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -35,8 +36,9 @@ export const updateMyProfile = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(200).json({ success: true, data: profile });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, message: 'Failed to update profile' });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to update profile';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -45,7 +47,7 @@ export const getCustomerHistory = async (req: AuthRequest, res: Response) => {
     const { id } = req.params; // customer_id (not user_id)
 
     const history = await prisma.appointment.findMany({
-      where: { customer_id: parseInt(id as string) },
+      where: { customer_id: parseInt(id) },
       include: {
         services: { include: { service: true } },
         technician: true,
@@ -55,7 +57,7 @@ export const getCustomerHistory = async (req: AuthRequest, res: Response) => {
     });
 
     const customer = await prisma.customerProfile.findUnique({
-      where: { id: parseInt(id as string) },
+      where: { id: parseInt(id) },
       include: { user: { select: { email: true, phone: true } } }
     });
 
@@ -66,8 +68,9 @@ export const getCustomerHistory = async (req: AuthRequest, res: Response) => {
         history,
       },
     });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, message: 'Failed to fetch customer history' });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch customer history';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -79,9 +82,9 @@ export const searchCustomers = async (req: AuthRequest, res: Response) => {
     const customers = await prisma.customerProfile.findMany({
       where: {
         OR: [
-          { full_name: { contains: query as string } },
-          { user: { phone: { contains: query as string } } },
-          { user: { email: { contains: query as string } } },
+          { full_name: { contains: String(query) } },
+          { user: { phone: { contains: String(query) } } },
+          { user: { email: { contains: String(query) } } },
         ],
       },
       include: { user: { select: { email: true, phone: true } } },
@@ -89,7 +92,8 @@ export const searchCustomers = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(200).json({ success: true, data: customers });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, message: 'Failed to search customers' });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to search customers';
+    return res.status(500).json({ success: false, message });
   }
 };

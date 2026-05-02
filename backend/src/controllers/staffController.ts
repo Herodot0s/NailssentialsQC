@@ -60,9 +60,10 @@ export const getAllStaff = async (req: Request, res: Response) => {
         createdAt: u.created_at,
       })),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get all staff error:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch staff list' });
+    const message = error instanceof Error ? error.message : 'Failed to fetch staff list';
+    res.status(500).json({ success: false, message });
   }
 };
 
@@ -127,9 +128,10 @@ export const createStaff = async (req: Request, res: Response) => {
         email: newUser.email,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Create staff error:', error);
-    res.status(500).json({ success: false, message: 'Failed to create staff member' });
+    const message = error instanceof Error ? error.message : 'Failed to create staff member';
+    res.status(500).json({ success: false, message });
   }
 };
 
@@ -142,7 +144,7 @@ export const updateStaff = async (req: Request, res: Response) => {
 
   try {
     const updatedUser = await prisma.user.update({
-      where: { id: parseInt(id as string) },
+      where: { id: parseInt(id) },
       data: {
         email,
         phone,
@@ -175,9 +177,10 @@ export const updateStaff = async (req: Request, res: Response) => {
         isActive: updatedUser.is_active,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update staff error:', error);
-    res.status(500).json({ success: false, message: 'Failed to update staff member' });
+    const message = error instanceof Error ? error.message : 'Failed to update staff member';
+    res.status(500).json({ success: false, message });
   }
 };
 
@@ -188,12 +191,13 @@ export const getStaffSchedule = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const schedule = await prisma.staffSchedule.findMany({
-      where: { staff_id: parseInt(id as string) },
+      where: { staff_id: parseInt(id) },
     });
     res.json({ success: true, data: schedule });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get schedule error:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch schedule' });
+    const message = error instanceof Error ? error.message : 'Failed to fetch schedule';
+    res.status(500).json({ success: false, message });
   }
 };
 
@@ -208,7 +212,7 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
 
     // Use a transaction to update all schedules for the staff
     await prisma.$transaction(
-      schedules.map((s: any) =>
+      schedules.map((s) =>
         prisma.staffSchedule.upsert({
           // NOTE: staff_day_unique key requires prisma generate after migration
             // Temporary workaround pending prisma generate
@@ -217,7 +221,7 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
                 staff_id: staffId,
                 day_of_week: s.day_of_week,
               }
-            } as any,
+            },
           update: {
             start_time: s.start_time,
             end_time: s.end_time,
@@ -235,8 +239,9 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
     );
 
     res.json({ success: true, message: 'Schedule updated successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update schedule error:', error);
-    res.status(500).json({ success: false, message: 'Failed to update schedule' });
+    const message = error instanceof Error ? error.message : 'Failed to update schedule';
+    res.status(500).json({ success: false, message });
   }
 };

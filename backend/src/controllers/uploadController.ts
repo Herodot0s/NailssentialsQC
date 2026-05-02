@@ -33,11 +33,12 @@ export const uploadFile = async (req: Request, res: Response) => {
       success: true,
       data: { url: blob.url },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Upload error:', error);
+    const message = error instanceof Error ? error.message : 'Upload failed';
     return res.status(500).json({
       success: false,
-      message: error.message || 'Upload failed',
+      message,
     });
   }
 };
@@ -57,11 +58,12 @@ export const deleteFile = async (req: Request, res: Response) => {
     await del(url, { token: process.env.BLOB_READ_WRITE_TOKEN });
 
     return res.json({ success: true, message: 'File deleted' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Delete error:', error);
+    const message = error instanceof Error ? error.message : 'Delete failed';
     return res.status(500).json({
       success: false,
-      message: error.message || 'Delete failed',
+      message,
     });
   }
 };

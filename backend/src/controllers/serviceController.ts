@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
 import { AuthRequest } from '../middleware/authMiddleware';
 import prisma from '../utils/prisma';
 
@@ -6,9 +7,9 @@ export const getCategories = async (req: Request, res: Response) => {
   try {
     const { parentId } = req.query;
 
-    const where: any = { is_active: true };
+    const where: Prisma.ServiceCategoryWhereInput = { is_active: true };
     if (parentId !== undefined) {
-      where.parent_id = parentId === 'null' ? null : parseInt(parentId as string);
+      where.parent_id = parentId === 'null' ? null : parseInt(parentId);
     }
 
     const categories = await prisma.serviceCategory.findMany({
@@ -23,13 +24,14 @@ export const getCategories = async (req: Request, res: Response) => {
       success: true,
       data: categories,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get categories error:', error);
+    const message = error instanceof Error ? error.message : 'Something went wrong while fetching categories';
     return res.status(500).json({
       success: false,
       error: {
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'Something went wrong while fetching categories',
+        message,
       },
     });
   }
@@ -39,7 +41,7 @@ export const getServices = async (req: Request, res: Response) => {
   try {
     const { categoryId } = req.query;
 
-    const where: any = { is_active: true };
+    const where: Prisma.ServiceWhereInput = { is_active: true };
     if (categoryId) {
       const parsedId = parseInt(categoryId as string);
       if (isNaN(parsedId)) {
@@ -68,13 +70,14 @@ export const getServices = async (req: Request, res: Response) => {
       success: true,
       data: services,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get services error:', error);
+    const message = error instanceof Error ? error.message : 'Something went wrong while fetching services';
     return res.status(500).json({
       success: false,
       error: {
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'Something went wrong while fetching services',
+        message,
       },
     });
   }
@@ -91,9 +94,10 @@ export const createCategory = async (req: Request, res: Response) => {
       },
     });
     return res.status(201).json({ success: true, data: category });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Create category error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to create category' });
+    const message = error instanceof Error ? error.message : 'Failed to create category';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -111,9 +115,10 @@ export const updateCategory = async (req: AuthRequest, res: Response) => {
       },
     });
     return res.status(200).json({ success: true, data: category });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update category error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to update category' });
+    const message = error instanceof Error ? error.message : 'Failed to update category';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -142,8 +147,9 @@ export const createService = async (req: Request, res: Response) => {
       },
     });
     return res.status(201).json({ success: true, data: service });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, message: 'Failed to create service' });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to create service';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -175,7 +181,8 @@ export const updateService = async (req: AuthRequest, res: Response) => {
       },
     });
     return res.status(200).json({ success: true, data: service });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, message: 'Failed to update service' });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to update service';
+    return res.status(500).json({ success: false, message });
   }
 };

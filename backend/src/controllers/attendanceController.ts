@@ -1,7 +1,12 @@
 import { Response } from 'express';
+import { Prisma } from '@prisma/client';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { createNotification } from './notificationController';
+
+interface PrismaError extends Error {
+  code: string;
+}
 
 /**
  * Get current attendance status for the logged-in staff and recent history.
@@ -65,11 +70,12 @@ export const getAttendanceStatus = async (req: AuthRequest, res: Response) => {
         logs: formattedLogs,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get attendance status error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to fetch attendance status';
     return res.status(500).json({
       success: false,
-      error: { code: 'INTERNAL_SERVER_ERROR', message: 'Failed to fetch attendance status' },
+      error: { code: 'INTERNAL_SERVER_ERROR', message },
     });
   }
 };
@@ -169,8 +175,9 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
             `${staffProfile.full_name} checked in at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. ${tardinessMinutes > 0 ? `Late by ${tardinessMinutes}m.` : ''}`
           );
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Manager notification error:', err);
+        const message = err instanceof Error ? err.message : 'Unknown error';
       }
     })();
 
@@ -178,11 +185,12 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
       success: true,
       data: attendance,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Check-in error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to check in';
     return res.status(500).json({
       success: false,
-      error: { code: 'INTERNAL_SERVER_ERROR', message: 'Failed to check in' },
+      error: { code: 'INTERNAL_SERVER_ERROR', message },
     });
   }
 };
@@ -232,8 +240,9 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
             `${staffProfile.full_name} checked out at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`
           );
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Manager notification error:', err);
+        const message = err instanceof Error ? err.message : 'Unknown error';
       }
     })();
 
@@ -241,9 +250,9 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
       success: true,
       data: attendance,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Check-out error:', error);
-    if (error.code === 'P2025') {
+    if (error instanceof Error && 'code' in error && (error as PrismaError).code === 'P2025') {
        return res.status(400).json({
         success: false,
         error: { code: 'NOT_CHECKED_IN', message: 'You must check in before checking out' },
@@ -260,11 +269,11 @@ export const getAllAttendance = async (req: AuthRequest, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
 
-    const where: any = {};
+    const where: Prisma.AttendanceWhereInput = {};
     if (startDate || endDate) {
       where.date = {};
-      if (startDate) where.date.gte = new Date(startDate as string);
-      if (endDate) where.date.lte = new Date(endDate as string);
+      if (startDate) where.date.gte = new Date(String(startDate));
+      if (endDate) where.date.lte = new Date(String(endDate));
     }
 
     const attendance = await prisma.attendance.findMany({
@@ -274,9 +283,10 @@ export const getAllAttendance = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(200).json({ success: true, data: attendance });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get all attendance error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to fetch attendance records' });
+    const message = error instanceof Error ? error.message : 'Failed to fetch attendance records';
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -297,8 +307,9 @@ export const updateAttendance = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(200).json({ success: true, data: attendance });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update attendance error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to update attendance record' });
+    const message = error instanceof Error ? error.message : 'Failed to update attendance record';
+    return res.status(500).json({ success: false, message });
   }
 };

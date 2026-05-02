@@ -1,5 +1,19 @@
 import nodemailer from 'nodemailer';
 
+interface BookingDetails {
+  customerName: string;
+  serviceName: string;
+  date: string;
+  time: string;
+  technicianName: string;
+}
+
+interface CompletionDetails {
+  customerName: string;
+  receiptNumber: string;
+  totalAmount: string;
+}
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.ethereal.email',
   port: parseInt(process.env.SMTP_PORT || '587'),
@@ -23,13 +37,13 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
       console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
     }
     return true;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Send email error:', error);
     return false;
   }
 };
 
-export const sendBookingConfirmation = async (email: string, details: any) => {
+export const sendBookingConfirmation = async (email: string, details: BookingDetails) => {
   const html = `
     <h1>Booking Confirmation</h1>
     <p>Dear ${details.customerName},</p>
@@ -43,7 +57,7 @@ export const sendBookingConfirmation = async (email: string, details: any) => {
   return sendEmail(email, 'Booking Confirmation - NailssentialsQC', html);
 };
 
-export const sendAppointmentCompletion = async (email: string, details: any) => {
+export const sendAppointmentCompletion = async (email: string, details: CompletionDetails) => {
   const html = `
     <h1>Thank You for Visiting!</h1>
     <p>Dear ${details.customerName},</p>
