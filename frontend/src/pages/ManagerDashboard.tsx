@@ -442,7 +442,7 @@ const ManagerDashboard: React.FC = () => {
             {menuItems.map(item => (
               <button
                 key={item.id}
-                onClick={() => setActiveView(item.id as any)}
+                onClick={() => setActiveView(item.id as ActiveView)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-none text-[10px] uppercase tracking-widest font-bold transition-all group ${activeView === item.id ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:bg-gray-50 hover:text-foreground'}`}
               >
                 <item.icon className={`h-4 w-4 stroke-[1.5] ${activeView === item.id ? 'text-white' : 'group-hover:text-primary'}`} />
