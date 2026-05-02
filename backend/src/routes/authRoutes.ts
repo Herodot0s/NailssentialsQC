@@ -2,6 +2,21 @@ import { Router } from 'express';
 import { body, validationResult } from 'express-validator';
 import { register, login, refresh, logout, getMe } from '../controllers/authController';
 import { authenticateToken } from '../middleware/authMiddleware';
+import rateLimit from 'express-rate-limit';
+
+const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes in milliseconds
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMIT_EXCEEDED',
+      message: 'Too many requests, please try again after 15 minutes',
+    },
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
 const router = Router();
 
@@ -63,9 +78,9 @@ const loginValidation = [
   },
 ];
 
-router.post('/register', registerValidation, register);
-router.post('/login', loginValidation, login);
-router.post('/refresh', refresh);
+router.post('/register', authRateLimiter, registerValidation, register);
+router.post('/login', authRateLimiter, loginValidation, login);
+router.post('/refresh', authRateLimiter, refresh);
 router.post('/logout', logout);
 router.get('/me', authenticateToken, getMe);
 
