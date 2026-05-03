@@ -103,7 +103,10 @@ const Navbar: React.FC = () => {
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary/5 transition-colors">
+                    <button
+                      type="button"
+                      className="relative inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-primary/5 transition-colors"
+                    >
                       <Avatar className="h-10 w-10">
                         <AvatarFallback className="bg-primary-ultra text-primary font-serif font-bold text-sm border-[0.5px] border-primary/20">
                           {user?.fullName ? (
@@ -113,9 +116,9 @@ const Navbar: React.FC = () => {
                           )}
                         </AvatarFallback>
                       </Avatar>
-                    </Button>
+                    </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 mt-4 border-none shadow-xl rounded-none p-2" align="end">
+                  <DropdownMenuContent className="w-56 mt-4 border-none shadow-xl rounded-none p-2 z-[100]" align="end">
                     <DropdownMenuGroup>
                       <DropdownMenuLabel className="font-normal px-4 py-3">
                         <div className="flex flex-col space-y-1">
@@ -204,9 +207,12 @@ const Navbar: React.FC = () => {
           <div className="flex md:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="hover:bg-primary/5">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center h-10 w-10 hover:bg-primary/5 transition-colors"
+                >
                   <Menu className="h-6 w-6 stroke-[1.5]" />
-                </Button>
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 mt-4 border-none shadow-xl rounded-none p-4 space-y-2">
                 <DropdownMenuItem
