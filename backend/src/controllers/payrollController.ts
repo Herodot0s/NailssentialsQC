@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
@@ -171,8 +172,19 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
  */
 export const getPayrollPeriods = async (req: AuthRequest, res: Response) => {
   try {
+    // Pagination params (D-10)
+    const cursor = req.query.cursor ? parseInt(req.query.cursor as string) : undefined;
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+
+    const where: Prisma.PayrollPeriodWhereInput = {};
+    if (cursor) {
+      where.id = { gt: cursor }; // D-09
+    }
+
     const periods = await prisma.payrollPeriod.findMany({
-      orderBy: { start_date: 'desc' },
+      where,
+      take: limit + 1, // D-12
+      orderBy: { id: 'asc' },
       include: {
         payrolls: {
           include: { staff: { select: { full_name: true } } },
@@ -180,7 +192,15 @@ export const getPayrollPeriods = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    return res.status(200).json({ success: true, data: periods });
+    const hasMore = periods.length > limit;
+    const items = hasMore ? periods.slice(0, limit) : periods;
+    const nextCursor = hasMore ? items[items.length - 1].id.toString() : null;
+
+    // D-11: Response wrapper
+    return res.status(200).json({
+      success: true,
+      data: { items, nextCursor, hasMore }
+    });
   } catch (error: unknown) {
     console.error('Get payroll periods error:', error);
     return res.status(500).json({ success: false, message: 'Failed to fetch payroll periods' });
@@ -257,19 +277,20 @@ export const addDeduction = async (req: AuthRequest, res: Response) => {
  */
 export const getMyPayroll = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
+    const userId = req.user?.sub as number | undefined;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: { staff_profile: true },
     });
+    const staffProfile = (user as { staff_profile?: { id: number } | null }).staff_profile;
 
-    if (!user?.staff_profile) {
+    if (!staffProfile) {
       return res.status(404).json({ success: false, message: 'Staff profile not found' });
     }
 
     const payrolls = await prisma.staffPayroll.findMany({
-      where: { staff_id: user.staff_profile.id },
+      where: { staff_id: staffProfile.id },
       include: { period: true },
       orderBy: { created_at: 'desc' },
     });

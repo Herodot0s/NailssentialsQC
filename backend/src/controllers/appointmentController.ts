@@ -21,6 +21,10 @@ export const getAppointments = async (req: AuthRequest, res: Response) => {
     const userId = req.user?.sub as number | undefined;
     const { role } = req.user || {};
 
+    // Pagination params (D-10: default 20, max 100)
+    const cursor = req.query.cursor ? parseInt(req.query.cursor as string) : undefined;
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+
     const where: Prisma.AppointmentWhereInput = {};
     if (role === 'customer') {
       const customer = await prisma.customerProfile.findUnique({ where: { user_id: userId } });
@@ -32,17 +36,31 @@ export const getAppointments = async (req: AuthRequest, res: Response) => {
       where.items = { some: { staff_id: staff.id } };
     }
 
+    // D-09: cursor-based using id field
+    if (cursor) {
+      where.id = { gt: cursor };
+    }
+
     const appointments = await prisma.appointment.findMany({
       where,
+      take: limit + 1, // Fetch one extra to detect hasMore (D-12: cursor-only)
+      orderBy: { id: 'asc' },
       include: {
         customer: true,
         items: { include: { service: true, staff: true } },
         transactions: true,
       },
-      orderBy: { appointment_date: 'desc' },
     });
 
-    return res.status(200).json({ success: true, data: appointments });
+    const hasMore = appointments.length > limit;
+    const items = hasMore ? appointments.slice(0, limit) : appointments;
+    const nextCursor = hasMore ? items[items.length - 1].id.toString() : null;
+
+    // D-11: Response format with { items, nextCursor, hasMore } wrapper
+    return res.status(200).json({
+      success: true,
+      data: { items, nextCursor, hasMore }
+    });
   } catch (error: unknown) {
     console.error('Get appointments error:', error);
     const message = error instanceof Error ? error.message : 'Failed to fetch appointments';
