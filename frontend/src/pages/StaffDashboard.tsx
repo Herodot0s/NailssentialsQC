@@ -20,6 +20,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { SwipeButton } from '@/components/ui/swipe-button';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -233,13 +234,13 @@ const StaffDashboard: React.FC = () => {
                    </div>
 
                    <div className="w-full max-w-xs space-y-4">
-                      <Button
-                        onClick={status?.isCheckedIn ? handleCheckOut : handleCheckIn}
+                      <SwipeButton
+                        onSwipe={status?.isCheckedIn ? handleCheckOut : handleCheckIn}
                         variant={status?.isCheckedIn ? 'destructive' : 'default'}
-                        className="w-full h-14 rounded-none text-[10px] uppercase tracking-widest font-bold shadow-xl transition-all hover:scale-[1.02]"
+                        className="w-full max-w-xs"
                       >
-                        {status?.isCheckedIn ? 'Check Out Artisan' : 'Initialize Shift'}
-                      </Button>
+                        {status?.isCheckedIn ? 'Swipe to Check Out Artisan' : 'Swipe to Initialize Shift'}
+                      </SwipeButton>
                       {status?.isCheckedIn && status.checkInTime && (
                         <p className="text-center text-[9px] text-muted-foreground font-bold uppercase tracking-widest">
                           Shift Started at {status.checkInTime}
