@@ -57,8 +57,8 @@ router.use(authorizeRoles('manager'));
  * @returns { success: boolean, data: { items: Staff[], nextCursor: string | null, hasMore: boolean } } (D-11)
  */
 router.get('/', getAllStaff);
-router.post('/', createStaff);
-router.put('/:id', updateStaff);
+router.post('/', validateZod(createStaffSchema), createStaff);
+router.put('/:id', validateIdParam, validateZod(updateStaffSchema), updateStaff);
 router.get('/:id/schedule', getStaffSchedule);
 router.put('/:id/schedule', validateIdParam, validateScheduleBody, updateStaffSchedule);
 
