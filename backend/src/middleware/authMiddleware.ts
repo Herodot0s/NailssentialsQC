@@ -1,12 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { JwtPayload } from 'jsonwebtoken';
-import { verifyAccessToken } from '../utils/jwt';
-
-interface AppJwtPayload {
-  sub: string | number;
-  email: string;
-  role: string;
-}
+import { verifyAccessToken, AppJwtPayload } from '../utils/jwt';
 
 export interface AuthRequest extends Request {
   user?: AppJwtPayload;
@@ -26,7 +19,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
   }
 
   try {
-    const decoded = verifyAccessToken(token) as unknown as AppJwtPayload;
+    const decoded = verifyAccessToken(token);
     req.user = decoded;
     next();
   } catch (error) {
