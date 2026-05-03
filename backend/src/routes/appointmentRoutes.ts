@@ -18,6 +18,6 @@ router.get('/staff-commissions', authenticateToken, authorizeRoles('staff', 'man
  */
 router.get('/', authenticateToken, getAppointments);
 router.post('/', authenticateToken, validateZod(createAppointmentSchema), createAppointment);
-router.post('/:id/complete', authenticateToken, authorizeRoles('staff', 'manager'), validateZod(completeAppointmentSchema), completeAppointment);
+router.post('/:id/complete', authenticateToken, authorizeRoles('staff', 'manager'), validateIdParam, validateZod(completeAppointmentSchema), completeAppointment);
 
 export default router;
