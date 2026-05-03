@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { AuthRequest } from '../middleware/authMiddleware';
 import bcrypt from 'bcrypt';
 import prisma from '../utils/prisma';
+import { sendSuccess, sendError } from '../utils/apiHelpers';
 
 /**
  * Get all staff members
@@ -53,35 +54,32 @@ export const getAllStaff = async (req: Request, res: Response) => {
     const nextCursor = hasMore ? items[items.length - 1].id.toString() : null;
 
     // D-11: Response wrapper
-    return res.json({
-      success: true,
-      data: {
-        items: items.map((u) => ({
-          id: u.id,
-          username: u.username,
-          email: u.email,
-          phone: u.phone,
-          role: u.role,
-          isActive: u.is_active,
-          fullName: u.staff_profile?.full_name,
-          staffProfileId: u.staff_profile?.id,
-          specializations: u.staff_profile?.specializations,
-          basePayPerWeek: u.staff_profile?.base_pay_per_week,
-          dailyTarget: u.staff_profile?.daily_target,
-          sssNumber: u.sss_number,
-          tinNumber: u.tin_number,
-          govId: u.gov_id,
-          profilePictureUrl: u.profile_picture_url,
-          createdAt: u.created_at,
-        })),
-        nextCursor,
-        hasMore,
-      },
+    return sendSuccess(res, {
+      items: items.map((u) => ({
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        phone: u.phone,
+        role: u.role,
+        isActive: u.is_active,
+        fullName: u.staff_profile?.full_name,
+        staffProfileId: u.staff_profile?.id,
+        specializations: u.staff_profile?.specializations,
+        basePayPerWeek: u.staff_profile?.base_pay_per_week,
+        dailyTarget: u.staff_profile?.daily_target,
+        sssNumber: u.sss_number,
+        tinNumber: u.tin_number,
+        govId: u.gov_id,
+        profilePictureUrl: u.profile_picture_url,
+        createdAt: u.created_at,
+      })),
+      nextCursor,
+      hasMore,
     });
   } catch (error: unknown) {
     console.error('Get all staff error:', error);
     const message = error instanceof Error ? error.message : 'Failed to fetch staff list';
-    res.status(500).json({ success: false, message });
+    return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
   }
 };
 
@@ -104,10 +102,7 @@ export const createStaff = async (req: Request, res: Response) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'A user with this username, email, or phone already exists.',
-      });
+      return sendError(res, 'USER_ALREADY_EXISTS', 'A user with this username, email, or phone already exists.', 400);
     }
 
     const hashedPassword = await bcrypt.hash(password || 'password123', 10);
@@ -137,15 +132,14 @@ export const createStaff = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(201).json({
-      success: true,
+    return sendSuccess(res, {
       message: 'Staff member created successfully',
       data: {
         id: newUser.id,
         fullName: newUser.staff_profile?.full_name,
         email: newUser.email,
       },
-    });
+    }, 201);
   } catch (error: unknown) {
     console.error('Create staff error:', error);
     const message = error instanceof Error ? error.message : 'Failed to create staff member';

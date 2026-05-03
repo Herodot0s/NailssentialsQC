@@ -5,6 +5,7 @@ import { format, getISOWeek, getMonth, getYear, startOfDay, endOfDay, subMonths,
 import { sendAppointmentCompletion } from '../utils/email';
 import { createNotification } from './notificationController';
 import { AppointmentWithDetails } from '../types/appointmentTypes';
+import { sendSuccess, sendError } from '../utils/apiHelpers';
 import { PaymentMethod } from '@prisma/client';
 
 /**
