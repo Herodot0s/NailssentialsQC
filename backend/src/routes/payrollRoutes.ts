@@ -1,6 +1,14 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { generatePayroll, getPayrollPeriods, getPayrollDetails, addDeduction, getMyPayroll, lockPayroll } from '../controllers/payrollController';
+import { 
+  generatePayroll, 
+  getPayrollPeriods, 
+  getPayrollDetails, 
+  addDeduction, 
+  getMyPayroll, 
+  lockPayroll,
+  exportPayrollExcel
+} from '../controllers/payrollController';
 import { authenticateToken, authorizeRoles, validateZod } from '../middleware/authMiddleware';
 import { generatePayrollSchema } from '../validators/payrollSchemas';
 import { addDeductionSchema } from '../validators/payrollSchemas';
@@ -35,5 +43,6 @@ router.get('/periods/:id', authenticateToken, authorizeRoles('manager'), validat
 router.post('/generate', authenticateToken, authorizeRoles('manager'), validateZod(generatePayrollSchema), generatePayroll);
 router.post('/deductions', authenticateToken, authorizeRoles('manager'), validateZod(addDeductionSchema), addDeduction);
 router.patch('/periods/:id/lock', authenticateToken, authorizeRoles('manager'), validateIdParam, lockPayroll);
+router.get('/export/:id', authenticateToken, authorizeRoles('manager'), validateIdParam, exportPayrollExcel);
 
 export default router;

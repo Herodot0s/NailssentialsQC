@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
+import * as ExcelJS from 'exceljs';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
@@ -337,5 +338,89 @@ export const lockPayroll = async (req: AuthRequest, res: Response) => {
   } catch (error: unknown) {
     console.error('Lock payroll error:', error);
     return res.status(500).json({ success: false, message: 'Failed to lock payroll period' });
+  }
+};
+
+/**
+ * Manager: Export payroll data to Excel.
+ */
+export const exportPayrollExcel = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.validatedParams ?? {};
+    const period = await prisma.payrollPeriod.findUnique({
+      where: { id },
+      include: {
+        payrolls: {
+          include: {
+            staff: {
+              include: {
+                user: {
+                  select: {
+                    sss_number: true,
+                    tin_number: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!period) {
+      return res.status(404).json({ success: false, message: 'Payroll period not found' });
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Payroll Report');
+
+    // Define columns
+    worksheet.columns = [
+      { header: 'Staff Full Name', key: 'fullName', width: 30 },
+      { header: 'Payroll Period', key: 'period', width: 25 },
+      { header: 'Base Pay', key: 'basePay', width: 15 },
+      { header: 'Commissions', key: 'commissions', width: 15 },
+      { header: 'Deductions', key: 'deductions', width: 15 },
+      { header: 'Net Pay', key: 'netPay', width: 15 },
+      { header: 'TIN', key: 'tin', width: 20 },
+      { header: 'SSS', key: 'sss', width: 20 },
+    ];
+
+    const periodString = `${format(period.start_date, 'MMM dd, yyyy')} - ${format(period.end_date, 'MMM dd, yyyy')}`;
+
+    // Add rows
+    period.payrolls.forEach((p) => {
+      worksheet.addRow({
+        fullName: p.staff.full_name,
+        period: periodString,
+        basePay: Number(p.base_pay),
+        commissions: Number(p.commissions),
+        deductions: Number(p.deductions),
+        netPay: Number(p.net_pay),
+        tin: p.staff.user.tin_number || 'N/A',
+        sss: p.staff.user.sss_number || 'N/A',
+      });
+    });
+
+    // Style the header
+    worksheet.getRow(1).font = { bold: true };
+
+    // Set response headers
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="Payroll_Report_${format(period.start_date, 'yyyy-MM-dd')}.xlsx"`
+    );
+
+    // Stream to response
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error: unknown) {
+    console.error('Export payroll error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to export payroll';
+    return res.status(500).json({ success: false, message });
   }
 };
