@@ -287,6 +287,7 @@ model PayrollPeriod {
   start_date        DateTime       @db.Date
   end_date          DateTime       @db.Date
   total_salon_sales Decimal        @db.Decimal(12, 2)
+  sales_target      Decimal?       @db.Decimal(12, 2)
   is_locked         Boolean        @default(false)
   created_at        DateTime       @default(now())
   updated_at        DateTime       @updatedAt
@@ -414,4 +415,13 @@ model RefreshToken {
   @@index([token(100)])
   @@index([expires_at])
   @@map("refresh_tokens")
+}
+
+model SystemSettings {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String
+  description String?
+
+  @@map("system_settings")
 }
