@@ -129,14 +129,16 @@ export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
       _count: { id: true }
     });
 
-    // Fetch service names for the stats
-    const statsWithNames = await Promise.all(serviceStats.map(async (stat) => {
-       const service = await prisma.service.findUnique({ where: { id: stat.service_id } });
-       return {
-         name: service?.name || 'Unknown',
-         amount: Number(stat._sum.base_amount || 0),
-         count: stat._count.id
-       };
+    // Fetch service names for the stats (batch fetch to avoid N+1)
+    const serviceIds = [...new Set(serviceStats.map((stat) => stat.service_id))];
+    const services = await prisma.service.findMany({
+      where: { id: { in: serviceIds } },
+    });
+    const serviceMap = new Map(services.map((s) => [s.id, s]));
+    const statsWithNames = serviceStats.map((stat) => ({
+      name: serviceMap.get(stat.service_id)?.name || 'Unknown',
+      amount: Number(stat._sum.base_amount || 0),
+      count: stat._count.id
     }));
 
     return res.status(200).json({
