@@ -10,7 +10,7 @@ import { sendSuccess, sendError } from '../utils/apiHelpers';
  */
 export const generatePayroll = async (req: AuthRequest, res: Response) => {
   try {
-    const { start_date, end_date } = req.body;
+    const { start_date, end_date } = req.validatedBody || req.body;
 
     if (!start_date || !end_date) {
       return sendError(res, 'MISSING_FIELDS', 'start_date and end_date are required', 400);

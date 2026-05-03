@@ -2,7 +2,8 @@ import { Router } from 'express';
 import { getAppointments, createAppointment } from '../controllers/appointmentController';
 import { getAvailableSlots, getCommissionSummary, getStaffCommissions } from '../controllers/appointmentAvailability';
 import { completeAppointment } from '../controllers/appointmentCompletion';
-import { authenticateToken, authorizeRoles } from '../middleware/authMiddleware';
+import { authenticateToken, authorizeRoles, validateZod } from '../middleware/authMiddleware';
+import { createAppointmentSchema, completeAppointmentSchema } from '../validators/appointmentSchemas';
 
 const router = Router();
 
@@ -16,7 +17,7 @@ router.get('/staff-commissions', authenticateToken, authorizeRoles('staff', 'man
  * @returns { success: boolean, data: { items: Appointment[], nextCursor: string | null, hasMore: boolean } } (D-11)
  */
 router.get('/', authenticateToken, getAppointments);
-router.post('/', authenticateToken, createAppointment);
-router.post('/:id/complete', authenticateToken, authorizeRoles('staff', 'manager'), completeAppointment);
+router.post('/', authenticateToken, validateZod(createAppointmentSchema), createAppointment);
+router.post('/:id/complete', authenticateToken, authorizeRoles('staff', 'manager'), validateZod(completeAppointmentSchema), completeAppointment);
 
 export default router;
