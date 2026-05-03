@@ -141,6 +141,31 @@ export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
       count: stat._count.id
     }));
 
+    // D-08, D-09 fallback logic for the sales target
+    let dynamicTarget = 8000.00; // Default fallback
+
+    try {
+      // 1. Query the currently active PayrollPeriod
+      const activePeriod = await prisma.payrollPeriod.findFirst({
+        where: { is_locked: false },
+        orderBy: { start_date: 'desc' }
+      });
+
+      if (activePeriod && (activePeriod as any).sales_target !== null) {
+        dynamicTarget = Number((activePeriod as any).sales_target);
+      } else {
+        // 2. Query SystemSettings
+        const systemSetting = await (prisma as any).systemSettings.findUnique({
+          where: { key: 'global_sales_target' }
+        });
+        if (systemSetting) {
+          dynamicTarget = parseFloat(systemSetting.value);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch dynamic sales target, using fallback 8000:', e);
+    }
+
     return res.status(200).json({
       success: true,
       data: {
@@ -149,7 +174,7 @@ export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
         onlineCount: onlineAppointments,
         walkInCount: walkInAppointments,
         serviceBreakdown: statsWithNames,
-        target: 8000 // From PRD
+        target: dynamicTarget
       }
     });
 

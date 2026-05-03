@@ -287,6 +287,18 @@ async function main() {
     }
   }
 
+  // --- 7. SEED SYSTEM SETTINGS ---
+  console.log('Seeding System Settings...');
+  await (prisma as any).systemSettings.upsert({
+    where: { key: 'global_sales_target' },
+    update: {},
+    create: {
+      key: 'global_sales_target',
+      value: '8000.00',
+      description: 'Global monthly sales target fallback'
+    }
+  });
+
   console.log('Comprehensive Seeding Completed Successfully!');
 }
 
