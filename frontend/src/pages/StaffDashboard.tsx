@@ -20,7 +20,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { SwipeButton } from '@/components/ui/swipe-button';
+import SwipeButton from '@/components/ui/swipe-button';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
