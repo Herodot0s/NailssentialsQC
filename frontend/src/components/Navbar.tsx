@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState } from "react"
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -102,21 +103,17 @@ const Navbar: React.FC = () => {
                 {(user?.role === 'staff' || user?.role === 'manager') && <NotificationBell />}
 
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className="relative inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-primary/5 transition-colors"
-                    >
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-primary-ultra text-primary font-serif font-bold text-sm border-[0.5px] border-primary/20">
-                          {user?.fullName ? (
-                            getInitials(user.fullName)
-                          ) : (
-                            <User className="h-4 w-4 stroke-[1.5]" />
-                          )}
-                        </AvatarFallback>
-                      </Avatar>
-                    </button>
+                  {/* FIX APPLIED HERE: Removed asChild and merged button classes */}
+                  <DropdownMenuTrigger className="relative inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-primary/5 transition-colors outline-none border-none">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-primary-ultra text-primary font-serif font-bold text-sm border-[0.5px] border-primary/20">
+                        {user?.fullName ? (
+                          getInitials(user.fullName)
+                        ) : (
+                          <User className="h-4 w-4 stroke-[1.5]" />
+                        )}
+                      </AvatarFallback>
+                    </Avatar>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56 mt-4 border-none shadow-xl rounded-none p-2 z-[100]" align="end">
                     <DropdownMenuGroup>
@@ -206,13 +203,9 @@ const Navbar: React.FC = () => {
           {/* Mobile Menu Trigger */}
           <div className="flex md:hidden">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center h-10 w-10 hover:bg-primary/5 transition-colors"
-                >
-                  <Menu className="h-6 w-6 stroke-[1.5]" />
-                </button>
+              {/* FIX APPLIED HERE: Removed asChild and merged button classes */}
+              <DropdownMenuTrigger className="inline-flex items-center justify-center h-10 w-10 hover:bg-primary/5 transition-colors outline-none border-none">
+                <Menu className="h-6 w-6 stroke-[1.5]" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 mt-4 border-none shadow-xl rounded-none p-4 space-y-2">
                 <DropdownMenuItem

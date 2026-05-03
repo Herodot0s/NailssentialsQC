@@ -70,7 +70,8 @@ const DrillDownLineChart: React.FC<DrillDownLineChartProps> = ({
     }
   };
 
-  const handleChartClick = (data: { activePayload?: Array<{ payload: { date: string }> }>) => {
+  // FIXED: Corrected the bracket order and added 'name' to the type definition
+  const handleChartClick = (data: { activePayload?: Array<{ name?: string; payload?: { date: string } }> }) => {
     if (data && data.activePayload && !selectedCategory) {
       const payload = data.activePayload[0]?.name;
       if (payload) onCategorySelect(payload);

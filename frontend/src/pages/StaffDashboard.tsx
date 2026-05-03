@@ -214,23 +214,25 @@ const StaffDashboard: React.FC = () => {
 
         <TabsContent value="schedule" className="space-y-12 mt-0">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-             <Card className="lg:col-span-4 rounded-none border-none shadow-sm bg-primary-ultra/30 overflow-hidden">
+             <Card className="lg:col-span-4 rounded-none border-none shadow-[0_0_20px_rgba(0,0,0,0.05)] bg-gradient-to-br from-primary/5 to-secondary/5 overflow-hidden">
                 <CardHeader className="pb-8">
                    <CardTitle className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] flex items-center gap-2">
                       <Clock className="h-3 w-3" /> Shift Registry
                    </CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center pb-12 space-y-8">
-                   <div className="bg-white rounded-full p-10 shadow-2xl flex flex-col items-center justify-center w-56 h-56 border border-primary/5">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                        {currentTime.toLocaleDateString([], { weekday: 'long' })}
-                      </span>
-                      <span className="text-5xl font-serif font-light text-primary my-2">
-                        {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                      <Badge className={`rounded-none border-none text-[8px] uppercase tracking-widest font-bold ${status?.isCheckedIn ? 'bg-success-color text-white' : 'bg-muted text-muted-foreground'}`}>
-                        {status?.isCheckedIn ? 'Status: Active' : 'Status: Off Duty'}
-                      </Badge>
+                   <div className={status?.isCheckedIn ? 'animate-pulse' : ''}>
+                      <div className="bg-white rounded-full p-10 shadow-2xl flex flex-col items-center justify-center w-56 h-56 border border-primary/5">
+                         <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                           {currentTime.toLocaleDateString([], { weekday: 'long' })}
+                         </span>
+                         <span className="text-6xl font-bold font-serif text-primary my-2">
+                           {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                         </span>
+                         <Badge className={`rounded-none border-none text-[8px] uppercase tracking-widest font-bold ${status?.isCheckedIn ? 'bg-success-color/90 text-white shadow-sm px-3 py-1' : 'bg-muted text-muted-foreground'}`}>
+                           {status?.isCheckedIn ? 'Status: Active' : 'Status: Off Duty'}
+                         </Badge>
+                      </div>
                    </div>
 
                    <div className="w-full max-w-xs space-y-4">

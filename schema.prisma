@@ -1,0 +1,417 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  customer
+  staff
+  manager
+}
+
+enum AppointmentStatus {
+  pending
+  confirmed
+  in_progress
+  completed
+  cancelled
+  no_show
+}
+
+enum PaymentMethod {
+  cash
+  gcash
+}
+
+enum TransactionStatus {
+  pending
+  completed
+  voided
+}
+
+model User {
+  id                    Int              @id @default(autoincrement())
+  username              String           @unique
+  email                 String?          @unique
+  phone                 String?          @unique
+  password_hash         String
+  role                  Role
+  is_active             Boolean          @default(true)
+  created_at            DateTime         @default(now())
+  updated_at            DateTime         @updatedAt
+  last_login            DateTime?
+  failed_login_attempts Int              @default(0)
+  locked_until          DateTime?
+
+  // V2 Profile Expansions
+  sss_number            String?
+  tin_number            String?
+  gov_id                String?
+  profile_picture_url   String?
+
+  customer_profile      CustomerProfile?
+  staff_profile         StaffProfile?
+  notifications         Notification[]
+  system_logs           SystemLog[]
+  refresh_tokens        RefreshToken[]
+
+  // V2 Messaging
+  sent_messages         Message[]        @relation("SentMessages")
+  received_messages     Message[]        @relation("ReceivedMessages")
+
+  @@index([username])
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+  @@map("users")
+}
+
+model CustomerProfile {
+  id          Int      @id @default(autoincrement())
+  user_id     Int      @unique
+  full_name   String
+  preferences Json?
+  allergies   String?  @db.Text
+  notes       String?  @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user         User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+  reviews      Review[]
+
+  @@index([full_name])
+  @@map("customer_profiles")
+}
+
+model StaffProfile {
+  id               Int      @id @default(autoincrement())
+  user_id          Int      @unique
+  full_name        String
+  specializations  String?
+  daily_target     Decimal  @default(6000.00) @db.Decimal(10, 2)
+  base_pay_per_week Decimal @default(2500.00) @db.Decimal(10, 2)
+  scheduled_start  String   @default("12:00:00")
+  scheduled_end    String   @default("22:00:00")
+  is_available     Boolean  @default(true)
+  hire_date        DateTime?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  user              User              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  appointment_items AppointmentItem[]
+  commissions       Commission[]
+  attendance        Attendance[]
+  schedules         StaffSchedule[]
+  payrolls          StaffPayroll[]
+  deductions        DeductionLog[]
+  reviews           Review[]
+
+  @@index([full_name])
+  @@map("staff_profiles")
+}
+
+model StaffSchedule {
+  id          Int      @id @default(autoincrement())
+  staff_id    Int
+  day_of_week Int      // 0-6 (Sunday-Saturday)
+  start_time  String
+  end_time    String
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  staff StaffProfile @relation(fields: [staff_id], references: [id], onDelete: Cascade)
+
+  @@unique([staff_id, day_of_week], name: "staff_day_unique")
+  @@index([staff_id])
+  @@map("staff_schedules")
+}
+
+model ServiceCategory {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?   @db.Text
+  is_active   Boolean   @default(true)
+  parent_id   Int?      // For Sub-Categories
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  parent         ServiceCategory?  @relation("SubCategories", fields: [parent_id], references: [id])
+  sub_categories ServiceCategory[] @relation("SubCategories")
+  services       Service[]
+
+  @@map("service_categories")
+}
+
+model Service {
+  id               Int      @id @default(autoincrement())
+  category_id      Int
+  name             String
+  description      String?  @db.Text
+  duration_minutes Int
+  price            Decimal  @db.Decimal(10, 2)
+  is_active        Boolean  @default(true)
+  is_popular       Boolean  @default(false)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  category          ServiceCategory   @relation(fields: [category_id], references: [id])
+  appointment_items AppointmentItem[]
+  commissions       Commission[]
+
+  @@unique([name, category_id])
+  @@index([category_id])
+  @@index([is_active, price])
+  @@map("services")
+}
+
+model Appointment {
+  id               Int               @id @default(autoincrement())
+  customer_id      Int
+  status           AppointmentStatus @default(pending)
+  appointment_date DateTime          @db.Date
+  is_walk_in       Boolean           @default(false)
+  notes            String?           @db.Text
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
+  deleted_at       DateTime?
+
+  customer     CustomerProfile   @relation(fields: [customer_id], references: [id])
+  items        AppointmentItem[]
+  transactions Transaction[]
+
+  @@index([customer_id])
+  @@index([status, appointment_date])
+  @@index([appointment_date])
+  @@map("appointments")
+}
+
+model AppointmentItem {
+  id               Int               @id @default(autoincrement())
+  appointment_id   Int
+  service_id       Int
+  staff_id         Int
+  status           AppointmentStatus @default(pending)
+  start_time       String
+  end_time         String
+  price_at_booking Decimal           @db.Decimal(10, 2)
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
+
+  appointment Appointment  @relation(fields: [appointment_id], references: [id], onDelete: Cascade)
+  service     Service      @relation(fields: [service_id], references: [id])
+  staff       StaffProfile @relation(fields: [staff_id], references: [id])
+  review      Review?
+
+  @@index([appointment_id])
+  @@index([staff_id])
+  @@map("appointment_items")
+}
+
+model Transaction {
+  id               Int               @id @default(autoincrement())
+  appointment_id   Int
+  amount           Decimal           @db.Decimal(10, 2)
+  payment_method   PaymentMethod
+  status           TransactionStatus @default(pending)
+  transaction_date DateTime          @default(now())
+  receipt_number   String            @unique
+  created_at       DateTime          @default(now())
+
+  appointment Appointment  @relation(fields: [appointment_id], references: [id])
+  commissions Commission[]
+
+  @@index([appointment_id])
+  @@index([transaction_date])
+  @@index([receipt_number])
+  @@map("transactions")
+}
+
+model Commission {
+  id                Int      @id @default(autoincrement())
+  transaction_id    Int
+  staff_id          Int
+  service_id        Int
+  base_amount       Decimal  @db.Decimal(10, 2)
+  commission_rate   Decimal  @db.Decimal(5, 2)
+  commission_amount Decimal  @db.Decimal(10, 2)
+  commission_date   DateTime @db.Date
+  period_week       Int
+  period_month      Int
+  period_year       Int
+  is_paid           Boolean  @default(false)
+  created_at        DateTime @default(now())
+
+  transaction Transaction @relation(fields: [transaction_id], references: [id])
+  staff       StaffProfile @relation(fields: [staff_id], references: [id])
+  service     Service      @relation(fields: [service_id], references: [id])
+
+  @@index([staff_id, period_year, period_week])
+  @@index([commission_date])
+  @@map("commissions")
+}
+
+model Attendance {
+  id                Int      @id @default(autoincrement())
+  staff_id          Int
+  date              DateTime @db.Date
+  check_in          DateTime?
+  check_out         DateTime?
+  scheduled_start   String?
+  scheduled_end     String?
+  tardiness_minutes Int      @default(0)
+  deduction_amount  Decimal  @default(0.00) @db.Decimal(10, 2)
+  notes             String?  @db.Text
+  created_at        DateTime @default(now())
+
+  staff StaffProfile @relation(fields: [staff_id], references: [id])
+
+  @@unique([staff_id, date], name: "uk_staff_date")
+  @@index([staff_id, date])
+  @@map("attendance")
+}
+
+model PayrollPeriod {
+  id                Int            @id @default(autoincrement())
+  start_date        DateTime       @db.Date
+  end_date          DateTime       @db.Date
+  total_salon_sales Decimal        @db.Decimal(12, 2)
+  is_locked         Boolean        @default(false)
+  created_at        DateTime       @default(now())
+  updated_at        DateTime       @updatedAt
+  payrolls          StaffPayroll[]
+
+  @@map("payroll_periods")
+}
+
+model StaffPayroll {
+  id                Int      @id @default(autoincrement())
+  staff_id          Int
+  payroll_period_id Int
+  base_pay          Decimal  @db.Decimal(10, 2)
+  commissions       Decimal  @db.Decimal(10, 2)
+  deductions        Decimal  @db.Decimal(10, 2)
+  net_pay           Decimal  @db.Decimal(10, 2)
+  status            String   @default("draft") // draft, paid
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  staff  StaffProfile  @relation(fields: [staff_id], references: [id])
+  period PayrollPeriod @relation(fields: [payroll_period_id], references: [id])
+
+  @@index([staff_id])
+  @@index([payroll_period_id])
+  @@map("staff_payrolls")
+}
+
+model DeductionLog {
+  id                Int      @id @default(autoincrement())
+  staff_id          Int
+  payroll_period_id Int?
+  type              String   // CA, Uniform, Loan, Tardiness, Absence
+  amount            Decimal  @db.Decimal(10, 2)
+  notes             String?  @db.Text
+  created_at        DateTime @default(now())
+
+  staff StaffProfile @relation(fields: [staff_id], references: [id])
+
+  @@index([staff_id])
+  @@map("deduction_logs")
+}
+
+model Message {
+  id          Int      @id @default(autoincrement())
+  sender_id   Int
+  receiver_id Int
+  subject     String
+  body        String   @db.Text
+  is_read     Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  sender   User @relation("SentMessages", fields: [sender_id], references: [id])
+  receiver User @relation("ReceivedMessages", fields: [receiver_id], references: [id])
+
+  @@index([sender_id])
+  @@index([receiver_id])
+  @@map("messages")
+}
+
+model Review {
+  id                  Int      @id @default(autoincrement())
+  customer_id         Int
+  staff_id            Int
+  appointment_item_id Int      @unique
+  rating              Int      // 1-5
+  tags                Json?    // Pre-determined praise tags
+  is_approved_for_public Boolean @default(false)
+  created_at          DateTime @default(now())
+
+  customer         CustomerProfile @relation(fields: [customer_id], references: [id])
+  staff            StaffProfile    @relation(fields: [staff_id], references: [id])
+  appointment_item AppointmentItem @relation(fields: [appointment_item_id], references: [id])
+
+  @@index([customer_id])
+  @@index([staff_id])
+  @@map("reviews")
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  type       String
+  title      String
+  message    String   @db.Text
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, is_read])
+  @@index([created_at])
+  @@map("notifications")
+}
+
+model SystemLog {
+  id          Int      @id @default(autoincrement())
+  user_id     Int?
+  action      String
+  entity_type String?
+  entity_id   Int?
+  details     Json?
+  ip_address  String?
+  user_agent  String?  @db.Text
+  created_at  DateTime @default(now())
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id, action])
+  @@index([created_at])
+  @@map("system_logs")
+}
+
+model RefreshToken {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  token      String   @db.VarChar(500)
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([token(100)])
+  @@index([expires_at])
+  @@map("refresh_tokens")
+}

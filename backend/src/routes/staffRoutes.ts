@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { getAllStaff, createStaff, updateStaff, getStaffSchedule, updateStaffSchedule } from '../controllers/staffController';
-import { authenticateToken, authorizeRoles } from '../middleware/authMiddleware';
+import { authenticateToken, authorizeRoles, validateZod } from '../middleware/authMiddleware';
+import { createStaffSchema, updateStaffSchema } from '../validators/staffSchemas';
 
 // Zod schemas for validation
 const idParamSchema = z.object({

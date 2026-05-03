@@ -107,9 +107,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: Add cursor-based pagination to all list endpoints (appointments, staff, payroll)
-- [ ] 04-02: Extract duplicate auth checks, error responses, and notification patterns into shared helpers
-- [ ] 04-03: Add Zod schema validation to all API endpoints (replace express-validator)
+- [x] 04-01: Add cursor-based pagination to all list endpoints (appointments, staff, payroll)
+- [x] 04-02: Extract duplicate auth checks, error responses, and notification patterns into shared helpers
+- [x] 04-03: Add Zod schema validation to all API endpoints (replace express-validator)
 
 ### Phase 5: Performance Optimization
 **Goal**: Fix performance bottlenecks for scalability and responsiveness
@@ -137,13 +137,13 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. All sensitive operations (payroll, staff updates, commission changes) create SystemLog entries
   2. Managers can export payroll data as CSV/Excel via dedicated endpoint
-  3. Sales target is configurable via environment variable (not hardcoded 8000)
+  3. Sales target is configurable via database
 **Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: Add audit trail (SystemLog entries) for all sensitive operations
-- [ ] 06-02: Add data export/backup endpoint (CSV/Excel for payroll data)
-- [ ] 06-03: Make sales target configurable via database or env var (remove hardcoded 8000)
+- [ ] 06-01-PLAN.md — Schema Updates & Configurable Target
+- [ ] 06-02-PLAN.md — System Audit Trail
+- [ ] 06-03-PLAN.md — Excel Payroll Export
 
 ### Phase 7: Backend Test Infrastructure
 **Goal**: Set up backend testing framework and achieve 80% line coverage

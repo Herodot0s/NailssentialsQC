@@ -1,49 +1,57 @@
 import { Request, Response } from 'express';
+import busboy from 'busboy';
 import { put, del } from '@vercel/blob';
+import { Readable } from 'stream';
 
 /**
  * POST /api/upload
- * Accepts JSON body with base64Data, filename, and mimeType
+ * Accepts multipart form-data with file field
  * Returns { success: true, data: { url: string } }
  */
 export const uploadFile = async (req: Request, res: Response) => {
   try {
-    const { base64Data, filename, mimeType } = req.body;
+    const bb = busboy({ headers: req.headers, limits: { fileSize: 4 * 1024 * 1024 } });
+    let filename = '';
+    let mimeType = '';
+    let fileStream: NodeJS.ReadableStream | null = null;
 
-    if (!base64Data) {
-      return res.status(400).json({ success: false, message: 'No file data provided. Send base64Data.' });
-    }
-
-    // Validate mime type
-    if (!mimeType?.startsWith('image/')) {
-      return res.status(400).json({ success: false, message: 'Only image files are allowed' });
-    }
-
-    // Convert base64 to buffer
-    const buffer = Buffer.from(base64Data, 'base64');
-
-    // Upload to Vercel Blob
-    const blob = await put(filename || 'upload.png', buffer, {
-      access: 'public',
-      contentType: mimeType,
-      token: process.env.BLOB_READ_WRITE_TOKEN,
+    bb.on('file', (_name, file, info) => {
+      filename = info.filename;
+      mimeType = info.mimeType;
+      fileStream = file;
     });
 
-    // SEC-05: Validate the returned URL against allowlist
-    const allowedPattern = /^https:\/\/.*\.public\.blob\.vercel-storage\.com\/.*$/;
-    if (!allowedPattern.test(blob.url)) {
-      // Reject the upload if URL is not on allowlist
-      await del(blob.url, { token: process.env.BLOB_READ_WRITE_TOKEN });
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid profile picture URL. Only Vercel Blob URLs are allowed.',
+    bb.on('close', async () => {
+      if (!fileStream) {
+        return res.status(400).json({ success: false, message: 'No file uploaded' });
+      }
+
+      if (!mimeType?.startsWith('image/')) {
+        return res.status(400).json({ success: false, message: 'Only image files are allowed' });
+      }
+
+      const blob = await put(filename || 'upload.png', fileStream as Readable, {
+        access: 'public',
+        contentType: mimeType,
+        token: process.env.BLOB_READ_WRITE_TOKEN,
       });
-    }
 
-    return res.json({
-      success: true,
-      data: { url: blob.url },
+      const allowedPattern = /^https:\/\/.*\.public\.blob\.vercel-storage\.com\/.*$/;
+      if (!allowedPattern.test(blob.url)) {
+        await del(blob.url, { token: process.env.BLOB_READ_WRITE_TOKEN });
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid profile picture URL. Only Vercel Blob URLs are allowed.',
+        });
+      }
+
+      return res.json({
+        success: true,
+        data: { url: blob.url },
+      });
     });
+
+    req.pipe(bb);
   } catch (error: unknown) {
     console.error('Upload error:', error);
     const message = error instanceof Error ? error.message : 'Upload failed';

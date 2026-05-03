@@ -1,0 +1,110 @@
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+src/components/dashboard/AttendanceLedger.tsx(2,56): error TS6133: 'CardContent' is declared but its value is never read.
+src/components/dashboard/AttendanceLedger.tsx(43,63): error TS2345: Argument of type 'number | "0"' is not assignable to parameter of type 'string'.
+  Type 'number' is not assignable to type 'string'.
+src/components/dashboard/PayrollTable.tsx(66,82): error TS2345: Argument of type 'number | "0"' is not assignable to parameter of type 'string'.
+  Type 'number' is not assignable to type 'string'.
+src/components/dashboard/ReviewModeration.tsx(2,16): error TS6133: 'CardContent' is declared but its value is never read.
+src/components/dashboard/StaffTable.tsx(2,16): error TS6133: 'CardContent' is declared but its value is never read.
+src/components/dashboard/types.ts(1,10): error TS1484: 'StaffMember' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/dashboard/types.ts(1,23): error TS1484: 'PayrollRecord' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/dashboard/types.ts(1,38): error TS1484: 'Review' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/dashboard/types.ts(1,46): error TS1484: 'AttendanceRecord' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/dashboard/types.ts(1,64): error TS1484: 'PayrollPeriod' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/DrillDownLineChart.tsx(44,11): error TS2322: Type 'number | undefined' is not assignable to type 'string | number'.
+  Type 'undefined' is not assignable to type 'string | number'.
+src/components/DrillDownLineChart.tsx(48,11): error TS2322: Type 'number | undefined' is not assignable to type 'string | number'.
+  Type 'undefined' is not assignable to type 'string | number'.
+src/components/DrillDownLineChart.tsx(103,39): error TS2322: Type '(data: { activePayload?: Array<{ name?: string; payload?: { date: string; }; }>; }) => void' is not assignable to type 'CategoricalChartFunc<MouseEvent<SVGGraphicsElement, MouseEvent>>'.
+  Types of parameters 'data' and 'nextState' are incompatible.
+    Type 'MouseHandlerDataParam' has no properties in common with type '{ activePayload?: { name?: string | undefined; payload?: { date: string; } | undefined; }[] | undefined; }'.
+src/components/DrillDownLineChart.tsx(111,15): error TS2322: Type '(data: { value: string; }) => void' is not assignable to type '(data: LegendPayload, index: number, event: MouseEvent<HTMLElement, MouseEvent>) => void'.
+  Types of parameters 'data' and 'data' are incompatible.
+    Type 'LegendPayload' is not assignable to type '{ value: string; }'.
+      Types of property 'value' are incompatible.
+        Type 'string | undefined' is not assignable to type 'string'.
+          Type 'undefined' is not assignable to type 'string'.
+src/components/Navbar.tsx(2,1): error TS6133: 'useState' is declared but its value is never read.
+src/components/ReceiptModal.tsx(52,5): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(callbackfn: (previousValue: { service: { name: string; }; price_at_booking?: number | undefined; }, currentValue: { service: { name: string; }; price_at_booking?: number | undefined; }, currentIndex: number, array: { ...; }[]) => { ...; }, initialValue: { ...; }): { ...; }', gave the following error.
+    Argument of type '(acc: number, s: { service?: { name: string; price: number; }; price_at_booking?: number; }) => number' is not assignable to parameter of type '(previousValue: { service: { name: string; }; price_at_booking?: number | undefined; }, currentValue: { service: { name: string; }; price_at_booking?: number | undefined; }, currentIndex: number, array: { ...; }[]) => { ...; }'.
+      Types of parameters 'acc' and 'previousValue' are incompatible.
+        Type '{ service: { name: string; }; price_at_booking?: number | undefined; }' is not assignable to type 'number'.
+  Overload 2 of 3, '(callbackfn: (previousValue: number, currentValue: { service: { name: string; }; price_at_booking?: number | undefined; }, currentIndex: number, array: { service: { name: string; }; price_at_booking?: number | undefined; }[]) => number, initialValue: number): number', gave the following error.
+    Argument of type '(acc: number, s: { service?: { name: string; price: number; }; price_at_booking?: number; }) => number' is not assignable to parameter of type '(previousValue: number, currentValue: { service: { name: string; }; price_at_booking?: number | undefined; }, currentIndex: number, array: { service: { name: string; }; price_at_booking?: number | undefined; }[]) => number'.
+      Types of parameters 's' and 'currentValue' are incompatible.
+        Type '{ service: { name: string; }; price_at_booking?: number | undefined; }' is not assignable to type '{ service?: { name: string; price: number; } | undefined; price_at_booking?: number | undefined; }'.
+          Types of property 'service' are incompatible.
+            Property 'price' is missing in type '{ name: string; }' but required in type '{ name: string; price: number; }'.
+src/components/ReceiptModal.tsx(99,47): error TS18048: 'appointment.technician' is possibly 'undefined'.
+src/components/ReceiptModal.tsx(110,64): error TS2339: Property 'price' does not exist on type '{ name: string; }'.
+src/components/ReceiptModal.tsx(120,37): error TS2339: Property 'toFixed' does not exist on type '{ service: { name: string; }; price_at_booking?: number | undefined; }'.
+src/components/ui/dropdown-menu.tsx(20,11): error TS2322: Type '{ children?: ReactNode; disabled?: boolean | undefined; handle?: MenuHandle<unknown> | undefined; payload?: unknown; delay?: number | undefined; closeDelay?: number | undefined; ... 288 more ...; "data-slot": string; }' is not assignable to type 'SlotProps'.
+  Types of property 'className' are incompatible.
+    Type 'string | ((state: MenuTriggerState) => string | undefined) | undefined' is not assignable to type 'string | undefined'.
+      Type '(state: MenuTriggerState) => string | undefined' is not assignable to type 'string'.
+src/components/ui/dropdown-menu.tsx(24,3): error TS2322: Type '"bottom"' is not assignable to type 'Align'.
+src/components/ui/dropdown-menu.tsx(43,10): error TS2322: Type '{ children: ReactNode; anchor?: Element | VirtualElement | RefObject<Element | null> | (() => Element | VirtualElement | null) | null | undefined; ... 283 more ...; className: string; }' is not assignable to type 'Omit<MenuPopupProps, "ref">'.
+  Types of property 'render' are incompatible.
+    Type 'ReactElement<unknown, string | JSXElementConstructor<any>> | ComponentRenderFn<HTMLProps, MenuPositionerState> | undefined' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>> | ComponentRenderFn<HTMLProps, MenuPopupState> | undefined'.
+      Type 'ComponentRenderFn<HTMLProps, MenuPositionerState>' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>> | ComponentRenderFn<HTMLProps, MenuPopupState> | undefined'.
+        Type 'ComponentRenderFn<HTMLProps, MenuPositionerState>' is not assignable to type 'ComponentRenderFn<HTMLProps, MenuPopupState>'.
+          Property 'anchorHidden' is missing in type 'MenuPopupState' but required in type 'MenuPositionerState'.
+src/components/ui/dropdown-menu.tsx(59,11): error TS2322: Type '{ children?: ReactNode; ref?: Ref<HTMLDivElement> | undefined; slot?: string | undefined; title?: string | undefined; key?: Key | null | undefined; ... 273 more ...; "data-slot": string; }' is not assignable to type 'SlotProps'.
+  Types of property 'className' are incompatible.
+    Type 'string | ((state: MenuGroupState) => string | undefined) | undefined' is not assignable to type 'string | undefined'.
+      Type '(state: MenuGroupState) => string | undefined' is not assignable to type 'string'.
+src/components/ui/dropdown-menu.tsx(144,3): error TS2339: Property 'className' does not exist on type 'MenuSubmenuRootProps & { align?: "center" | "end" | "top" | "bottom" | "left" | "right" | "start" | undefined; alignOffset?: number | undefined; side?: "top" | "bottom" | "left" | "right" | undefined; sideOffset?: number | undefined; children?: ReactNode; asChild?: boolean | undefined; }'.
+src/components/ui/dropdown-menu.tsx(159,9): error TS2322: Type '"center" | "end" | "top" | "bottom" | "left" | "right" | "start"' is not assignable to type 'Align | undefined'.
+  Type '"top"' is not assignable to type 'Align | undefined'.
+src/components/ui/dropdown-menu.tsx(213,11): error TS2322: Type '{ children?: ReactNode; value?: any; defaultValue?: any; onValueChange?: ((value: any, eventDetails: MenuRootChangeEventDetails) => void) | undefined; ... 278 more ...; "data-slot": string; }' is not assignable to type 'SlotProps'.
+  Types of property 'className' are incompatible.
+    Type 'string | ((state: MenuRadioGroupState) => string | undefined) | undefined' is not assignable to type 'string | undefined'.
+      Type '(state: MenuRadioGroupState) => string | undefined' is not assignable to type 'string'.
+src/pages/Booking.tsx(165,14): error TS2322: Type '{ children: Element; asChild: true; className: string; }' is not assignable to type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+src/pages/Booking.tsx(235,58): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/pages/Booking.tsx(236,89): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/pages/CustomerAppointments.tsx(16,32): error TS6196: 'SubmitReviewRequest' is declared but never used.
+src/pages/CustomerAppointments.tsx(119,17): error TS2322: Type '{ children: Element; asChild: true; className: string; }' is not assignable to type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+src/pages/CustomerAppointments.tsx(137,94): error TS2322: Type '{ children: Element; variant: "outline"; className: string; asChild: true; }' is not assignable to type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+src/pages/CustomerAppointments.tsx(191,79): error TS18049: 'item.review' is possibly 'null' or 'undefined'.
+src/pages/CustomerAppointments.tsx(289,11): error TS2741: Property 'services' is missing in type 'Appointment' but required in type 'AppointmentWithServices'.
+src/pages/Login.tsx(85,40): error TS2345: Argument of type '(data: LoginRequest) => Promise<void>' is not assignable to parameter of type 'SubmitHandler<FieldValues>'.
+  Types of parameters 'data' and 'data' are incompatible.
+    Type 'FieldValues' is missing the following properties from type 'LoginRequest': identifier, password
+src/pages/ManagerDashboard.tsx(16,1): error TS6192: All imports in import declaration are unused.
+src/pages/ManagerDashboard.tsx(51,3): error TS6133: 'X' is declared but its value is never read.
+src/pages/ManagerDashboard.tsx(60,3): error TS6133: 'Lock' is declared but its value is never read.
+src/pages/ManagerDashboard.tsx(95,3): error TS6196: 'Message' is declared but never used.
+src/pages/ManagerDashboard.tsx(98,3): error TS2440: Import declaration conflicts with local declaration of 'ScheduleItem'.
+src/pages/ManagerDashboard.tsx(100,3): error TS2305: Module '"@/types/api"' has no exported member 'HistoricalData'.
+src/pages/ManagerDashboard.tsx(221,25): error TS2345: Argument of type '{ fullName: string; email: string; phone: string; username: string; password: string; specializations: string; basePayPerWeek: string; dailyTarget: string; sssNumber: string; tinNumber: string; govId: string; profilePictureUrl: string; }' is not assignable to parameter of type 'CreateStaffRequest'.
+  Types of property 'basePayPerWeek' are incompatible.
+    Type 'string' is not assignable to type 'number'.
+src/pages/ManageServices.tsx(124,48): error TS2345: Argument of type 'Partial<Service>' is not assignable to parameter of type 'UpdateServiceRequest'.
+  Types of property 'price' are incompatible.
+    Type 'string | undefined' is not assignable to type 'number | undefined'.
+      Type 'string' is not assignable to type 'number'.
+src/pages/ManageServices.tsx(126,29): error TS2345: Argument of type 'Partial<Service>' is not assignable to parameter of type 'CreateServiceRequest'.
+  Property 'duration' is missing in type 'Partial<Service>' but required in type 'CreateServiceRequest'.
+src/pages/ManageServices.tsx(137,35): error TS2345: Argument of type '{ is_active: boolean; id: number; name: string; description: string | null; duration_minutes: number; price: string; is_popular: boolean; category_id: number; category?: Category; }' is not assignable to parameter of type 'UpdateServiceRequest'.
+  Types of property 'price' are incompatible.
+    Type 'string' is not assignable to type 'number'.
+src/pages/Register.tsx(82,40): error TS2345: Argument of type '(data: RegisterRequest) => Promise<void>' is not assignable to parameter of type 'SubmitHandler<FieldValues>'.
+  Types of parameters 'data' and 'data' are incompatible.
+    Type 'FieldValues' is missing the following properties from type 'RegisterRequest': fullName, password
+src/pages/StaffDashboard.tsx(365,43): error TS2339: Property 'id' does not exist on type 'PayrollRecord'.
+src/pages/StaffDashboard.tsx(366,92): error TS2339: Property 'period' does not exist on type 'PayrollRecord'.
+src/pages/StaffDashboard.tsx(366,147): error TS2339: Property 'period' does not exist on type 'PayrollRecord'.
+src/pages/StaffDashboard.tsx(367,73): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/pages/StaffDashboard.tsx(368,73): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/pages/StaffDashboard.tsx(369,91): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/pages/StaffDashboard.tsx(370,124): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
