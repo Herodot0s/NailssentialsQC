@@ -50,6 +50,12 @@ const router = Router();
 router.use(authenticateToken);
 router.use(authorizeRoles('manager'));
 
+/**
+ * GET /api/staff
+ * @query {string} [cursor] - Cursor ID for pagination (last ID from previous page, D-09)
+ * @query {number} [limit=20] - Number of items per page (max 100, D-10)
+ * @returns { success: boolean, data: { items: Staff[], nextCursor: string | null, hasMore: boolean } } (D-11)
+ */
 router.get('/', getAllStaff);
 router.post('/', createStaff);
 router.put('/:id', updateStaff);
