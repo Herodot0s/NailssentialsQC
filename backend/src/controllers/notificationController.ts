@@ -1,11 +1,12 @@
 import { Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
+import { sendSuccess, sendError } from '../utils/apiHelpers';
 
 export const getNotifications = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.sub;
-    if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+    if (!userId) return sendError(res, 'UNAUTHORIZED', 'Unauthorized', 401);
 
     const notifications = await prisma.notification.findMany({
       where: { user_id: userId },
@@ -24,7 +25,7 @@ export const markAsRead = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const userId = req.user?.sub;
-    if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+    if (!userId) return sendError(res, 'UNAUTHORIZED', 'Unauthorized', 401);
 
     await prisma.notification.update({
       where: { id: parseInt(id as string), user_id: userId },
@@ -41,7 +42,7 @@ export const markAsRead = async (req: AuthRequest, res: Response) => {
 export const markAllAsRead = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.sub;
-    if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+    if (!userId) return sendError(res, 'UNAUTHORIZED', 'Unauthorized', 401);
 
     await prisma.notification.updateMany({
       where: { user_id: userId, is_read: false },

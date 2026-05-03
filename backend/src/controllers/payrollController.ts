@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { sendSuccess, sendError } from '../utils/apiHelpers';
 
 /**
  * Manager: Generate a new payroll period and calculate payroll for all staff.
@@ -12,7 +13,7 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
     const { start_date, end_date } = req.body;
 
     if (!start_date || !end_date) {
-      return res.status(400).json({ success: false, message: 'start_date and end_date are required' });
+      return sendError(res, 'MISSING_FIELDS', 'start_date and end_date are required', 400);
     }
 
     const startDate = new Date(start_date);
