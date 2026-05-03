@@ -146,7 +146,7 @@ Plans:
 - [x] 06-03-PLAN.md — Excel Payroll Export
 
 ### Phase 7: Backend Test Infrastructure
-**Goal**: Set up backend testing framework and achieve 80% line coverage
+**Goal**: Set up backend testing framework and achieve 80% backend coverage
 **Depends on**: Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6
 **Requirements**: TEST-01, TEST-03, TEST-04, TEST-05, TEST-06
 **Success Criteria** (what must be TRUE):
@@ -156,7 +156,7 @@ Plans:
   4. Appointment creation and completion flows have integration tests
   5. Payroll generation and period locking have integration tests
   6. Backend achieves 80% line coverage overall, 90% for critical paths
-**Plans**: 5 plans
+**Plans**: 8 plans
 
 Plans:
 - [ ] 07-01-PLAN.md — Backend Test Foundation
@@ -164,6 +164,9 @@ Plans:
 - [ ] 07-03-PLAN.md — Authentication Integration Tests
 - [ ] 07-04-PLAN.md — Appointment Management Integration Tests
 - [ ] 07-05-PLAN.md — Payroll & Period Locking Integration Tests
+- [ ] 07-06-PLAN.md — Staff & Attendance Integration Tests
+- [ ] 07-07-PLAN.md — Services, Customers & Reports Integration Tests
+- [ ] 07-08-PLAN.md — Miscellaneous Controllers Integration Tests
 
 ### Phase 8: Frontend Test Infrastructure
 **Goal**: Set up frontend testing framework and achieve 70% line coverage
@@ -189,7 +192,7 @@ Plans:
 **Requirements**: (Builds on TEST-04, TEST-05, TEST-06 with full-stack integration)
 **Success Criteria** (what must be TRUE):
   1. Complete booking flow test passes (login -> search availability -> book -> complete -> review)
-  2. Payroll generation flow test passes (generate payroll -> lock period -> export data)
+  2. payroll generation flow test passes (generate payroll -> lock period -> export data)
   3. Staff operations flow test passes (clock in -> view schedule -> view commissions)
   4. Auth security flow test passes (rate limiting -> lockout -> password validation)
   5. Critical paths have 90% test coverage across frontend and backend
@@ -230,7 +233,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 4. API Improvements | 3/3 | Complete | 2026-05-04 |
 | 5. Performance Optimization | 5/5 | Complete | 2026-05-04 |
 | 6. Missing Features | 3/3 | Complete | 2026-05-04 |
-| 7. Backend Test Infrastructure | 0/5 | In planning | - |
+| 7. Backend Test Infrastructure | 0/8 | In planning | - |
 | 8. Frontend Test Infrastructure | 0/3 | Not started | - |
 | 9. Integration Tests for Critical Paths | 0/5 | Not started | - |
 | 10. Cleanup & Verification | 0/2 | Not started | - |
