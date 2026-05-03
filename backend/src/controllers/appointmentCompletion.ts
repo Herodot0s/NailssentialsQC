@@ -6,18 +6,19 @@ import { sendAppointmentCompletion } from '../utils/email';
 import { createNotification } from './notificationController';
 import { AppointmentWithDetails } from '../types/appointmentTypes';
 import { sendSuccess, sendError } from '../utils/apiHelpers';
-import { PaymentMethod } from '@prisma/client';
+import { PaymentMethod, Prisma } from '@prisma/client';
+import { logSystemAction } from '../utils/systemLog';
 
 /**
  * Helper to determine the commission rate based on previous month's total salon sales.
  * Below ₱51,000 = 5%, ₱51,000 to ₱54,999 = 8%, ₱55,000 and above = 10%.
  */
-const getTieredCommissionRate = async (tx: typeof prisma) => {
+const getTieredCommissionRate = async (tx: Prisma.TransactionClient) => {
   const lastMonth = subMonths(new Date(), 1);
   const start = startOfMonth(lastMonth);
   const end = endOfMonth(lastMonth);
 
-  const totalSales = await prisma.transaction.aggregate({
+  const totalSales = await tx.transaction.aggregate({
     where: {
       transaction_date: { gte: start, lte: end },
       status: 'completed',
@@ -36,10 +37,10 @@ const getTieredCommissionRate = async (tx: typeof prisma) => {
  * Helper to check if staff hits their specialty quota (Rule 2).
  * 20% rate applied if staff hits >₱6000 in specific services during current month.
  */
-const checkSpecialtyQuota = async (staffId: number, tx: typeof prisma) => {
+const checkSpecialtyQuota = async (staffId: number, tx: Prisma.TransactionClient) => {
   const startOfCurrMonth = startOfMonth(new Date());
 
-  const staffSales = await prisma.commission.aggregate({
+  const staffSales = await tx.commission.aggregate({
     where: {
       staff_id: staffId,
       commission_date: { gte: startOfCurrMonth },
@@ -63,8 +64,12 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
     const appointment = await prisma.appointment.findUnique({
       where: { id: parseInt(id) },
       include: {
+        customer: true,
         items: {
-          include: { service: true }
+          include: { 
+            service: true,
+            staff: true
+          }
         }
       },
     });
@@ -145,10 +150,34 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
           },
         });
         commissionsCreated.push(commission);
+
+        // Create in-app notification for staff member
+        await tx.notification.create({
+          data: {
+            user_id: item.staff.user_id,
+            type: 'APPOINTMENT_COMPLETED',
+            title: 'Appointment Completed',
+            message: `You completed an appointment. Commission: ₱${commissionAmount.toFixed(2)}`,
+          },
+        });
+      }
+
+      // Create in-app notification for customer
+      if (appointment.customer) {
+        await tx.notification.create({
+          data: {
+            user_id: appointment.customer.user_id,
+            type: 'APPOINTMENT_COMPLETED',
+            title: 'Appointment Completed',
+            message: `Your appointment on ${format(today, 'yyyy-MM-dd')} is complete. Receipt: ${receiptNumber}`,
+          },
+        });
       }
 
       return { transaction, commissions: commissionsCreated };
     });
+
+    await logSystemAction(req as AuthRequest, 'COMMISSIONS_CREATED', 'Appointment', Number(id), { message: 'Calculated commissions for appointment' });
 
     // 4. Send Completion Notification (Async)
     (async () => {

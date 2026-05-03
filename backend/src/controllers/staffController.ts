@@ -4,6 +4,7 @@ import { AuthRequest } from '../middleware/authMiddleware';
 import bcrypt from 'bcrypt';
 import prisma from '../utils/prisma';
 import { sendSuccess, sendError } from '../utils/apiHelpers';
+import { logSystemAction } from '../utils/systemLog';
 
 /**
  * Get all staff members
@@ -132,6 +133,8 @@ export const createStaff = async (req: Request, res: Response) => {
       },
     });
 
+    await logSystemAction(req as AuthRequest, 'STAFF_CREATED', 'Staff', newUser.id, { message: 'Created staff profile' });
+
     return sendSuccess(res, {
       message: 'Staff member created successfully',
       data: {
@@ -181,6 +184,8 @@ export const updateStaff = async (req: Request, res: Response) => {
         staff_profile: true,
       },
     });
+
+    await logSystemAction(req as AuthRequest, 'STAFF_UPDATED', 'Staff', idNum, { message: 'Updated staff profile' });
 
     res.json({
       success: true,
@@ -253,6 +258,8 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
         })
       )
     );
+
+    await logSystemAction(req as AuthRequest, 'SCHEDULE_UPDATED', 'Staff', staffId, { message: 'Updated staff schedule' });
 
     res.json({ success: true, message: 'Schedule updated successfully' });
   } catch (error: unknown) {
