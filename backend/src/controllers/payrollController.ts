@@ -269,6 +269,8 @@ export const addDeduction = async (req: AuthRequest, res: Response) => {
       },
     });
 
+    await logSystemAction(req as AuthRequest, 'DEDUCTION_ADDED', 'Deduction', deduction.id, { message: 'Added payroll deduction' });
+
     return res.status(201).json({ success: true, data: deduction });
   } catch (error: unknown) {
     console.error('Add deduction error:', error);
@@ -328,6 +330,8 @@ export const lockPayroll = async (req: AuthRequest, res: Response) => {
       where: { id },
       data: { is_locked: true },
     });
+
+    await logSystemAction(req as AuthRequest, 'PAYROLL_LOCKED', 'PayrollPeriod', Number(id), { message: 'Locked payroll period' });
 
     return res.status(200).json({ success: true, data: updatedPeriod });
   } catch (error: unknown) {
