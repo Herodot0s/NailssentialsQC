@@ -4,6 +4,7 @@ import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { sendSuccess, sendError } from '../utils/apiHelpers';
+import { logSystemAction } from '../utils/systemLog';
 
 /**
  * Manager: Generate a new payroll period and calculate payroll for all staff.
@@ -19,26 +20,44 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
     const startDate = new Date(start_date);
     const endDate = new Date(end_date);
 
-    // Check for overlapping payroll periods
-    const existingPeriod = await prisma.payrollPeriod.findFirst({
-      where: {
-        OR: [
-          { start_date: { lte: endDate }, end_date: { gte: startDate } },
-        ],
-      },
-    });
+    // Calculate previous month's date range for divide-by-4 rule (synchronous, needed before parallel queries)
+    const lastMonth = subMonths(startDate, 1);
+    const prevMonthStart = startOfMonth(lastMonth);
+    const prevMonthEnd = endOfMonth(lastMonth);
+
+    // Group all independent DB queries in Promise.all (per D-06, D-07)
+    const [existingPeriod, transactions, staffProfiles, prevMonthCommissions] = await Promise.all([
+      prisma.payrollPeriod.findFirst({
+        where: {
+          OR: [
+            { start_date: { lte: endDate }, end_date: { gte: startDate } },
+          ],
+        },
+      }),
+      prisma.transaction.findMany({
+        where: {
+          transaction_date: { gte: startDate, lte: endDate },
+          status: 'completed',
+        },
+      }),
+      prisma.staffProfile.findMany({
+        where: { is_available: true },
+      }),
+      prisma.commission.findMany({
+        where: {
+          commission_date: {
+            gte: prevMonthStart,
+            lte: prevMonthEnd,
+          },
+        },
+      }),
+    ]);
 
     if (existingPeriod) {
       return res.status(400).json({ success: false, message: 'Payroll period overlaps with existing period' });
     }
 
-    // Calculate total salon sales (completed transactions in period)
-    const transactions = await prisma.transaction.findMany({
-      where: {
-        transaction_date: { gte: startDate, lte: endDate },
-        status: 'completed',
-      },
-    });
+    // Post-processing: compute total salon sales after parallel queries (per D-07)
     const totalSalonSales = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
 
     // Create payroll period
@@ -51,29 +70,9 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // Get all active staff
-    const staffProfiles = await prisma.staffProfile.findMany({
-      where: { is_available: true },
-    });
-
     // Calculate weeks in period for base pay
     const daysInPeriod = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
     const weeksInPeriod = Math.ceil(daysInPeriod / 7);
-
-    // Calculate previous month's total commissions for the "divide by 4" rule
-    const lastMonth = subMonths(startDate, 1);
-    const prevMonthStart = startOfMonth(lastMonth);
-    const prevMonthEnd = endOfMonth(lastMonth);
-
-    // Get all commissions earned in the previous month
-    const prevMonthCommissions = await prisma.commission.findMany({
-      where: {
-        commission_date: {
-          gte: prevMonthStart,
-          lte: prevMonthEnd,
-        },
-      },
-    });
 
     // Sum by staff for divide-by-4 calculation
     const prevMonthCommissionsByStaff = new Map<number, number>();
@@ -93,19 +92,22 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       const prevMonthTotal = prevMonthCommissionsByStaff.get(staff.id) || 0;
       const totalCommissions = Math.round((prevMonthTotal / 4) * 100) / 100;
 
-      // Deductions: manual deductions + tardiness from attendance
-      const manualDeductions = await prisma.deductionLog.findMany({
-        where: {
-          staff_id: staff.id,
-          payroll_period_id: null,
-        },
-      });
-      const attendanceRecords = await prisma.attendance.findMany({
-        where: {
-          staff_id: staff.id,
-          date: { gte: startDate, lte: endDate },
-        },
-      });
+      // Parallel fetch for per-staff queries (per D-06)
+      const [manualDeductions, attendanceRecords] = await Promise.all([
+        prisma.deductionLog.findMany({
+          where: {
+            staff_id: staff.id,
+            payroll_period_id: null,
+          },
+        }),
+        prisma.attendance.findMany({
+          where: {
+            staff_id: staff.id,
+            date: { gte: startDate, lte: endDate },
+          },
+        }),
+      ]);
+
       const tardinessDeduction = attendanceRecords.reduce((sum, a) => sum + Number(a.deduction_amount), 0);
       const manualDeductionTotal = manualDeductions.reduce((sum, d) => sum + Number(d.amount), 0);
       const totalDeductions = tardinessDeduction + manualDeductionTotal;
@@ -159,6 +161,7 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       }
     }
 
+    await logSystemAction(req as AuthRequest, 'PAYROLL_GENERATED', 'PayrollPeriod', payrollPeriod.id, { message: 'Generated payroll for period' });
 
     return res.status(201).json({ success: true, data: payrollPeriod });
   } catch (error: unknown) {
