@@ -15,9 +15,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Critical Bug Fixes** - Fix all critical bugs preventing normal operation (JSX errors, hardcoded passwords, type mismatches, parseInt errors, schedule upsert)
 - [x] **Phase 2: Type Safety & Code Quality** - Replace any types with proper interfaces and split large files into manageable components
 - [x] **Phase 3: Security Hardening** - Address JWT secrets, password validation, authorization checks, rate limiting, XSS prevention, and token rotation
-- [ ] **Phase 4: API Improvements** - Add pagination, extract duplicate code, and implement Zod validation
+- [x] **Phase 4: API Improvements** - Add pagination, extract duplicate code, and implement Zod validation
 - [x] **Phase 5: Performance Optimization** - Fix sequential awaits, N+1 queries, missing indexes, memory issues, and transaction handling
-- [ ] **Phase 6: Missing Features** - Add audit trail, data export, and configurable sales targets
+- [x] **Phase 6: Missing Features** - Add audit trail, data export, and configurable sales targets
 - [ ] **Phase 7: Backend Test Infrastructure** - Set up Jest + Supertest and achieve 80% backend coverage
 - [ ] **Phase 8: Frontend Test Infrastructure** - Set up Vitest + RTL and achieve 70% frontend coverage
 - [ ] **Phase 9: Integration Tests for Critical Paths** - Add end-to-end tests for booking, payroll, and auth flows
@@ -159,11 +159,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 07-01: Set up Jest + Supertest for backend with configuration and test helpers
-- [ ] 07-02: Write unit tests for commission calculation logic (tiered rates, specialty quota)
-- [ ] 07-03: Write integration tests for authentication flows (register, login, refresh, logout)
-- [ ] 07-04: Write integration tests for appointment creation and completion
-- [ ] 07-05: Write integration tests for payroll generation and period locking
+- [ ] 07-01-PLAN.md — Backend Test Foundation
+- [ ] 07-02-PLAN.md — Commission Logic Unit Tests
+- [ ] 07-03-PLAN.md — Authentication Integration Tests
+- [ ] 07-04-PLAN.md — Appointment Management Integration Tests
+- [ ] 07-05-PLAN.md — Payroll & Period Locking Integration Tests
 
 ### Phase 8: Frontend Test Infrastructure
 **Goal**: Set up frontend testing framework and achieve 70% line coverage
@@ -230,7 +230,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 4. API Improvements | 3/3 | Complete | 2026-05-04 |
 | 5. Performance Optimization | 5/5 | Complete | 2026-05-04 |
 | 6. Missing Features | 3/3 | Complete | 2026-05-04 |
-| 7. Backend Test Infrastructure | 0/5 | Not started | - |
+| 7. Backend Test Infrastructure | 0/5 | In planning | - |
 | 8. Frontend Test Infrastructure | 0/3 | Not started | - |
 | 9. Integration Tests for Critical Paths | 0/5 | Not started | - |
 | 10. Cleanup & Verification | 0/2 | Not started | - |
