@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { generatePayroll, getPayrollPeriods, getPayrollDetails, addDeduction, getMyPayroll, lockPayroll } from '../controllers/payrollController';
-import { authenticateToken, authorizeRoles } from '../middleware/authMiddleware';
+import { authenticateToken, authorizeRoles, validateZod } from '../middleware/authMiddleware';
+import { generatePayrollSchema } from '../validators/payrollSchemas';
 
 const idParamSchema = z.object({
   id: z.string().regex(/^\d+$/, 'ID must be a number').transform(Number)
@@ -30,7 +31,7 @@ router.get('/my-payroll', authenticateToken, authorizeRoles('staff', 'manager'),
  */
 router.get('/periods', authenticateToken, authorizeRoles('manager'), getPayrollPeriods);
 router.get('/periods/:id', authenticateToken, authorizeRoles('manager'), validateIdParam, getPayrollDetails);
-router.post('/generate', authenticateToken, authorizeRoles('manager'), generatePayroll);
+router.post('/generate', authenticateToken, authorizeRoles('manager'), validateZod(generatePayrollSchema), generatePayroll);
 router.post('/deductions', authenticateToken, authorizeRoles('manager'), addDeduction);
 router.patch('/periods/:id/lock', authenticateToken, authorizeRoles('manager'), validateIdParam, lockPayroll);
 

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
 import { verifyAccessToken, AppJwtPayload } from '../utils/jwt';
 
 export interface AuthRequest extends Request {
@@ -38,6 +39,24 @@ export const authorizeRoles = (...roles: string[]) => {
         error: { code: 'UNAUTHORIZED', message: 'You do not have permission to perform this action' },
       });
     }
+    next();
+  };
+};
+
+export const validateZod = (schema: z.ZodSchema) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const result = schema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid input data',
+          details: result.error.flatten(),
+        },
+      });
+    }
+    req.validatedBody = result.data;
     next();
   };
 };

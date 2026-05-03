@@ -8,10 +8,10 @@ import { sendSuccess, sendError, getCurrentUser } from '../utils/apiHelpers';
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { fullName, password } = req.body;
+    const { fullName, password, email: reqEmail, phone: reqPhone } = req.validatedBody || req.body;
     // Coalesce empty strings to null for unique constraints
-    const email = req.body.email?.trim() || null;
-    const phone = req.body.phone?.trim() || null;
+    const email = reqEmail?.trim() || null;
+    const phone = reqPhone?.trim() || null;
 
     // Check if email or phone already exists
     if (email) {
@@ -107,7 +107,7 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { identifier, password } = req.body;
+    const { identifier, password } = req.validatedBody || req.body;
 
     // Find user by username, email or phone
     const user = await prisma.user.findFirst({

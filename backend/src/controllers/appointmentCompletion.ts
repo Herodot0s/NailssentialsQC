@@ -54,7 +54,7 @@ const checkSpecialtyQuota = async (staffId: number) => {
 export const completeAppointment = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { paymentMethod } = req.body; // 'cash' | 'gcash'
+    const { paymentMethod } = req.validatedBody || req.body; // 'cash' | 'gcash'
 
     if (!paymentMethod) {
       return res.status(400).json({ success: false, message: 'Payment method is required' });

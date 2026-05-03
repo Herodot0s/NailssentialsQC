@@ -78,7 +78,7 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
     }
     const userId = currentUser.userId;
     const role = currentUser.role;
-    const { items, date, notes, customerId, isWalkIn } = req.body;
+    const { items, date, notes, customerId, isWalkIn } = req.validatedBody || req.body;
 
     if (!userId) {
       return sendError(res, 'UNAUTHORIZED', 'User not authenticated', 401);
