@@ -106,12 +106,25 @@ const SwipeButton: React.FC<SwipeButtonProps> = ({
     ? (thumbPosition / getMaxThumbPosition()) * 100
     : 0;
 
+  const maxPos = getMaxThumbPosition();
+  const threshold = maxPos * 0.8;
+  const isNearThreshold = thumbPosition >= threshold * 0.6;
+
+  const thumbTransitionClass = isDragging
+    ? '' // No transition during drag — thumb must track finger instantly
+    : 'transition-all duration-300 ease-out'; // Smooth return when released
+
   return (
     <div className={cn('relative w-full h-14 rounded-none overflow-hidden cursor-pointer select-none', trackBgClass, className)}>
       {/* Filled background that follows the thumb */}
       <div
-        className={cn('absolute inset-0 transition-all duration-75', thumbBgClass)}
-        style={{ width: `${fillWidth}%`, opacity: 0.2 }}
+        className={cn(
+          'absolute inset-0 transition-all duration-75 ease-out',
+          thumbBgClass,
+          isNearThreshold && 'opacity-40',
+          !isNearThreshold && 'opacity-25'
+        )}
+        style={{ width: `${fillWidth}%` }}
       />
 
       {/* Label */}
@@ -126,9 +139,10 @@ const SwipeButton: React.FC<SwipeButtonProps> = ({
       <div
         ref={thumbRef}
         className={cn(
-          'absolute left-0 top-0 h-full w-14 flex items-center justify-center transition-all duration-200 z-10',
+          'absolute left-0 top-0 h-full w-14 flex items-center justify-center z-10',
           thumbBgClass,
-          isDragging ? 'shadow-xl scale-105' : 'shadow-md'
+          thumbTransitionClass,
+          isDragging ? 'shadow-xl scale-110' : 'shadow-lg'
         )}
         style={{ transform: `translateX(${thumbPosition}px)` }}
         onMouseDown={handleMouseDown}
