@@ -7,6 +7,7 @@ import { sendBookingConfirmation } from '../utils/email';
 import { createNotification } from './notificationController';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
+import { sendSuccess, sendError, getCurrentUser } from '../utils/apiHelpers';
 
 function getFullDate(dateStr: string, timeStr: string): Date {
   return parse(`${dateStr} ${timeStr}`, 'yyyy-MM-dd HH:mm', new Date());
@@ -18,8 +19,12 @@ function generateRandomPassword(length: number = 12): string {
 
 export const getAppointments = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub as number | undefined;
-    const { role } = req.user || {};
+    const currentUser = getCurrentUser(req);
+    if (!currentUser) {
+      return sendError(res, 'UNAUTHORIZED', 'User not authenticated', 401);
+    }
+    const userId = currentUser.userId;
+    const role = currentUser.role;
 
     // Pagination params (D-10: default 20, max 100)
     const cursor = req.query.cursor ? parseInt(req.query.cursor as string) : undefined;
@@ -28,11 +33,11 @@ export const getAppointments = async (req: AuthRequest, res: Response) => {
     const where: Prisma.AppointmentWhereInput = {};
     if (role === 'customer') {
       const customer = await prisma.customerProfile.findUnique({ where: { user_id: userId } });
-      if (!customer) return res.status(404).json({ success: false, message: 'Customer not found' });
+      if (!customer) return sendError(res, 'CUSTOMER_NOT_FOUND', 'Customer not found', 404);
       where.customer_id = customer.id;
     } else if (role === 'staff') {
       const staff = await prisma.staffProfile.findUnique({ where: { user_id: userId } });
-      if (!staff) return res.status(404).json({ success: false, message: 'Staff profile not found' });
+      if (!staff) return sendError(res, 'STAFF_NOT_FOUND', 'Staff profile not found', 404);
       where.items = { some: { staff_id: staff.id } };
     }
 
@@ -57,29 +62,30 @@ export const getAppointments = async (req: AuthRequest, res: Response) => {
     const nextCursor = hasMore ? items[items.length - 1].id.toString() : null;
 
     // D-11: Response format with { items, nextCursor, hasMore } wrapper
-    return res.status(200).json({
-      success: true,
-      data: { items, nextCursor, hasMore }
-    });
+    return sendSuccess(res, { items, nextCursor, hasMore }, 200);
   } catch (error: unknown) {
     console.error('Get appointments error:', error);
     const message = error instanceof Error ? error.message : 'Failed to fetch appointments';
-    return res.status(500).json({ success: false, message });
+    return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
   }
 };
 
 export const createAppointment = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub as number | undefined;
-    const { role } = req.user || {};
+    const currentUser = getCurrentUser(req);
+    if (!currentUser) {
+      return sendError(res, 'UNAUTHORIZED', 'User not authenticated', 401);
+    }
+    const userId = currentUser.userId;
+    const role = currentUser.role;
     const { items, date, notes, customerId, isWalkIn } = req.body;
 
     if (!userId) {
-      return res.status(401).json({ success: false, message: 'Unauthorized' });
+      return sendError(res, 'UNAUTHORIZED', 'User not authenticated', 401);
     }
 
     if (!items || !Array.isArray(items) || items.length === 0 || !date) {
-      return res.status(400).json({ success: false, message: 'Missing required fields (items, date)' });
+      return sendError(res, 'MISSING_FIELDS', 'Missing required fields (items, date)', 400);
     }
 
     let targetCustomerId: number;
@@ -109,12 +115,12 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
         }
         targetCustomerId = walkInCustomer.id;
       } else {
-        return res.status(400).json({ success: false, message: 'Customer ID is required for staff bookings' });
+        return sendError(res, 'CUSTOMER_ID_REQUIRED', 'Customer ID is required for staff bookings', 400);
       }
     } else {
       const customerProfile = await prisma.customerProfile.findUnique({ where: { user_id: userId } });
       if (!customerProfile) {
-        return res.status(404).json({ success: false, message: 'Customer profile not found' });
+        return sendError(res, 'CUSTOMER_PROFILE_NOT_FOUND', 'Customer profile not found', 404);
       }
       targetCustomerId = customerProfile.id;
     }
@@ -197,14 +203,10 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
       }
     })();
 
-    return res.status(201).json({
-      success: true,
-      data: appointment,
-      message: 'Appointment booked successfully!',
-    });
+    return sendSuccess(res, { ...appointment, message: 'Appointment booked successfully!' }, 201);
   } catch (error: unknown) {
     console.error('Create appointment error:', error);
     const message = error instanceof Error ? error.message : 'Failed to create appointment';
-    return res.status(500).json({ success: false, message });
+    return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
   }
 };

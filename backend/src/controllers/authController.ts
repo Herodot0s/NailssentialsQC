@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import prisma from '../utils/prisma';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { AuthRequest } from '../middleware/authMiddleware';
+import { sendSuccess, sendError, getCurrentUser } from '../utils/apiHelpers';
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -18,13 +19,7 @@ export const register = async (req: Request, res: Response) => {
         where: { email },
       });
       if (existingUserByEmail) {
-        return res.status(400).json({
-          success: false,
-          error: {
-            code: 'EMAIL_ALREADY_EXISTS',
-            message: 'Email is already registered',
-          },
-        });
+        return sendError(res, 'EMAIL_ALREADY_EXISTS', 'Email is already registered', 400);
       }
     }
 
@@ -33,13 +28,7 @@ export const register = async (req: Request, res: Response) => {
         where: { phone },
       });
       if (existingUserByPhone) {
-        return res.status(400).json({
-          success: false,
-          error: {
-            code: 'PHONE_ALREADY_EXISTS',
-            message: 'Phone number is already registered',
-          },
-        });
+        return sendError(res, 'PHONE_ALREADY_EXISTS', 'Phone number is already registered', 400);
       }
     }
 
@@ -92,9 +81,9 @@ export const register = async (req: Request, res: Response) => {
       },
     });
 
-    return res.status(201).json({
-      success: true,
-      data: {
+    return sendSuccess(
+      res,
+      {
         user: {
           id: result.user.id,
           email: result.user.email,
@@ -107,17 +96,12 @@ export const register = async (req: Request, res: Response) => {
           refreshToken,
         },
       },
-    });
+      201
+    );
   } catch (error: unknown) {
     console.error('Registration error:', error);
     const message = error instanceof Error ? error.message : 'Something went wrong during registration';
-    return res.status(500).json({
-      success: false,
-      error: {
-        code: 'INTERNAL_SERVER_ERROR',
-        message,
-      },
-    });
+    return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
   }
 };
 
@@ -141,25 +125,13 @@ export const login = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        error: {
-          code: 'INVALID_CREDENTIALS',
-          message: 'Invalid email/phone or password',
-        },
-      });
+      return sendError(res, 'INVALID_CREDENTIALS', 'Invalid email/phone or password', 401);
     }
 
     // Check if account is locked
     const now = new Date();
     if (user.locked_until && user.locked_until > now) {
-      return res.status(403).json({
-        success: false,
-        error: {
-          code: 'ACCOUNT_LOCKED',
-          message: 'Account is temporarily locked due to too many failed attempts. Please try again later.',
-        },
-      });
+      return sendError(res, 'ACCOUNT_LOCKED', 'Account is temporarily locked due to too many failed attempts. Please try again later.', 403);
     }
 
     // Verify password
@@ -184,13 +156,7 @@ export const login = async (req: Request, res: Response) => {
         },
       });
 
-      return res.status(401).json({
-        success: false,
-        error: {
-          code: 'INVALID_CREDENTIALS',
-          message: 'Invalid email/phone or password',
-        },
-      });
+      return sendError(res, 'INVALID_CREDENTIALS', 'Invalid email/phone or password', 401);
     }
 
     // Reset failed attempts on successful login
@@ -229,9 +195,9 @@ export const login = async (req: Request, res: Response) => {
     // Determine fullName based on role
     const fullName = user.customer_profile?.full_name || user.staff_profile?.full_name || 'User';
 
-    return res.status(200).json({
-      success: true,
-      data: {
+    return sendSuccess(
+      res,
+      {
         user: {
           id: user.id,
           email: user.email,
@@ -244,17 +210,12 @@ export const login = async (req: Request, res: Response) => {
           refreshToken,
         },
       },
-    });
+      200
+    );
   } catch (error: unknown) {
     console.error('Login error:', error);
     const message = error instanceof Error ? error.message : 'Something went wrong during login';
-    return res.status(500).json({
-      success: false,
-      error: {
-        code: 'INTERNAL_SERVER_ERROR',
-        message,
-      },
-    });
+    return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
   }
 };
 
@@ -263,10 +224,7 @@ export const refresh = async (req: Request, res: Response) => {
     const { refreshToken: providedToken } = req.body;
 
     if (!providedToken) {
-      return res.status(401).json({
-        success: false,
-        error: { code: 'TOKEN_REQUIRED', message: 'Refresh token is required' },
-      });
+      return sendError(res, 'TOKEN_REQUIRED', 'Refresh token is required', 401);
     }
 
     // 1. JWT Signature Check (Review Finding [HIGH])
@@ -274,10 +232,7 @@ export const refresh = async (req: Request, res: Response) => {
     try {
       decoded = verifyRefreshToken(providedToken);
     } catch (err) {
-      return res.status(403).json({
-        success: false,
-        error: { code: 'INVALID_TOKEN', message: 'Invalid token signature' },
-      });
+      return sendError(res, 'INVALID_TOKEN', 'Invalid token signature', 403);
     }
 
     // 2. Database Check
@@ -290,10 +245,7 @@ export const refresh = async (req: Request, res: Response) => {
     });
 
     if (!storedToken) {
-      return res.status(403).json({
-        success: false,
-        error: { code: 'INVALID_TOKEN', message: 'Invalid or expired refresh token' },
-      });
+      return sendError(res, 'INVALID_TOKEN', 'Invalid or expired refresh token', 403);
     }
 
     // 3. Refresh Token Rotation (Review Finding [LOW])
@@ -324,25 +276,20 @@ export const refresh = async (req: Request, res: Response) => {
       where: { id: storedToken.id },
     });
 
-    return res.status(200).json({
-      success: true,
-      data: {
+    return sendSuccess(
+      res,
+      {
         tokens: {
           accessToken,
           refreshToken: newRefreshToken,
         },
       },
-    });
+      200
+    );
   } catch (error: unknown) {
     console.error('Refresh token error:', error);
     const message = error instanceof Error ? error.message : 'Something went wrong during token refresh';
-    return res.status(500).json({
-      success: false,
-      error: {
-        code: 'INTERNAL_SERVER_ERROR',
-        message,
-      },
-    });
+    return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
   }
 };
 
@@ -356,26 +303,21 @@ export const logout = async (req: Request, res: Response) => {
       });
     }
 
-    return res.status(200).json({
-      success: true,
-      message: 'Logged out successfully',
-    });
+    return sendSuccess(res, { message: 'Logged out successfully' }, 200);
   } catch (error: unknown) {
     console.error('Logout error:', error);
     const message = error instanceof Error ? error.message : 'Something went wrong during logout';
-    return res.status(500).json({
-      success: false,
-      error: {
-        code: 'INTERNAL_SERVER_ERROR',
-        message,
-      },
-    });
+    return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
   }
 };
 
 export const getMe = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = (req.user as { sub: string | number }).sub;
+    const currentUser = getCurrentUser(req);
+    if (!currentUser) {
+      return sendError(res, 'UNAUTHORIZED', 'User not authenticated', 401);
+    }
+    const userId = currentUser.userId;
 
     const user = await prisma.user.findUnique({
       where: { id: Number(userId) },
@@ -386,17 +328,14 @@ export const getMe = async (req: AuthRequest, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { code: 'USER_NOT_FOUND', message: 'User not found' },
-      });
+      return sendError(res, 'USER_NOT_FOUND', 'User not found', 404);
     }
 
     const fullName = (user as { customer_profile?: { full_name: string } | null; staff_profile?: { full_name: string } | null }).customer_profile?.full_name || (user as { staff_profile?: { full_name: string } | null }).staff_profile?.full_name || 'User';
 
-    return res.status(200).json({
-      success: true,
-      data: {
+    return sendSuccess(
+      res,
+      {
         user: {
           id: user.id,
           email: user.email,
@@ -405,16 +344,11 @@ export const getMe = async (req: AuthRequest, res: Response) => {
           fullName,
         },
       },
-    });
+      200
+    );
   } catch (error: unknown) {
     console.error('Get profile error:', error);
     const message = error instanceof Error ? error.message : 'Something went wrong while fetching profile';
-    return res.status(500).json({
-      success: false,
-      error: {
-        code: 'INTERNAL_SERVER_ERROR',
-        message,
-      },
-    });
+    return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
   }
 };
