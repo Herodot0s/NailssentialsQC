@@ -4,7 +4,10 @@ import { AuthRequest } from '../middleware/authMiddleware';
 
 export const getMyProfile = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
+    const userId = req.user?.sub as number | undefined;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: { code: 'TOKEN_REQUIRED', message: 'Invalid user token' } });
+    }
     const profile = await prisma.customerProfile.findUnique({
       where: { user_id: userId },
     });
@@ -22,7 +25,10 @@ export const getMyProfile = async (req: AuthRequest, res: Response) => {
 
 export const updateMyProfile = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
+    const userId = req.user?.sub as number | undefined;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: { code: 'TOKEN_REQUIRED', message: 'Invalid user token' } });
+    }
     const { fullName, preferences, allergies, notes } = req.body;
 
     const profile = await prisma.customerProfile.update({
@@ -46,8 +52,10 @@ export const getCustomerHistory = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params; // customer_id (not user_id)
 
+    const idStr = (Array.isArray(id) ? id[0] : id) as string;
+    const idNum = parseInt(idStr);
     const history = await prisma.appointment.findMany({
-      where: { customer_id: parseInt(id) },
+      where: { customer_id: idNum },
       include: {
         services: { include: { service: true } },
         technician: true,
@@ -57,7 +65,7 @@ export const getCustomerHistory = async (req: AuthRequest, res: Response) => {
     });
 
     const customer = await prisma.customerProfile.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: idNum },
       include: { user: { select: { email: true, phone: true } } }
     });
 

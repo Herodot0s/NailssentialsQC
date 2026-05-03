@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 import { verifyAccessToken } from '../utils/jwt';
 
-interface AppJwtPayload extends JwtPayload {
+interface AppJwtPayload {
   sub: string | number;
   email: string;
   role: string;
@@ -21,7 +21,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
   if (!token) {
     return res.status(401).json({
       success: false,
-      error: { code: 'ACCESS_DENIED', message: 'Access token required' },
+      error: { code: 'TOKEN_REQUIRED', message: 'Access token required' },
     });
   }
 
@@ -30,7 +30,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(403).json({
+    return res.status(401).json({
       success: false,
       error: { code: 'INVALID_TOKEN', message: 'Invalid or expired access token' },
     });
