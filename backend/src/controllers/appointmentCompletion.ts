@@ -12,7 +12,7 @@ import { PaymentMethod } from '@prisma/client';
  * Helper to determine the commission rate based on previous month's total salon sales.
  * Below ₱51,000 = 5%, ₱51,000 to ₱54,999 = 8%, ₱55,000 and above = 10%.
  */
-const getTieredCommissionRate = async () => {
+const getTieredCommissionRate = async (tx: typeof prisma) => {
   const lastMonth = subMonths(new Date(), 1);
   const start = startOfMonth(lastMonth);
   const end = endOfMonth(lastMonth);
@@ -36,7 +36,7 @@ const getTieredCommissionRate = async () => {
  * Helper to check if staff hits their specialty quota (Rule 2).
  * 20% rate applied if staff hits >₱6000 in specific services during current month.
  */
-const checkSpecialtyQuota = async (staffId: number) => {
+const checkSpecialtyQuota = async (staffId: number, tx: typeof prisma) => {
   const startOfCurrMonth = startOfMonth(new Date());
 
   const staffSales = await prisma.commission.aggregate({
@@ -120,12 +120,12 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
       });
 
       // Calculate and create commissions
-      const baseRate = await getTieredCommissionRate();
+      const baseRate = await getTieredCommissionRate(tx);
 
       const commissionsCreated = [];
       for (const item of appointment.items) {
         // Specialty Quota Check (Rule 2)
-        const hasHitQuota = await checkSpecialtyQuota(item.staff_id);
+        const hasHitQuota = await checkSpecialtyQuota(item.staff_id, tx);
         const commissionRate = hasHitQuota ? 0.20 : baseRate;
 
         const commissionAmount = Number(item.price_at_booking) * commissionRate;
