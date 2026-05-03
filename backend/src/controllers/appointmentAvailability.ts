@@ -31,11 +31,15 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
       return res.status(200).json({ success: true, data: allSlots.map(s => ({ time: s, available: false })) });
     }
 
-    // 2. Get all appointment items for this date
+    // 2. Get all appointment items for this date (using date range to handle time zones)
+    const parsedDate = parse(dateStr, 'yyyy-MM-dd', new Date());
     const appointmentItems = await prisma.appointmentItem.findMany({
       where: {
         appointment: {
-          appointment_date: new Date(dateStr),
+          appointment_date: {
+            gte: startOfDay(parsedDate),
+            lte: endOfDay(parsedDate),
+          }
         },
         status: { in: ['pending', 'confirmed', 'in_progress'] }
       },
