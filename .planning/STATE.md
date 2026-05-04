@@ -1,65 +1,42 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: active
-stopped_at: Phase 7 planned
-last_updated: "2026-05-04T02:35:00.000Z"
-last_activity: 2026-05-04 -- Phase 07 plans verified
+milestone: v2.0
+milestone_name: Premium Experience & Expansion
+status: planning
+stopped_at: Defining requirements
+last_updated: "2026-05-04T00:00:00.000Z"
+last_activity: 2026-05-04 -- Milestone v2.0 started
 progress:
-  total_phases: 10
-  completed_phases: 6
-  total_plans: 35
-  completed_plans: 27
-  percent: 77
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-02)
+See: .planning/PROJECT.md (updated 2026-05-04)
 
 **Core value:** A reliable, bug-free salon management system that customers, staff, and managers can trust for daily operations — with verified correctness through full test coverage.
-**Current focus:** Phase 07 — Backend Test Infrastructure
+**Current focus:** Defining requirements
 
 ## Current Position
 
-Phase: 07 — ACTIVE
-Plan: 0
-Status: Ready to execute
-Last activity: 2026-05-04 -- Phase 07 plans verified
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-04 — Milestone v2.0 started
 
-Progress: [███████░░░] 77%
-
-## Performance Metrics
-
-**Velocity:**
-
-- Total plans completed: 21
-- Average duration: N/A
-- Total execution time: 0.0 hours
-
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 1. Critical Bug Fixes | 5/5 | 5 | ~15min |
-| 2. Type Safety & Code Quality | 4/4 | 4 | ~30min |
-| 3. Security Hardening | 6/6 | 6 | - |
-| 4. API Improvements | 3/3 | 3 | - |
-| 5. Performance Optimization | 5/5 | 5 | ~15min |
-| 6. Missing Features | 3/3 | 3 | - |
-| 7. Backend Test Infrastructure | 0/8 | 8 | - |
-| 8. Frontend Test Infrastructure | 0/3 | 3 | - |
-| 9. Integration Tests for Critical Paths | 0/5 | 5 | - |
-| 10. Cleanup & Verification | 0/2 | 2 | - |
+Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-Last session: 2026-05-04T02:35:00.000Z
-Stopped at: Phase 7 planned
-Resume file: .planning/phases/07-backend-test-infrastructure/07-CONTEXT.md
+Last session: 2026-05-04T00:00:00.000Z
+Stopped at: Defining requirements
+Resume file: .planning/STATE.md
 
 
 ### Quick Tasks Completed

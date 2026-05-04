@@ -1,5 +1,16 @@
 # NailssentialsQC
 
+## Current Milestone: v2.0 Premium Experience & Expansion
+
+**Goal:** Overhaul the entire UI/UX to match Airbnb's premium design system, while expanding the platform with a content CMS, advanced analytics, and expanded salon services.
+
+**Target features:**
+- Full UI/UX Overhaul using Airbnb DESIGN.md (clean white canvas, soft radii, Rausch accents) and the 'impeccable' skill.
+- Nail Art Exhibit / Gallery Page.
+- Comprehensive Manager CMS (CRUD for both business entities and website content like gallery/landing info).
+- Advanced Manager Analytics (Revenue, retention, staff performance, detailed breakdowns).
+- Service Packages/Bundles combining Nail, Spa, Hair, Waxing, and Threading services.
+
 ## What This Is
 
 NailssentialsQC is a nail salon management system built with React 19, Express.js, and PostgreSQL (via Prisma ORM). It serves three user types — customers (booking, profiles), staff (clock in/out, commissions), and managers (payroll, reports, staff management) — with a full-featured web application. The system is operational but requires comprehensive bug fixes, tech debt cleanup, security hardening, and full test coverage to be production-ready.
@@ -30,50 +41,68 @@ A reliable, bug-free salon management system that customers, staff, and managers
 
 <!-- Current scope. Building toward these. -->
 
+**Premium UI/UX Overhaul:**
+- [ ] **UI-01**: Implement Airbnb DESIGN.md tokens (colors, typography, radii, spacing) across all components
+- [ ] **UI-02**: Redesign customer landing page with Premium aesthetic
+- [ ] **UI-03**: Redesign manager and staff dashboards for cleaner, softer UI
+
+**Nail Art Exhibit:**
+- [ ] **ART-01**: Add public gallery page for Nail Art Exhibits
+- [ ] **ART-02**: Allow managers to upload and manage exhibit images and details
+
+**Manager CMS & Analytics:**
+- [ ] **CMS-01**: Add full CRUD for website content (landing info, policies, exhibit)
+- [ ] **ANLY-01**: Add Advanced Analytics dashboard (retention, staff performance, detailed revenue)
+
+**Service Expansion:**
+- [ ] **SERV-01**: Add support for Service Packages/Bundles (combining Nail, Spa, Hair, etc.)
+
+*(Existing active bugs, debt, security, and performance requirements remain active)*
+
 **Bug Fixes:**
-- [ ] **BUG-01**: Fix JSX syntax errors in Navbar.tsx dropdown menu (missing closing tags on DropdownMenuItem)
-- [ ] **BUG-02**: Fix hardcoded password 'N/A' for walk-in customers (generate random password or prevent login)
-- [ ] **BUG-03**: Fix ManagerDashboard setState type mismatch (replace `as any` cast with proper union type)
-- [ ] **BUG-04**: Fix parseInt without NaN checks on route params across all controllers
-- [ ] **BUG-05**: Fix staff schedule upsert logic using `s.id || -1` (never matches for new schedules)
+- [ ] **BUG-01**: Fix JSX syntax errors in Navbar.tsx dropdown menu
+- [ ] **BUG-02**: Fix hardcoded password 'N/A' for walk-in customers
+- [ ] **BUG-03**: Fix ManagerDashboard setState type mismatch
+- [ ] **BUG-04**: Fix parseInt without NaN checks
+- [ ] **BUG-05**: Fix staff schedule upsert logic
 
 **Tech Debt:**
-- [ ] **DEBT-01**: Replace `any` type with proper interfaces across frontend (50+ occurrences) and backend
-- [ ] **DEBT-02**: Split ManagerDashboard.tsx (1224 lines) into separate components (StaffTable, PayrollTable, AttendanceLedger, ReviewModeration)
-- [ ] **DEBT-03**: Split appointmentController.ts (527 lines) into separate modules
-- [ ] **DEBT-04**: Add cursor-based pagination to all list endpoints (appointments, staff, payroll periods)
-- [ ] **DEBT-05**: Extract duplicate auth checks, error responses, and notification patterns into shared helpers
-- [ ] **DEBT-06**: Add Zod schema validation to all API endpoints (replace express-validator or add Zod)
-- [ ] **DEBT-07**: Debounce localStorage writes in AuthContext and CartContext
+- [ ] **DEBT-01**: Replace `any` type with proper interfaces
+- [ ] **DEBT-02**: Split ManagerDashboard.tsx into separate components
+- [ ] **DEBT-03**: Split appointmentController.ts into separate modules
+- [ ] **DEBT-04**: Add cursor-based pagination
+- [ ] **DEBT-05**: Extract shared helpers
+- [ ] **DEBT-06**: Add Zod schema validation
+- [ ] **DEBT-07**: Debounce localStorage writes
 
 **Security:**
-- [ ] **SEC-01**: Remove JWT secret fallbacks, fail fast if env vars not set
-- [ ] **SEC-02**: Add password strength validation during registration
-- [ ] **SEC-03**: Add role-based permission checks for notification creation
-- [ ] **SEC-04**: Add rate limiting middleware to auth endpoints (express-rate-limit)
-- [ ] **SEC-05**: Validate profile picture URLs against allowlist to prevent stored XSS
-- [ ] **SEC-06**: Fix refresh token rotation race condition (create new before deleting old)
+- [ ] **SEC-01**: Remove JWT secret fallbacks
+- [ ] **SEC-02**: Add password strength validation
+- [ ] **SEC-03**: Add role-based permission checks for notifications
+- [ ] **SEC-04**: Add rate limiting middleware
+- [ ] **SEC-05**: Validate profile picture URLs
+- [ ] **SEC-06**: Fix refresh token rotation race condition
 
 **Performance:**
-- [ ] **PERF-01**: Fix sequential awaits in payroll controller (use Promise.all for independent queries)
-- [ ] **PERF-02**: Fix N+1 query pattern in report controller (batch fetch services)
-- [ ] **PERF-03**: Add database index on commission.commission_date for unpaid records
-- [ ] **PERF-04**: Stream large file uploads instead of loading into memory
-- [ ] **PERF-05**: Fix appointment completion flow (wrap in single Prisma transaction, handle email failures gracefully)
+- [ ] **PERF-01**: Fix sequential awaits in payroll controller
+- [ ] **PERF-02**: Fix N+1 query pattern in report controller
+- [ ] **PERF-03**: Add database index on commission.commission_date
+- [ ] **PERF-04**: Stream large file uploads
+- [ ] **PERF-05**: Fix appointment completion flow
 
 **Missing Features:**
-- [ ] **FEAT-01**: Add audit trail (SystemLog entries) for all sensitive operations (payroll, staff updates, commission changes)
-- [ ] **FEAT-02**: Add data export/backup endpoint (CSV/Excel for payroll data)
-- [ ] **FEAT-03**: Make sales target configurable via database or env var (remove hardcoded 8000)
+- [ ] **FEAT-01**: Add audit trail (SystemLog entries)
+- [ ] **FEAT-02**: Add data export/backup endpoint
+- [ ] **FEAT-03**: Make sales target configurable
 
 **Test Coverage:**
-- [ ] **TEST-01**: Set up Jest + Supertest for backend with 80% line coverage minimum
-- [ ] **TEST-02**: Set up Vitest + React Testing Library for frontend with 70% line coverage minimum
-- [ ] **TEST-03**: Write unit tests for commission calculation logic (tiered rates, specialty quota)
-- [ ] **TEST-04**: Write integration tests for authentication flows (register, login, refresh, logout)
-- [ ] **TEST-05**: Write integration tests for appointment creation and completion
-- [ ] **TEST-06**: Write integration tests for payroll generation and period locking
-- [ ] **TEST-07**: Write component tests for critical pages (Login, Booking, ManagerDashboard, StaffDashboard)
+- [ ] **TEST-01**: Set up Jest + Supertest for backend
+- [ ] **TEST-02**: Set up Vitest + React Testing Library for frontend
+- [ ] **TEST-03**: Write unit tests for commission calculation
+- [ ] **TEST-04**: Write integration tests for authentication
+- [ ] **TEST-05**: Write integration tests for appointment completion
+- [ ] **TEST-06**: Write integration tests for payroll generation
+- [ ] **TEST-07**: Write component tests for critical pages
 - [ ] **TEST-08**: Add npm audit to CI/CD pipeline
 
 ### Out of Scope
@@ -84,8 +113,8 @@ A reliable, bug-free salon management system that customers, staff, and managers
 - [ ] **Real-time chat** — Not core to salon operations
 - [ ] **Video appointments** — Not applicable for nail salon
 - [ ] **Multi-tenant / multi-location support** — Single salon deployment only
-- [ ] **Switching from Nodemailer to SendGrid/Resend** — Current setup works, deferral to future
-- [ ] **Switching from bcrypt to bcryptjs** — Current version stable, no pressing need
+- [ ] **Switching from Nodemailer to SendGrid/Resend** — Current setup works
+- [ ] **Switching from bcrypt to bcryptjs** — Current version stable
 
 ## Context
 
@@ -130,5 +159,22 @@ A reliable, bug-free salon management system that customers, staff, and managers
 | Zod for validation | Modern, TypeScript-first, replaces express-validator incrementally | — Pending |
 | Jest + Supertest (backend), Vitest + RTL (frontend) | Recommended by codebase testing analysis, matches existing patterns | — Pending |
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-05-02 after initialization*
+*Last updated: 2026-05-04 after milestone v2.0 start*
