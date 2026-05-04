@@ -40,8 +40,8 @@ app.get('/', (req: Request, res: Response) => {
   res.send('NailssentialsQC Backend API is running!');
 });
 
-// Only listen to the port if not in a serverless environment
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+// Only listen to the port if not in a serverless environment and not in test mode
+if (process.env.NODE_ENV !== 'test' && (process.env.NODE_ENV !== 'production' || !process.env.VERCEL)) {
   app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
   });
