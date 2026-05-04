@@ -49,7 +49,11 @@ const CustomerAppointments: React.FC = () => {
     try {
       setIsLoading(true);
       const res = await getAppointments();
-      if (res.data.success) setAppointments(res.data.data);
+      if (res.data.success) {
+        const aptData = res.data.data;
+        const aptItems = Array.isArray(aptData) ? aptData : (aptData?.items || []);
+        setAppointments(aptItems);
+      }
     } catch {
       setError('Failed to synchronize ritual history.');
     } finally {

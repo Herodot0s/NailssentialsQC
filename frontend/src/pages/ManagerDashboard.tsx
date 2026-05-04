@@ -177,8 +177,17 @@ const ManagerDashboard: React.FC = () => {
 
       if (salesRes.data.success) setSalesStats(salesRes.data.data);
       if (payrollRes.data.success) setPayrollReport(payrollRes.data.data.report);
-      if (staffRes.data.success) setStaffMembers(staffRes.data.data);
-      if (periodsRes.data.success) setPayrollPeriods(periodsRes.data.data);
+      
+      if (staffRes.data.success) {
+        const staffData = staffRes.data.data;
+        setStaffMembers(Array.isArray(staffData) ? staffData : (staffData?.items || []));
+      }
+      
+      if (periodsRes.data.success) {
+        const periodsData = periodsRes.data.data;
+        setPayrollPeriods(Array.isArray(periodsData) ? periodsData : (periodsData?.items || []));
+      }
+      
       if (reviewsRes.data.success) setReviews(reviewsRes.data.data);
       if (attRes.data.success) setAttendance(attRes.data.data);
       if (catRes.data.success) setCategories(catRes.data.data);

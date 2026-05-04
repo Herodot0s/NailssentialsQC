@@ -64,7 +64,9 @@ const Booking: React.FC = () => {
           getAllStaff(),
           getAvailability(selectedDate)
         ]);
-        setStaffList(staffRes.data.data.filter((s: Staff) => s.role === 'staff' || s.role === 'manager'));
+        const staffData = staffRes.data.data;
+        const staffItems = Array.isArray(staffData) ? staffData : (staffData?.items || []);
+        setStaffList(staffItems.filter((s: Staff) => s.role === 'staff' || s.role === 'manager'));
         setSlots(availRes.data.data);
       } catch (err) {
         setError('Failed to load booking details.');

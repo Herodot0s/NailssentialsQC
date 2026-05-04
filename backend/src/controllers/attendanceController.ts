@@ -119,8 +119,10 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
     }
 
     // Calculate tardiness
-    const scheduledStartStr = staffProfile.scheduled_start; // "12:00:00"
-    const [scheduledHours, scheduledMinutes] = scheduledStartStr.split(':').map(Number);
+    const scheduledStartStr = staffProfile.scheduled_start || "12:00:00"; // "12:00:00"
+    const scheduledParts = scheduledStartStr.split(':');
+    const scheduledHours = parseInt(scheduledParts[0]) || 12;
+    const scheduledMinutes = parseInt(scheduledParts[1]) || 0;
     
     const scheduledStartTime = new Date(today);
     scheduledStartTime.setHours(scheduledHours, scheduledMinutes, 0, 0);
@@ -148,7 +150,7 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
       update: {
         check_in: now,
         scheduled_start: scheduledStartStr,
-        scheduled_end: staffProfile.scheduled_end,
+        scheduled_end: staffProfile.scheduled_end || "22:00:00",
         tardiness_minutes: tardinessMinutes,
         deduction_amount: deductionAmount,
       },
@@ -157,7 +159,7 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
         date: today,
         check_in: now,
         scheduled_start: scheduledStartStr,
-        scheduled_end: staffProfile.scheduled_end,
+        scheduled_end: staffProfile.scheduled_end || "22:00:00",
         tardiness_minutes: tardinessMinutes,
         deduction_amount: deductionAmount,
       },

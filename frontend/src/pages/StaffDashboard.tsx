@@ -107,9 +107,11 @@ const StaffDashboard: React.FC = () => {
 
       if (attRes.data.success) setStatus(attRes.data.data.status);
       if (aptRes.data.success) {
-        setAppointments(Array.isArray(aptRes.data.data) ? aptRes.data.data : []);
-        if (!Array.isArray(aptRes.data.data)) {
-          console.error('[StaffDashboard] Unexpected appointments response format, expected array:', aptRes.data.data);
+        const aptData = aptRes.data.data;
+        const aptItems = Array.isArray(aptData) ? aptData : (aptData?.items || []);
+        setAppointments(aptItems);
+        if (!Array.isArray(aptItems)) {
+          console.error('[StaffDashboard] Unexpected appointments response format:', aptData);
         }
       }
       if (commRes.data.success) setCommission(commRes.data.data);
