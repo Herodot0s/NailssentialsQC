@@ -49,24 +49,24 @@ Requirements for the v2.0 Premium Experience & Expansion milestone. Each maps to
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| UI-01 | | Pending |
-| UI-02 | | Pending |
-| UI-03 | | Pending |
-| UI-04 | | Pending |
-| CMS-01 | | Pending |
-| CMS-02 | | Pending |
-| CMS-03 | | Pending |
-| ANLY-01 | | Pending |
-| ANLY-02 | | Pending |
-| ANLY-03 | | Pending |
-| PKG-01 | | Pending |
-| PKG-02 | | Pending |
-| PKG-03 | | Pending |
+| UI-01 | Phase 1 | Pending |
+| UI-02 | Phase 2 | Pending |
+| UI-03 | Phase 3 | Pending |
+| UI-04 | Phase 1 | Pending |
+| CMS-01 | Phase 4 | Pending |
+| CMS-02 | Phase 4 | Pending |
+| CMS-03 | Phase 4 | Pending |
+| ANLY-01 | Phase 6 | Pending |
+| ANLY-02 | Phase 6 | Pending |
+| ANLY-03 | Phase 6 | Pending |
+| PKG-01 | Phase 5 | Pending |
+| PKG-02 | Phase 5 | Pending |
+| PKG-03 | Phase 5 | Pending |
 
 **Coverage:**
 - v2 requirements: 13 total
-- Mapped to phases: 0
-- Unmapped: 13 ⚠️
+- Mapped to phases: 13
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-04*
