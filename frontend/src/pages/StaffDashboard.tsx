@@ -367,12 +367,14 @@ const StaffDashboard: React.FC = () => {
                     </TableHeader>
                     <TableBody>
                        {myPayrolls.map(p => (
-                         <TableRow key={p.id} className="hover:bg-primary-ultra/10 border-primary/5 transition-colors">
-                            <TableCell className="pl-8 py-6 font-bold text-xs">{new Date(p.period.start_date).toLocaleDateString()} — {new Date(p.period.end_date).toLocaleDateString()}</TableCell>
-                            <TableCell className="text-xs">₱{parseFloat(p.base_pay).toLocaleString()}</TableCell>
-                            <TableCell className="text-xs">₱{parseFloat(p.commissions).toLocaleString()}</TableCell>
-                            <TableCell className="text-xs text-destructive">-₱{parseFloat(p.deductions).toLocaleString()}</TableCell>
-                            <TableCell className="pr-8 text-right font-serif text-xl font-light text-primary">₱{parseFloat(p.net_pay).toLocaleString()}</TableCell>
+                         <TableRow key={p.id || Math.random()} className="hover:bg-primary-ultra/10 border-primary/5 transition-colors">
+                            <TableCell className="pl-8 py-6 font-bold text-xs">
+                               {p.period ? `${new Date(p.period.start_date).toLocaleDateString()} — ${new Date(p.period.end_date).toLocaleDateString()}` : 'N/A'}
+                            </TableCell>
+                            <TableCell className="text-xs">₱{(p.base_pay || 0).toLocaleString()}</TableCell>
+                            <TableCell className="text-xs">₱{(p.commissions || 0).toLocaleString()}</TableCell>
+                            <TableCell className="text-xs text-destructive">-₱{(p.deductions || 0).toLocaleString()}</TableCell>
+                            <TableCell className="pr-8 text-right font-serif text-xl font-light text-primary">₱{(p.net_pay || 0).toLocaleString()}</TableCell>
                          </TableRow>
                        ))}
                     </TableBody>

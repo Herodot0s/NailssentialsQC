@@ -4,11 +4,13 @@ import type { User } from './User';
 export interface LoginRequest {
   identifier: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface RegisterRequest {
   fullName: string;
   password: string;
+  confirmPassword?: string;
   email?: string | null;
   phone?: string | null;
 }
@@ -158,6 +160,7 @@ export interface PayrollPeriod {
 }
 
 export interface PayrollRecord {
+  id?: number;
   staffId: number;
   fullName: string;
   commissionCount: number;
@@ -170,6 +173,10 @@ export interface PayrollRecord {
   deductions: number;
   net_pay: number;
   base_pay: number;
+  period?: {
+    start_date: string;
+    end_date: string;
+  };
 }
 
 // Sales/Reports API types
@@ -254,7 +261,7 @@ export interface AppointmentWithServices {
   customer?: { full_name: string };
   technician?: { full_name: string };
   services: {
-    service: { name: string };
+    service: { name: string; price: number };
     price_at_booking?: number;
   }[];
   transactions: Transaction[];

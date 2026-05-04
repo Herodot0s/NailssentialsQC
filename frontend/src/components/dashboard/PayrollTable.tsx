@@ -63,7 +63,7 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({ payrollReport, onPay
                   </Badge>
                   <span className="text-[10px] font-bold text-muted-foreground">{format(new Date(period.start_date), 'MMM dd')} — {format(new Date(period.end_date), 'MMM dd')}</span>
                 </div>
-                <h4 className="font-serif text-3xl font-light mb-8">₱{parseFloat(period.total_salon_sales || '0').toLocaleString()} <span className="text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest block mt-2 italic opacity-60">Confirmed Salon Sales</span></h4>
+                <h4 className="font-serif text-3xl font-light mb-8">₱{(period.total_salon_sales || 0).toLocaleString()} <span className="text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest block mt-2 italic opacity-60">Confirmed Salon Sales</span></h4>
 
                 <div className="flex justify-between items-center pt-6 border-t border-gray-50">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">{period._count?.payrolls || 0} Employees</p>

@@ -159,13 +159,28 @@ Plans:
 **Plans**: 8 plans
 
 Plans:
+**Wave 1**
 - [ ] 07-01-PLAN.md — Backend Test Foundation
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 07-02-PLAN.md — Commission Logic Unit Tests
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 07-03-PLAN.md — Authentication Integration Tests
+
+**Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 07-04-PLAN.md — Appointment Management Integration Tests
+
+**Wave 5** *(blocked on Wave 4 completion)*
 - [ ] 07-05-PLAN.md — Payroll & Period Locking Integration Tests
+
+**Wave 6** *(blocked on Wave 5 completion)*
 - [ ] 07-06-PLAN.md — Staff & Attendance Integration Tests
+
+**Wave 7** *(blocked on Wave 6 completion)*
 - [ ] 07-07-PLAN.md — Services, Customers & Reports Integration Tests
+
+**Wave 8** *(blocked on Wave 7 completion)*
 - [ ] 07-08-PLAN.md — Miscellaneous Controllers Integration Tests
 
 ### Phase 8: Frontend Test Infrastructure

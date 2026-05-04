@@ -13,7 +13,7 @@ import {
   Star,
 } from 'lucide-react';
 import ReceiptModal from '@/components/ReceiptModal';
-import type { AppointmentItem, SubmitReviewRequest, Appointment } from '@/types/api';
+import type { AppointmentItem, Appointment, AppointmentWithServices } from '@/types/api';
 import {
   Dialog,
   DialogContent,
@@ -116,8 +116,8 @@ const CustomerAppointments: React.FC = () => {
             My <span className="italic">Rituals</span>
           </h1>
         </div>
-        <Button asChild className="h-14 px-10 rounded-none text-xs uppercase tracking-widest font-bold shadow-xl">
-           <Link to="/booking">Schedule New Session</Link>
+        <Button render={<Link to="/booking" />} className="h-14 px-10 rounded-none text-xs uppercase tracking-widest font-bold shadow-xl">
+           Schedule New Session
         </Button>
       </div>
 
@@ -134,8 +134,8 @@ const CustomerAppointments: React.FC = () => {
               <Calendar className="h-12 w-12 text-primary/20 mx-auto" />
               <h2 className="font-serif text-3xl font-light">The archive is empty</h2>
               <p className="text-muted-foreground text-sm font-light">Begin your self-care journey with us by scheduling your first ritual.</p>
-              <Button variant="outline" className="h-12 px-8 rounded-none border-primary/20" asChild>
-                <Link to="/booking">Book First Visit</Link>
+              <Button variant="outline" className="h-12 px-8 rounded-none border-primary/20" render={<Link to="/booking" />}>
+                Book First Visit
               </Button>
            </div>
         </div>
@@ -188,7 +188,7 @@ const CustomerAppointments: React.FC = () => {
                                {item.review && (
                                  <div className="flex items-center gap-1">
                                     {[...Array(5)].map((_, i) => (
-                                      <Star key={i} className={`h-3 w-3 ${i < item.review.rating ? 'text-primary fill-primary' : 'text-muted'}`} />
+                                      <Star key={i} className={`h-3 w-3 ${i < (item.review?.rating || 0) ? 'text-primary fill-primary' : 'text-muted'}`} />
                                     ))}
                                     <span className="text-[9px] font-bold text-success-color uppercase tracking-widest ml-2">Reviewed</span>
                                  </div>
@@ -286,7 +286,16 @@ const CustomerAppointments: React.FC = () => {
         <ReceiptModal
           open={showReceipt}
           onOpenChange={setShowReceipt}
-          appointment={selectedAppointment!}
+          appointment={{
+            id: selectedAppointment.id,
+            customer: selectedAppointment.customer,
+            technician: selectedAppointment.items[0]?.staff,
+            services: selectedAppointment.items.map(item => ({
+              service: item.service,
+              price_at_booking: item.service.price
+            })),
+            transactions: selectedAppointment.transactions || []
+          } as AppointmentWithServices}
         />
       )}
     </div>

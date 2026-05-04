@@ -120,10 +120,18 @@ const ManageServices: React.FC = () => {
     }
 
     try {
+      const payload = {
+        name: currentService.name!,
+        price: parseFloat(currentService.price || '0'),
+        duration: currentService.duration_minutes!,
+        category_id: currentService.category_id!,
+        is_active: currentService.is_active,
+      };
+
       if (currentService.id) {
-        await updateService(currentService.id, currentService);
+        await updateService(currentService.id, payload);
       } else {
-        await createService(currentService);
+        await createService(payload);
       }
       setIsEditing(false);
       fetchData();
@@ -134,7 +142,10 @@ const ManageServices: React.FC = () => {
 
   const toggleStatus = async (svc: Service) => {
     try {
-      await updateService(svc.id, { ...svc, is_active: !svc.is_active });
+      await updateService(svc.id, {
+        is_active: !svc.is_active,
+        price: parseFloat(svc.price),
+      });
       fetchData();
     } catch (err) {
       setError('Failed to toggle status');

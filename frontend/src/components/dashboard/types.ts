@@ -1,4 +1,4 @@
-import { StaffMember, PayrollRecord, Review, AttendanceRecord, PayrollPeriod } from '@/types/api';
+import type { StaffMember, PayrollRecord, Review, AttendanceRecord, PayrollPeriod } from '@/types/api';
 
 export interface StaffTableProps {
   staffMembers: StaffMember[];

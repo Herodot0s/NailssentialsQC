@@ -14,14 +14,6 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -48,7 +40,6 @@ import {
   Loader2,
   Plus,
   Check,
-  X,
   Star,
   Users,
   Clock,
@@ -57,7 +48,6 @@ import {
   PieChart as PieChartIcon,
   Settings,
   AlertCircle,
-  Lock,
   TrendingUp,
 } from 'lucide-react';
 import {
@@ -92,21 +82,11 @@ import type {
   Category,
   UpdateAttendanceRequest,
   PayrollRecord,
-  Message,
   Review,
   StaffMember,
   ScheduleItem,
   SalesStats,
-  HistoricalData,
 } from '@/types/api';
-
-interface ScheduleItem {
-  id?: number;
-  day_of_week: number;
-  start_time: string;
-  end_time: string;
-  is_active: boolean;
-}
 
 interface HistoricalData {
   date: string;
@@ -218,8 +198,26 @@ const ManagerDashboard: React.FC = () => {
   const handleAddStaff = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createStaff(newStaffForm);
+      await createStaff({
+        ...newStaffForm,
+        basePayPerWeek: parseFloat(newStaffForm.basePayPerWeek),
+        dailyTarget: parseFloat(newStaffForm.dailyTarget),
+      });
       setShowAddStaffModal(false);
+      setNewStaffForm({
+        fullName: '',
+        email: '',
+        phone: '',
+        username: '',
+        password: '',
+        specializations: '',
+        basePayPerWeek: '2500',
+        dailyTarget: '6000',
+        sssNumber: '',
+        tinNumber: '',
+        govId: '',
+        profilePictureUrl: '',
+      });
       fetchData();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to add staff member.';

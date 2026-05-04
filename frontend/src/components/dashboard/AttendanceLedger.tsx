@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
@@ -40,7 +40,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
                     {log.tardiness_minutes > 0 ? `${log.tardiness_minutes} MINS` : 'ON TIME'}
                   </span>
                 </TableCell>
-                <TableCell className="font-bold">₱{parseFloat(log.deduction_amount || '0').toLocaleString()}</TableCell>
+                <TableCell className="font-bold">₱{(log.deduction_amount || 0).toLocaleString()}</TableCell>
                 <TableCell className="text-right pr-8">
                   <div className="flex justify-end gap-2">
                     <Button onClick={() => onUpdateAttendance(log.id, 'Present')} variant="ghost" size="sm" className="rounded-none h-8 text-[8px] uppercase font-bold tracking-widest border border-success-color/20 text-success-color hover:bg-success-color hover:text-white">Present</Button>

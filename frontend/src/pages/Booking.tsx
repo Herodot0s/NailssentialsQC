@@ -162,12 +162,11 @@ const Booking: React.FC = () => {
               <p className="text-muted-foreground font-light">Begin your journey by selecting from our curated treatments.</p>
            </div>
            <Button
-             asChild
+             render={<Link to="/services" />}
              className="h-14 px-10 rounded-none text-xs uppercase tracking-widest font-bold"
            >
-             <Link to="/services">Explore Services</Link>
-           </Button>
-        </div>
+             Explore Services
+           </Button>        </div>
       </div>
     );
   }
@@ -232,8 +231,8 @@ const Booking: React.FC = () => {
                                    <Select 
                                      value={item.staffId?.toString()} 
                                      onValueChange={(val) => updateCartItem(item.serviceId, { 
-                                       staffId: parseInt(val),
-                                       staffName: staffList.find(s => s.id === parseInt(val))?.fullName
+                                       staffId: val ? parseInt(val) : undefined,
+                                       staffName: val ? staffList.find(s => s.id === parseInt(val))?.fullName : undefined
                                      })}
                                    >
                                      <SelectTrigger className="rounded-none border-primary/10 h-11 focus:ring-primary bg-white/50">

@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import { Menu as MenuPrimitive } from '@base-ui/react/menu';
 import { Slot } from '@radix-ui/react-slot';
 
@@ -15,13 +14,13 @@ function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
   return <MenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />;
 }
 
-function DropdownMenuTrigger({ asChild, ...props }: MenuPrimitive.Trigger.Props & { asChild?: boolean }) {
+function DropdownMenuTrigger({ asChild, ...props }: any) {
   const Comp = asChild ? Slot : MenuPrimitive.Trigger;
   return <Comp data-slot="dropdown-menu-trigger" {...props} />;
 }
 
 function DropdownMenuContent({
-  align = 'bottom',
+  align = 'center',
   alignOffset = 0,
   side = 'bottom',
   sideOffset = 4,
@@ -29,7 +28,7 @@ function DropdownMenuContent({
   children,
   asChild,
   ...props
-}: MenuPrimitive.Positioner.Props & { children?: React.ReactNode; asChild?: boolean }) {
+}: any) {
   return (
     <MenuPrimitive.Portal>
       <MenuPrimitive.Positioner
@@ -54,7 +53,7 @@ function DropdownMenuContent({
   );
 }
 
-function DropdownMenuGroup({ asChild, ...props }: MenuPrimitive.Group.Props & { asChild?: boolean }) {
+function DropdownMenuGroup({ asChild, ...props }: any) {
   const Comp = asChild ? Slot : MenuPrimitive.Group;
   return <Comp data-slot="dropdown-menu-group" {...props} />;
 }
@@ -64,10 +63,7 @@ function DropdownMenuLabel({
   inset,
   asChild,
   ...props
-}: MenuPrimitive.GroupLabel.Props & {
-  inset?: boolean;
-  asChild?: boolean;
-}) {
+}: any) {
   const Comp = asChild ? Slot : MenuPrimitive.GroupLabel;
   return (
     <Comp
@@ -88,11 +84,7 @@ function DropdownMenuItem({
   variant = 'default',
   asChild,
   ...props
-}: MenuPrimitive.Item.Props & {
-  inset?: boolean;
-  variant?: 'default' | 'destructive';
-  asChild?: boolean;
-}) {
+}: any) {
   const Comp = asChild ? Slot : MenuPrimitive.Item;
   return (
     <Comp
@@ -118,10 +110,7 @@ function DropdownMenuSubTrigger({
   asChild,
   children,
   ...props
-}: MenuPrimitive.SubmenuTrigger.Props & {
-  inset?: boolean;
-  asChild?: boolean;
-}) {
+}: any) {
   const Comp = asChild ? Slot : MenuPrimitive.SubmenuTrigger;
   return (
     <Comp
@@ -145,14 +134,7 @@ function DropdownMenuSubContent({
   children,
   asChild,
   ...props
-}: MenuPrimitive.SubmenuRoot.Props & {
-  align?: 'top' | 'bottom' | 'left' | 'right' | 'center' | 'start' | 'end';
-  alignOffset?: number;
-  side?: 'top' | 'bottom' | 'left' | 'right';
-  sideOffset?: number;
-  children?: React.ReactNode;
-  asChild?: boolean;
-}) {
+}: any) {
   return (
     <MenuPrimitive.Portal>
       <MenuPrimitive.Positioner
@@ -183,7 +165,7 @@ function DropdownMenuCheckboxItem({
   checked,
   asChild,
   ...props
-}: MenuPrimitive.CheckboxItem.Props & { asChild?: boolean }) {
+}: any) {
   const Comp = asChild ? Slot : MenuPrimitive.CheckboxItem;
   return (
     <Comp
@@ -208,7 +190,7 @@ function DropdownMenuCheckboxItem({
   );
 }
 
-function DropdownMenuRadioGroup({ asChild, ...props }: MenuPrimitive.RadioGroup.Props & { asChild?: boolean }) {
+function DropdownMenuRadioGroup({ asChild, ...props }: any) {
   const Comp = asChild ? Slot : MenuPrimitive.RadioGroup;
   return <Comp data-slot="dropdown-menu-radio-group" {...props} />;
 }
@@ -218,7 +200,7 @@ function DropdownMenuRadioItem({
   children,
   asChild,
   ...props
-}: MenuPrimitive.RadioItem.Props & { asChild?: boolean }) {
+}: any) {
   const Comp = asChild ? Slot : MenuPrimitive.RadioItem;
   return (
     <Comp
@@ -242,7 +224,7 @@ function DropdownMenuRadioItem({
   );
 }
 
-function DropdownMenuSeparator({ className, asChild, ...props }: MenuPrimitive.Separator.Props & { asChild?: boolean }) {
+function DropdownMenuSeparator({ className, asChild, ...props }: any) {
   const Comp = asChild ? Slot : MenuPrimitive.Separator;
   return (
     <Comp
@@ -253,7 +235,7 @@ function DropdownMenuSeparator({ className, asChild, ...props }: MenuPrimitive.S
   );
 }
 
-function DropdownMenuShortcut({ className, asChild, ...props }: React.ComponentProps<'span'> & { asChild?: boolean }) {
+function DropdownMenuShortcut({ className, asChild, ...props }: any) {
   const Comp = asChild ? Slot : 'span';
   return (
     <Comp

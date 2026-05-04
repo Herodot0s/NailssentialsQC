@@ -49,8 +49,8 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ open, onOpenChange, appoint
   if (!appointment || !transaction) return null;
 
   const totalAmount = appointment.services.reduce(
-    (acc: number, s: { service?: { name: string; price: number }; price_at_booking?: number }) =>
-      acc + Number(s.price_at_booking || s.service?.price),
+    (acc: number, s) =>
+      acc + Number(s.price_at_booking || s.service?.price || 0),
     0,
   );
 
@@ -96,18 +96,18 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ open, onOpenChange, appoint
               </div>
               <div className="flex justify-between">
                 <span>Technician:</span>
-                <span className="capitalize">{appointment.technician.full_name}</span>
+                <span className="capitalize">{appointment.technician?.full_name || 'N/A'}</span>
               </div>
             </div>
 
             <div className="mb-6">
               <p className="text-[10px] font-bold uppercase mb-2 text-zinc-400">Services</p>
               <div className="space-y-2 text-[11px]">
-                {appointment.services.map((s: { service: { name: string }; price_at_booking?: number }, idx: number) => (
+                {appointment.services.map((s, idx: number) => (
                   <div key={idx} className="flex justify-between items-start gap-4">
                     <span className="flex-grow">{s.service.name}</span>
                     <span className="font-bold">
-                      ₱{Number(s.price_at_booking || s.service.price).toFixed(2)}
+                      ₱{Number(s.price_at_booking || s.service.price || 0).toFixed(2)}
                     </span>
                   </div>
                 ))}

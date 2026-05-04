@@ -41,11 +41,11 @@ const DrillDownLineChart: React.FC<DrillDownLineChartProps> = ({
       const entry: Record<string, string | number> = { date: d.date };
       if (!selectedCategory) {
         Object.keys(d.categories || {}).forEach(cat => {
-          entry[cat] = d.categories?.[cat];
+          entry[cat] = d.categories?.[cat] ?? 0;
         });
       } else {
         Object.keys(d.services || {}).forEach(svc => {
-          entry[svc] = d.services?.[svc];
+          entry[svc] = d.services?.[svc] ?? 0;
         });
       }
       return entry;
@@ -64,17 +64,16 @@ const DrillDownLineChart: React.FC<DrillDownLineChartProps> = ({
     return Array.from(names);
   }, [historicalData, selectedCategory]);
 
-  const handleLegendClick = (data: { value: string }) => {
+  const handleLegendClick = (data: any) => {
     if (!selectedCategory && data?.value) {
       onCategorySelect(data.value);
     }
   };
 
-  // FIXED: Corrected the bracket order and added 'name' to the type definition
-  const handleChartClick = (data: { activePayload?: Array<{ name?: string; payload?: { date: string } }> }) => {
+  const handleChartClick = (data: any) => {
     if (data && data.activePayload && !selectedCategory) {
       const payload = data.activePayload[0]?.name;
-      if (payload) onCategorySelect(payload);
+      if (payload) onCategorySelect(payload.toString());
     }
   };
 

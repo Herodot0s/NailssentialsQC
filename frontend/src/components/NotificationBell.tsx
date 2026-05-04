@@ -111,7 +111,7 @@ const NotificationBell: React.FC = () => {
               <DropdownMenuItem
                 key={notification.id}
                 className={`flex flex-col items-start p-3 focus:bg-accent ${!notification.is_read ? 'bg-muted/30' : ''}`}
-                onSelect={(e) => {
+                onSelect={(e: any) => {
                   if (!notification.is_read) {
                     e.preventDefault();
                     handleMarkRead(notification.id);
