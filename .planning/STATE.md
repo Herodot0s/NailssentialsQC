@@ -67,3 +67,4 @@ Resume file: .planning/phases/07-backend-test-infrastructure/07-CONTEXT.md
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260504-3eq | Fix Uncaught TypeError: appointments.filter is not a function at StaffDashboard.tsx:181 | 2026-05-03 | 1234b1b | [260504-3eq-fix-uncaught-typeerror-appointments-filt](./quick/260504-3eq-fix-uncaught-typeerror-appointments-filt/) |
+| 20260504-fix-frontend-errors | Fix 53 frontend build errors (TypeScript, types, unused imports) | 2026-05-04 | eeb6fef | [20260504-fix-frontend-errors](./quick/20260504-fix-frontend-errors/) |

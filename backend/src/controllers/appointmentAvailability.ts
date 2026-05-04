@@ -14,7 +14,7 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
     if (!date) {
       return res.status(400).json({ success: false, message: 'Date is required' });
     }
-    const dateStr = Array.isArray(date) ? date[0] : date;
+    const dateStr = Array.isArray(date) ? (date[0] as string) : (date as string);
 
     const OPERATING_HOURS = { start: 12, end: 22 }; // 12 PM to 10 PM
     const allSlots = [];
@@ -93,7 +93,7 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
 
 export const getCommissionSummary = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
+    const userId = Number(req.user?.sub);
     const staff = await prisma.staffProfile.findUnique({ where: { user_id: userId } });
     if (!staff) return res.status(404).json({ success: false, message: 'Staff profile not found' });
 
@@ -139,7 +139,7 @@ export const getCommissionSummary = async (req: AuthRequest, res: Response) => {
 
 export const getStaffCommissions = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
+    const userId = Number(req.user?.sub);
     const staff = await prisma.staffProfile.findUnique({ where: { user_id: userId } });
     if (!staff) return res.status(404).json({ success: false, message: 'Staff profile not found' });
 

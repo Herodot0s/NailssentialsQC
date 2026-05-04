@@ -11,7 +11,7 @@ interface PrismaError extends Error {
  */
 export const submitReview = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
+    const userId = Number(req.user?.sub);
     const { appointmentItemId, rating, tags } = req.body;
 
     if (!appointmentItemId || !rating) {
@@ -68,7 +68,7 @@ export const getStaffReviews = async (req: AuthRequest, res: Response) => {
     const { staffId } = req.params;
     const reviews = await prisma.review.findMany({
       where: {
-        staff_id: parseInt(staffId),
+        staff_id: parseInt(staffId as string),
         is_approved_for_public: true,
       },
       include: {
@@ -114,7 +114,7 @@ export const moderateReview = async (req: AuthRequest, res: Response) => {
     const { isApproved } = req.body;
 
     const review = await prisma.review.update({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id as string) },
       data: { is_approved_for_public: isApproved },
     });
 

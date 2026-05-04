@@ -44,7 +44,7 @@ export const authorizeRoles = (...roles: string[]) => {
 };
 
 export const validateZod = (schema: z.ZodSchema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
     const result = schema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({
@@ -56,7 +56,7 @@ export const validateZod = (schema: z.ZodSchema) => {
         },
       });
     }
-    req.validatedBody = result.data;
+    req.validatedBody = result.data as Record<string, any>;
     next();
   };
 };

@@ -62,7 +62,7 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
     }
 
     const appointment = await prisma.appointment.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id as string) },
       include: {
         customer: true,
         items: {
@@ -103,20 +103,20 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
     const result = await prisma.$transaction(async (tx) => {
       // Update appointment status
       await tx.appointment.update({
-        where: { id: parseInt(id) },
+        where: { id: parseInt(id as string) },
         data: { status: 'completed' },
       });
 
       // Also update all items to completed
       await tx.appointmentItem.updateMany({
-        where: { appointment_id: parseInt(id) },
+        where: { appointment_id: parseInt(id as string) },
         data: { status: 'completed' }
       });
 
       // Create transaction
       const transaction = await tx.transaction.create({
         data: {
-          appointment_id: parseInt(id),
+          appointment_id: parseInt(id as string),
           amount: totalAmount,
           payment_method: paymentMethod as PaymentMethod,
           status: 'completed',

@@ -6,7 +6,7 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '.
 import { AuthRequest } from '../middleware/authMiddleware';
 import { sendSuccess, sendError, getCurrentUser } from '../utils/apiHelpers';
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (req: AuthRequest, res: Response) => {
   try {
     const { fullName, password, email: reqEmail, phone: reqPhone } = req.validatedBody || req.body;
     // Coalesce empty strings to null for unique constraints
@@ -105,7 +105,7 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: AuthRequest, res: Response) => {
   try {
     const { identifier, password } = req.validatedBody || req.body;
 
@@ -219,7 +219,7 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const refresh = async (req: Request, res: Response) => {
+export const refresh = async (req: AuthRequest, res: Response) => {
   try {
     const { refreshToken: providedToken } = req.body;
 
@@ -228,7 +228,7 @@ export const refresh = async (req: Request, res: Response) => {
     }
 
     // 1. JWT Signature Check (Review Finding [HIGH])
-    let decoded: JwtPayload;
+    let decoded: any;
     try {
       decoded = verifyRefreshToken(providedToken);
     } catch (err) {

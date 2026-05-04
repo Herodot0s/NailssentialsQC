@@ -7,7 +7,7 @@ import { AuthRequest } from '../middleware/authMiddleware';
  */
 export const sendMessage = async (req: AuthRequest, res: Response) => {
   try {
-    const senderId = req.user?.sub;
+    const senderId = Number(req.user?.sub);
     const { receiverId, subject, body } = req.body;
 
     if (!senderId) {
@@ -40,7 +40,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
  */
 export const getMyMessages = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
+    const userId = Number(req.user?.sub);
     const messages = await prisma.message.findMany({
       where: {
         OR: [
@@ -68,12 +68,12 @@ export const getMyMessages = async (req: AuthRequest, res: Response) => {
  */
 export const markAsRead = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
+    const userId = Number(req.user?.sub);
     const { id } = req.params;
 
     const message = await prisma.message.update({
       where: {
-        id: parseInt(id),
+        id: parseInt(id as string),
         receiver_id: userId, // Ensure only the receiver can mark as read
       },
       data: { is_read: true },

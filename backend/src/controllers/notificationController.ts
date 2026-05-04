@@ -5,7 +5,7 @@ import { sendSuccess, sendError } from '../utils/apiHelpers';
 
 export const getNotifications = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
+    const userId = Number(req.user?.sub);
     if (!userId) return sendError(res, 'UNAUTHORIZED', 'Unauthorized', 401);
 
     const notifications = await prisma.notification.findMany({
@@ -24,7 +24,7 @@ export const getNotifications = async (req: AuthRequest, res: Response) => {
 export const markAsRead = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.sub;
+    const userId = Number(req.user?.sub);
     if (!userId) return sendError(res, 'UNAUTHORIZED', 'Unauthorized', 401);
 
     await prisma.notification.update({
@@ -41,7 +41,7 @@ export const markAsRead = async (req: AuthRequest, res: Response) => {
 
 export const markAllAsRead = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
+    const userId = Number(req.user?.sub);
     if (!userId) return sendError(res, 'UNAUTHORIZED', 'Unauthorized', 401);
 
     await prisma.notification.updateMany({

@@ -9,7 +9,7 @@ export const getCategories = async (req: Request, res: Response) => {
 
     const where: Prisma.ServiceCategoryWhereInput = { is_active: true };
     if (parentId !== undefined) {
-      where.parent_id = parentId === 'null' ? null : parseInt(parentId);
+      where.parent_id = parentId === 'null' ? null : parseInt(parentId as string);
     }
 
     const categories = await prisma.serviceCategory.findMany({
