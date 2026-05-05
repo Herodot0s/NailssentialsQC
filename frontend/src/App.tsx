@@ -19,6 +19,17 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import './App.css';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 min default; landing page CMS queries override to 10 min
+      retry: 1,
+    },
+  },
+});
+
 function AppRoutes() {
   const location = useLocation();
 
@@ -92,14 +103,16 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <Router>
-          <Navbar />
-          <AppRoutes />
-        </Router>
-      </CartProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <CartProvider>
+          <Router>
+            <Navbar />
+            <AppRoutes />
+          </Router>
+        </CartProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
