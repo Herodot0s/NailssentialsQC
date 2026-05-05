@@ -63,7 +63,9 @@
 **Success Criteria** (what must be TRUE):
   1. Customer can browse a public "Nail Art Exhibit" gallery with high-resolution imagery
   2. Manager can upload, name, and delete exhibit images via a simple drag-and-drop interface (Vercel Blob)
-**Plans**: 3 plans
+**Plans**: 4 plans
+- **Wave 0**
+  - [x] 03-00-PLAN.md — Test Skeletons (Backend & Frontend)
 - **Wave 1**
   - [ ] 03-01-PLAN.md — Data Foundations (Prisma, API, Migration)
 - **Wave 2**
@@ -127,7 +129,7 @@
 | V1-7. Backend Test Infrastructure | 8/8 | Complete | 2026-05-04 |
 | 1. Premium UI Foundations | 4/4 | Complete | 2026-05-05 |
 | 2. Customer Journey Redesign | 4/4 | In progress | - |
-| 3. Nail Art Exhibit & Gallery | 3/3 | Not started | - |
+| 3. Nail Art Exhibit & Gallery | 1/4 | In Progress|  |
 | 4. Operations Interface Overhaul | 0/0 | Not started | - |
 | 5. Marketing CMS & Content Control | 0/0 | Not started | - |
 | 6. Service Packages & Bundling | 0/0 | Not started | - |
