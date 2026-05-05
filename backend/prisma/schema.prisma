@@ -445,3 +445,36 @@ model Exhibit {
   @@index([service_id])
   @@map("exhibits")
 }
+
+enum SiteContentType {
+  faq
+  policy
+
+  @@map("site_content_type")
+}
+
+model SiteSettings {
+  id         Int      @id @default(autoincrement())
+  section    String
+  key        String
+  value      String   @db.Text
+  updated_at DateTime @updatedAt
+
+  @@unique([section, key], name: "section_key_unique")
+  @@index([section])
+  @@map("site_settings")
+}
+
+model SiteContent {
+  id         Int             @id @default(autoincrement())
+  type       SiteContentType
+  title      String
+  body       String          @db.Text
+  sort_order Int             @default(0)
+  is_active  Boolean         @default(true)
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
+
+  @@index([type, is_active, sort_order])
+  @@map("site_content")
+}

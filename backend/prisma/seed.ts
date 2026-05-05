@@ -299,6 +299,52 @@ async function main() {
     }
   });
 
+  // --- 8. SEED SITE SETTINGS DEFAULTS ---
+  console.log('Seeding SiteSettings defaults...');
+  
+  const SITE_SETTINGS_DEFAULTS: Array<{ section: string; key: string; value: string }> = [
+    // Hero section
+    { section: 'hero', key: 'tagline', value: 'Experience Pure Tranquility' },
+    { section: 'hero', key: 'headline', value: 'Elevate Your Natural Beauty' },
+    { section: 'hero', key: 'subheadline', value: 'Discover a haven of serenity where expert craftsmanship meets premium self-care. Welcome to the NailssentialsQC sanctuary.' },
+    { section: 'hero', key: 'bg_image_url', value: 'https://images.unsplash.com/photo-1600334129128-685c4582f98c?auto=format&fit=crop&q=80&w=2070' },
+    { section: 'hero', key: 'button_label', value: 'Book Your Sanctuary' },
+    // Signature Experience section
+    { section: 'signature', key: 'label', value: 'Signature Experience' },
+    { section: 'signature', key: 'headline', value: 'The Nailssentials Ritual' },
+    { section: 'signature', key: 'body', value: 'Step into a world where time slows down. Our signature ritual combines aromatherapy, precision technique, and an atmosphere of absolute luxury to revitalize your spirit.' },
+    { section: 'signature', key: 'link_label', value: 'Discover the Menu' },
+    { section: 'signature', key: 'bg_image_url', value: 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&q=80&w=2070' },
+    // Footer CTA section
+    { section: 'footer', key: 'headline', value: 'Prepare for your visit.' },
+    { section: 'footer', key: 'button_label', value: 'JOIN THE PRIVILEGE CLUB' },
+    // Contact Information section (empty by default — manager fills in)
+    { section: 'contact', key: 'phone', value: '' },
+    { section: 'contact', key: 'address', value: '' },
+    { section: 'contact', key: 'hours', value: '' },
+    { section: 'contact', key: 'email', value: '' },
+    { section: 'contact', key: 'maps_link', value: '' },
+  ];
+
+  for (const setting of SITE_SETTINGS_DEFAULTS) {
+    await (prisma as any).siteSettings.upsert({
+      where: {
+        section_key_unique: {
+          section: setting.section,
+          key: setting.key,
+        },
+      },
+      update: {}, // Never overwrite manager-set values
+      create: {
+        section: setting.section,
+        key: setting.key,
+        value: setting.value,
+      },
+    });
+  }
+  
+  console.log(`Seeded ${SITE_SETTINGS_DEFAULTS.length} SiteSettings rows.`);
+
   console.log('Comprehensive Seeding Completed Successfully!');
 }
 
