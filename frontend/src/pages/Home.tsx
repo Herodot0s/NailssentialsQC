@@ -1,7 +1,6 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Leaf, ShieldCheck, ChevronRight, Star } from 'lucide-react';
+import { Sparkles, Leaf, ShieldCheck, Star } from 'lucide-react';
 import Hero from '@/components/home/Hero';
 import TrendingTreatments from '@/components/home/TrendingTreatments';
 

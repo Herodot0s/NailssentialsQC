@@ -353,7 +353,7 @@ Generate selected artifacts sequentially (file I/O is fast, no benefit from para
 gsd-sdk query generate-dev-preferences --analysis "$ANALYSIS_PATH" --json
 ```
 
-Display: "✓ Generated /gsd-dev-preferences at C:/Users/Administrator/Desktop/nailssentialsqc-system/.gemini/skills/gsd-dev-preferences/SKILL.md"
+Display: "✓ Generated /gsd-dev-preferences at C:/Users/Administrator/Desktop/nailssentialsqc-system/.gemini/commands/gsd/dev-preferences.md"
 
 **For CLAUDE.md profile section (if selected):**
 
@@ -412,7 +412,7 @@ Your profile:    C:/Users/Administrator/Desktop/nailssentialsqc-system/.gemini/g
 Then list paths for each generated artifact:
 ```
 Artifacts:
-  ✓ /gsd-dev-preferences   C:/Users/Administrator/Desktop/nailssentialsqc-system/.gemini/skills/gsd-dev-preferences/SKILL.md
+  ✓ /gsd-dev-preferences   C:/Users/Administrator/Desktop/nailssentialsqc-system/.gemini/commands/gsd/dev-preferences.md
   ✓ CLAUDE.md section       ./CLAUDE.md
   ✓ Global CLAUDE.md        C:/Users/Administrator/Desktop/nailssentialsqc-system/.gemini/CLAUDE.md
 ```

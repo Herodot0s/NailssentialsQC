@@ -8,7 +8,9 @@ import Login from './pages/Login';
 import Services from './pages/Services';
 import Booking from './pages/Booking';
 import Home from './pages/Home';
+import Gallery from './pages/Gallery';
 import ManageServices from './pages/ManageServices';
+import ManageExhibits from './pages/ManageExhibits';
 import ManagerDashboard from './pages/ManagerDashboard';
 import StaffDashboard from './pages/StaffDashboard';
 import CustomerAppointments from './pages/CustomerAppointments';
@@ -27,6 +29,7 @@ function AppRoutes() {
         <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
         <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
         <Route path="/services" element={<PageTransition><Services /></PageTransition>} />
+        <Route path="/gallery" element={<PageTransition><Gallery /></PageTransition>} />
         <Route path="/booking" element={<PageTransition><Booking /></PageTransition>} />
 
         {/* Protected Routes */}
@@ -68,6 +71,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={['manager']}>
               <PageTransition><ManagerDashboard /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/manage-exhibits"
+          element={
+            <ProtectedRoute allowedRoles={['manager']}>
+              <PageTransition><ManageExhibits /></PageTransition>
             </ProtectedRoute>
           }
         />

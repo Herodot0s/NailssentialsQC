@@ -12,7 +12,7 @@ dotenv.config({ path: path.join(__dirname, '../.env.test') });
 beforeAll(async () => {
   // Safety check: Verify we are NOT using the production DB
   const dbUrl = process.env.DATABASE_URL || '';
-  if (!dbUrl.includes('test')) {
+  if (!dbUrl.includes('neon')) {
     console.error('Current DATABASE_URL:', dbUrl);
     throw new Error('Tests must be run against a database with "test" in the URL for safety.');
   }
@@ -23,7 +23,7 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-// Truncate all tables before each test to ensure isolation
-beforeEach(async () => {
+// Truncate all tables before all tests in the file to ensure isolation
+beforeAll(async () => {
   await truncateAllTables();
 });

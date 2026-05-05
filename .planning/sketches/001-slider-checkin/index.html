@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sketch 001: Slider Check-In/Out</title>
+  <link rel="stylesheet" href="../themes/default.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--color-bg); color: var(--color-text); min-height: 100vh; }
+
+    .variant-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--color-border); background: white; position: sticky; top: 0; z-index: 100; }
+    .variant-tab { flex: 1; padding: 12px 16px; text-align: center; font-size: var(--text-sm); font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.15s ease; color: var(--color-text-muted); background: none; border-top: none; border-left: none; border-right: none; }
+    .variant-tab:hover { color: var(--color-text); background: var(--color-primary-light); }
+    .variant-tab.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+
+    .variant-content { display: none; padding: 40px 20px; max-width: 480px; margin: 0 auto; }
+    .variant-content.active { display: block; }
+
+    .phone-frame { background: white; border-radius: 24px; box-shadow: var(--shadow-2xl); overflow: hidden; border: 1px solid var(--color-border); }
+    .phone-header { background: var(--color-primary); padding: 20px 24px; color: white; }
+    .phone-header h2 { font-family: var(--font-serif); font-weight: 300; font-size: var(--text-xl); }
+    .phone-header p { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.2em; opacity: 0.7; margin-top: 4px; }
+
+    .phone-body { padding: 32px 24px; }
+
+    /* === VARIANT A: iPhone-Style Slider === */
+    .iphone-slider-container { text-align: center; padding: 24px 0; }
+
+    .iphone-status-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      border-radius: var(--radius-full);
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+    .iphone-status-badge.checked-out { background: var(--color-bg); color: var(--color-text-muted); border: 1px solid var(--color-border); }
+    .iphone-status-badge.checked-in { background: var(--color-success-light); color: var(--color-success); border: 1px solid var(--color-success); }
+
+    .iphone-clock { font-family: var(--font-serif); font-weight: 300; font-size: 48px; color: var(--color-text); margin-bottom: 4px; }
+    .iphone-date { font-size: 12px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 24px; }
+
+    .iphone-track {
+      position: relative;
+      width: 100%;
+      height: 56px;
+      background: var(--color-primary-light);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      user-select: none;
+      cursor: default;
+    }
+
+    .iphone-track-text {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: var(--color-primary);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Spotlight effect using mask */
+    .iphone-track-text .spotlight {
+      background: linear-gradient(90deg, transparent 0%, rgba(184,121,78,0.15) 30%, rgba(184,121,78,0.4) 50%, rgba(184,121,78,0.15) 70%, transparent 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      padding: 0 60px;
+      animation: spotlightMove 3s ease-in-out infinite;
+    }
+
+    @keyframes spotlightMove {
+      0%, 100% { background-position: 200% center; }
+      50% { background-position: -100% center; }
+    }
+
+    .iphone-thumb {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 48px;
+      height: 48px;
+      background: white;
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-md);
+      z-index: 2;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: box-shadow 0.15s ease;
+      touch-action: none;
+    }
+    .iphone-thumb:active { cursor: grabbing; box-shadow: var(--shadow-lg); }
+    .iphone-thumb svg { width: 20px; height: 20px; color: var(--color-primary); }
+
+    .iphone-thumb.slid { left: calc(100% - 52px); }
+    .iphone-track.complete { background: var(--color-success-light); border-color: var(--color-success); }
+    .iphone-track.complete .iphone-track-text { color: var(--color-success); }
+
+    .iphone-last-action { font-size: 11px; color: var(--color-text-muted); margin-top: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; }
+
+    /* === VARIANT B: Modern Capsule Slider === */
+    .modern-slider-container { text-align: center; padding: 24px 0; }
+
+    .modern-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: 32px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .modern-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 20px;
+    }
+    .modern-status .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .modern-status.off { background: var(--color-bg); color: var(--color-text-muted); border: 1px solid var(--color-border); }
+    .modern-status.off .dot { background: var(--color-text-muted); }
+    .modern-status.on { background: var(--color-success-light); color: var(--color-success); border: 1px solid rgba(74,140,111,0.3); }
+    .modern-status.on .dot { background: var(--color-success); }
+
+    .modern-clock { font-family: var(--font-serif); font-weight: 300; font-size: 42px; margin-bottom: 2px; }
+    .modern-label { font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 28px; }
+
+    .modern-track {
+      position: relative;
+      width: 100%;
+      height: 64px;
+      background: var(--color-primary-light);
+      border-radius: var(--radius-full);
+      border: 2px solid var(--color-border);
+      overflow: visible;
+      user-select: none;
+    }
+
+    .modern-track-fill {
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 56px;
+      background: var(--color-primary);
+      border-radius: var(--radius-full);
+      transition: width 0.15s ease;
+    }
+
+    .modern-track-label {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--color-primary);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .modern-thumb {
+      position: absolute;
+      top: 50%;
+      left: 4px;
+      transform: translateY(-50%);
+      width: 56px;
+      height: 56px;
+      background: white;
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-md);
+      z-index: 2;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: box-shadow 0.15s ease, left 0.15s ease;
+      touch-action: none;
+      border: 2px solid var(--color-primary);
+    }
+    .modern-thumb:active { cursor: grabbing; box-shadow: var(--shadow-lg); }
+    .modern-thumb svg { width: 22px; height: 22px; color: var(--color-primary); }
+
+    .modern-info { display: flex; justify-content: space-between; margin-top: 16px; font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+
+    /* === VARIANT C: Pull-down Slider === */
+    .pulldown-slider-container { text-align: center; padding: 24px 0; }
+
+    .pulldown-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: 32px 24px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pulldown-status {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 12px;
+    }
+    .pulldown-status .badge { padding: 6px 16px; border-radius: var(--radius-full); }
+    .pulldown-status .badge.off { background: var(--color-bg); color: var(--color-text-muted); border: 1px solid var(--color-border); }
+    .pulldown-status .badge.on { background: var(--color-success-light); color: var(--color-success); border: 1px solid rgba(74,140,111,0.3); }
+
+    .pulldown-clock { font-family: var(--font-serif); font-weight: 300; font-size: 42px; margin-bottom: 24px; }
+
+    .pulldown-track {
+      position: relative;
+      width: 80px;
+      height: 240px;
+      background: var(--color-primary-light);
+      border-radius: 40px;
+      border: 2px solid var(--color-border);
+      margin: 0 auto;
+      overflow: visible;
+      user-select: none;
+    }
+
+    .pulldown-fill {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 56px;
+      background: var(--color-primary);
+      border-radius: 40px;
+      transition: height 0.15s ease;
+    }
+
+    .pulldown-thumb {
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 56px;
+      height: 56px;
+      background: white;
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-md);
+      z-index: 2;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+      border: 2px solid var(--color-primary);
+    }
+    .pulldown-thumb:active { cursor: grabbing; }
+    .pulldown-thumb svg { width: 22px; height: 22px; color: var(--color-primary); }
+
+    .pulldown-label {
+      margin-top: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--color-primary);
+    }
+
+    .pulldown-info { margin-top: 12px; font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+    /* Toolbar */
+    .toolbar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--color-border); padding: 12px 20px; display: flex; gap: 12px; align-items: center; z-index: 200; }
+    .toolbar button { padding: 8px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: white; cursor: pointer; transition: all 0.15s ease; }
+    .toolbar button:hover { background: var(--color-primary-light); border-color: var(--color-primary); color: var(--color-primary); }
+    .toolbar button.primary { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+    .toolbar button.primary:hover { background: var(--color-primary-hover); }
+    .toolbar select { padding: 8px 12px; font-size: 12px; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: white; cursor: pointer; }
+
+    .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--color-success); color: white; padding: 12px 24px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; letter-spacing: 0.05em; z-index: 999; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+    .toast.show { opacity: 1; }
+
+    .state-toggle { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+    .state-toggle button { padding: 8px 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; border-radius: var(--radius-full); border: 1px solid var(--color-border); background: white; cursor: pointer; transition: all 0.15s ease; }
+    .state-toggle button.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+  </style>
+</head>
+<body>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:var(--color-text-muted);">Sketch 001:</span>
+    <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;">Slider Check-In</span>
+    <select id="theme-switcher" onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'">
+      <option value="default">Default Theme</option>
+    </select>
+    <button onclick="resetAll()" style="margin-left:auto;">Reset All</button>
+  </div>
+
+  <!-- Variant Tabs -->
+  <div class="variant-tabs">
+    <button class="variant-tab active" onclick="showVariant('a')">Variant A: iPhone Style</button>
+    <button class="variant-tab" onclick="showVariant('b')">★ Variant B: Modern Capsule</button>
+    <button class="variant-tab" onclick="showVariant('c')">Variant C: Pull-Down</button>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- VARIANT A: iPhone-Style Slider -->
+  <div class="variant-content active" id="variant-a">
+    <div class="phone-frame">
+      <div class="phone-header">
+        <h2>Artisan Terminal</h2>
+        <p>Shift Registry</p>
+      </div>
+      <div class="phone-body">
+        <div class="iphone-slider-container">
+          <div class="iphone-status-badge" id="a-status" style="background:var(--color-bg);color:var(--color-text-muted);border:1px solid var(--color-border);">
+            Status: Off Duty
+          </div>
+          <div class="iphone-clock" id="a-clock">10:42</div>
+          <div class="iphone-date" id="a-date">Thursday, April 30</div>
+
+          <div class="state-toggle">
+            <button class="active" onclick="setAVariantState(false, this)">Off Duty</button>
+            <button onclick="setAVariantState(true, this)">On Duty</button>
+          </div>
+
+          <div class="iphone-track" id="a-track">
+            <div class="iphone-track-text">
+              <span class="spotlight" id="a-track-text">Slide to Check In</span>
+            </div>
+            <div class="iphone-thumb" id="a-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="iphone-last-action" id="a-last-action">Last action: —</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:24px;font-size:11px;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.15em;">
+      <p>★ Winner</p>
+    </div>
+  </div>
+
+  <!-- VARIANT B: Modern Capsule Slider ★ WINNER -->
+  <div class="variant-content" id="variant-b">
+    <div class="phone-frame">
+      <div class="phone-header">
+        <h2>Artisan Terminal</h2>
+        <p>Shift Registry</p>
+      </div>
+      <div class="phone-body">
+        <div class="modern-slider-container">
+          <div class="modern-card">
+            <div style="text-align:center;margin-bottom:8px;font-size:11px;color:var(--color-success);font-weight:700;text-transform:uppercase;letter-spacing:0.15em;">★ WINNER</div>
+            <div class="modern-status off" id="b-status">
+              <span class="dot"></span>
+              Off Duty
+            </div>
+            <div class="modern-clock" id="b-clock">10:42</div>
+            <div class="modern-label">Current Time</div>
+
+            <div class="state-toggle">
+              <button class="active" onclick="setBVariantState(false, this)">Off Duty</button>
+              <button onclick="setBVariantState(true, this)">On Duty</button>
+            </div>
+
+            <div class="modern-track" id="b-track">
+              <div class="modern-track-fill" id="b-fill"></div>
+              <div class="modern-track-label" id="b-track-text">Slide to Check In</div>
+              <div class="modern-thumb" id="b-thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="modern-info">
+              <span id="b-last-action">Last: —</span>
+              <span id="b-today-hours">Today: 0h 0m</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:24px;font-size:11px;color:var(--color-success);text-transform:uppercase;letter-spacing:0.15em;font-weight:700;">
+      <p>★ Winner — Modern Capsule</p>
+    </div>
+  </div>
+
+  <!-- VARIANT C: Pull-Down Slider -->
+  <div class="variant-content" id="variant-c">
+    <div class="phone-frame">
+      <div class="phone-header">
+        <h2>Artisan Terminal</h2>
+        <p>Shift Registry</p>
+      </div>
+      <div class="phone-body">
+        <div class="pulldown-slider-container">
+          <div class="pulldown-card">
+            <div class="pulldown-status">
+              <span class="badge off" id="c-status">Off Duty</span>
+            </div>
+            <div class="pulldown-clock" id="c-clock">10:42</div>
+
+            <div class="state-toggle">
+              <button class="active" onclick="setCVariantState(false, this)">Off Duty</button>
+              <button onclick="setCVariantState(true, this)">On Duty</button>
+            </div>
+
+            <div class="pulldown-track" id="c-track">
+              <div class="pulldown-fill" id="c-fill"></div>
+              <div class="pulldown-thumb" id="c-thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 19V5M5 12l7-7 7 7"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="pulldown-label" id="c-track-text">Pull Up to Check In</div>
+            <div class="pulldown-info" id="c-last-action">Last: —</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:24px;font-size:11px;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.15em;">
+      <p>★ Winner</p>
+    </div>
+  </div>
+
+  <div style="height:80px;"></div>
+
+  <script>
+    // === Variant Tab Switching ===
+    function showVariant(v) {
+      document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.variant-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('variant-' + v).classList.add('active');
+    }
+
+    // === Toast ===
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    // === Clock Update ===
+    function updateClock() {
+      const now = new Date();
+      const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const date = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+      ['a', 'b', 'c'].forEach(v => {
+        const clock = document.getElementById(v + '-clock');
+        const dateEl = document.getElementById(v + '-date');
+        if (clock) clock.textContent = time;
+        if (dateEl) dateEl.textContent = date;
+      });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // === VARIANT A: iPhone-Style ===
+    let aState = false; // false = off duty, true = on duty
+    let aDragging = false;
+    let aStartX = 0;
+    let aThumbLeft = 4;
+    const aTrack = document.getElementById('a-track');
+    const aThumb = document.getElementById('a-thumb');
+    const aMaxLeft = aTrack.offsetWidth - 52;
+
+    function setAVariantState(checkedIn, btn) {
+      aState = checkedIn;
+      const statusEl = document.getElementById('a-status');
+      const textEl = document.getElementById('a-track-text');
+      const lastEl = document.getElementById('a-last-action');
+
+      if (checkedIn) {
+        statusEl.textContent = 'Status: Active';
+        statusEl.className = 'iphone-status-badge';
+        statusEl.style.background = 'var(--color-success-light)';
+        statusEl.style.color = 'var(--color-success)';
+        statusEl.style.border = '1px solid rgba(74,140,111,0.3)';
+        textEl.textContent = 'Slide to Check Out';
+        aThumbLeft = aMaxLeft;
+        aTrack.classList.add('complete');
+        lastEl.textContent = 'Last action: Checked in at ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } else {
+        statusEl.textContent = 'Status: Off Duty';
+        statusEl.className = 'iphone-status-badge';
+        statusEl.style.background = 'var(--color-bg)';
+        statusEl.style.color = 'var(--color-text-muted)';
+        statusEl.style.border = '1px solid var(--color-border)';
+        textEl.textContent = 'Slide to Check In';
+        aThumbLeft = 4;
+        aTrack.classList.remove('complete');
+        lastEl.textContent = 'Last action: Checked out at ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      aThumb.style.left = aThumbLeft + 'px';
+      aTrack.style.background = checkedIn ? 'var(--color-success-light)' : 'var(--color-primary-light)';
+
+      if (btn) {
+        document.querySelectorAll('#variant-a .state-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+    }
+
+    aThumb.addEventListener('mousedown', (e) => { aDragging = true; aStartX = e.clientX - aThumbLeft; aThumb.style.transition = 'none'; });
+    aThumb.addEventListener('touchstart', (e) => { aDragging = true; aStartX = e.touches[0].clientX - aThumbLeft; aThumb.style.transition = 'none'; });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!aDragging) return;
+      let newLeft = e.clientX - aStartX;
+      newLeft = Math.max(4, Math.min(newLeft, aMaxLeft));
+      aThumbLeft = newLeft;
+      aThumb.style.left = newLeft + 'px';
+      aTrack.style.background = newLeft > aMaxLeft * 0.5 ? 'var(--color-success-light)' : 'var(--color-primary-light)';
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!aDragging) return;
+      let newLeft = e.touches[0].clientX - aStartX;
+      newLeft = Math.max(4, Math.min(newLeft, aMaxLeft));
+      aThumbLeft = newLeft;
+      aThumb.style.left = newLeft + 'px';
+      aTrack.style.background = newLeft > aMaxLeft * 0.5 ? 'var(--color-success-light)' : 'var(--color-primary-light)';
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!aDragging) return;
+      aDragging = false;
+      aThumb.style.transition = 'left 0.15s ease';
+      if (aThumbLeft > aMaxLeft * 0.85) {
+        aThumbLeft = aMaxLeft;
+        aThumb.style.left = aThumbLeft + 'px';
+        if (!aState) { setAVariantState(true, null); showToast('✓ Checked In Successfully'); }
+        else { setAVariantState(false, null); showToast('✓ Checked Out Successfully'); }
+      } else {
+        aThumbLeft = aState ? aMaxLeft : 4;
+        aThumb.style.left = aThumbLeft + 'px';
+      }
+    });
+
+    document.addEventListener('touchend', () => {
+      if (!aDragging) return;
+      aDragging = false;
+      aThumb.style.transition = 'left 0.15s ease';
+      if (aThumbLeft > aMaxLeft * 0.85) {
+        aThumbLeft = aMaxLeft;
+        aThumb.style.left = aThumbLeft + 'px';
+        if (!aState) { setAVariantState(true, null); showToast('✓ Checked In Successfully'); }
+        else { setAVariantState(false, null); showToast('✓ Checked Out Successfully'); }
+      } else {
+        aThumbLeft = aState ? aMaxLeft : 4;
+        aThumb.style.left = aThumbLeft + 'px';
+      }
+    });
+
+    // === VARIANT B: Modern Capsule ===
+    let bState = false;
+    let bDragging = false;
+    let bStartX = 0;
+    let bThumbLeft = 4;
+    const bTrack = document.getElementById('b-track');
+    const bThumb = document.getElementById('b-thumb');
+    const bFill = document.getElementById('b-fill');
+    const bMaxLeft = bTrack.offsetWidth - 60;
+
+    function setBVariantState(checkedIn, btn) {
+      bState = checkedIn;
+      const statusEl = document.getElementById('b-status');
+      const textEl = document.getElementById('b-track-text');
+      const lastEl = document.getElementById('b-last-action');
+
+      if (checkedIn) {
+        statusEl.innerHTML = '<span class="dot"></span> Active';
+        statusEl.className = 'modern-status on';
+        textEl.textContent = 'Slide to Check Out';
+        bThumbLeft = bMaxLeft;
+        bFill.style.width = bMaxLeft + 56 + 'px';
+        lastEl.textContent = 'In at ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('b-today-hours').textContent = 'Today: 0h 0m';
+      } else {
+        statusEl.innerHTML = '<span class="dot"></span> Off Duty';
+        statusEl.className = 'modern-status off';
+        textEl.textContent = 'Slide to Check In';
+        bThumbLeft = 4;
+        bFill.style.width = '56px';
+        lastEl.textContent = 'Out at ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      bThumb.style.left = bThumbLeft + 'px';
+
+      if (btn) {
+        document.querySelectorAll('#variant-b .state-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+    }
+
+    bThumb.addEventListener('mousedown', (e) => { bDragging = true; bStartX = e.clientX - bThumbLeft; bThumb.style.transition = 'none'; bFill.style.transition = 'none'; });
+    bThumb.addEventListener('touchstart', (e) => { bDragging = true; bStartX = e.touches[0].clientX - bThumbLeft; bThumb.style.transition = 'none'; bFill.style.transition = 'none'; });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!bDragging) return;
+      let newLeft = e.clientX - bStartX;
+      newLeft = Math.max(4, Math.min(newLeft, bMaxLeft));
+      bThumbLeft = newLeft;
+      bThumb.style.left = newLeft + 'px';
+      bFill.style.width = (newLeft + 52) + 'px';
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!bDragging) return;
+      let newLeft = e.touches[0].clientX - bStartX;
+      newLeft = Math.max(4, Math.min(newLeft, bMaxLeft));
+      bThumbLeft = newLeft;
+      bThumb.style.left = newLeft + 'px';
+      bFill.style.width = (newLeft + 52) + 'px';
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!bDragging) return;
+      bDragging = false;
+      bThumb.style.transition = 'left 0.15s ease';
+      bFill.style.transition = 'width 0.15s ease';
+      if (bThumbLeft > bMaxLeft * 0.85) {
+        bThumbLeft = bMaxLeft;
+        bThumb.style.left = bThumbLeft + 'px';
+        bFill.style.width = bMaxLeft + 56 + 'px';
+        if (!bState) { setBVariantState(true, null); showToast('✓ Checked In Successfully'); }
+        else { setBVariantState(false, null); showToast('✓ Checked Out Successfully'); }
+      } else {
+        bThumbLeft = bState ? bMaxLeft : 4;
+        bThumb.style.left = bThumbLeft + 'px';
+        bFill.style.width = bState ? (bMaxLeft + 56) + 'px' : '56px';
+      }
+    });
+
+    document.addEventListener('touchend', () => {
+      if (!bDragging) return;
+      bDragging = false;
+      bThumb.style.transition = 'left 0.15s ease';
+      bFill.style.transition = 'width 0.15s ease';
+      if (bThumbLeft > bMaxLeft * 0.85) {
+        bThumbLeft = bMaxLeft;
+        bThumb.style.left = bThumbLeft + 'px';
+        bFill.style.width = bMaxLeft + 56 + 'px';
+        if (!bState) { setBVariantState(true, null); showToast('✓ Checked In Successfully'); }
+        else { setBVariantState(false, null); showToast('✓ Checked Out Successfully'); }
+      } else {
+        bThumbLeft = bState ? bMaxLeft : 4;
+        bThumb.style.left = bThumbLeft + 'px';
+        bFill.style.width = bState ? (bMaxLeft + 56) + 'px' : '56px';
+      }
+    });
+
+    // === VARIANT C: Pull-Down ===
+    let cState = false;
+    let cDragging = false;
+    let cStartY = 0;
+    let cThumbBottom = 4;
+    const cTrack = document.getElementById('c-track');
+    const cThumb = document.getElementById('c-thumb');
+    const cFill = document.getElementById('c-fill');
+    const cMaxBottom = cTrack.offsetHeight - 60;
+
+    function setCVariantState(checkedIn, btn) {
+      cState = checkedIn;
+      const statusEl = document.getElementById('c-status');
+      const textEl = document.getElementById('c-track-text');
+      const lastEl = document.getElementById('c-last-action');
+
+      if (checkedIn) {
+        statusEl.textContent = 'Active';
+        statusEl.className = 'badge on';
+        textEl.textContent = 'Pull Down to Check Out';
+        cThumbBottom = cMaxBottom;
+        cThumb.style.bottom = cThumbBottom + 'px';
+        cFill.style.height = cMaxBottom + 56 + 'px';
+        lastEl.textContent = 'In: ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } else {
+        statusEl.textContent = 'Off Duty';
+        statusEl.className = 'badge off';
+        textEl.textContent = 'Pull Up to Check In';
+        cThumbBottom = 4;
+        cThumb.style.bottom = cThumbBottom + 'px';
+        cFill.style.height = '56px';
+        lastEl.textContent = 'Out: ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      if (btn) {
+        document.querySelectorAll('#variant-c .state-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+    }
+
+    cThumb.addEventListener('mousedown', (e) => { cDragging = true; cStartY = e.clientY - cThumbBottom; cThumb.style.transition = 'none'; cFill.style.transition = 'none'; });
+    cThumb.addEventListener('touchstart', (e) => { cDragging = true; cStartY = e.touches[0].clientY - cThumbBottom; cThumb.style.transition = 'none'; cFill.style.transition = 'none'; });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!cDragging) return;
+      let newBottom = e.clientY - cStartY;
+      newBottom = Math.max(4, Math.min(newBottom, cMaxBottom));
+      cThumbBottom = newBottom;
+      cThumb.style.bottom = newBottom + 'px';
+      cFill.style.height = (newBottom + 52) + 'px';
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!cDragging) return;
+      let newBottom = e.touches[0].clientY - cStartY;
+      newBottom = Math.max(4, Math.min(newBottom, cMaxBottom));
+      cThumbBottom = newBottom;
+      cThumb.style.bottom = newBottom + 'px';
+      cFill.style.height = (newBottom + 52) + 'px';
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!cDragging) return;
+      cDragging = false;
+      cThumb.style.transition = 'bottom 0.15s ease';
+      cFill.style.transition = 'height 0.15s ease';
+      if (cThumbBottom > cMaxBottom * 0.85) {
+        cThumbBottom = cMaxBottom;
+        cThumb.style.bottom = cThumbBottom + 'px';
+        cFill.style.height = cMaxBottom + 56 + 'px';
+        if (!cState) { setCVariantState(true, null); showToast('✓ Checked In Successfully'); }
+        else { setCVariantState(false, null); showToast('✓ Checked Out Successfully'); }
+      } else {
+        cThumbBottom = cState ? cMaxBottom : 4;
+        cThumb.style.bottom = cThumbBottom + 'px';
+        cFill.style.height = cState ? (cMaxBottom + 56) + 'px' : '56px';
+      }
+    });
+
+    document.addEventListener('touchend', () => {
+      if (!cDragging) return;
+      cDragging = false;
+      cThumb.style.transition = 'bottom 0.15s ease';
+      cFill.style.transition = 'height 0.15s ease';
+      if (cThumbBottom > cMaxBottom * 0.85) {
+        cThumbBottom = cMaxBottom;
+        cThumb.style.bottom = cThumbBottom + 'px';
+        cFill.style.height = cMaxBottom + 56 + 'px';
+        if (!cState) { setCVariantState(true, null); showToast('✓ Checked In Successfully'); }
+        else { setCVariantState(false, null); showToast('✓ Checked Out Successfully'); }
+      } else {
+        cThumbBottom = cState ? cMaxBottom : 4;
+        cThumb.style.bottom = cThumbBottom + 'px';
+        cFill.style.height = cState ? (cMaxBottom + 56) + 'px' : '56px';
+      }
+    });
+
+    // === Reset ===
+    function resetAll() {
+      setAVariantState(false, null);
+      setBVariantState(false, null);
+      setCVariantState(false, null);
+      showToast('All sliders reset');
+    }
+  </script>
+</body>
+</html>

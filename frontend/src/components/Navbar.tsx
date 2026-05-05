@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { LogOut, User, Calendar, Settings, LayoutDashboard, Menu, ShoppingCart } from 'lucide-react';
+import { LogOut, User, Calendar, Settings, LayoutDashboard, Menu, ShoppingCart, Image as ImageIcon } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import { useCart } from '../context/CartContext';
 
@@ -50,6 +50,12 @@ const Navbar: React.FC = () => {
               className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all"
             >
               Services
+            </Link>
+            <Link
+              to="/gallery"
+              className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all"
+            >
+              Exhibit
             </Link>
             {isAuthenticated && user?.role === 'customer' && (
               <Link
@@ -91,12 +97,20 @@ const Navbar: React.FC = () => {
                   </Link>
                 )}
                 {user?.role === 'manager' && (
-                  <Link
-                    to="/manage-services"
-                    className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all"
-                  >
-                    Manage Services
-                  </Link>
+                  <>
+                    <Link
+                      to="/manage-services"
+                      className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all"
+                    >
+                      Manage Services
+                    </Link>
+                    <Link
+                      to="/manage-exhibits"
+                      className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all"
+                    >
+                      Exhibit Gallery
+                    </Link>
+                  </>
                 )}
 
                 {(user?.role === 'staff' || user?.role === 'manager') && <NotificationBell />}
@@ -161,13 +175,22 @@ const Navbar: React.FC = () => {
                       </DropdownMenuItem>
                     )}
                     {user?.role === 'manager' && (
-                      <DropdownMenuItem
-                        onClick={() => navigate('/manage-services')}
-                        className="rounded-none px-4 py-3 cursor-pointer"
-                      >
-                        <Settings className="mr-3 h-4 w-4 stroke-[1.5]" />
-                        <span className="text-xs font-medium">Manage Services</span>
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => navigate('/manage-services')}
+                          className="rounded-none px-4 py-3 cursor-pointer"
+                        >
+                          <Settings className="mr-3 h-4 w-4 stroke-[1.5]" />
+                          <span className="text-xs font-medium">Manage Services</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => navigate('/manage-exhibits')}
+                          className="rounded-none px-4 py-3 cursor-pointer"
+                        >
+                          <ImageIcon className="mr-3 h-4 w-4 stroke-[1.5]" />
+                          <span className="text-xs font-medium">Exhibit Gallery</span>
+                        </DropdownMenuItem>
+                      </>
                     )}
                     <DropdownMenuSeparator className="bg-primary/5" />
                     <DropdownMenuItem
@@ -207,6 +230,12 @@ const Navbar: React.FC = () => {
                 <Menu className="h-6 w-6 stroke-[1.5]" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 mt-4 border-none shadow-xl rounded-none p-4 space-y-2">
+                <DropdownMenuItem
+                  onClick={() => navigate('/gallery')}
+                  className="rounded-none px-4 py-3 cursor-pointer"
+                >
+                  Exhibit
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => navigate('/services')}
                   className="rounded-none px-4 py-3 cursor-pointer"

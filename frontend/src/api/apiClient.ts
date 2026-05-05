@@ -63,9 +63,16 @@ apiClient.interceptors.response.use(
   },
 );
 
-// File upload method (base64 upload for Vercel serverless)
-export const uploadFile = (base64Data: string, filename: string, mimeType: string) =>
-  apiClient.post('/upload', { base64Data, filename, mimeType });
+// File upload method (multipart/form-data)
+export const uploadFile = (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return apiClient.post('/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
 
 // Catalog methods
 export const getCategories = () => apiClient.get('/services/categories');
@@ -147,5 +154,11 @@ export const getHistoricalAnalytics = (params: { startDate: string; endDate: str
 export const getNotifications = () => apiClient.get('/notifications');
 export const markNotificationRead = (id: number) => apiClient.put(`/notifications/${id}/read`);
 export const markAllNotificationsRead = () => apiClient.put('/notifications/read-all');
+
+// Exhibit methods
+export const getExhibits = () => apiClient.get('/exhibits');
+export const createExhibit = (data: { title: string; image_url: string; staff_id: number; service_id?: number }) =>
+  apiClient.post('/exhibits', data);
+export const deleteExhibit = (id: number) => apiClient.delete(`/exhibits/${id}`);
 
 export default apiClient;

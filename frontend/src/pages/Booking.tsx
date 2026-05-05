@@ -163,12 +163,13 @@ const Booking: React.FC = () => {
               <h2 className="font-serif text-4xl font-light">Your cart is empty</h2>
               <p className="text-muted-foreground font-light">Begin your journey by selecting from our curated treatments.</p>
            </div>
-           <Button
-             render={<Link to="/services" />}
-             className="h-14 px-10 rounded-none text-xs uppercase tracking-widest font-bold"
-           >
-             Explore Services
-           </Button>        </div>
+           <Link to="/services">
+             <Button
+               className="h-14 px-10 rounded-none text-xs uppercase tracking-widest font-bold"
+             >
+               Explore Services
+             </Button>
+           </Link>        </div>
       </div>
     );
   }

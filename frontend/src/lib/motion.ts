@@ -9,7 +9,7 @@ export const PAGE_VARIANTS = {
     y: 0,
     transition: {
       duration: PAGE_TRANSITION_DURATION,
-      ease: PREMIUM_EASE,
+      ease: PREMIUM_EASE as any,
     },
   },
   exit: {

@@ -7,12 +7,13 @@ import prisma from '../../src/utils/prisma';
  */
 export const truncateAllTables = async () => {
   const tables = await prisma.$queryRaw<Array<{ tablename: string }>>`
-    SELECT tablename FROM pg_tables 
-    WHERE schemaname='public' 
+    SELECT tablename FROM pg_tables
+    WHERE schemaname='public'
     AND tablename != '_prisma_migrations';
   `;
 
-  for (const { tablename } of tables) {
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${tablename}" CASCADE;`);
+  const tableNames = tables.map((t) => `"${t.tablename}"`).join(', ');
+  if (tableNames.length > 0) {
+    await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${tableNames} CASCADE;`);
   }
 };

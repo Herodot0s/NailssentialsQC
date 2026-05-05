@@ -25,6 +25,9 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendEmail = async (to: string, subject: string, html: string) => {
+  if (process.env.NODE_ENV === 'test') {
+    return true;
+  }
   try {
     const info = await transporter.sendMail({
       from: `"NailssentialsQC" <${process.env.SMTP_FROM || 'noreply@nailssentialsqc.com'}>`,

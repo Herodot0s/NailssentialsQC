@@ -266,3 +266,22 @@ export interface AppointmentWithServices {
   }[];
   transactions: Transaction[];
 }
+
+// Exhibit API types
+export interface Exhibit {
+  id: number;
+  title: string;
+  image_url: string;
+  staff_id: number;
+  service_id: number | null;
+  is_active: boolean;
+  created_at: string;
+  artist?: {
+    id: number;
+    full_name: string;
+  };
+  service?: {
+    id: number;
+    name: string;
+  };
+}

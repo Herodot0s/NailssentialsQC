@@ -116,6 +116,7 @@ model StaffProfile {
   payrolls          StaffPayroll[]
   deductions        DeductionLog[]
   reviews           Review[]
+  exhibits          Exhibit[]
 
   @@index([full_name])
   @@map("staff_profiles")
@@ -169,6 +170,7 @@ model Service {
   category          ServiceCategory   @relation(fields: [category_id], references: [id])
   appointment_items AppointmentItem[]
   commissions       Commission[]
+  exhibits          Exhibit[]
 
   @@unique([name, category_id])
   @@index([category_id])
@@ -424,4 +426,22 @@ model SystemSettings {
   description String?
 
   @@map("system_settings")
+}
+
+model Exhibit {
+  id          Int      @id @default(autoincrement())
+  title       String
+  image_url   String
+  staff_id    Int
+  service_id  Int?
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  artist  StaffProfile @relation(fields: [staff_id], references: [id])
+  service Service?      @relation(fields: [service_id], references: [id])
+
+  @@index([staff_id])
+  @@index([service_id])
+  @@map("exhibits")
 }

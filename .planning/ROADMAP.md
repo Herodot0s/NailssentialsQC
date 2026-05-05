@@ -67,11 +67,11 @@
 - **Wave 0**
   - [x] 03-00-PLAN.md — Test Skeletons (Backend & Frontend)
 - **Wave 1**
-  - [ ] 03-01-PLAN.md — Data Foundations (Prisma, API, Migration)
+  - [x] 03-01-PLAN.md — Data Foundations (Prisma, API, Migration)
 - **Wave 2**
-  - [ ] 03-02-PLAN.md — Management CMS (Manager Upload/List)
+  - [x] 03-02-PLAN.md — Management CMS (Manager Upload/List)
 - **Wave 3**
-  - [ ] 03-03-PLAN.md — Public Gallery (Masonry Layout, Detail View)
+  - [x] 03-03-PLAN.md — Public Gallery (Masonry Layout, Detail View)
 **UI hint**: yes
 
 ### Phase 4: Operations Interface Overhaul
@@ -129,7 +129,7 @@
 | V1-7. Backend Test Infrastructure | 8/8 | Complete | 2026-05-04 |
 | 1. Premium UI Foundations | 4/4 | Complete | 2026-05-05 |
 | 2. Customer Journey Redesign | 4/4 | In progress | - |
-| 3. Nail Art Exhibit & Gallery | 1/4 | In Progress|  |
+| 3. Nail Art Exhibit & Gallery | 4/4 | Complete | 2026-05-05 |
 | 4. Operations Interface Overhaul | 0/0 | Not started | - |
 | 5. Marketing CMS & Content Control | 0/0 | Not started | - |
 | 6. Service Packages & Bundling | 0/0 | Not started | - |

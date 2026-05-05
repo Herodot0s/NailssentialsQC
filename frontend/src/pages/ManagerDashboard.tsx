@@ -49,6 +49,7 @@ import {
   Settings,
   AlertCircle,
   TrendingUp,
+  Image as ImageIcon,
 } from 'lucide-react';
 import {
   getDailySales,
@@ -76,6 +77,7 @@ import { StaffTable } from '@/components/dashboard/StaffTable';
 import { PayrollTable } from '@/components/dashboard/PayrollTable';
 import { AttendanceLedger } from '@/components/dashboard/AttendanceLedger';
 import { ReviewModeration } from '@/components/dashboard/ReviewModeration';
+import ManageExhibits from './ManageExhibits';
 import type {
   PayrollPeriod,
   AttendanceRecord,
@@ -98,7 +100,7 @@ interface HistoricalData {
 const COLORS = ['#B8794E', '#D9A07E', '#E6B69E', '#F2CCBE', '#9A6440'];
 
 const ManagerDashboard: React.FC = () => {
-  type ActiveView = 'analytics' | 'staff' | 'attendance' | 'deductions' | 'payroll' | 'reviews';
+  type ActiveView = 'analytics' | 'staff' | 'attendance' | 'deductions' | 'payroll' | 'reviews' | 'exhibits';
   const [activeView, setActiveView] = useState<ActiveView>('analytics');
   const [salesStats, setSalesStats] = useState<SalesStats | null>(null);
   const [payrollReport, setPayrollReport] = useState<PayrollRecord[]>([]);
@@ -391,6 +393,7 @@ const ManagerDashboard: React.FC = () => {
     { id: 'deductions', label: 'Deductions Ledger', icon: Wallet },
     { id: 'payroll', label: 'Salary Slips', icon: DollarSign },
     { id: 'reviews', label: 'Reviews', icon: Star },
+    { id: 'exhibits', label: 'Exhibit Gallery', icon: ImageIcon },
   ];
 
   if (isLoading && !salesStats) {
@@ -656,6 +659,12 @@ const ManagerDashboard: React.FC = () => {
             reviews={reviews}
             onModerateReview={handleModerateReview}
           />
+        )}
+        
+        {activeView === 'exhibits' && (
+          <div className="animate-in fade-in duration-700">
+             <ManageExhibits />
+          </div>
         )}
       </main>
 

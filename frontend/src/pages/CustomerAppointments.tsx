@@ -121,7 +121,7 @@ const CustomerAppointments: React.FC = () => {
           </h1>
         </div>
         <Link to="/booking">
-          <Button className="h-14 px-10 rounded-none text-xs uppercase tracking-widest font-bold shadow-xl">
+          <Button className="h-14 px-10 text-xs uppercase tracking-widest font-bold shadow-premium">
              Schedule New Session
           </Button>
         </Link>

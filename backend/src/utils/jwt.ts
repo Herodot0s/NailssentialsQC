@@ -63,7 +63,11 @@ export const generateAccessToken = (payload: object): string => {
 };
 
 export const generateRefreshToken = (payload: object): string => {
-  return jwt.sign({ ...payload, type: 'refresh' }, REFRESH_TOKEN_SECRET, { expiresIn: '30d' });
+  return jwt.sign(
+    { ...payload, type: 'refresh', jti: Math.random().toString(36).substring(7) },
+    REFRESH_TOKEN_SECRET,
+    { expiresIn: '30d' }
+  );
 };
 
 // Token verification functions with typed returns and error handling

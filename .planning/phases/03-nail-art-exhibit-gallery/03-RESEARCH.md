@@ -38,9 +38,9 @@ This phase focuses on the "Nail Art Exhibit," a public-facing gallery showcasing
 
 | ID | Description | Research Support |
 |----|-------------|------------------|
-| REQ-01 | Public "Nail Art Exhibit" gallery with masonry grid. | `react-masonry-css` identified as the standard for this layout. [D-01, D-02] |
-| REQ-02 | Manager CRUD for uploading images via Vercel Blob. | Existing `uploadController.ts` verified for reuse. [D-07, D-08] |
-| REQ-03 | Link images to StaffProfile (Artist) and optionally to a Service. | `Exhibit` model drafted with relations to `StaffProfile` and `Service`. [D-04, D-05, D-06] |
+| CMS-01 | Public "Nail Art Exhibit" gallery with masonry grid. | `react-masonry-css` identified as the standard for this layout. [D-01, D-02] |
+| CMS-02 | Manager CRUD for uploading images via Vercel Blob. | Existing `uploadController.ts` verified for reuse. [D-07, D-08] |
+| CMS-02 | Link images to StaffProfile (Artist) and optionally to a Service. | `Exhibit` model drafted with relations to `StaffProfile` and `Service`. [D-04, D-05, D-06] |
 </phase_requirements>
 
 ## Architectural Responsibility Map
@@ -218,12 +218,12 @@ const Gallery = () => {
 | A1 | `react-masonry-css` is compatible with React 19. | Standard Stack | LOW. If incompatible, `react-plock` or CSS Grid `masonry` (experimental) are fallbacks. |
 | A2 | Vercel Blob token is already in `.env`. | Architecture | MEDIUM. If missing, manager upload will fail. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Detail View**: Should clicking an image open a full-screen lightbox or a side-drawer with details?
-   - *Recommendation*: Start with a simple Radix UI Dialog (Lightbox) as it aligns with the "Inspiration Only" goal.
+   - **Resolution**: Use a **Radix UI Dialog (Lightbox)**. It provides the best focus on the visual art and aligns with the "Inspiration Only" goal of this phase.
 2. **Staff Access**: Does the manager want staff to be able to upload their own work, or is it strictly for managers?
-   - *Recommendation*: Locked to `manager` per D-07, but can be expanded later.
+   - **Resolution**: Strictly for **Managers** in this phase. This simplifies the RBAC requirements and focuses on a curated "Exhibit" feel. Staff access may be added in a future phase.
 
 ## Environment Availability
 
@@ -245,8 +245,8 @@ const Gallery = () => {
 ### Phase Requirements → Test Map
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| REQ-01 | Public Gallery renders items | Integration | `npm test Gallery.test.tsx` | ❌ Wave 0 |
-| REQ-02 | Upload API returns Blob URL | Unit | `npm test uploadController.test.ts` | ❌ Wave 0 |
+| CMS-01 | Public Gallery renders items | Integration | `npm test Gallery.test.tsx` | ❌ Wave 0 |
+| CMS-02 | Upload API returns Blob URL | Unit | `npm test uploadController.test.ts` | ❌ Wave 0 |
 
 ## Security Domain
 

@@ -53,11 +53,7 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
     // Upload to server
     setUploading(true);
     try {
-      // Convert to base64 (strip the data:mime;base64, prefix)
-      const base64Data = reader.result as string;
-      const base64Content = base64Data.split(',')[1];
-
-      const result = await uploadFile(base64Content, file.name, file.type);
+      const result = await uploadFile(file);
 
       if (result.data?.success) {
         onUploadComplete(result.data.data.url);
