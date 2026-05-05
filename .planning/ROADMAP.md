@@ -29,7 +29,7 @@
 **Success Criteria** (what must be TRUE):
   1. User sees correct Airbnb-inspired colors (Terracotta/Rausch), typography, and spacing tokens applied globally
   2. User experiences smooth page transitions and micro-interactions using framer-motion
-**Plans**: 
+**Plans**:
 - **Wave 1**
   - [x] 01-01-PLAN.md: Foundation & Testing Setup
 - **Wave 2 (Blocked on Wave 1)**
@@ -46,7 +46,7 @@
 **Success Criteria** (what must be TRUE):
   1. Customer can navigate a visually stunning landing page that reflects the premium NailssentialsQC brand
   2. Customer can book an appointment through a simplified, premium-feeling multi-step booking flow
-**Plans**: 
+**Plans**:
 - **Wave 1**
   - [x] 02-01-PLAN.md — Landing Page Refactor & Hero (D-01, D-02, D-03)
 - **Wave 2**
@@ -63,7 +63,13 @@
 **Success Criteria** (what must be TRUE):
   1. Customer can browse a public "Nail Art Exhibit" gallery with high-resolution imagery
   2. Manager can upload, name, and delete exhibit images via a simple drag-and-drop interface (Vercel Blob)
-**Plans**: TBD
+**Plans**: 3 plans
+- **Wave 1**
+  - [ ] 03-01-PLAN.md — Data Foundations (Prisma, API, Migration)
+- **Wave 2**
+  - [ ] 03-02-PLAN.md — Management CMS (Manager Upload/List)
+- **Wave 3**
+  - [ ] 03-03-PLAN.md — Public Gallery (Masonry Layout, Detail View)
 **UI hint**: yes
 
 ### Phase 4: Operations Interface Overhaul
@@ -120,8 +126,8 @@
 | V1-6. Missing Features | 3/3 | Complete | 2026-05-04 |
 | V1-7. Backend Test Infrastructure | 8/8 | Complete | 2026-05-04 |
 | 1. Premium UI Foundations | 4/4 | Complete | 2026-05-05 |
-| 2. Customer Journey Redesign | 0/4 | In progress | - |
-| 3. Nail Art Exhibit & Gallery | 0/0 | Not started | - |
+| 2. Customer Journey Redesign | 4/4 | In progress | - |
+| 3. Nail Art Exhibit & Gallery | 3/3 | Not started | - |
 | 4. Operations Interface Overhaul | 0/0 | Not started | - |
 | 5. Marketing CMS & Content Control | 0/0 | Not started | - |
 | 6. Service Packages & Bundling | 0/0 | Not started | - |
