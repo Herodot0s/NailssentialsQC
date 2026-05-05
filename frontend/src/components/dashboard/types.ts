@@ -1,4 +1,4 @@
-import type { StaffMember, PayrollRecord, Review, AttendanceRecord, PayrollPeriod } from '@/types/api';
+import type { SalesStats, StaffMember, PayrollRecord, PayrollPeriod, AttendanceRecord, Category, Review, ScheduleItem } from '@/types/api';
 
 export interface StaffTableProps {
   staffMembers: StaffMember[];
@@ -20,4 +20,90 @@ export interface AttendanceLedgerProps {
 export interface ReviewModerationProps {
   reviews: Review[];
   onModerateReview: (id: number, approved: boolean) => void;
+}
+
+export interface HistoricalData {
+  date: string;
+  total: number;
+  categories: Record<string, number>;
+  services: Record<string, number>;
+}
+
+export type ActiveView = 'analytics' | 'staff' | 'attendance' | 'deductions' | 'payroll' | 'reviews' | 'exhibits' | 'content';
+
+export interface ManagerSidebarProps {
+  activeView: ActiveView;
+  onViewChange: (view: ActiveView) => void;
+  collapsed?: boolean;
+  mobileOpen?: boolean;
+  onMobileToggle?: () => void;
+}
+
+export interface OverviewViewProps {
+  salesStats: SalesStats | null;
+  historicalData: HistoricalData[];
+  selectedCategory: string | null;
+  onCategorySelect: (cat: string | null) => void;
+  onCategoryReset: () => void;
+  activeStaffCount: number;
+  pendingReviewCount: number;
+  appointments: any[];
+  staffMembers: StaffMember[];
+}
+
+export interface DeductionsViewProps {
+  staffMembers: StaffMember[];
+  deductionForm: { staffId: string; type: string; amount: string; notes: string };
+  onFormChange: (form: DeductionsViewProps['deductionForm']) => void;
+  onSubmit: (e: React.FormEvent) => void;
+}
+
+export interface StaffDetailSheetProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  staff: StaffMember | null;
+  onStaffChange: (staff: StaffMember) => void;
+  schedule: ScheduleItem[];
+  categories: Category[];
+  onEditShift: (dayOfWeek: number) => void;
+  onUpdateBaseline: () => void;
+}
+
+export interface AddStaffDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  form: {
+    fullName: string; email: string; phone: string; username: string;
+    password: string; specializations: string; basePayPerWeek: string;
+    dailyTarget: string; sssNumber: string; tinNumber: string;
+    govId: string; profilePictureUrl: string;
+  };
+  onFormChange: (form: AddStaffDialogProps['form']) => void;
+  onSubmit: (e: React.FormEvent) => void;
+}
+
+export interface ShiftEditDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  editingDay: number | null;
+  form: { start: string; end: string; isActive: boolean };
+  onFormChange: (form: ShiftEditDialogProps['form']) => void;
+  onSubmit: (e: React.FormEvent) => void;
+}
+
+export interface PayrollRunDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  form: { startDate: string; endDate: string; totalSalonSales: string };
+  onFormChange: (form: PayrollRunDialogProps['form']) => void;
+  onSubmit: (e: React.FormEvent) => void;
+}
+
+export interface DeductionEntryDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  staffMembers: StaffMember[];
+  form: { staffId: string; type: string; amount: string; notes: string };
+  onFormChange: (form: DeductionEntryDialogProps['form']) => void;
+  onSubmit: (e: React.FormEvent) => void;
 }
