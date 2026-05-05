@@ -332,3 +332,44 @@ export interface SiteContent {
 export interface SaveSettingsRequest {
   settings: Array<{ section: string; key: string; value: string }>;
 }
+
+export interface ServicePackageService {
+  id: number;
+  name: string;
+  price: string;
+  duration_minutes: number;
+  category: { name: string };
+}
+
+export interface ServicePackage {
+  id: number;
+  name: string;
+  description: string | null;
+  price: string;
+  image_url: string | null;
+  display_order: number;
+  valid_from: string | null;
+  valid_until: string | null;
+  max_redemptions: number | null;
+  is_active: boolean;
+  services: ServicePackageService[];
+  bookings_count: number;
+  services_total: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreatePackagePayload {
+  name: string;
+  description?: string;
+  price: number;
+  image_url?: string;
+  display_order?: number;
+  valid_from?: string | null;
+  valid_until?: string | null;
+  max_redemptions?: number | null;
+  is_active?: boolean;
+  service_ids: number[];
+}
+
+export interface UpdatePackagePayload extends Partial<CreatePackagePayload> {}
