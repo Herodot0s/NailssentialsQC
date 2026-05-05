@@ -2,56 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Leaf, ShieldCheck, ChevronRight, Star } from 'lucide-react';
+import Hero from '@/components/home/Hero';
 
 const Home = () => (
   <div className="flex flex-col min-h-[calc(100vh-64px)] overflow-x-hidden" data-testid="home-page">
-    {/* Hero Section */}
-    <section className="relative h-[90vh] flex flex-col items-center justify-center overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1600334129128-685c4582f98c?auto=format&fit=crop&q=80&w=2070" 
-          alt="Luxury Spa Interior"
-          className="w-full h-full object-cover scale-105"
-        />
-        <div className="absolute inset-0 bg-black/50" />
-      </div>
-
-      <div className="container relative z-10 flex flex-col items-center gap-8 text-center px-6">
-        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out fill-mode-forwards">
-          <p className="text-primary-light uppercase tracking-[0.4em] text-sm font-sans">Experience Pure Tranquility</p>
-          <h1 className="font-serif text-5xl font-light tracking-tight text-white sm:text-7xl md:text-8xl max-w-5xl leading-[1.1]">
-            Elevate Your <span className="italic">Natural</span> Beauty
-          </h1>
-          <p className="max-w-[700px] mx-auto text-lg text-white/80 sm:text-xl font-light leading-relaxed">
-            Discover a haven of serenity where expert craftsmanship meets premium self-care. 
-            Welcome to the NailssentialsQC sanctuary.
-          </p>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row gap-6 mt-8 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 ease-out fill-mode-forwards">
-          <Link to="/booking">
-            <Button
-              className="h-14 px-10 text-base font-medium tracking-widest uppercase bg-white text-black hover:bg-primary hover:text-white border-none transition-all duration-500"
-            >
-              Book Your Sanctuary
-            </Button>
-          </Link>
-          <Link 
-            to="/services" 
-            className="group flex items-center h-14 px-6 text-white text-base font-medium tracking-widest uppercase transition-all duration-300 border-b border-white/30 hover:border-white"
-          >
-            Explore Services
-            <ChevronRight className="ml-2 h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-      </div>
-
-      {/* Elegant scroll indicator */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 text-white/40">
-        <div className="w-[1px] h-20 bg-gradient-to-b from-white/0 via-white/40 to-white/0" />
-      </div>
-    </section>
+    <Hero />
 
     {/* Philosophy Section (Features Refined) */}
     <section className="py-32 bg-white relative">
