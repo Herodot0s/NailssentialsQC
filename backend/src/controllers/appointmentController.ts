@@ -125,6 +125,37 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
       targetCustomerId = customerProfile.id;
     }
 
+    const packageIds = [...new Set(items.filter((i: any) => i.packageId).map((i: any) => i.packageId))];
+    for (const pkgId of packageIds as number[]) {
+      const pkg = await prisma.servicePackage.findUnique({
+        where: { id: pkgId },
+        include: { appointment_items: { select: { id: true } } }
+      });
+
+      if (!pkg) {
+        return sendError(res, 'BAD_REQUEST', `Package ${pkgId} not found`, 400);
+      }
+      if (!pkg.is_active) {
+        return sendError(res, 'BAD_REQUEST', `Package "${pkg.name}" is no longer available`, 400);
+      }
+
+      const now = new Date();
+      if (pkg.valid_from && new Date(pkg.valid_from) > now) {
+        return sendError(res, 'BAD_REQUEST', `Package "${pkg.name}" is not yet available`, 400);
+      }
+      if (pkg.valid_until && new Date(pkg.valid_until) < now) {
+        return sendError(res, 'BAD_REQUEST', `Package "${pkg.name}" has expired`, 400);
+      }
+
+      if (pkg.max_redemptions !== null) {
+        const currentBookings = pkg.appointment_items.length;
+        const newBookingsForThisPkg = items.filter((i: any) => i.packageId === pkgId).length;
+        if (currentBookings + newBookingsForThisPkg > pkg.max_redemptions) {
+          return sendError(res, 'BAD_REQUEST', `Package "${pkg.name}" has reached its booking limit`, 400);
+        }
+      }
+    }
+
     const appointment = await prisma.$transaction(async (tx) => {
       const apt = await tx.appointment.create({
         data: {
@@ -137,7 +168,7 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
       });
 
       for (const item of items) {
-        const { serviceId, staffId, startTime } = item;
+        const { serviceId, staffId, startTime, packageId } = item;
         const service = await tx.service.findUnique({ where: { id: parseInt(serviceId) } });
         if (!service) throw new Error(`Service ${serviceId} not found`);
 
@@ -154,6 +185,7 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
             start_time: startTime,
             end_time: endTimeStr,
             price_at_booking: service.price,
+            package_id: packageId || null,
           },
         });
       }

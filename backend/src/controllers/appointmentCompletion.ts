@@ -83,7 +83,36 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
     }
 
     // 1. Calculate total amount
-    const totalAmount = appointment.items.reduce((acc, item) => acc + Number(item.price_at_booking), 0);
+    const packageGroups = new Map<number, typeof appointment.items>();
+    const individualItems: typeof appointment.items = [];
+
+    for (const item of appointment.items) {
+      if (item.package_id) {
+        if (!packageGroups.has(item.package_id)) {
+          packageGroups.set(item.package_id, []);
+        }
+        packageGroups.get(item.package_id)!.push(item);
+      } else {
+        individualItems.push(item);
+      }
+    }
+
+    let totalAmount = 0;
+
+    for (const item of individualItems) {
+      totalAmount += Number(item.price_at_booking);
+    }
+
+    for (const [packageId, items] of packageGroups) {
+      const pkg = await prisma.servicePackage.findUnique({ where: { id: packageId } });
+      if (pkg) {
+        totalAmount += Number(pkg.price);
+      } else {
+        for (const item of items) {
+          totalAmount += Number(item.price_at_booking);
+        }
+      }
+    }
 
     // 2. Generate receipt number (REC-MMYYYY-NNNN)
     const today = new Date();
