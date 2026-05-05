@@ -9,14 +9,27 @@
 @tailwind utilities;
 
 :root {
-  /* Brand Colors - Terracotta Brown Palette */
-  --primary: 24 45% 51%; /* #B8794E translated to HSL */
+  /* Brand Rausch Palette */
+  --brand-rausch: #FF385C;
+  --brand-rausch-muted: #FFF1F2;
+  --bg-canvas: #FFFFFF;
+
+  /* Radius System */
+  --radius-container: 32px;
+  --radius-utility: 12px;
+  --radius-data: 8px;
+
+  /* Shadows */
+  --shadow-premium: 0 8px 28px rgba(0, 0, 0, 0.08);
+
+  /* Brand Colors - Terracotta Brown Palette (Legacy - being replaced by Rausch) */
+  --primary: 349 100% 61%; /* Rausch #FF385C translated to HSL */
   --primary-foreground: 0 0% 100%;
 
-  --primary-color: #b8794e; /* Terracotta Brown */
-  --primary-dark: #9a6440; /* Hover state */
-  --primary-light: #f5e6d9; /* Highlights/Subtle elements */
-  --primary-ultra: #fdf8f4; /* Ultra-light backgrounds */
+  --primary-color: var(--brand-rausch);
+  --primary-dark: #E31C5F; /* Slightly darker Rausch for hover */
+  --primary-light: var(--brand-rausch-muted);
+  --primary-ultra: #fff8f8;
 
   /* Functional Colors */
   --success-color: #4caf50;
@@ -46,17 +59,17 @@
   --card-foreground: 222.2 84% 4.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
-  --secondary: 30 38% 91%; /* primary-light #F5E6D9 */
-  --secondary-foreground: 24 45% 35%;
-  --muted: 30 38% 96%; /* primary-ultra #FDF8F4 */
+  --secondary: 354 100% 97%; /* Rausch Muted #FFF1F2 */
+  --secondary-foreground: 349 100% 35%;
+  --muted: 354 100% 98%;
   --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 30 38% 91%;
-  --accent-foreground: 24 45% 35%;
+  --accent: 354 100% 97%;
+  --accent-foreground: 349 100% 35%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 24 45% 51%;
+  --ring: 349 100% 61%; /* Rausch */
 }
 
 .dark {
@@ -98,10 +111,16 @@
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 }
 
+/* Featured Border for premium components */
+.featured-border {
+  border: 1.5px solid var(--brand-rausch);
+  box-shadow: 0 0 0 4px var(--brand-rausch-muted);
+}
+
 /* Loading States */
 .loader {
   border: 4px solid #e5e7eb;
-  border-top: 4px solid #b8794e;
+  border-top: 4px solid var(--brand-rausch);
   border-radius: 50%;
   width: 40px;
   height: 40px;
