@@ -120,9 +120,11 @@ const CustomerAppointments: React.FC = () => {
             My <span className="italic">Rituals</span>
           </h1>
         </div>
-        <Button render={<Link to="/booking" />} className="h-14 px-10 rounded-none text-xs uppercase tracking-widest font-bold shadow-xl">
-           Schedule New Session
-        </Button>
+        <Link to="/booking">
+          <Button className="h-14 px-10 rounded-none text-xs uppercase tracking-widest font-bold shadow-xl">
+             Schedule New Session
+          </Button>
+        </Link>
       </div>
 
       {error && (
@@ -138,9 +140,11 @@ const CustomerAppointments: React.FC = () => {
               <Calendar className="h-12 w-12 text-primary/20 mx-auto" />
               <h2 className="font-serif text-3xl font-light">The archive is empty</h2>
               <p className="text-muted-foreground text-sm font-light">Begin your self-care journey with us by scheduling your first ritual.</p>
-              <Button variant="outline" className="h-12 px-8 rounded-none border-primary/20" render={<Link to="/booking" />}>
-                Book First Visit
-              </Button>
+              <Link to="/booking">
+                <Button variant="outline" className="h-12 px-8 rounded-none border-primary/20">
+                  Book First Visit
+                </Button>
+              </Link>
            </div>
         </div>
       ) : (
