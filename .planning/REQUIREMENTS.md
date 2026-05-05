@@ -32,7 +32,7 @@ Requirements for the v2.0 Premium Experience & Expansion milestone. Each maps to
 
 ### Service Packages
 
-- [ ] **PKG-01**: Managers can create fixed bundles of existing services
+- [x] **PKG-01**: Managers can create fixed bundles of existing services
 - [ ] **PKG-02**: Customers can book a service package
 - [ ] **PKG-03**: Commission logic properly handles package redemption
 
@@ -59,7 +59,7 @@ Requirements for the v2.0 Premium Experience & Expansion milestone. Each maps to
 | ANLY-01 | Phase 7 | Pending |
 | ANLY-02 | Phase 7 | Pending |
 | ANLY-03 | Phase 7 | Pending |
-| PKG-01 | Phase 6 | Pending |
+| PKG-01 | Phase 6 | Complete |
 | PKG-02 | Phase 6 | Pending |
 | PKG-03 | Phase 6 | Pending |
 

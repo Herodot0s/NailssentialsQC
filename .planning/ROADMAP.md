@@ -15,9 +15,9 @@
 
 - [x] **Phase 1: Premium UI Foundations** - Establish global design tokens and transition animations
 - [ ] **Phase 2: Customer Journey Redesign** - Overhaul the landing page and booking flow with premium aesthetics
-- [ ] **Phase 3: Nail Art Exhibit & Gallery** - Launch the public gallery with manager-led media management
-- [ ] **Phase 4: Operations Interface Overhaul** - Modernize the staff and manager daily task views
-- [ ] **Phase 5: Marketing CMS & Content Control** - Enable full manager control over landing page text and policies
+- [x] **Phase 3: Nail Art Exhibit & Gallery** - Launch the public gallery with manager-led media management
+- [x] **Phase 4: Operations Interface Overhaul** - Modernize the staff and manager daily task views
+- [x] **Phase 5: Marketing CMS & Content Control** - Enable full manager control over landing page text and policies
 - [ ] **Phase 6: Service Packages & Bundling** - Implement creation and booking of service bundles with commission logic
 - [ ] **Phase 7: Advanced Analytics Dashboard** - Provide deep business insights via interactive reporting
 
@@ -81,7 +81,14 @@
 **Success Criteria** (what must be TRUE):
   1. Staff can manage attendance and view schedules in a modernized, mobile-responsive dashboard
   2. Manager can oversee today's salon status and coordinate staff in an organized, cleaner layout
-**Plans**: TBD
+**Plans**: 4 plans
+- **Wave 1**
+  - [x] 04-01-PLAN.md — Manager Dashboard Decomposition (D-01, D-02, D-05)
+- **Wave 2 (Blocked on Wave 1)**
+  - [x] 04-02-PLAN.md — Manager Dashboard Responsive Sidebar & Overview (D-01, D-04, D-08, D-09)
+  - [x] 04-03-PLAN.md — Staff Dashboard Mobile-First & Check-In Overhaul (D-03, D-06, D-07)
+- **Wave 3 (Blocked on Wave 2)**
+  - [x] 04-04-PLAN.md — Visual Polish & Integration Testing (all decisions)
 **UI hint**: yes
 
 ### Phase 5: Marketing CMS & Content Control
@@ -91,7 +98,15 @@
 **Success Criteria** (what must be TRUE):
   1. Manager can update landing page hero text, descriptions, and contact info via the CMS dashboard
   2. Manager can modify salon policies and FAQ sections directly through the interface
-**Plans**: TBD
+**Plans**:
+- **Wave 1**
+  - [x] 05-01-PLAN.md — Prisma Schema & Database Foundation
+- **Wave 2**
+  - [x] 05-02-PLAN.md — Frontend Dependency Setup
+  - [x] 05-03-PLAN.md — CMS Backend API
+- **Wave 3**
+  - [x] 05-04-PLAN.md — CMS Manager Dashboard Editor
+  - [x] 05-05-PLAN.md — Public Landing Page CMS Integration
 **UI hint**: yes
 
 ### Phase 6: Service Packages & Bundling
@@ -102,7 +117,15 @@
   1. Manager can create service packages (e.g., "Mani-Pedi Bundle") with custom pricing and services
   2. Customer can discover and book a service package as a single item in the booking flow
   3. Staff receive accurate commission specifically calculated for services within a redeemed package
-**Plans**: TBD
+**Plans**: 5 plans
+- **Wave 1**
+  - [x] 06-01-PLAN.md — Data Foundations: Schema, Migration & Types (PKG-01)
+- **Wave 2 *(blocked on Wave 1 completion)***
+  - [ ] 06-02-PLAN.md — Package CRUD API: Controller, Routes & Registration (PKG-01)
+  - [ ] 06-03-PLAN.md — Manager Package Studio: Dashboard UI & CRUD Interface (PKG-01)
+- **Wave 3 *(blocked on Wave 2 completion)***
+  - [ ] 06-04-PLAN.md — Customer Package Discovery & Cart Integration (PKG-02)
+  - [ ] 06-05-PLAN.md — Booking Flow Backend & Commission Integration (PKG-02, PKG-03)
 **UI hint**: yes
 
 ### Phase 7: Advanced Analytics Dashboard
@@ -130,7 +153,7 @@
 | 1. Premium UI Foundations | 4/4 | Complete | 2026-05-05 |
 | 2. Customer Journey Redesign | 4/4 | In progress | - |
 | 3. Nail Art Exhibit & Gallery | 4/4 | Complete | 2026-05-05 |
-| 4. Operations Interface Overhaul | 0/0 | Not started | - |
-| 5. Marketing CMS & Content Control | 0/0 | Not started | - |
-| 6. Service Packages & Bundling | 0/0 | Not started | - |
+| 4. Operations Interface Overhaul | 4/4 | Complete | 2026-05-05 |
+| 5. Marketing CMS & Content Control | 5/5 | Complete | 2026-05-05 |
+| 6. Service Packages & Bundling | 0/5 | Ready for execution | - |
 | 7. Advanced Analytics Dashboard | 0/0 | Not started | - |
