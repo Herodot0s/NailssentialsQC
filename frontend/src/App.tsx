@@ -9,6 +9,7 @@ import Services from './pages/Services';
 import Booking from './pages/Booking';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
+import PoliciesPage from './pages/PoliciesPage';
 import ManageServices from './pages/ManageServices';
 import ManageExhibits from './pages/ManageExhibits';
 import ManagerDashboard from './pages/ManagerDashboard';
@@ -41,6 +42,7 @@ function AppRoutes() {
         <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
         <Route path="/services" element={<PageTransition><Services /></PageTransition>} />
         <Route path="/gallery" element={<PageTransition><Gallery /></PageTransition>} />
+        <Route path="/policies" element={<PageTransition><PoliciesPage /></PageTransition>} />
         <Route path="/booking" element={<PageTransition><Booking /></PageTransition>} />
 
         {/* Protected Routes */}
