@@ -285,3 +285,50 @@ export interface Exhibit {
     name: string;
   };
 }
+
+// CMS Types
+
+export interface SiteSettingsData {
+  hero?: {
+    tagline?: string;
+    headline?: string;
+    subheadline?: string;
+    bg_image_url?: string;
+    button_label?: string;
+  };
+  signature?: {
+    label?: string;
+    headline?: string;
+    body?: string;
+    link_label?: string;
+    bg_image_url?: string;
+  };
+  footer?: {
+    headline?: string;
+    button_label?: string;
+  };
+  contact?: {
+    phone?: string;
+    address?: string;
+    hours?: string;
+    email?: string;
+    maps_link?: string;
+  };
+}
+
+export type SiteContentType = 'faq' | 'policy';
+
+export interface SiteContent {
+  id: number;
+  type: SiteContentType;
+  title: string;
+  body: string;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SaveSettingsRequest {
+  settings: Array<{ section: string; key: string; value: string }>;
+}

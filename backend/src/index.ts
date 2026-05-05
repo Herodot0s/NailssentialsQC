@@ -14,6 +14,7 @@ import messageRoutes from './routes/messageRoutes';
 import reviewRoutes from './routes/reviewRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import exhibitRoutes from './routes/exhibitRoutes';
+import cmsRoutes from './routes/cmsRoutes';
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use('/api/v1/messages', messageRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/v1/exhibits', exhibitRoutes);
+app.use('/api/v1/cms', cmsRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('NailssentialsQC Backend API is running!');

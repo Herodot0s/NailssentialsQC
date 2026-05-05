@@ -8,6 +8,9 @@ import type {
   UpdateServiceRequest,
   ScheduleItem,
   UpdateCustomerProfileRequest,
+  SiteSettingsData,
+  SiteContent,
+  SaveSettingsRequest,
 } from '@/types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
@@ -160,5 +163,27 @@ export const getExhibits = () => apiClient.get('/exhibits');
 export const createExhibit = (data: { title: string; image_url: string; staff_id: number; service_id?: number }) =>
   apiClient.post('/exhibits', data);
 export const deleteExhibit = (id: number) => apiClient.delete(`/exhibits/${id}`);
+
+// CMS methods
+
+// Settings (landing page copy)
+export const getCmsSettings = () =>
+  apiClient.get<{ success: boolean; data: SiteSettingsData }>('/cms/settings');
+
+export const saveCmsSettings = (data: SaveSettingsRequest) =>
+  apiClient.put<{ success: boolean; data: { updated: number } }>('/cms/settings', data);
+
+// Content (FAQ + policies)
+export const getCmsContent = (params?: { type?: 'faq' | 'policy'; limit?: number; activeOnly?: boolean }) =>
+  apiClient.get<{ success: boolean; data: SiteContent[] }>('/cms/content', { params });
+
+export const createCmsContent = (data: { type: 'faq' | 'policy'; title: string; body: string; sort_order?: number; is_active?: boolean }) =>
+  apiClient.post<{ success: boolean; data: SiteContent }>('/cms/content', data);
+
+export const updateCmsContent = (id: number, data: { title?: string; body?: string; sort_order?: number; is_active?: boolean }) =>
+  apiClient.put<{ success: boolean; data: SiteContent }>(`/cms/content/${id}`, data);
+
+export const deleteCmsContent = (id: number) =>
+  apiClient.delete<{ success: boolean; message: string }>(`/cms/content/${id}`);
 
 export default apiClient;
