@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/sheet';
 import { Clock, Sparkles, AlertCircle, Loader2, ArrowRight, CheckCircle2, ShoppingCart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import PackageDiscoverySection from '@/components/packages/PackageDiscoverySection';
 
 interface Category {
   id: number;
@@ -97,6 +98,8 @@ const Services: React.FC = () => {
           </p>
         </div>
       </header>
+
+      <PackageDiscoverySection />
 
       <main className="container max-w-5xl mx-auto py-16 px-6 sm:px-12">
         {error && (
