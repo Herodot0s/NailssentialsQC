@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import SwipeButton from '@/components/ui/swipe-button';
+import { MobileCheckIn } from '@/components/dashboard/MobileCheckIn';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -49,7 +50,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Clock,
   Plus,
   Mail,
   Send,
@@ -220,44 +220,25 @@ const StaffDashboard: React.FC = () => {
         </TabsList>
 
         <TabsContent value="schedule" className="space-y-12 mt-0">
+          {status?.isCheckedIn && (
+            <div className="flex items-center justify-between bg-success-color/5 border border-success-color/10 p-4 md:hidden">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-success-color animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Active Since {status.checkInTime}</span>
+              </div>
+              <SwipeButton onSwipe={handleCheckOut} variant="destructive" className="h-8 text-[8px] px-4 py-0 min-w-0 flex-shrink-0">
+                End Shift
+              </SwipeButton>
+            </div>
+          )}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-             <Card className="lg:col-span-4 rounded-none border-none shadow-[0_0_20px_rgba(0,0,0,0.05)] bg-gradient-to-br from-primary/5 to-secondary/5 overflow-hidden">
-                <CardHeader className="pb-8">
-                   <CardTitle className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] flex items-center gap-2">
-                      <Clock className="h-3 w-3" /> Shift Registry
-                   </CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center pb-12 space-y-8">
-                   <div className={status?.isCheckedIn ? 'animate-pulse' : ''}>
-                      <div className="bg-white rounded-full p-10 shadow-2xl flex flex-col items-center justify-center w-56 h-56 border border-primary/5">
-                         <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                           {currentTime.toLocaleDateString([], { weekday: 'long' })}
-                         </span>
-                         <span className="text-6xl font-bold font-serif text-primary my-2">
-                           {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                         </span>
-                         <Badge className={`rounded-none border-none text-[8px] uppercase tracking-widest font-bold ${status?.isCheckedIn ? 'bg-success-color/90 text-white shadow-sm px-3 py-1' : 'bg-muted text-muted-foreground'}`}>
-                           {status?.isCheckedIn ? 'Status: Active' : 'Status: Off Duty'}
-                         </Badge>
-                      </div>
-                   </div>
-
-                   <div className="w-full max-w-xs space-y-4">
-                      <SwipeButton
-                        onSwipe={status?.isCheckedIn ? handleCheckOut : handleCheckIn}
-                        variant={status?.isCheckedIn ? 'destructive' : 'default'}
-                        className="w-full max-w-xs"
-                      >
-                        {status?.isCheckedIn ? 'Swipe to Check Out Artisan' : 'Swipe to Initialize Shift'}
-                      </SwipeButton>
-                      {status?.isCheckedIn && status.checkInTime && (
-                        <p className="text-center text-[9px] text-muted-foreground font-bold uppercase tracking-widest">
-                          Shift Started at {status.checkInTime}
-                        </p>
-                      )}
-                   </div>
-                </CardContent>
-             </Card>
+             <MobileCheckIn
+               isCheckedIn={status?.isCheckedIn ?? false}
+               checkInTime={status?.checkInTime ?? null}
+               currentTime={currentTime}
+               onCheckIn={handleCheckIn}
+               onCheckOut={handleCheckOut}
+             />
 
              <Card className="lg:col-span-8 rounded-none border-none shadow-sm overflow-hidden">
                 <CardHeader className="bg-primary/5 border-b border-primary/5 pb-8">
@@ -283,19 +264,25 @@ const StaffDashboard: React.FC = () => {
                         <TableBody>
                            {todayAppointments.map((apt) => {
                              const myItems = apt.items.filter(i => i.staff_id === user?.id || !user?.id); 
-                             return myItems.map(item => (
-                               <TableRow key={item.id} className="hover:bg-primary-ultra/10 border-primary/5 transition-colors">
-                                 <TableCell className="pl-8 py-6 font-bold text-xs">{item.start_time} — {item.end_time}</TableCell>
-                                 <TableCell className="font-serif text-lg">{apt.customer.full_name}</TableCell>
-                                 <TableCell className="font-medium text-xs">{item.service.name}</TableCell>
-                                 <TableCell>{getStatusBadge(item.status)}</TableCell>
-                                 <TableCell className="pr-8 text-right">
+                             return myItems.map(item => {
+                               const isActive = item.status === 'in_progress';
+                               const now = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                               const isCurrentTimeSlot = now >= item.start_time && now <= item.end_time;
+                               
+                               return (
+                               <TableRow key={item.id} className={`hover:bg-primary-ultra/10 border-primary/5 transition-colors ${isActive ? 'border-l-2 border-l-info-color' : ''} ${isCurrentTimeSlot ? 'bg-info-color/5' : ''}`}>
+                                 <TableCell className="pl-4 md:pl-8 py-4 md:py-6 font-bold text-xs block md:table-cell w-full">{item.start_time} — {item.end_time}</TableCell>
+                                 <TableCell className="font-serif text-lg block md:table-cell w-full">{apt.customer.full_name}</TableCell>
+                                 <TableCell className="font-medium text-xs block md:table-cell w-full">{item.service.name}</TableCell>
+                                 <TableCell className="block md:table-cell w-full mt-2 md:mt-0">{getStatusBadge(item.status)}</TableCell>
+                                 <TableCell className="pr-4 md:pr-8 md:text-right block md:table-cell w-full mt-4 md:mt-0">
                                     {item.status !== 'completed' && (
-                                       <Button onClick={() => handleComplete(apt.id)} size="sm" className="rounded-none h-8 text-[9px] uppercase font-bold tracking-widest px-4 bg-success-color hover:bg-success-color/90">Finalize Ritual</Button>
+                                       <Button onClick={() => handleComplete(apt.id)} size="sm" className="rounded-none h-8 text-[9px] uppercase font-bold tracking-widest px-4 bg-success-color hover:bg-success-color/90 w-full md:w-auto">Finalize Ritual</Button>
                                     )}
                                  </TableCell>
                                </TableRow>
-                             ));
+                               );
+                             });
                            })}
                         </TableBody>
                      </Table>
