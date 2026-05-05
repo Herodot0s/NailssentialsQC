@@ -31,6 +31,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import type { Staff } from '@/types/api';
+import CartPackageItem from '@/components/packages/CartPackageItem';
 
 interface Slot {
   time: string;
@@ -83,7 +84,14 @@ const Booking: React.FC = () => {
   };
 
   const handleBooking = async () => {
-    const invalidItems = cart.filter(item => !item.staffId || !item.startTime);
+    // Validate packages and individual items
+    const invalidItems = cart.filter(item => {
+      if (item.type === 'package' && item.childServices) {
+        return item.childServices.some(child => !child.staffId || !child.startTime);
+      }
+      return !item.staffId || !item.startTime;
+    });
+
     if (invalidItems.length > 0) {
       setError('Please select staff and time for all services in your cart.');
       return;
@@ -92,12 +100,24 @@ const Booking: React.FC = () => {
     setIsSubmitting(true);
     setError(null);
     try {
-      await createAppointment({
-        items: cart.map(item => ({
+      const itemsToBook = cart.flatMap(item => {
+        if (item.type === 'package' && item.childServices) {
+          return item.childServices.map(child => ({
+            serviceId: child.serviceId,
+            staffId: child.staffId!,
+            startTime: child.startTime!,
+            packageId: item.packageId
+          }));
+        }
+        return [{
           serviceId: item.serviceId,
           staffId: item.staffId!,
           startTime: item.startTime!,
-        })),
+        }];
+      });
+
+      await createAppointment({
+        items: itemsToBook,
         date: selectedDate,
         notes,
       });
@@ -206,7 +226,12 @@ const Booking: React.FC = () => {
                  Treatment Details
                </Label>
                <div className="space-y-6">
-                 {cart.map((item) => (
+                 {cart.map((item) => {
+                   if (item.type === 'package') {
+                     return <CartPackageItem key={item.serviceId} item={item} staffList={staffList} slots={slots} />;
+                   }
+                   
+                   return (
                    <Card key={item.serviceId} className="rounded-none border-none bg-primary-ultra/20 shadow-none overflow-hidden group">
                      <CardContent className="p-0">
                        <div className="flex flex-col sm:flex-row">
@@ -282,7 +307,7 @@ const Booking: React.FC = () => {
                        </div>
                      </CardContent>
                    </Card>
-                 ))}
+                 )})}
                </div>
             </div>
 
@@ -311,15 +336,38 @@ const Booking: React.FC = () => {
             </CardHeader>
             <CardContent className="pt-10 space-y-8">
               <div className="space-y-4">
-                {cart.map(item => (
-                  <div key={item.serviceId} className="flex justify-between items-baseline group">
-                    <div className="space-y-0.5">
-                      <p className="text-sm font-medium">{item.serviceName}</p>
-                      <p className="text-[9px] uppercase tracking-widest text-muted-foreground">{item.staffName || 'No technician'} • {item.startTime || '--:--'}</p>
+                {cart.map(item => {
+                  if (item.type === 'package') {
+                    return (
+                      <div key={item.serviceId} className="space-y-3">
+                        <div className="flex justify-between items-baseline">
+                          <p className="text-sm font-medium">{item.packageName}</p>
+                          <p className="text-sm font-serif italic">₱{item.packagePrice?.toLocaleString()}</p>
+                        </div>
+                        <div className="pl-3 space-y-2 border-l border-primary/10">
+                          {item.childServices?.map(child => (
+                            <div key={child.serviceId} className="flex justify-between items-baseline group">
+                              <div className="space-y-0.5">
+                                <p className="text-xs font-medium text-muted-foreground">{child.serviceName}</p>
+                                <p className="text-[8px] uppercase tracking-widest text-muted-foreground/60">{child.staffName || 'No technician'} • {child.startTime || '--:--'}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div key={item.serviceId} className="flex justify-between items-baseline group">
+                      <div className="space-y-0.5">
+                        <p className="text-sm font-medium">{item.serviceName}</p>
+                        <p className="text-[9px] uppercase tracking-widest text-muted-foreground">{item.staffName || 'No technician'} • {item.startTime || '--:--'}</p>
+                      </div>
+                      <p className="text-sm font-serif italic">₱{item.price.toLocaleString()}</p>
                     </div>
-                    <p className="text-sm font-serif italic">₱{item.price.toLocaleString()}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="pt-8 space-y-4 border-t border-primary/10">
