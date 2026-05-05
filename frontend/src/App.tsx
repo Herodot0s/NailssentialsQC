@@ -1,7 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { Button } from '@/components/ui/button';
+import { AnimatePresence } from 'framer-motion';
+import { PageTransition } from '@/components/motion/PageTransition';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Services from './pages/Services';
@@ -44,10 +46,13 @@ const Home = () => (
         </div>
         
         <div className="flex flex-col sm:flex-row gap-6 mt-8 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 ease-out fill-mode-forwards">
-          <Button
-            render={<Link to="/booking">Book Your Sanctuary</Link>}
-            className="h-14 px-10 text-base font-medium tracking-widest uppercase bg-white text-black hover:bg-primary hover:text-white border-none rounded-none transition-all duration-500 shadow-2xl"
-          />
+          <Link to="/booking">
+            <Button
+              className="h-14 px-10 text-base font-medium tracking-widest uppercase bg-white text-black hover:bg-primary hover:text-white border-none rounded-none transition-all duration-500 shadow-2xl"
+            >
+              Book Your Sanctuary
+            </Button>
+          </Link>
           <Link 
             to="/services" 
             className="group flex items-center h-14 px-6 text-white text-base font-medium tracking-widest uppercase transition-all duration-300 border-b border-white/30 hover:border-white"
@@ -145,14 +150,79 @@ const Home = () => (
     <section className="py-24 text-center border-t border-primary/10">
       <div className="container mx-auto px-6 max-w-xl space-y-8">
         <h2 className="font-serif text-3xl font-light text-foreground">Prepare for your visit.</h2>
-        <Button
-          render={<Link to="/register">JOIN THE PRIVILEGE CLUB</Link>}
-          className="h-14 px-12 tracking-widest bg-black text-white hover:bg-primary border-none rounded-none transition-all duration-500"
-        />
+        <Link to="/register">
+          <Button
+            className="h-14 px-12 tracking-widest bg-black text-white hover:bg-primary border-none rounded-none transition-all duration-500"
+          >
+            JOIN THE PRIVILEGE CLUB
+          </Button>
+        </Link>
       </div>
     </section>
   </div>
 );
+
+function AppRoutes() {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        {/* Public Routes */}
+        <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+        <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+        <Route path="/services" element={<PageTransition><Services /></PageTransition>} />
+        <Route path="/booking" element={<PageTransition><Booking /></PageTransition>} />
+
+        {/* Protected Routes */}
+        <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['staff', 'manager']}>
+              <PageTransition><StaffDashboard /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/appointments"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <PageTransition><CustomerAppointments /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <PageTransition><Profile /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/manage-services"
+          element={
+            <ProtectedRoute allowedRoles={['manager']}>
+              <PageTransition><ManageServices /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/manager"
+          element={
+            <ProtectedRoute allowedRoles={['manager']}>
+              <PageTransition><ManagerDashboard /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
 
 function App() {
   return (
@@ -160,59 +230,7 @@ function App() {
       <CartProvider>
         <Router>
           <Navbar />
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/booking" element={<Booking />} />
-
-            {/* Protected Routes */}
-            <Route path="/" element={<Home />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={['staff', 'manager']}>
-                  <StaffDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/appointments"
-              element={
-                <ProtectedRoute allowedRoles={['customer']}>
-                  <CustomerAppointments />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute allowedRoles={['customer']}>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/manage-services"
-              element={
-                <ProtectedRoute allowedRoles={['manager']}>
-                  <ManageServices />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/manager"
-              element={
-                <ProtectedRoute allowedRoles={['manager']}>
-                  <ManagerDashboard />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <AppRoutes />
         </Router>
       </CartProvider>
     </AuthProvider>
