@@ -16,7 +16,7 @@ Requirements for the v2.0 Premium Experience & Expansion milestone. Each maps to
 - [ ] **UI-01**: Implement Design Tokens (Airbnb radii, spacing, Terracotta palette)
 - [ ] **UI-02**: Redesign Customer Landing Page & Booking Flow
 - [ ] **UI-03**: Redesign Manager & Staff Dashboards
-- [ ] **UI-04**: Add smooth transitions using framer-motion
+- [x] **UI-04**: Add smooth transitions using framer-motion
 
 ### Manager CMS & Gallery
 
@@ -52,7 +52,7 @@ Requirements for the v2.0 Premium Experience & Expansion milestone. Each maps to
 | UI-01 | Phase 1 | Pending |
 | UI-02 | Phase 2 | Pending |
 | UI-03 | Phase 4 | Pending |
-| UI-04 | Phase 1 | Pending |
+| UI-04 | Phase 1 | Completed |
 | CMS-01 | Phase 3 | Pending |
 | CMS-02 | Phase 3 | Pending |
 | CMS-03 | Phase 5 | Pending |

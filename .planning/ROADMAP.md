@@ -13,7 +13,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: Premium UI Foundations** - Establish global design tokens and transition animations
+- [x] **Phase 1: Premium UI Foundations** - Establish global design tokens and transition animations
 - [ ] **Phase 2: Customer Journey Redesign** - Overhaul the landing page and booking flow with premium aesthetics
 - [ ] **Phase 3: Nail Art Exhibit & Gallery** - Launch the public gallery with manager-led media management
 - [ ] **Phase 4: Operations Interface Overhaul** - Modernize the staff and manager daily task views
@@ -22,7 +22,6 @@
 - [ ] **Phase 7: Advanced Analytics Dashboard** - Provide deep business insights via interactive reporting
 
 ## Phase Details
-
 ### Phase 1: Premium UI Foundations
 **Goal**: Establish a consistent, premium design language and interaction model across the entire platform
 **Depends on**: Nothing
@@ -30,7 +29,14 @@
 **Success Criteria** (what must be TRUE):
   1. User sees correct Airbnb-inspired colors (Terracotta/Rausch), typography, and spacing tokens applied globally
   2. User experiences smooth page transitions and micro-interactions using framer-motion
-**Plans**: TBD
+**Plans**: 
+- **Wave 1**
+  - [x] 01-01-PLAN.md: Foundation & Testing Setup
+- **Wave 2 (Blocked on Wave 1)**
+  - [x] 01-02-PLAN.md: Global Design System (Tokens)
+  - [x] 01-03-PLAN.md: Animation Primitives
+- **Wave 3 (Blocked on Wave 2)**
+  - [x] 01-04-PLAN.md: Component & Route Integration
 **UI hint**: yes
 
 ### Phase 2: Customer Journey Redesign
@@ -40,7 +46,14 @@
 **Success Criteria** (what must be TRUE):
   1. Customer can navigate a visually stunning landing page that reflects the premium NailssentialsQC brand
   2. Customer can book an appointment through a simplified, premium-feeling multi-step booking flow
-**Plans**: TBD
+**Plans**: 
+- **Wave 1**
+  - [x] 02-01-PLAN.md — Landing Page Refactor & Hero (D-01, D-02, D-03)
+- **Wave 2**
+  - [ ] 02-02-PLAN.md — Booking Ritual State Machine & Steps (D-04, D-06, D-09, D-10)
+  - [ ] 02-03-PLAN.md — Final Ritual Steps & Navigation (D-05)
+- **Wave 3**
+  - [ ] 02-04-PLAN.md — Visual Integration & Final Polish (D-07, D-08)
 **UI hint**: yes
 
 ### Phase 3: Nail Art Exhibit & Gallery
@@ -106,8 +119,8 @@
 | V1-5. Performance Optimization | 5/5 | Complete | 2026-05-04 |
 | V1-6. Missing Features | 3/3 | Complete | 2026-05-04 |
 | V1-7. Backend Test Infrastructure | 8/8 | Complete | 2026-05-04 |
-| 1. Premium UI Foundations | 0/0 | Not started | - |
-| 2. Customer Journey Redesign | 0/0 | Not started | - |
+| 1. Premium UI Foundations | 4/4 | Complete | 2026-05-05 |
+| 2. Customer Journey Redesign | 0/4 | In progress | - |
 | 3. Nail Art Exhibit & Gallery | 0/0 | Not started | - |
 | 4. Operations Interface Overhaul | 0/0 | Not started | - |
 | 5. Marketing CMS & Content Control | 0/0 | Not started | - |
