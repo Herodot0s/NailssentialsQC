@@ -124,7 +124,7 @@
   - [x] 06-02-PLAN.md — Package CRUD API: Controller, Routes & Registration (PKG-01)
   - [x] 06-03-PLAN.md — Manager Package Studio: Dashboard UI & CRUD Interface (PKG-01)
 - **Wave 3 *(blocked on Wave 2 completion)***
-  - [ ] 06-04-PLAN.md — Customer Package Discovery & Cart Integration (PKG-02)
+  - [x] 06-04-PLAN.md — Customer Package Discovery & Cart Integration (PKG-02)
   - [ ] 06-05-PLAN.md — Booking Flow Backend & Commission Integration (PKG-02, PKG-03)
 **UI hint**: yes
 
