@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Leaf, ShieldCheck, ChevronRight, Star } from 'lucide-react';
 import Hero from '@/components/home/Hero';
+import TrendingTreatments from '@/components/home/TrendingTreatments';
 
 const Home = () => (
   <div className="flex flex-col min-h-[calc(100vh-64px)] overflow-x-hidden" data-testid="home-page">
@@ -47,6 +48,9 @@ const Home = () => (
         </div>
       </div>
     </section>
+
+    {/* Trending Treatments Section */}
+    <TrendingTreatments />
 
     {/* Signature Experience Section */}
     <section className="bg-primary-ultra overflow-hidden">
