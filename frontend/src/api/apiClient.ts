@@ -11,6 +11,9 @@ import type {
   SiteSettingsData,
   SiteContent,
   SaveSettingsRequest,
+  ServicePackage,
+  CreatePackagePayload,
+  UpdatePackagePayload,
 } from '@/types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
@@ -185,5 +188,27 @@ export const updateCmsContent = (id: number, data: { title?: string; body?: stri
 
 export const deleteCmsContent = (id: number) =>
   apiClient.delete<{ success: boolean; message: string }>(`/cms/content/${id}`);
+
+// Package endpoints
+export const getPackages = () =>
+  apiClient.get<{ success: boolean; data: ServicePackage[] }>('/packages');
+
+export const getActivePackages = () =>
+  apiClient.get<{ success: boolean; data: ServicePackage[] }>('/packages/active');
+
+export const getPackage = (id: number) =>
+  apiClient.get<{ success: boolean; data: ServicePackage }>(`/packages/${id}`);
+
+export const createPackage = (data: CreatePackagePayload) =>
+  apiClient.post<{ success: boolean; data: ServicePackage }>('/packages', data);
+
+export const updatePackage = (id: number, data: UpdatePackagePayload) =>
+  apiClient.put<{ success: boolean; data: ServicePackage }>(`/packages/${id}`, data);
+
+export const togglePackage = (id: number, isActive: boolean) =>
+  apiClient.patch<{ success: boolean; data: ServicePackage }>(`/packages/${id}/toggle`, { is_active: isActive });
+
+export const deletePackage = (id: number) =>
+  apiClient.delete<{ success: boolean; message: string }>(`/packages/${id}`);
 
 export default apiClient;
