@@ -37,6 +37,14 @@ A reliable, bug-free salon management system that customers, staff, and managers
 - ✓ Email notifications for bookings and completions — existing
 - ✓ Service catalog with categories — existing
 
+**Completed V1 Tasks (Phases 1-7):**
+- ✓ **Bug Fixes:** Fix JSX syntax errors in Navbar, hardcoded passwords, type mismatches, and schedule upsert logic
+- ✓ **Tech Debt:** Replace `any` types, split components/controllers, add cursor-based pagination, extract helpers, add Zod schema, debounce localStorage
+- ✓ **Security:** Remove JWT secret fallbacks, add password strength validation, role-based permission checks, rate limiting, URL validation, fix refresh token rotation
+- ✓ **Performance:** Fix sequential awaits, N+1 query patterns, add DB index, stream large file uploads, fix appointment completion flow
+- ✓ **Missing Features:** Add audit trail, data export/backup endpoint, configurable sales target
+- ✓ **Test Coverage:** Setup Jest+Supertest for backend, Vitest+RTL for frontend, add unit/integration/component tests, add npm audit
+
 ### Active
 
 <!-- Current scope. Building toward these. -->
@@ -56,54 +64,6 @@ A reliable, bug-free salon management system that customers, staff, and managers
 
 **Service Expansion:**
 - [ ] **SERV-01**: Add support for Service Packages/Bundles (combining Nail, Spa, Hair, etc.)
-
-*(Existing active bugs, debt, security, and performance requirements remain active)*
-
-**Bug Fixes:**
-- [ ] **BUG-01**: Fix JSX syntax errors in Navbar.tsx dropdown menu
-- [ ] **BUG-02**: Fix hardcoded password 'N/A' for walk-in customers
-- [ ] **BUG-03**: Fix ManagerDashboard setState type mismatch
-- [ ] **BUG-04**: Fix parseInt without NaN checks
-- [ ] **BUG-05**: Fix staff schedule upsert logic
-
-**Tech Debt:**
-- [ ] **DEBT-01**: Replace `any` type with proper interfaces
-- [ ] **DEBT-02**: Split ManagerDashboard.tsx into separate components
-- [ ] **DEBT-03**: Split appointmentController.ts into separate modules
-- [ ] **DEBT-04**: Add cursor-based pagination
-- [ ] **DEBT-05**: Extract shared helpers
-- [ ] **DEBT-06**: Add Zod schema validation
-- [ ] **DEBT-07**: Debounce localStorage writes
-
-**Security:**
-- [ ] **SEC-01**: Remove JWT secret fallbacks
-- [ ] **SEC-02**: Add password strength validation
-- [ ] **SEC-03**: Add role-based permission checks for notifications
-- [ ] **SEC-04**: Add rate limiting middleware
-- [ ] **SEC-05**: Validate profile picture URLs
-- [ ] **SEC-06**: Fix refresh token rotation race condition
-
-**Performance:**
-- [ ] **PERF-01**: Fix sequential awaits in payroll controller
-- [ ] **PERF-02**: Fix N+1 query pattern in report controller
-- [ ] **PERF-03**: Add database index on commission.commission_date
-- [ ] **PERF-04**: Stream large file uploads
-- [ ] **PERF-05**: Fix appointment completion flow
-
-**Missing Features:**
-- [ ] **FEAT-01**: Add audit trail (SystemLog entries)
-- [ ] **FEAT-02**: Add data export/backup endpoint
-- [ ] **FEAT-03**: Make sales target configurable
-
-**Test Coverage:**
-- [ ] **TEST-01**: Set up Jest + Supertest for backend
-- [ ] **TEST-02**: Set up Vitest + React Testing Library for frontend
-- [ ] **TEST-03**: Write unit tests for commission calculation
-- [ ] **TEST-04**: Write integration tests for authentication
-- [ ] **TEST-05**: Write integration tests for appointment completion
-- [ ] **TEST-06**: Write integration tests for payroll generation
-- [ ] **TEST-07**: Write component tests for critical pages
-- [ ] **TEST-08**: Add npm audit to CI/CD pipeline
 
 ### Out of Scope
 

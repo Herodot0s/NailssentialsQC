@@ -5,7 +5,7 @@
 
 ## v1 Requirements
 
-*(Existing v1 requirements from v1.0 milestone remain active for bug fixes and test infrastructure, see PROJECT.md)*
+*(All v1 requirements from the v1.0 milestone, including bug fixes, tech debt, security, performance, missing features, and test coverage from phases 1-7, have been completed and are isolated from v2.0.)*
 
 ## v2 Requirements
 
@@ -51,17 +51,17 @@ Requirements for the v2.0 Premium Experience & Expansion milestone. Each maps to
 |-------------|-------|--------|
 | UI-01 | Phase 1 | Pending |
 | UI-02 | Phase 2 | Pending |
-| UI-03 | Phase 3 | Pending |
+| UI-03 | Phase 4 | Pending |
 | UI-04 | Phase 1 | Pending |
-| CMS-01 | Phase 4 | Pending |
-| CMS-02 | Phase 4 | Pending |
-| CMS-03 | Phase 4 | Pending |
-| ANLY-01 | Phase 6 | Pending |
-| ANLY-02 | Phase 6 | Pending |
-| ANLY-03 | Phase 6 | Pending |
-| PKG-01 | Phase 5 | Pending |
-| PKG-02 | Phase 5 | Pending |
-| PKG-03 | Phase 5 | Pending |
+| CMS-01 | Phase 3 | Pending |
+| CMS-02 | Phase 3 | Pending |
+| CMS-03 | Phase 5 | Pending |
+| ANLY-01 | Phase 7 | Pending |
+| ANLY-02 | Phase 7 | Pending |
+| ANLY-03 | Phase 7 | Pending |
+| PKG-01 | Phase 6 | Pending |
+| PKG-02 | Phase 6 | Pending |
+| PKG-03 | Phase 6 | Pending |
 
 **Coverage:**
 - v2 requirements: 13 total
