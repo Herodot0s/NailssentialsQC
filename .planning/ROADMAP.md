@@ -121,7 +121,7 @@
 - **Wave 1**
   - [x] 06-01-PLAN.md — Data Foundations: Schema, Migration & Types (PKG-01)
 - **Wave 2 *(blocked on Wave 1 completion)***
-  - [ ] 06-02-PLAN.md — Package CRUD API: Controller, Routes & Registration (PKG-01)
+  - [x] 06-02-PLAN.md — Package CRUD API: Controller, Routes & Registration (PKG-01)
   - [ ] 06-03-PLAN.md — Manager Package Studio: Dashboard UI & CRUD Interface (PKG-01)
 - **Wave 3 *(blocked on Wave 2 completion)***
   - [ ] 06-04-PLAN.md — Customer Package Discovery & Cart Integration (PKG-02)
