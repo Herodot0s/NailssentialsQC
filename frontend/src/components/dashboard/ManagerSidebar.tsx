@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   DollarSign, Users, Clock, Wallet, Star, Settings,
-  PieChart as PieChartIcon, Image as ImageIcon, FileText, Package
+  PieChart as PieChartIcon, Image as ImageIcon, FileText, Package, BarChart2
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import type { ManagerSidebarProps, ActiveView } from './types';
@@ -16,6 +16,7 @@ const menuItems: { id: ActiveView; label: string; icon: React.ElementType }[] = 
   { id: 'exhibits', label: 'Exhibit Gallery', icon: ImageIcon },
   { id: 'content', label: 'Content', icon: FileText },
   { id: 'packages', label: 'Packages', icon: Package },
+  { id: 'advanced-analytics', label: 'Analytics', icon: BarChart2 },
 ];
 
 export const ManagerSidebar: React.FC<ManagerSidebarProps> = ({ 

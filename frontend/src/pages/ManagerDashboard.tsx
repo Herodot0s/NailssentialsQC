@@ -30,6 +30,7 @@ import { ReviewModeration } from '@/components/dashboard/ReviewModeration';
 import ManageExhibits from './ManageExhibits';
 import { ContentView } from '@/components/dashboard/cms/ContentView';
 import PackagesView from '@/components/packages/PackagesView';
+import { AnalyticsDashboard } from '@/components/dashboard/analytics/AnalyticsDashboard';
 
 import { ManagerSidebar } from '@/components/dashboard/ManagerSidebar';
 import { OverviewView } from '@/components/dashboard/OverviewView';
@@ -485,6 +486,12 @@ const ManagerDashboard: React.FC = () => {
         {activeView === 'packages' && (
           <div className="animate-in fade-in duration-700">
             <PackagesView />
+          </div>
+        )}
+
+        {activeView === 'advanced-analytics' && (
+          <div className="animate-in fade-in duration-700">
+            <AnalyticsDashboard />
           </div>
         )}
       </main>
