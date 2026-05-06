@@ -4,17 +4,9 @@ import { useDateFilter } from './hooks/useDateFilter';
 import { useKpiSummary } from './hooks/useAnalyticsData';
 import { KpiCards } from './KpiCards';
 import { DateFilterBar } from './DateFilterBar';
-
-// Placeholder tab components — replaced in Plan 07-03
-const RevenueTab: React.FC<{ dateRange: any }> = () => (
-  <div className="text-center py-16 text-muted-foreground text-sm">Revenue Tab — charts loading in next wave</div>
-);
-const StaffTab: React.FC<{ dateRange: any }> = () => (
-  <div className="text-center py-16 text-muted-foreground text-sm">Staff Tab — charts loading in next wave</div>
-);
-const RetentionTab: React.FC<{ dateRange: any }> = () => (
-  <div className="text-center py-16 text-muted-foreground text-sm">Retention Tab — charts loading in next wave</div>
-);
+import { RevenueTab } from './RevenueTab';
+import { StaffTab } from './StaffTab';
+import { RetentionTab } from './RetentionTab';
 
 export const AnalyticsDashboard: React.FC = () => {
   const { dateRange, setPreset, setCustomRange, isValid } = useDateFilter();
@@ -69,3 +61,4 @@ export const AnalyticsDashboard: React.FC = () => {
     </div>
   );
 };
+
