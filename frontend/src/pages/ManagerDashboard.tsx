@@ -56,7 +56,7 @@ import type {
 } from '@/types/api';
 
 const ManagerDashboard: React.FC = () => {
-  const [activeView, setActiveView] = useState<ActiveView>('analytics');
+  const [activeView, setActiveView] = useState<ActiveView>('advanced-analytics');
   const [salesStats, setSalesStats] = useState<SalesStats | null>(null);
   const [payrollReport, setPayrollReport] = useState<PayrollRecord[]>([]);
   const [payrollPeriods, setPayrollPeriods] = useState<PayrollPeriod[]>([]);
@@ -409,19 +409,6 @@ const ManagerDashboard: React.FC = () => {
            </div>
         </header>
 
-        {activeView === 'analytics' && (
-          <OverviewView 
-            salesStats={salesStats} 
-            historicalData={historicalData} 
-            selectedCategory={selectedCategory}
-            onCategorySelect={setSelectedCategory}
-            onCategoryReset={() => setSelectedCategory(null)}
-            activeStaffCount={attendance.filter(a => new Date(a.date).toDateString() === new Date().toDateString() && a.status === 'Present').length}
-            pendingReviewCount={reviews.filter(r => r.is_approved_for_public === null || r.is_approved_for_public === false).length}
-            appointments={appointments}
-            staffMembers={staffMembers}
-          />
-        )}
 
         {activeView === 'staff' && (
           <div className="animate-in fade-in duration-700">

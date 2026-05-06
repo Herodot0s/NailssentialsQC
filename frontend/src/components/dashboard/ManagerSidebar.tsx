@@ -6,18 +6,37 @@ import {
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import type { ManagerSidebarProps, ActiveView } from './types';
 
-const menuItems: { id: ActiveView; label: string; icon: React.ElementType }[] = [
-  { id: 'analytics', label: 'Dashboard', icon: PieChartIcon },
-  { id: 'staff', label: 'Employee Files', icon: Users },
-  { id: 'attendance', label: 'Attendance Tool', icon: Clock },
-  { id: 'deductions', label: 'Deductions Ledger', icon: Wallet },
-  { id: 'payroll', label: 'Salary Slips', icon: DollarSign },
-  { id: 'reviews', label: 'Reviews', icon: Star },
-  { id: 'exhibits', label: 'Exhibit Gallery', icon: ImageIcon },
-  { id: 'content', label: 'Content', icon: FileText },
-  { id: 'packages', label: 'Packages', icon: Package },
-  { id: 'services', label: 'Services', icon: Settings },
-  { id: 'advanced-analytics', label: 'Analytics', icon: BarChart2 },
+interface SidebarGroup {
+  title: string;
+  items: { id: ActiveView; label: string; icon: React.ElementType }[];
+}
+
+const groups: SidebarGroup[] = [
+  {
+    title: 'Insights',
+    items: [
+      { id: 'advanced-analytics', label: 'Dashboard', icon: BarChart2 },
+      { id: 'reviews', label: 'Reviews', icon: Star },
+    ]
+  },
+  {
+    title: 'Operations',
+    items: [
+      { id: 'services', label: 'Service Menu', icon: Settings },
+      { id: 'packages', label: 'Packages', icon: Package },
+      { id: 'exhibits', label: 'Exhibit Gallery', icon: ImageIcon },
+      { id: 'content', label: 'Website CMS', icon: FileText },
+    ]
+  },
+  {
+    title: 'Personnel',
+    items: [
+      { id: 'staff', label: 'Employee Files', icon: Users },
+      { id: 'attendance', label: 'Attendance', icon: Clock },
+      { id: 'deductions', label: 'Deductions', icon: Wallet },
+      { id: 'payroll', label: 'Salary Slips', icon: DollarSign },
+    ]
+  }
 ];
 
 export const ManagerSidebar: React.FC<ManagerSidebarProps> = ({ 
@@ -42,28 +61,39 @@ export const ManagerSidebar: React.FC<ManagerSidebarProps> = ({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto overflow-x-hidden">
-        {menuItems.map(item => (
-          <button
-            key={item.id}
-            onClick={() => {
-              onViewChange(item.id);
-              if (mobileOpen && onMobileToggle) onMobileToggle();
-            }}
-            className={`w-full flex items-center px-4 py-3 rounded-none text-[10px] uppercase tracking-widest font-bold transition-all group ${
-              collapsed ? 'justify-center' : 'gap-3'
-            } ${
-              activeView === item.id
-                ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                : 'text-muted-foreground hover:bg-gray-50 hover:text-foreground'
-            }`}
-            title={collapsed ? item.label : undefined}
-          >
-            <item.icon className={`h-4 w-4 shrink-0 stroke-[1.5] ${
-              activeView === item.id ? 'text-white' : 'group-hover:text-primary'
-            }`} />
-            {!collapsed && <span>{item.label}</span>}
-          </button>
+      <nav className="flex-1 p-4 space-y-8 overflow-y-auto overflow-x-hidden">
+        {groups.map((group, groupIdx) => (
+          <div key={groupIdx} className="space-y-2">
+            {!collapsed && (
+              <h3 className="px-4 text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
+                {group.title}
+              </h3>
+            )}
+            <div className="space-y-1">
+              {group.items.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    onViewChange(item.id);
+                    if (mobileOpen && onMobileToggle) onMobileToggle();
+                  }}
+                  className={`w-full flex items-center px-4 py-3 rounded-none text-[10px] uppercase tracking-widest font-bold transition-all group ${
+                    collapsed ? 'justify-center' : 'gap-3'
+                  } ${
+                    activeView === item.id
+                      ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                      : 'text-muted-foreground hover:bg-gray-50 hover:text-foreground'
+                  }`}
+                  title={collapsed ? item.label : undefined}
+                >
+                  <item.icon className={`h-4 w-4 shrink-0 stroke-[1.5] ${
+                    activeView === item.id ? 'text-white' : 'group-hover:text-primary'
+                  }`} />
+                  {!collapsed && <span>{item.label}</span>}
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
 
