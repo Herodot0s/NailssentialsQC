@@ -136,7 +136,13 @@
   1. Manager can view interactive revenue charts and booking volume trends with date filtering
   2. Manager can identify top-performing staff based on utilization and revenue generation metrics
   3. Manager can analyze customer retention rates and cohort behavior over time
-**Plans**: TBD
+**Plans**: 3 plans
+- **Wave 1**
+  - [x] 07-01-PLAN.md — Backend Analytics API: Staff Performance, Retention & KPI Endpoints (ANLY-01, ANLY-02, ANLY-03)
+- **Wave 2**
+  - [x] 07-02-PLAN.md — Analytics Dashboard Shell: Sidebar, Date Filter, KPI Cards & Tabs (ANLY-01)
+- **Wave 3**
+  - [x] 07-03-PLAN.md — Chart Components: Revenue Bar/Line, Staff Leaderboard & Retention Visualizations (ANLY-01, ANLY-02, ANLY-03)
 **UI hint**: yes
 
 ## Progress
@@ -155,5 +161,5 @@
 | 3. Nail Art Exhibit & Gallery | 4/4 | Complete | 2026-05-05 |
 | 4. Operations Interface Overhaul | 4/4 | Complete | 2026-05-05 |
 | 5. Marketing CMS & Content Control | 5/5 | Complete | 2026-05-05 |
-| 6. Service Packages & Bundling | 0/5 | Ready for execution | - |
-| 7. Advanced Analytics Dashboard | 0/0 | Not started | - |
+| 6. Service Packages & Bundling | 5/5 | Complete | 2026-05-05 |
+| 7. Advanced Analytics Dashboard | 3/3 | Complete | 2026-05-06 |
