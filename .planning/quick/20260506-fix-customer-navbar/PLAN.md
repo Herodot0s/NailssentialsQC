@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: complete
 ---
 
 # Fix Customer Navigation Bar

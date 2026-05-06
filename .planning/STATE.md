@@ -52,3 +52,4 @@ Resume file: None
 | 20260506-consolidate-manager-tools | Consolidate Manager Tools to Dashboard | 2026-05-06 | pending | [20260506-consolidate-manager-tools](./quick/20260506-consolidate-manager-tools/) |
 | 20260506-categorize-manager-sidebar | Categorize Manager Sidebar & Refine Analytics | 2026-05-06 | pending | [20260506-categorize-manager-sidebar](./quick/20260506-categorize-manager-sidebar/) |
 | 20260506-add-login-shortcuts | Add login shortcut buttons for Customer, Staff, and Manager | 2026-05-06 | 4a0f944 | [20260506-add-login-shortcuts](./quick/20260506-add-login-shortcuts/) |
+| 20260506-fix-customer-navbar | Streamline customer navbar and fix mobile menu gaps | 2026-05-06 | 5655403 | [20260506-fix-customer-navbar](./quick/20260506-fix-customer-navbar/) |
