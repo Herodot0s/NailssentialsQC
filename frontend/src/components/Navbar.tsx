@@ -55,45 +55,40 @@ const Navbar: React.FC = () => {
               to="/gallery"
               className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all"
             >
-              Exhibit
+              Gallery
             </Link>
-            {isAuthenticated && user?.role === 'customer' && (
-              <Link
-                to="/booking"
-                className="relative text-muted-foreground hover:text-foreground transition-all p-2"
-              >
-                <ShoppingCart className="h-5 w-5 stroke-[1.5]" />
-                {cart.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-bold h-4 w-4 rounded-full flex items-center justify-center animate-in zoom-in duration-300">
-                    {cart.length}
-                  </span>
-                )}
-              </Link>
-            )}
             {isAuthenticated ? (
               <>
                 {user?.role === 'customer' && (
-                  <>
-                    <Link
-                      to="/booking"
-                      className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all"
-                    >
-                      Book Now
-                    </Link>
-                    <Link
-                      to="/appointments"
-                      className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all"
-                    >
-                      My Appointments
-                    </Link>
-                  </>
+                  <Link
+                    to="/booking"
+                    className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all flex items-center gap-2"
+                  >
+                    <span>Book Now</span>
+                    {cart.length > 0 && (
+                      <div className="relative h-5 w-5 flex items-center justify-center">
+                        <ShoppingCart className="h-4 w-4 stroke-[1.5]" />
+                        <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[7px] font-bold h-3.5 w-3.5 rounded-full flex items-center justify-center">
+                          {cart.length}
+                        </span>
+                      </div>
+                    )}
+                  </Link>
                 )}
                 {user?.role === 'staff' && (
                   <Link
                     to="/dashboard"
                     className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all"
                   >
-                    Dashboard
+                    Staff Portal
+                  </Link>
+                )}
+                {user?.role === 'manager' && (
+                  <Link
+                    to="/manager"
+                    className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all"
+                  >
+                    Manager Dashboard
                   </Link>
                 )}
 
@@ -200,7 +195,7 @@ const Navbar: React.FC = () => {
                   onClick={() => navigate('/gallery')}
                   className="rounded-none px-4 py-3 cursor-pointer"
                 >
-                  Exhibit
+                  Gallery
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => navigate('/services')}
@@ -208,6 +203,38 @@ const Navbar: React.FC = () => {
                 >
                   Services
                 </DropdownMenuItem>
+                {isAuthenticated && user?.role === 'customer' && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => navigate('/booking')}
+                      className="rounded-none px-4 py-3 cursor-pointer font-bold text-primary"
+                    >
+                      Book Now {cart.length > 0 ? `(${cart.length})` : ''}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate('/appointments')}
+                      className="rounded-none px-4 py-3 cursor-pointer"
+                    >
+                      My Appointments
+                    </DropdownMenuItem>
+                  </>
+                )}
+                {isAuthenticated && user?.role === 'staff' && (
+                  <DropdownMenuItem
+                    onClick={() => navigate('/dashboard')}
+                    className="rounded-none px-4 py-3 cursor-pointer font-bold text-primary"
+                  >
+                    Staff Portal
+                  </DropdownMenuItem>
+                )}
+                {isAuthenticated && user?.role === 'manager' && (
+                  <DropdownMenuItem
+                    onClick={() => navigate('/manager')}
+                    className="rounded-none px-4 py-3 cursor-pointer font-bold text-primary"
+                  >
+                    Manager Dashboard
+                  </DropdownMenuItem>
+                )}
                 {!isAuthenticated ? (
                   <>
                     <DropdownMenuItem
