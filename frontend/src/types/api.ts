@@ -373,3 +373,44 @@ export interface CreatePackagePayload {
 }
 
 export interface UpdatePackagePayload extends Partial<CreatePackagePayload> {}
+
+// Analytics Types
+
+export interface StaffPerformanceStat {
+  staffId: number;
+  fullName: string;
+  revenue: number;
+  commission: number;
+  serviceCount: number;
+  categoryBreakdown: Record<string, number>;
+}
+
+export interface RetentionTrendPoint {
+  month: string;
+  rate: number;
+}
+
+export interface TopCustomer {
+  name: string;
+  visitCount: number;
+  lastVisit: string;
+}
+
+export interface RetentionData {
+  retentionRate: number;
+  totalCustomers: number;
+  returningCustomers: number;
+  newCustomers: number;
+  trend: RetentionTrendPoint[];
+  topCustomers: TopCustomer[];
+}
+
+export interface KpiSummaryData {
+  todayRevenue: number;
+  monthRevenue: number;
+  activeStaff: number;
+  monthAppointments: number;
+  todayRevenueTrend: number | null;
+  monthRevenueTrend: number | null;
+  monthAppointmentsTrend: number | null;
+}

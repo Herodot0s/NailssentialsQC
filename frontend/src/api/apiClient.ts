@@ -14,6 +14,9 @@ import type {
   ServicePackage,
   CreatePackagePayload,
   UpdatePackagePayload,
+  StaffPerformanceStat,
+  RetentionData,
+  KpiSummaryData,
 } from '@/types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
@@ -73,12 +76,14 @@ apiClient.interceptors.response.use(
 export const uploadFile = (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
-  return apiClient.post('/upload', formData, {
+  return apiClient.post('../upload', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   });
 };
+
+export const deleteFile = (url: string) => apiClient.delete('../upload', { data: { url } });
 
 // Catalog methods
 export const getCategories = () => apiClient.get('/services/categories');
@@ -155,6 +160,16 @@ export const getDailySales = (date?: string) =>
   apiClient.get('/reports/daily-sales', { params: { date } });
 export const getHistoricalAnalytics = (params: { startDate: string; endDate: string }) =>
   apiClient.get('/reports/historical-analytics', { params });
+
+// Analytics endpoints
+export const getStaffPerformance = (params: { startDate: string; endDate: string }) =>
+  apiClient.get<{ success: boolean; data: StaffPerformanceStat[] }>('/reports/staff-performance', { params });
+
+export const getRetentionAnalytics = (params: { startDate: string; endDate: string }) =>
+  apiClient.get<{ success: boolean; data: RetentionData }>('/reports/retention', { params });
+
+export const getKpiSummary = (params: { startDate: string; endDate: string }) =>
+  apiClient.get<{ success: boolean; data: KpiSummaryData }>('/reports/kpi-summary', { params });
 
 // Notification methods
 export const getNotifications = () => apiClient.get('/notifications');
