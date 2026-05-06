@@ -152,6 +152,47 @@ const Login: React.FC = () => {
               )}
             </Button>
           </form>
+
+          <div className="pt-4 border-t border-dashed">
+            <p className="text-xs font-medium text-muted-foreground mb-2 text-center">
+              Quick Login (Demo Accounts)
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setValue('identifier', 'charlie_brown');
+                  setValue('password', 'password123');
+                }}
+                className="text-xs h-8 border-primary/20 hover:bg-primary/5 hover:text-primary"
+              >
+                Customer
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setValue('identifier', 'john_smith');
+                  setValue('password', 'password123');
+                }}
+                className="text-xs h-8 border-primary/20 hover:bg-primary/5 hover:text-primary"
+              >
+                Staff
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setValue('identifier', 'admin');
+                  setValue('password', 'password123');
+                }}
+                className="text-xs h-8 border-primary/20 hover:bg-primary/5 hover:text-primary"
+              >
+                Manager
+              </Button>
+            </div>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-center border-t py-6">
           <p className="text-sm text-muted-foreground">
