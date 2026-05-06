@@ -51,3 +51,4 @@ Resume file: None
 | 20260505-sync-roadmap-state | Sync ROADMAP.md and STATE.md for Phase 4 completion | 2026-05-05 | pending | [20260505-sync-roadmap-state](./quick/20260505-sync-roadmap-state/) |
 | 20260506-consolidate-manager-tools | Consolidate Manager Tools to Dashboard | 2026-05-06 | pending | [20260506-consolidate-manager-tools](./quick/20260506-consolidate-manager-tools/) |
 | 20260506-categorize-manager-sidebar | Categorize Manager Sidebar & Refine Analytics | 2026-05-06 | pending | [20260506-categorize-manager-sidebar](./quick/20260506-categorize-manager-sidebar/) |
+| 20260506-add-login-shortcuts | Add login shortcut buttons for Customer, Staff, and Manager | 2026-05-06 | 4a0f944 | [20260506-add-login-shortcuts](./quick/20260506-add-login-shortcuts/) |
