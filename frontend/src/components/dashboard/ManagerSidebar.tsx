@@ -16,6 +16,7 @@ const menuItems: { id: ActiveView; label: string; icon: React.ElementType }[] = 
   { id: 'exhibits', label: 'Exhibit Gallery', icon: ImageIcon },
   { id: 'content', label: 'Content', icon: FileText },
   { id: 'packages', label: 'Packages', icon: Package },
+  { id: 'services', label: 'Services', icon: Settings },
   { id: 'advanced-analytics', label: 'Analytics', icon: BarChart2 },
 ];
 

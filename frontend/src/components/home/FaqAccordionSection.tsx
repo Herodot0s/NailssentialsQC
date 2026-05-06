@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ChevronRight } from 'lucide-react';
 import type { SiteContent } from '@/types/api';
 
 interface FaqAccordionSectionProps {
@@ -32,9 +33,10 @@ export const FaqAccordionSection: React.FC<FaqAccordionSectionProps> = ({ faqs }
         <div className="mt-10 text-center">
           <Link
             to="/policies"
-            className="text-sm font-bold tracking-[0.2em] uppercase border-b border-primary/40 pb-2 hover:border-primary transition-all duration-300"
+            className="group inline-flex items-center gap-1 text-sm font-bold tracking-[0.2em] uppercase border-b border-primary/40 pb-2 hover:border-primary transition-all duration-300"
           >
-            View all FAQs →
+            View all FAQs
+            <ChevronRight className="h-3.5 w-3.5 transform group-hover:translate-x-1 transition-transform duration-200" />
           </Link>
         </div>
       </div>

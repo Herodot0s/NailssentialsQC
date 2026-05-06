@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Sparkles, Leaf, ShieldCheck, Star } from 'lucide-react';
 import Hero from '@/components/home/Hero';
 import TrendingTreatments from '@/components/home/TrendingTreatments';
+import landingPageBg from '@/assets/img/landing_page_bg.svg';
 import { ContactInfoSection } from '@/components/home/ContactInfoSection';
 import { FaqAccordionSection } from '@/components/home/FaqAccordionSection';
 import { getCmsSettings, getCmsContent } from '@/api/apiClient';
@@ -29,52 +30,51 @@ const Home = () => {
   const sigHeadline = s?.signature?.headline ?? 'The Nailssentials Ritual';
   const sigBody = s?.signature?.body ?? 'Step into a world where time slows down. Our signature ritual combines aromatherapy, precision technique, and an atmosphere of absolute luxury to revitalize your spirit.';
   const sigLinkLabel = s?.signature?.link_label ?? 'Discover the Menu';
-  const sigBgUrl = s?.signature?.bg_image_url ?? 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&q=80&w=2070';
+  const sigBgUrl = s?.signature?.bg_image_url || landingPageBg;
   const footerHeadline = s?.footer?.headline ?? 'Prepare for your visit.';
   const footerButtonLabel = s?.footer?.button_label ?? 'JOIN THE PRIVILEGE CLUB';
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-64px)] overflow-x-hidden" data-testid="home-page">
+    <main className="flex flex-col min-h-[calc(100vh-64px)] overflow-x-hidden" data-testid="home-page">
       <Hero
         tagline={s?.hero?.tagline}
-        headline={s?.hero?.headline}
+        headline={s?.hero?.headline && s?.hero?.headline !== 'Elevate Your Natural Beauty' ? s?.hero?.headline : undefined}
         subheadline={s?.hero?.subheadline}
-        bgImageUrl={s?.hero?.bg_image_url}
+        bgImageUrl={s?.hero?.bg_image_url || undefined}
         buttonLabel={s?.hero?.button_label}
       />
 
-      {/* Philosophy Section — hardcoded (icons/layout coupled) */}
-      <section className="py-32 bg-white relative">
-        <div className="container px-6 mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-20">
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 mb-8">
-                <Sparkles className="w-8 h-8 text-primary stroke-[1.2]" />
-                <div className="h-[1px] flex-grow bg-primary/20" />
-              </div>
-              <h3 className="text-xs font-sans tracking-[0.3em] text-muted-foreground uppercase">Unrivaled Quality</h3>
-              <p className="font-serif text-2xl text-foreground leading-relaxed">
-                We curate only the most <span className="italic">exquisite</span> products to grace your skin and nails.
+      {/* Philosophy Section — varied layout, lead statement + two supporting values */}
+      <section className="py-24 md:py-32 bg-background relative">
+        <div className="container px-6 mx-auto max-w-5xl">
+          {/* Lead Value — full width, large */}
+          <div className="mb-20 md:mb-24">
+            <div className="flex items-center gap-2 mb-8">
+              <Sparkles className="w-3.5 h-3.5 text-primary stroke-[2]" />
+              <span className="text-primary font-bold tracking-[0.2em] text-[11px] uppercase">Our Philosophy</span>
+            </div>
+            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-light text-foreground tracking-tight leading-tight max-w-3xl mb-6">
+              We curate only the most exquisite products to grace your skin and nails.
+            </h2>
+            <p className="text-muted-foreground text-base md:text-lg font-light leading-relaxed max-w-xl">
+              Every detail at Nailssentials is chosen with intention, from the tools we sterilize to the artisans we train.
+            </p>
+          </div>
+
+          {/* Two supporting values — asymmetric grid */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-12 md:gap-16">
+            <div className="md:col-span-2 space-y-4">
+              <Leaf className="w-6 h-6 text-primary stroke-[1.5]" />
+              <h3 className="font-serif text-xl text-foreground">Medical-Grade Hygiene</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Hospital-standard sterilization protocols protect every client. Your health is never a compromise.
               </p>
             </div>
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 mb-8">
-                <Leaf className="w-8 h-8 text-primary stroke-[1.2]" />
-                <div className="h-[1px] flex-grow bg-primary/20" />
-              </div>
-              <h3 className="text-xs font-sans tracking-[0.3em] text-muted-foreground uppercase">Pure Hygiene</h3>
-              <p className="font-serif text-2xl text-foreground leading-relaxed">
-                Medical-grade sterilization ensures your health is protected within our <span className="italic">pristine</span> environment.
-              </p>
-            </div>
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 mb-8">
-                <ShieldCheck className="w-8 h-8 text-primary stroke-[1.2]" />
-                <div className="h-[1px] flex-grow bg-primary/20" />
-              </div>
-              <h3 className="text-xs font-sans tracking-[0.3em] text-muted-foreground uppercase">Artistic Mastery</h3>
-              <p className="font-serif text-2xl text-foreground leading-relaxed">
-                Our technicians are not just staff; they are <span className="italic">dedicated</span> artisans of beauty.
+            <div className="md:col-span-3 md:border-l md:border-primary/10 md:pl-16 space-y-4">
+              <ShieldCheck className="w-6 h-6 text-primary stroke-[1.5]" />
+              <h3 className="font-serif text-xl text-foreground">Artisan Technicians</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
+                Our technicians are dedicated artisans of beauty. Each holds specialized certifications and undergoes continuous training to deliver results that exceed expectations.
               </p>
             </div>
           </div>
@@ -89,10 +89,10 @@ const Home = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-center">
             <div className="py-24 lg:py-32 lg:pr-24 space-y-10">
               <div className="space-y-4">
-                <span className="flex items-center gap-2 text-primary font-medium tracking-widest text-xs uppercase">
-                  <Star className="h-3 w-3 fill-primary" /> {sigLabel}
+                <span className="flex items-center gap-2 text-primary font-bold tracking-[0.2em] text-[11px] uppercase">
+                  <Star className="h-3.5 w-3.5 fill-primary" /> {sigLabel}
                 </span>
-                <h2 className="font-serif text-4xl sm:text-6xl font-light text-foreground leading-tight max-w-xl">
+                <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-light text-foreground tracking-tight leading-tight max-w-xl">
                   {sigHeadline}
                 </h2>
               </div>
@@ -103,7 +103,7 @@ const Home = () => {
                 </Link>
               </div>
             </div>
-            <div className="relative h-[600px] lg:h-[800px] w-full">
+            <div className="relative h-[400px] md:h-[600px] lg:h-[800px] w-full">
               <img src={sigBgUrl} alt="Manicure Ritual" className="absolute inset-0 w-full h-full object-cover" />
             </div>
           </div>
@@ -123,17 +123,17 @@ const Home = () => {
       <FaqAccordionSection faqs={faqs} />
 
       {/* Footer CTA */}
-      <section className="py-24 text-center border-t border-primary/10">
+      <section className="py-24 text-center bg-primary text-primary-foreground">
         <div className="container mx-auto px-6 max-w-xl space-y-8">
-          <h2 className="font-serif text-3xl font-light text-foreground">{footerHeadline}</h2>
+          <h2 className="font-serif text-3xl md:text-4xl font-light text-primary-foreground">{footerHeadline}</h2>
           <Link to="/register">
-            <Button className="h-14 px-12 tracking-widest bg-black text-white hover:bg-primary border-none transition-all duration-500">
+            <Button size="lg" className="px-12 bg-white text-primary hover:bg-primary-light hover:text-primary shadow-premium">
               {footerButtonLabel}
             </Button>
           </Link>
         </div>
       </section>
-    </div>
+    </main>
   );
 };
 

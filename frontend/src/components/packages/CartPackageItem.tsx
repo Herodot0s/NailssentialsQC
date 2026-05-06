@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Clock, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { CartItem } from '@/types/CartItem';
 import { useCart } from '@/context/CartContext';
 import type { Staff } from '@/types/api';
@@ -17,6 +18,14 @@ interface CartPackageItemProps {
   staffList: Staff[];
   slots: Slot[];
 }
+
+const formatTime = (time24: string) => {
+  if (!time24) return '';
+  const [hours, minutes] = time24.split(':').map(Number);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const hours12 = hours % 12 || 12;
+  return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+};
 
 export default function CartPackageItem({ item, staffList, slots }: CartPackageItemProps) {
   const { removeFromCart, updateChildService } = useCart();
@@ -90,12 +99,23 @@ export default function CartPackageItem({ item, staffList, slots }: CartPackageI
                     })}
                   >
                     <SelectTrigger className="rounded-none border-primary/10 h-11 focus:ring-primary bg-white">
-                      <SelectValue placeholder="Select Technician" />
+                      <SelectValue placeholder="Select Technician">
+                        {child.staffName}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-none border-none shadow-xl">
                       {staffList.map(staff => (
-                        <SelectItem key={staff.id} value={staff.id.toString()} className="rounded-none">
-                          {staff.fullName}
+                        <SelectItem key={staff.id} value={staff.id.toString()} textValue={staff.fullName} className="rounded-none py-3">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-medium text-sm">
+                              {staff.fullName}
+                            </span>
+                            {staff.specializations && (
+                              <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-bold">
+                                {staff.specializations}
+                              </span>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -108,7 +128,9 @@ export default function CartPackageItem({ item, staffList, slots }: CartPackageI
                     onValueChange={(val) => updateChildService(item.packageId!, child.serviceId, { startTime: val || undefined })}
                   >
                     <SelectTrigger className="rounded-none border-primary/10 h-11 focus:ring-primary bg-white">
-                      <SelectValue placeholder="Select Time" />
+                      <SelectValue placeholder="Select Time">
+                        {child.startTime ? formatTime(child.startTime) : undefined}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-none border-none shadow-xl h-64 overflow-y-auto">
                       {slots.map(slot => (
@@ -116,9 +138,20 @@ export default function CartPackageItem({ item, staffList, slots }: CartPackageI
                           key={slot.time} 
                           value={slot.time} 
                           disabled={!slot.available}
-                          className="rounded-none"
+                          textValue={formatTime(slot.time)}
+                          className="rounded-none py-3"
                         >
-                          {slot.time} {!slot.available && '(Busy)'}
+                          <div className="flex items-center justify-between w-full gap-4">
+                             <div className="flex items-center gap-2">
+                                <Clock className={cn("h-3.5 w-3.5", slot.available ? "text-primary/40" : "text-muted-foreground/30")} />
+                                <span className="font-medium text-sm">{formatTime(slot.time)}</span>
+                             </div>
+                             {!slot.available && (
+                               <span className="text-[8px] uppercase tracking-widest font-bold text-destructive/50 bg-destructive/5 px-2 py-0.5">
+                                 Busy
+                               </span>
+                             )}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>

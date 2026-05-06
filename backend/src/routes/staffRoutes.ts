@@ -49,15 +49,11 @@ const router = Router();
 
 // All staff routes are restricted to managers
 router.use(authenticateToken);
-router.use(authorizeRoles('manager'));
-
-/**
- * GET /api/staff
- * @query {string} [cursor] - Cursor ID for pagination (last ID from previous page, D-09)
- * @query {number} [limit=20] - Number of items per page (max 100, D-10)
- * @returns { success: boolean, data: { items: Staff[], nextCursor: string | null, hasMore: boolean } } (D-11)
- */
+// Staff list is viewable by all authenticated users (for booking)
 router.get('/', getAllStaff);
+
+// Management routes restricted to managers
+router.use(authorizeRoles('manager'));
 router.post('/', validateZod(createStaffSchema), createStaff);
 router.put('/:id', validateIdParam, validateZod(updateStaffSchema), updateStaff);
 router.get('/:id/schedule', getStaffSchedule);

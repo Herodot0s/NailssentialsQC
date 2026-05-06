@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import { getAvailability, createAppointment, getAllStaff } from '../api/apiClient';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -38,9 +39,17 @@ interface Slot {
   available: boolean;
 }
 
+const formatTime = (time24: string) => {
+  if (!time24) return '';
+  const [hours, minutes] = time24.split(':').map(Number);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const hours12 = hours % 12 || 12;
+  return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+};
+
 const Booking: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { cart, removeFromCart, updateCartItem, clearCart, totalPrice } = useCart();
 
   const [staffList, setStaffList] = useState<Staff[]>([]);
@@ -53,6 +62,8 @@ const Booking: React.FC = () => {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
+    if (authLoading) return;
+
     if (!isAuthenticated) {
       navigate('/login?redirect=/booking');
       return;
@@ -77,7 +88,7 @@ const Booking: React.FC = () => {
     };
 
     fetchData();
-  }, [isAuthenticated, navigate, selectedDate]);
+  }, [isAuthenticated, authLoading, navigate, selectedDate]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(e.target.value);
@@ -264,12 +275,23 @@ const Booking: React.FC = () => {
                                      })}
                                    >
                                      <SelectTrigger className="rounded-none border-primary/10 h-11 focus:ring-primary bg-white/50">
-                                       <SelectValue placeholder="Select Technician" />
+                                       <SelectValue placeholder="Select Technician">
+                                          {item.staffName}
+                                       </SelectValue>
                                      </SelectTrigger>
                                      <SelectContent className="rounded-none border-none shadow-xl">
                                        {staffList.map(staff => (
-                                         <SelectItem key={staff.id} value={staff.id.toString()} className="rounded-none">
-                                           {staff.fullName}
+                                         <SelectItem key={staff.id} value={staff.id.toString()} textValue={staff.fullName} className="rounded-none py-3">
+                                           <div className="flex flex-col gap-0.5">
+                                             <span className="font-medium text-sm">
+                                               {staff.fullName}
+                                             </span>
+                                             {staff.specializations && (
+                                               <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-bold">
+                                                 {staff.specializations}
+                                               </span>
+                                             )}
+                                           </div>
                                          </SelectItem>
                                        ))}
                                      </SelectContent>
@@ -283,7 +305,9 @@ const Booking: React.FC = () => {
                                      onValueChange={(val) => updateCartItem(item.serviceId, { startTime: val || undefined })}
                                    >
                                      <SelectTrigger className="rounded-none border-primary/10 h-11 focus:ring-primary bg-white/50">
-                                       <SelectValue placeholder="Select Time" />
+                                       <SelectValue placeholder="Select Time">
+                                          {item.startTime ? formatTime(item.startTime) : undefined}
+                                       </SelectValue>
                                      </SelectTrigger>
                                      <SelectContent className="rounded-none border-none shadow-xl h-64 overflow-y-auto">
                                        {slots.map(slot => (
@@ -291,9 +315,20 @@ const Booking: React.FC = () => {
                                            key={slot.time} 
                                            value={slot.time} 
                                            disabled={!slot.available}
-                                           className="rounded-none"
+                                           textValue={formatTime(slot.time)}
+                                           className="rounded-none py-3"
                                          >
-                                           {slot.time} {!slot.available && '(Busy)'}
+                                           <div className="flex items-center justify-between w-full gap-4">
+                                              <div className="flex items-center gap-2">
+                                                 <Clock className={cn("h-3.5 w-3.5", slot.available ? "text-primary/40" : "text-muted-foreground/30")} />
+                                                 <span className="font-medium text-sm">{formatTime(slot.time)}</span>
+                                              </div>
+                                              {!slot.available && (
+                                                <span className="text-[8px] uppercase tracking-widest font-bold text-destructive/50 bg-destructive/5 px-2 py-0.5">
+                                                  Busy
+                                                </span>
+                                              )}
+                                           </div>
                                          </SelectItem>
                                        ))}
                                      </SelectContent>

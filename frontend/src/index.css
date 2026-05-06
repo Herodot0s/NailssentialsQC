@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+/* Fonts loaded via @fontsource-variable packages below */
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import '@fontsource-variable/noto-sans';
@@ -9,10 +9,18 @@
 @tailwind utilities;
 
 :root {
-  /* Brand Rausch Palette */
-  --brand-rausch: #FF385C;
-  --brand-rausch-muted: #FFF1F2;
-  --bg-canvas: #FFFFFF;
+  /* Brand Terracotta Palette */
+  --brand-primary: #B8794E;
+  --brand-primary-hover: #9A6440;
+  --brand-primary-light: #F5E6D9;
+  --brand-primary-ultra: #FDF8F4;
+
+  /* Tinted Neutrals - Warm Spa Palette */
+  --bg-canvas: #FAFAF9;
+  /* Warm off-white */
+  --bg-pure: #FFFFFF;
+  --text-dark: #1A1614;
+  /* Deep charcoal-brown */
 
   /* Radius System */
   --radius-container: 32px;
@@ -20,30 +28,34 @@
   --radius-data: 8px;
 
   /* Shadows */
-  --shadow-premium: 0 8px 28px rgba(0, 0, 0, 0.08);
+  --shadow-premium: 0 16px 32px rgba(184, 121, 78, 0.12);
 
-  /* Brand Colors - Terracotta Brown Palette (Legacy - being replaced by Rausch) */
-  --primary: 349 100% 61%; /* Rausch #FF385C translated to HSL */
+  /* Primary HSL (Terracotta) */
+  --primary: 25 44% 51%;
   --primary-foreground: 0 0% 100%;
 
-  --primary-color: var(--brand-rausch);
-  --primary-dark: #E31C5F; /* Slightly darker Rausch for hover */
-  --primary-light: var(--brand-rausch-muted);
-  --primary-ultra: #fff8f8;
+  --primary-color: var(--brand-primary);
+  --primary-dark: var(--brand-primary-hover);
+  --primary-light: var(--brand-primary-light);
+  --primary-ultra: var(--brand-primary-ultra);
 
   /* Functional Colors */
-  --success-color: #4caf50;
-  --warning-color: #ff9800;
-  --error-color: #dc2626;
-  --info-color: #2563eb;
+  --success-color: #435334;
+  /* Forest green */
+  --warning-color: #C08261;
+  /* Muted terracotta */
+  --error-color: #A94438;
+  /* Deep brick red */
+  --info-color: #5D7285;
+  /* Slate blue */
 
   /* Neutral Colors */
-  --text-primary: #1f2937;
-  --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
-  --border-color: #e5e7eb;
-  --bg-color: #fafaf9; /* Warm off-white */
-  --card-bg: #ffffff;
+  --text-primary: #2D2723;
+  --text-secondary: #5C544F;
+  --text-muted: #8E8680;
+  --border-color: #E7E2DF;
+  --bg-color: var(--bg-canvas);
+  --card-bg: #FFFFFF;
 
   /* Typography */
   --font-heading: 'Playfair Display', serif;
@@ -52,52 +64,55 @@
   /* Effects */
   --radius: 8px;
 
-  /* Shadcn Variables - Mapped to match brand where possible */
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
+  /* Shadcn Variables */
+  --background: 20 10% 98%;
+  /* Tinted background */
+  --foreground: 25 20% 12%;
+  /* Tinted foreground */
   --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
+  --card-foreground: 25 20% 12%;
   --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --secondary: 354 100% 97%; /* Rausch Muted #FFF1F2 */
-  --secondary-foreground: 349 100% 35%;
-  --muted: 354 100% 98%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 354 100% 97%;
-  --accent-foreground: 349 100% 35%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 349 100% 61%; /* Rausch */
+  --popover-foreground: 25 20% 12%;
+  --secondary: 25 30% 95%;
+  --secondary-foreground: 25 44% 30%;
+  --muted: 25 15% 96%;
+  --muted-foreground: 25 10% 45%;
+  --accent: 25 30% 95%;
+  --accent-foreground: 25 44% 30%;
+  --destructive: 0 60% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 25 15% 90%;
+  --input: 25 15% 90%;
+  --ring: 25 44% 51%;
 }
 
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 210 40% 98%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 212.7 26.8% 83.9%;
+  --background: 25 20% 8%;
+  --foreground: 25 10% 95%;
+  --card: 25 20% 10%;
+  --card-foreground: 25 10% 95%;
+  --popover: 25 20% 10%;
+  --popover-foreground: 25 10% 95%;
+  --primary: 25 44% 51%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 25 20% 15%;
+  --secondary-foreground: 25 10% 95%;
+  --muted: 25 20% 15%;
+  --muted-foreground: 25 10% 70%;
+  --accent: 25 20% 15%;
+  --accent-foreground: 25 10% 95%;
+  --destructive: 0 60% 30%;
+  --destructive-foreground: 25 10% 95%;
+  --border: 25 20% 15%;
+  --input: 25 20% 15%;
+  --ring: 25 44% 51%;
 }
 
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings:
@@ -108,29 +123,30 @@
 
 /* Custom shadow for cards */
 .shadow-card {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 32px rgba(184, 121, 78, 0.08);
 }
 
 /* Featured Border for premium components */
 .featured-border {
-  border: 1.5px solid var(--brand-rausch);
-  box-shadow: 0 0 0 4px var(--brand-rausch-muted);
+  border: 1.5px solid var(--brand-primary);
+  box-shadow: 0 0 0 4px var(--brand-primary-light);
 }
 
 /* Loading States */
 .loader {
-  border: 4px solid #e5e7eb;
-  border-top: 4px solid var(--brand-rausch);
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--brand-primary);
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  animation: spin 1s linear infinite;
+  animation: spin 1s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 @keyframes spin {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }

@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { AuthRequest } from '../middleware/authMiddleware';
 import bcrypt from 'bcrypt';
 import prisma from '../utils/prisma';
-import { sendSuccess, sendError } from '../utils/apiHelpers';
+import { sendSuccess, sendError, getCurrentUser } from '../utils/apiHelpers';
 import { logSystemAction } from '../utils/systemLog';
 
 /**
@@ -15,16 +15,20 @@ export const getAllStaff = async (req: Request, res: Response) => {
     const cursor = req.query.cursor ? parseInt(req.query.cursor as string) : undefined;
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
 
+    const currentUser = getCurrentUser(req as AuthRequest);
+    const isManager = currentUser?.role === 'manager';
+
     const where: Prisma.UserWhereInput = {
       role: { in: ['staff', 'manager'] },
+      is_active: true, // Only active staff for booking
     };
     if (cursor) {
-      where.id = { gt: cursor }; // D-09: id field cursor
+      where.id = { gt: cursor };
     }
 
     const staff = await prisma.user.findMany({
       where,
-      take: limit + 1, // D-12: cursor-only detection
+      take: limit + 1,
       orderBy: { id: 'asc' },
       select: {
         id: true,
@@ -59,20 +63,21 @@ export const getAllStaff = async (req: Request, res: Response) => {
       items: items.map((u) => ({
         id: u.id,
         username: u.username,
-        email: u.email,
-        phone: u.phone,
         role: u.role,
-        isActive: u.is_active,
         fullName: u.staff_profile?.full_name,
         staffProfileId: u.staff_profile?.id,
         specializations: u.staff_profile?.specializations,
-        basePayPerWeek: u.staff_profile?.base_pay_per_week,
-        dailyTarget: u.staff_profile?.daily_target,
-        sssNumber: u.sss_number,
-        tinNumber: u.tin_number,
-        govId: u.gov_id,
         profilePictureUrl: u.profile_picture_url,
-        createdAt: u.created_at,
+        // Only include sensitive info for managers
+        email: isManager ? u.email : undefined,
+        phone: isManager ? u.phone : undefined,
+        isActive: isManager ? u.is_active : undefined,
+        basePayPerWeek: isManager ? u.staff_profile?.base_pay_per_week : undefined,
+        dailyTarget: isManager ? u.staff_profile?.daily_target : undefined,
+        sssNumber: isManager ? u.sss_number : undefined,
+        tinNumber: isManager ? u.tin_number : undefined,
+        govId: isManager ? u.gov_id : undefined,
+        createdAt: isManager ? u.created_at : undefined,
       })),
       nextCursor,
       hasMore,
@@ -172,11 +177,19 @@ export const updateStaff = async (req: Request, res: Response) => {
         gov_id: govId,
         profile_picture_url: profilePictureUrl,
         staff_profile: {
-          update: {
-            full_name: fullName,
-            specializations,
-            base_pay_per_week: basePayPerWeek ? parseFloat(basePayPerWeek) : undefined,
-            daily_target: dailyTarget ? parseFloat(dailyTarget) : undefined,
+          upsert: {
+            update: {
+              full_name: fullName,
+              specializations,
+              base_pay_per_week: basePayPerWeek ? parseFloat(basePayPerWeek) : undefined,
+              daily_target: dailyTarget ? parseFloat(dailyTarget) : undefined,
+            },
+            create: {
+              full_name: fullName || 'New Staff',
+              specializations: specializations || 'General',
+              base_pay_per_week: basePayPerWeek ? parseFloat(basePayPerWeek) : 2500.00,
+              daily_target: dailyTarget ? parseFloat(dailyTarget) : 6000.00,
+            }
           },
         },
       },

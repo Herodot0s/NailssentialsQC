@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getServices, getCategories } from '@/api/apiClient';
-import { Service, Category } from '@/types/api';
+import type { Service, Category } from '@/types/api';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

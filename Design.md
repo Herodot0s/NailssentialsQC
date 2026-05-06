@@ -1,193 +1,241 @@
-# NailssentialsQC - Full-Fledge UI/UX Design System & Web App Implementation Guide
-
-This document is the ultimate "Source of Truth" for generating and implementing the NailssentialsQC Spa Management System UI. It strictly adheres to **UI/UX Pro Max Guidelines**, ensuring enterprise-grade accessibility, aesthetic excellence, and robust interaction patterns, while fully aligning with the `05-UX-Design.md` specification.
-
+---
+name: NailssentialsQC
+description: Premium nail salon management and booking system in Quezon City
+colors:
+  kiln-terracotta: "#B8794E"
+  kiln-terracotta-hover: "#9A6440"
+  bisque-wash: "#F5E6D9"
+  linen-mist: "#FDF8F4"
+  warm-canvas: "#FAFAF9"
+  charcoal-bark: "#2D2723"
+  warm-stone: "#5C544F"
+  clay-dust: "#8E8680"
+  kiln-border: "#E7E2DF"
+  forest-confirm: "#435334"
+  brick-error: "#A94438"
+  slate-info: "#5D7285"
+  muted-terracotta-warning: "#C08261"
+typography:
+  display:
+    fontFamily: "Playfair Display, ui-serif, Georgia, serif"
+    fontSize: "clamp(2rem, 5vw, 4.5rem)"
+    fontWeight: 300
+    lineHeight: 1.1
+    letterSpacing: "normal"
+  headline:
+    fontFamily: "Playfair Display, ui-serif, Georgia, serif"
+    fontSize: "clamp(1.5rem, 3vw, 2.25rem)"
+    fontWeight: 400
+    lineHeight: 1.25
+    letterSpacing: "normal"
+  title:
+    fontFamily: "Playfair Display, ui-serif, Georgia, serif"
+    fontSize: "1.25rem"
+    fontWeight: 500
+    lineHeight: 1.3
+  body:
+    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 400
+    lineHeight: 1.6
+    letterSpacing: "normal"
+  label:
+    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.75rem"
+    fontWeight: 600
+    lineHeight: 1
+    letterSpacing: "0.2em"
+rounded:
+  container: "32px"
+  utility: "12px"
+  data: "8px"
+  data-sm: "4px"
+spacing:
+  xs: "4px"
+  sm: "8px"
+  md: "16px"
+  lg: "24px"
+  xl: "32px"
+  2xl: "48px"
+  3xl: "64px"
+components:
+  button-primary:
+    backgroundColor: "{colors.kiln-terracotta}"
+    textColor: "#FFFFFF"
+    rounded: "{rounded.utility}"
+    padding: "0 32px"
+    height: "44px"
+  button-primary-hover:
+    backgroundColor: "hsl(25 44% 51% / 0.8)"
+  button-outline:
+    backgroundColor: "transparent"
+    textColor: "{colors.charcoal-bark}"
+    rounded: "{rounded.utility}"
+    padding: "0 24px"
+    height: "40px"
+  button-ghost:
+    backgroundColor: "transparent"
+    textColor: "{colors.charcoal-bark}"
+    rounded: "{rounded.utility}"
+    padding: "0 24px"
+    height: "40px"
+  button-destructive:
+    backgroundColor: "hsl(0 60% 50% / 0.1)"
+    textColor: "{colors.brick-error}"
+    rounded: "{rounded.utility}"
+    padding: "0 24px"
+  card-default:
+    backgroundColor: "#FFFFFF"
+    rounded: "{rounded.container}"
+    padding: "32px"
+  input-default:
+    backgroundColor: "transparent"
+    textColor: "{colors.charcoal-bark}"
+    height: "40px"
+  tab-active:
+    backgroundColor: "#FFFFFF"
+    textColor: "{colors.kiln-terracotta}"
 ---
 
-## 1. Global Theme Configuration (Design Tokens)
+# Design System: NailssentialsQC
 
-The brand conveys an elegant, warm, natural, and modern spa-like experience.
+## 1. Overview
 
-### 1.1 Color Palette
-```javascript
-export const theme = {
-  colors: {
-    // Brand Colors
-    primary: '#B8794E',       // Terracotta Brown (Main Action / Brand Identity)
-    primaryHover: '#9A6440',  // Darker Terracotta (Active/Hover states)
-    primaryLight: '#F5E6D9',  // Subtle backgrounds / Active tab states
-    primaryUltra: '#FDF8F4',  // Card accents / Very light hover surfaces
-    
-    // UI Colors
-    background: '#FAFAF9',    // Warm off-white page background (Spa vibe)
-    surface: '#FFFFFF',       // Pure white for cards/modals
-    surfaceAlt: '#F5F5F4',    // Alternate sections/Light warm gray
-    border: '#E5E7EB',        // Dividers and inputs
-    
-    // Text Colors
-    textPrimary: '#1F2937',   // Headings, body text (Contrast > 4.5:1 on light backgrounds)
-    textSecondary: '#6B7280', // Labels, subtitles (Contrast > 4.5:1 on light backgrounds)
-    textMuted: '#9CA3AF',     // Disabled text (Do not use for vital info)
-    
-    // Semantic Colors (Must pair with icons, never color alone)
-    success: '#4CAF50',       // Confirmed/Completed
-    successBg: '#E8F5E9',
-    warning: '#FF9800',       // Pending/Attention
-    warningBg: '#FFF3E0',
-    error: '#DC2626',         // Cancelled/Failed/Destructive
-    errorBg: '#FEE2E2',
-    info: '#2563EB',          // Links/Help
-    infoBg: '#DBEAFE',
-  },
-  // ... rest of theme
-};
-```
+**Creative North Star: "The Artisan's Alcove"**
 
-### 1.2 Typography & Spacing
-```javascript
-export const theme = {
-  // ...
-  fonts: {
-    heading: '"Playfair Display", serif', // Elegant, luxurious
-    body: '"Inter", sans-serif',          // Highly legible UI font
-  },
-  fontSizes: {
-    xs: '12px',   // Badges, footnotes
-    sm: '14px',   // Labels, captions
-    md: '16px',   // Base mobile body (prevents iOS auto-zoom)
-    lg: '18px',   // Subtitles (Inter)
-    xl: '20px',   // Card titles (Inter)
-    '2xl': '24px',// Section titles (Playfair)
-    '3xl': '32px',// Page titles (Playfair)
-    '4xl': '48px',// Hero sections (Playfair)
-  },
-  space: {
-    1: '4px',
-    2: '8px',     // Minimum touch target gap
-    3: '16px',    // Standard padding
-    4: '24px',    // Generous padding
-    5: '32px',
-    6: '48px',
-    7: '64px',
-  },
-  radii: {
-    sm: '4px',    // Badges
-    md: '8px',    // Inputs, standard buttons
-    lg: '16px',   // Soft, organic spa-like primary radius for cards
-    pill: '50px', // For tags and special buttons
-    round: '50%', // Avatars, Icon circles
-  },
-  shadows: {
-    // Terracotta-tinted elegant shadows (replaces harsh grays)
-    sm: '0 2px 8px rgba(184, 121, 78, 0.04)',
-    md: '0 8px 24px rgba(184, 121, 78, 0.08)',
-    lg: '0 16px 32px rgba(184, 121, 78, 0.12)',
-    focus: '0 0 0 2px #F5E6D9, 0 0 0 4px #B8794E', // Required A11y Focus Ring
-  },
-  transitions: {
-    default: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-    fast: 'all 0.2s ease',
-    spring: 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' // Natural bounce
-  }
-};
-```
+NailssentialsQC is a private retreat where every visual detail feels handmade. The system conveys warmth without saccharine, luxury without ostentation, and craft without pretension. Surfaces are warm off-white with terracotta accents that feel like fired clay, not digital gradient. The density is generous; spacing breathes. The overall impression is of walking into a well-lit studio where someone who cares deeply about their work has arranged everything with quiet intention.
 
----
+The system explicitly rejects: clinical SaaS aesthetics, generic AI-generated spa templates, glassmorphism as decoration, identical card grids with icon-title-text patterns, and gradient text effects. If someone could look at a screen and say "AI made that," the implementation has failed.
 
-## 2. UI/UX Pro Max Engineering Rules
-*Strictly follow these rules across ALL web application code to ensure enterprise-grade quality.*
+Motion is responsive, not choreographed. Elements acknowledge interaction (hover lifts, focus rings, tap feedback) but don't perform. The one exception is the marketing landing page hero, which earns its entrance animation because first impressions are the product.
 
-### 2.1 Accessibility (A11y) & Interaction [CRITICAL]
-- **Touch Targets:** ALL interactive elements (buttons, links, icon buttons) MUST have a minimum height/width of `44px` on mobile/touch interfaces.
-- **Focus States:** Globally enforce `:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }`. Never remove focus rings.
-- **Icons:** STRICTLY use SVG icons (Lucide/Heroicons/Radix). **DO NOT use Emojis**. Ensure consistent stroke width (1.5px or 2px).
-- **Semantic HTML:** Use native `<button type="button">`, `<nav>`, `<main>`, `<dialog>`, `<form>`, `<fieldset>`, `<legend>`, `<label>`.
-- **Color Contrast:** All text must meet the WCAG 4.5:1 contrast ratio against its background. Do not convey info by color alone (always pair with icons or text).
+**Key Characteristics:**
+- Warm terracotta-tinted palette with restrained accent usage in product surfaces, committed usage on brand surfaces
+- Serif display + sans body pairing (Playfair Display + Inter)
+- Flat-by-default elevation with terracotta-tinted shadows on state change
+- Scale-based micro-interactions via Framer Motion (1.02× hover, 0.98× tap)
+- Premium easing curve: `cubic-bezier(0.32, 0.72, 0, 1)` for all motion
 
-### 2.2 Layout & Responsive [HIGH]
-- **Mobile-First:** Design for 320px-375px first. Use a responsive max-width container (`1200px`) for desktop to prevent horizontal stretching.
-- **Spacing Rhythm:** Use strict 8px increment multiples (`8px`, `16px`, `24px`, `32px`).
-- **Navigation:** 
-  - Mobile: Bottom navigation bar (max 5 items, active highlighted in primary color).
-  - Desktop: Left sidebar (fixed, 240px wide).
+## 2. Colors: The Kiln Palette
 
-### 2.3 Animation & States [MEDIUM]
-- **Interactions:** Use active/pressed states. Button hovers use a subtle scale `transform: scale(1.02)`.
-- **Loading:** Use skeleton screens for content loading > 300ms. Use button spinners for form submissions. Never leave the UI unresponsive.
-- **Toasts:** Success/Error toast notifications should auto-dismiss in 3-5 seconds and be announced to screen readers (`aria-live="polite"`).
+A terracotta-anchored palette tinted warm throughout. No pure black, no pure white. Every neutral leans toward hue 25 (warm amber-brown).
 
-### 2.4 Forms & Inputs
-- **Labels:** Every input MUST have a visible `<label>`. Do not rely solely on placeholders.
-- **Validation:** Validate on blur. Show clear error messages below the input in `error` color (#DC2626) with an error SVG icon.
-- **Progressive Disclosure:** Group long forms into logical steps (e.g., the 4-step booking flow).
+### Primary
+- **Kiln Terracotta** (`#B8794E`, HSL 25 44% 51%): The brand identity color. Used on primary buttons, active states, accent icons, and the hero CTA. On brand surfaces (landing page), it carries 30-60% of the section in backgrounds and CTAs. On product surfaces (dashboards, forms), it stays below 10%.
+- **Kiln Terracotta Hover** (`#9A6440`): Active/pressed state for primary buttons. Darker and warmer.
+- **Bisque Wash** (`#F5E6D9`): Light tinted backgrounds for selected tabs, active filter pills, and subtle section differentiation. The "warm glow" behind featured elements.
+- **Linen Mist** (`#FDF8F4`): The lightest brand tint. Card accents, signature section backgrounds, barely-visible hover surfaces.
 
----
+### Neutral
+- **Warm Canvas** (`#FAFAF9`, HSL 20 10% 98%): Page background. Not white, not gray; a warm off-white with enough hue to feel intentional.
+- **Charcoal Bark** (`#2D2723`, HSL 25 20% 12%): Primary text and headings. Deep enough for contrast, warm enough to avoid coldness.
+- **Warm Stone** (`#5C544F`, HSL 25 10% 45%): Secondary text, muted-foreground. Labels, subtitles, body copy that doesn't need to shout.
+- **Clay Dust** (`#8E8680`): Disabled text, placeholder text. Never used for information a user needs to read.
+- **Kiln Border** (`#E7E2DF`, HSL 25 15% 90%): Dividers, input borders, table lines. Warm enough to not feel stark.
 
-## 3. Web App Component Architecture
+### Semantic
+- **Forest Confirm** (`#435334`): Success states. Deep muted green, not the generic `#4CAF50`. Always paired with a checkmark icon.
+- **Brick Error** (`#A94438`): Error and destructive states. Deep brick red, earthy rather than alarming.
+- **Slate Info** (`#5D7285`): Links, help text, informational badges. A cool counterpoint to the warm palette.
+- **Muted Terracotta Warning** (`#C08261`): Pending/attention states. Stays in the terracotta family rather than introducing orange.
 
-### 3.1 Buttons
-- **Primary:** `bg: primary`, `color: white`, `radius: 8px`, `min-height: 44px`, `font: bold 16px`. Hover: `bg: primaryHover`, `scale(1.02)`. Loading: Show spinner, disable.
-- **Secondary (Outline):** `bg: transparent`, `border: 1px solid primary`, `color: primary`. Hover: `bg: primaryLight`.
-- **Ghost:** `bg: transparent`, `color: primary`. Hover: `bg: primaryUltra`.
-- **Destructive:** `bg: error`, `color: white`. Used for Cancel/Delete/Remove actions.
+### Named Rules
+**The Tinted Neutral Rule.** Every neutral surface uses HSL hue 25 (warm amber). Pure `#000000` and `#FFFFFF` are prohibited. Even "white" cards are `hsl(0 0% 100%)` which is the one exception; all backgrounds, foregrounds, and borders carry warmth.
 
-### 3.2 Form Inputs
-- **Base:** `bg: white`, `border: 1px solid border`, `radius: 8px`, `min-height: 48px`, `padding: 0 16px`.
-- **Focus:** `border-color: primary`, `box-shadow: focus`.
-- **Error:** `border-color: error`. Red error text + icon below input.
+**The Committed Brand Rule.** On brand surfaces (the landing page, marketing sections), terracotta carries 30-60% of the surface area in at least one section. On product surfaces (dashboards, forms, dialogs), terracotta stays below 10% as an accent. Never collapse the brand register to restrained.
 
-### 3.3 Cards (Services, Appointments, Metrics)
-- **Base Style:** `bg: surface`, `borderRadius: lg (16px)`, `boxShadow: sm`, `border: 1px solid transparent`, `padding: 24px`.
-- **Hover State (Interactive Cards):** `transform: translateY(-2px) scale(1.01)`, `boxShadow: lg`, `transition: spring`.
-- **Accent:** Use a `4px` solid left border for status indication (e.g., Orange for Pending, Green for Confirmed, Primary Terracotta for Active/Highlighted).
+## 3. Typography
 
-### 3.4 Badges & Status Tags
-- **Base:** `padding: 4px 8px`, `radius: 4px`, `font: bold 12px`.
-- **Success:** `bg: successBg`, `color: success`.
-- **Warning:** `bg: warningBg`, `color: warning`.
-- **Info:** `bg: infoBg`, `color: info`.
+**Display Font:** Playfair Display (with Georgia, serif fallback)
+**Body Font:** Inter (with system-ui, sans-serif fallback)
+**Label Font:** Inter (uppercase, tracked)
 
----
+**Character:** Playfair Display brings editorial gravity to headings without being ornate. Its contrast strokes pair cleanly with Inter's geometric neutrality. The combination is warm-editorial, not magazine-precious; headings rarely go below `font-weight: 300` to keep the display cuts elegant.
 
-## 4. Full-Fledge Web App Screen Prompts (UI Generation)
+### Hierarchy
+- **Display** (300, `clamp(2rem, 5vw, 4.5rem)`, line-height 1.1): Hero headlines and full-bleed section titles. Reserved for the landing page and signature moments. Font-light only.
+- **Headline** (400, `clamp(1.5rem, 3vw, 2.25rem)`, line-height 1.25): Section headings across all surfaces. The primary structural marker.
+- **Title** (500, `1.25rem`, line-height 1.3): Card titles, dialog headers, list item names. The workhorse heading level.
+- **Body** (400, `1rem`, line-height 1.6, max 65-75ch): All running text. Inter at 16px base prevents iOS auto-zoom. Line length capped for readability.
+- **Label** (600, `0.75rem`, letter-spacing 0.2em, uppercase): Eyebrow text, category labels, metadata. Always uppercase with wide tracking. Minimum rendered size is 11px.
 
-*Copy and paste these exact descriptions into your UI generator (v0, Cursor, Bolt, Lovable) to build out the full application screen by screen.*
+### Named Rules
+**The Minimum Legibility Rule.** No rendered text below 11px. The `text-[10px]` utility is prohibited. Label-size text uses `text-[11px]` or `text-xs` (12px) minimum.
 
-### 🖥️ Prompt 1: Landing Page & Navigation
-> "Generate a responsive landing page for NailssentialsQC Spa. **Navbar:** Fixed top, blurred glassmorphism background. Includes Logo (Playfair Display font, Terracotta #B8794E), links (Services, About, Contact), and two buttons ('Log In' outline, 'Book Now' solid primary). **Hero Section:** Split layout. Left: Playfair Display H1 'Elevate Your Natural Beauty', Inter body text, primary 'Book Appointment' button (min 44px height). Right: A placeholder for a beautiful spa image with soft rounded corners (16px) and a subtle terracotta shadow (`0 16px 32px rgba(184, 121, 78, 0.12)`). **Services Preview:** 3 cards in a row. Each card has a white bg, 16px radius, a 64px circular SVG icon container with a light pink gradient, service title, and an outline select button. Ensure all spacing follows an 8px grid."
+**The Italic Restraint Rule.** Italic spans wrapping single words for decoration are prohibited. Italic is for emphasis within running text or for the Display headline's signature treatment (one word per hero, maximum).
 
-### 🔐 Prompt 2: Authentication (Login / Register)
-> "Generate an Authentication page (Login view). **Background:** Warm gradient from off-white (#FAFAF9) to a very faint terracotta (#F5E6D9). **Card:** Centered, white, 8px border-radius, terracotta shadow (`0 4px 24px rgba(0,0,0,0.08)`), max-width 400px. Padding 40px vertical, 32px horizontal. **Header:** 'Welcome Back' in Playfair Display. **Form:** Email input and Password input. Both MUST have visible `<label>` above them, 8px border-radius, 48px height, and focus states with a 2px terracotta ring. Include a password visibility toggle (SVG eye icon). **Actions:** Full-width 48px Primary Button ('Login'). A 'Forgot Password?' text link, and a 'Don't have an account? Register Now' footer text. Ensure keyboard accessibility."
+## 4. Elevation
 
-### 🛍️ Prompt 3: Service Catalog (Browsing)
-> "Generate a Service Catalog page. **Header:** 'Services' (18px, bold) with sticky search bar (magnifying glass SVG). **Tabs:** Horizontally scrollable category tabs (All, Nails, Waxing, Lashes). Active tab has a 2px solid primary underline and primary text. **Main Content:** Responsive grid of Service Cards. **Service Card Design:** White bg, 8px radius, shadow `sm`. Left: 48px circular SVG icon container (primaryLight bg). Middle: Service Name, Duration (14px textSecondary), Price. Right: 'Select' outline button. Include 'Package Deals' cards with a light gradient background (#FCE4F3 to #FFFFFF) and a primary left border."
+Surfaces are flat by default. The system uses tonal layering (warmer/cooler tints of hue 25) to establish hierarchy, not shadow depth. Shadows appear as responses to state, not as resting decoration.
 
-### 📅 Prompt 4: Date & Time Selection (Booking Flow)
-> "Generate a Date and Time Selection booking interface. **Header:** Progress stepper showing 'Step 3 of 4: Select Date & Time' with a green checkmark on completed steps. **Summary Card:** Sticky top card showing 'Selected Service: Gel Manicure'. **Left Column (Date):** Calendar component. Available dates are bold, selected date has a solid primary circle background. **Right Column (Time):** Grid of time slots. Each chip is a pill shape (44px height). Selected chip is solid primary. **Bottom Bar:** Fixed bottom container with an 'Order Summary' and an enabled 'Continue' primary button."
+### Shadow Vocabulary
+- **Premium** (`0 16px 32px rgba(184, 121, 78, 0.12)`): Featured cards, hero CTAs, elevated dialogs. The terracotta tint makes shadows feel warm rather than gray. Used via `shadow-premium` utility.
+- **Card** (`0 8px 32px rgba(184, 121, 78, 0.08)`): Subtle resting shadow for interactive cards. Used via `shadow-card` utility.
+- **Focus Ring** (`0 0 0 2px #F5E6D9, 0 0 0 4px #B8794E`): Double-ring focus indicator. Inner ring is Bisque Wash, outer is Kiln Terracotta. Applied via `focus-visible:ring` utilities.
+- **Featured Border** (`border: 1.5px solid #B8794E` + `box-shadow: 0 0 0 4px #F5E6D9`): Selected/featured state for cards and packages. A warm glow ring via `.featured-border` utility.
 
-### 👤 Prompt 5: Customer Dashboard (Home & Appointments)
-> "Generate a Customer Dashboard. **Layout:** Bottom nav on mobile (Home, Book, Appointments, Profile), Left sidebar on desktop. **Header:** 'Welcome back, Maria! 👋' in Playfair Display. **Upcoming Appointment Widget:** A prominent card (16px radius, terracotta shadow) with a 4px primary left border. Shows service name, date, time, and 'Reschedule' (outline) / 'Cancel' (destructive red text) buttons. **Quick Actions:** 2x2 grid of square cards (Book Now, My Appointments, Profile, Support). Each has a 32x32px circular SVG icon. **Recent Activity:** A list of completed appointments with a green checkmark SVG."
+### Named Rules
+**The Flat-By-Default Rule.** Surfaces are flat at rest. Shadows appear only as a response to state (hover, focus, elevation change). A card sitting untouched has no visible shadow; hovering adds `shadow-premium`. The exception is persistent premium cards (featured items, hero CTAs) that communicate permanence.
 
-### 💅 Prompt 6: Staff Schedule & Check-in Dashboard
-> "Generate a Staff Dashboard for Salon Technicians. **Header:** 'Today's Schedule'. **Welcome Widget:** 'Good morning, Anna' with a large green '✅ CHECK IN' primary button (48px height). **Timeline:** A vertical list of today's appointments. **Card Statuses:** Pending = Orange left-border, Confirmed = Green left-border, In Progress = Blue left-border. Include a 'Start Service' button on Confirmed cards. **Progress Widget:** A card showing 'Daily Target' with a horizontal progress bar (8px height) filled with the primary terracotta color based on commission earned."
+## 5. Components
 
-### 📊 Prompt 7: Manager / Admin Analytics Dashboard
-> "Generate a Manager Analytics Dashboard. **Top Bar:** Date range picker and export buttons. **KPI Grid:** 4 cards across the top (Sales, Appointments, Staff Present, Target). Each card shows a large metric number and a soft-colored SVG icon. **Charts Area:** A card containing a placeholder for a Sales Trend Line Chart (using Chart.js logic), and a 'Top Services' card showing horizontal progress bars. **Team Target Widget:** A full-width progress bar showing daily break-even goal. **Alerts:** A list of actionable notifications (e.g., '⚠️ 2 appointments pending')."
+### Buttons
+Tactile and responsive. Every button uses Framer Motion for scale-based micro-interactions.
 
----
+- **Shape:** Generous rounding (12px / `rounded-xl`), uppercase text, wide letter-spacing (0.05em+), font-weight 600
+- **Primary:** Kiln Terracotta background, white text, 44px minimum height (touch-safe), 32px horizontal padding. Hover: 80% opacity. Motion: `whileHover: scale(1.02)`, `whileTap: scale(0.98)`, easing `[0.32, 0.72, 0, 1]` over 200ms
+- **Outline:** Transparent background, Kiln Border stroke, foreground text. Hover: muted background fill
+- **Ghost:** No background, no border. Hover: muted background. Used in toolbars, secondary actions
+- **Destructive:** 10% opacity brick-error background, brick-error text. Soft and reversible-feeling, not alarming
+- **Link:** Underlined text in primary color. For inline text actions only
 
-## 5. Final Code Review & Delivery Checklist (UI/UX Pro Max)
+### Cards / Containers
+- **Corner Style:** Large rounded corners (32px / `rounded-3xl`). The signature shape of the system. Organic and spa-like.
+- **Background:** Pure white (`hsl(0 0% 100%)`) on warm canvas. The contrast between warm background and white card creates depth without shadow.
+- **Shadow Strategy:** Flat at rest. `shadow-premium` on hover via AnimatedCard wrapper. Motion: `whileHover: scale(1.02)` with staggered entrance animations.
+- **Border:** None by default. `featured-border` class for selected/premium state.
+- **Internal Padding:** 32px default (`px-8 py-8`), 20px compact (`data-[size=sm]`)
 
-Before finalizing any frontend implementation, developers MUST verify the following:
+### Inputs / Fields
+- **Style:** Borderless top/sides, bottom border only (`border-b-input`). Transparent background. Minimal and understated.
+- **Focus:** Bottom border shifts to ring color (Kiln Terracotta). Clean focus transition without box shadows.
+- **Error:** Bottom border shifts to destructive red. Error text appears below inline.
+- **Height:** 40px default, 48px for prominent forms (booking flow)
 
-- [ ] **Component Semantics:** Are buttons native `<button>` tags? Are interactive links `<a>` tags?
-- [ ] **Accessibility (A11y):** Does every form input have an associated `<label>`? Are icons hidden from screen readers unless they convey meaning?
-- [ ] **Focus States:** Can a user tab through the interface and clearly see a Terracotta (`#B8794E`) focus ring?
-- [ ] **Touch Targets:** Are all clickable elements at least `44px` tall on mobile devices?
-- [ ] **Icons:** Are all icons SVG-based (strictly NO emojis)? Are they visually consistent in stroke width (1.5px - 2px)?
-- [ ] **Responsiveness:** Does the layout break gracefully from Desktop (Sidebar/Grid) to Mobile (Bottom Nav/Stacked)?
-- [ ] **Contrast:** Is text contrast sufficient? (Especially white text on the #B8794E primary color, and gray text on white backgrounds).
-- [ ] **Loading/Empty States:** Are there states designed for "No appointments", "Loading data" (skeletons), and form submission spinners?
-- [ ] **Error Handling:** Are form errors displayed inline beneath the input field with clear, actionable text?
-- [ ] **Animation:** Are transitions smooth, short (150-300ms), and free of layout thrashing (only animating `transform` or `opacity`)?
-- [ ] **Mobile Overlays:** Do bottom sheets, modals, and dropdowns have a semi-transparent dark scrim (40-60% opacity) separating them from the background?
+### Navigation
+- **Desktop Sidebar:** Fixed 240px width, white background, primary-highlighted active item
+- **Mobile Bottom Nav:** Fixed bottom bar, max 5 items, active item highlighted with Kiln Terracotta fill
+- **Tabs (Default variant):** Muted background container, white active tab with subtle shadow and primary text color
+- **Tabs (Line variant):** Transparent background, 2px primary underline on active tab
+
+### Signature: AnimatedCard
+The system's distinctive motion component. Wraps any Card in a Framer Motion container with:
+- Entrance: fade-in + 20px upward slide, staggered by 100ms per card
+- Hover: scale to 1.02×
+- Tap: scale to 0.98×
+- Easing: `PREMIUM_EASE [0.32, 0.72, 0, 1]` (a custom expo-out curve)
+- Duration: 250ms for interactions, 400ms for page transitions
+
+## 6. Do's and Don'ts
+
+### Do:
+- **Do** tint every neutral toward hue 25. The warmth is the identity.
+- **Do** use `shadow-premium` with terracotta-tinted rgba for elevated elements. Gray shadows feel foreign.
+- **Do** use Framer Motion `whileHover: scale(1.02)` for interactive cards and buttons. The tactile feel is the signature.
+- **Do** keep primary text at Charcoal Bark (`#2D2723`), never pure black. The contrast is sufficient (>7:1 on Warm Canvas) and the warmth is intentional.
+- **Do** use the `featured-border` class (1.5px terracotta + 4px bisque glow) for selected/premium states instead of side-stripe borders.
+- **Do** vary section layouts on the landing page. The Signature Experience's asymmetric split is the model; centered stacks are the exception.
+- **Do** use `rounded-3xl` (32px) for cards and containers. The large radius is the system's shape signature.
+- **Do** use Kiln Terracotta (`#B8794E`) at 30-60% surface coverage on at least one brand section (e.g., the Footer CTA with `bg-primary text-primary-foreground`).
+
+### Don't:
+- **Don't** use `border-left` or `border-right` greater than 1px as a colored accent stripe. Use `featured-border`, background tints, or icons instead.
+- **Don't** use `background-clip: text` with gradient backgrounds. Text is always a single solid color.
+- **Don't** use `backdrop-blur` or glassmorphism as decoration. The hero card glassmorphism pattern was removed for this reason.
+- **Don't** create identical card grids (same size, same icon + heading + text structure, repeated 3+ times). Vary the grid: feature one item large, size others differently, or use an asymmetric layout.
+- **Don't** use `text-[10px]` or any rendered text below 11px. It fails WCAG readability.
+- **Don't** wrap random words in `<span className="italic">` for decoration. One italic word per hero headline maximum; none in body copy.
+- **Don't** use pure `#000000` or `#FFFFFF` for text or backgrounds. Tint toward hue 25.
+- **Don't** use generic `#4CAF50` green or `#DC2626` red for semantic colors. Use the kiln-palette versions: Forest Confirm (`#435334`) and Brick Error (`#A94438`).
+- **Don't** center-stack every section on the landing page. Asymmetric splits, left-aligned leads, and varied grids are what distinguish this from a template.
+- **Don't** use `dangerouslySetInnerHTML` for decorative text effects. Use React nodes.

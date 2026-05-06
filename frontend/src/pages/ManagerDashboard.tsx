@@ -28,6 +28,7 @@ import { PayrollTable } from '@/components/dashboard/PayrollTable';
 import { AttendanceLedger } from '@/components/dashboard/AttendanceLedger';
 import { ReviewModeration } from '@/components/dashboard/ReviewModeration';
 import ManageExhibits from './ManageExhibits';
+import ManageServices from './ManageServices';
 import { ContentView } from '@/components/dashboard/cms/ContentView';
 import PackagesView from '@/components/packages/PackagesView';
 import { AnalyticsDashboard } from '@/components/dashboard/analytics/AnalyticsDashboard';
@@ -486,6 +487,12 @@ const ManagerDashboard: React.FC = () => {
         {activeView === 'packages' && (
           <div className="animate-in fade-in duration-700">
             <PackagesView />
+          </div>
+        )}
+
+        {activeView === 'services' && (
+          <div className="animate-in fade-in duration-700">
+            <ManageServices />
           </div>
         )}
 

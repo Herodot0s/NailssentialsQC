@@ -17,7 +17,7 @@ export const ContactInfoSection: React.FC<ContactInfoSectionProps> = ({
   if (!hasAny) return null;
 
   return (
-    <section className="bg-[#fafaf9] py-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <section className="bg-background py-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="container mx-auto px-6 max-w-4xl">
         <div className="space-y-6 mb-10">
           <span className="flex items-center gap-2 text-xs tracking-[0.3em] text-muted-foreground uppercase">
