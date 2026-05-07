@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import React from 'react';
 import landingPageBg from '@/assets/img/landing_page_bg.svg';
+import logo from '@/assets/img/NailssentialsQC Logo.svg';
 
 interface HeroProps {
   tagline?: string;
@@ -35,6 +36,7 @@ const Hero: React.FC<HeroProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-end">
           {/* Left Column: Eyebrow + Huge Headline */}
           <div className="lg:col-span-7">
+            <img src={logo} alt="NailssentialsQC Logo" className="h-16 md:h-20 w-auto mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000" />
             <div className="flex items-center gap-4 mb-6 md:mb-8">
               <div className="h-[1px] w-12 bg-white/40" />
               <p className="text-white/80 uppercase tracking-[0.2em] text-[11px] font-bold">{tagline}</p>

@@ -8,7 +8,6 @@ import landingPageBg from '@/assets/img/landing_page_bg.svg';
 import { ContactInfoSection } from '@/components/home/ContactInfoSection';
 import { FaqAccordionSection } from '@/components/home/FaqAccordionSection';
 import { getCmsSettings, getCmsContent } from '@/api/apiClient';
-import logo from '@/assets/img/NailssentialsQC Logo.svg';
 
 const Home = () => {
   const { data: settingsRes } = useQuery({
@@ -49,8 +48,8 @@ const Home = () => {
         <div className="container px-6 mx-auto max-w-5xl">
           {/* Lead Value — full width, large */}
           <div className="mb-20 md:mb-24">
-            <div className="flex items-center gap-4 mb-8">
-              <img src={logo} alt="NailssentialsQC Logo" className="h-10 w-auto object-contain" />
+            <div className="flex items-center gap-2 mb-8">
+              <Sparkles className="w-3.5 h-3.5 text-primary stroke-[2]" />
               <span className="text-primary font-bold tracking-[0.2em] text-[11px] uppercase">Our Philosophy</span>
             </div>
             <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-light text-foreground tracking-tight leading-tight max-w-3xl mb-6">
