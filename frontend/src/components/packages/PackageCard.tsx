@@ -4,15 +4,14 @@ import { Button } from '@/components/ui/button';
 import type { ServicePackage } from '@/types/api';
 import { useCart } from '@/context/CartContext';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface PackageCardProps {
   pkg: ServicePackage;
-  index: number;
   isFocused?: boolean;
 }
 
-export default function PackageCard({ pkg, index, isFocused = false }: PackageCardProps) {
+export default function PackageCard({ pkg, isFocused = false }: PackageCardProps) {
   const { addPackageToCart, isPackageInCart } = useCart();
   const navigate = useNavigate();
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getServices, getCategories } from '@/api/apiClient';
 import type { Service, Category } from '@/types/api';
 import { Check } from 'lucide-react';

@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   DollarSign, Users, Clock, Wallet, Star, Settings,
-  PieChart as PieChartIcon, Image as ImageIcon, FileText, Package, BarChart2
+  Image as ImageIcon, FileText, Package, BarChart2
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import type { ManagerSidebarProps, ActiveView } from './types';

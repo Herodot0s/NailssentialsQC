@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getActivePackages } from '@/api/apiClient';
 import PackageCard from './PackageCard';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function PackageDiscoverySection() {
@@ -13,7 +13,7 @@ export default function PackageDiscoverySection() {
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
+  const autoPlayRef = useRef<any>(null);
 
   const packages = response?.data?.data || [];
 
@@ -134,7 +134,7 @@ export default function PackageDiscoverySection() {
                     className={`shrink-0 w-full md:w-[400px] h-auto md:h-[680px] ${!isCenter ? 'hidden md:block cursor-pointer' : ''}`}
                     onClick={() => !isCenter && setActiveIndex(idx)}
                   >
-                    <PackageCard pkg={pkg} index={idx} isFocused={isCenter} />
+                    <PackageCard pkg={pkg} isFocused={isCenter} />
                   </motion.div>
                 );
               })}

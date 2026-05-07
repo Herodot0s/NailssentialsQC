@@ -219,9 +219,9 @@ export interface CreateServiceRequest {
   price: number;
   duration_minutes: number;
   category_id: number;
-  image_url?: string;
-  experience_description?: string;
-  what_to_expect?: string;
+  image_url?: string | null;
+  experience_description?: string | null;
+  what_to_expect?: string | null;
 }
 
 export interface UpdateServiceRequest {
@@ -231,9 +231,9 @@ export interface UpdateServiceRequest {
   category_id?: number;
   is_active?: boolean;
   is_popular?: boolean;
-  image_url?: string;
-  experience_description?: string;
-  what_to_expect?: string;
+  image_url?: string | null;
+  experience_description?: string | null;
+  what_to_expect?: string | null;
 }
 
 // Customer API types

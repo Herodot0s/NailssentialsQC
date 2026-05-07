@@ -15,7 +15,7 @@ interface Service {
   is_popular?: boolean;
 }
 
-const PREMIUM_EASE = [0.32, 0.72, 0, 1];
+const PREMIUM_EASE = [0.32, 0.72, 0, 1] as const;
 
 const TrendingTreatments = ({ services: initialServices }: { services?: Service[] }) => {
   const [popularServices, setPopularServices] = useState<Service[]>(initialServices || []);

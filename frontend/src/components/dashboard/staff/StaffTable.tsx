@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Briefcase } from 'lucide-react';
 import type { StaffTableProps } from '../types';
 
 export const StaffTable: React.FC<StaffTableProps> = ({ staffMembers, onStaffClick }) => {

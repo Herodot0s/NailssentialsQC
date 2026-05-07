@@ -18,8 +18,6 @@ import {
   addDeduction,
   getStaffSchedule,
   updateStaffSchedule,
-  getHistoricalAnalytics,
-  getAppointments,
 } from '../api/apiClient';
 
 import SalarySlipModal from '@/components/SalarySlipModal';
@@ -34,7 +32,6 @@ import PackagesView from '@/components/packages/PackagesView';
 import { AnalyticsDashboard } from '@/components/dashboard/analytics/AnalyticsDashboard';
 
 import { ManagerSidebar } from '@/components/dashboard/ManagerSidebar';
-import { OverviewView } from '@/components/dashboard/OverviewView';
 import { DeductionsView } from '@/components/dashboard/payroll/DeductionsView';
 import { StaffDetailSheet } from '@/components/dashboard/staff/StaffDetailSheet';
 import { AddStaffDialog } from '@/components/dashboard/staff/AddStaffDialog';
@@ -64,15 +61,12 @@ const ManagerDashboard: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [historicalData, setHistoricalData] = useState<any[]>([]);
-  const [appointments, setAppointments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  // Drill-down State
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
 
   // Modals & Sheets
   const [showAddStaffModal, setShowAddStaffModal] = useState(false);
@@ -125,7 +119,7 @@ const ManagerDashboard: React.FC = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [salesRes, payrollRes, staffRes, periodsRes, reviewsRes, attRes, catRes, historyRes, appointmentsRes] = await Promise.all([
+      const [salesRes, payrollRes, staffRes, periodsRes, reviewsRes, attRes, catRes] = await Promise.all([
         getDailySales(),
         getReports({ startDate: dateRange.start, endDate: dateRange.end }),
         getAllStaff(),
@@ -133,8 +127,6 @@ const ManagerDashboard: React.FC = () => {
         getAllReviews(),
         getAllAttendance({ startDate: dateRange.start }),
         getCategories(),
-        getHistoricalAnalytics({ startDate: dateRange.start, endDate: dateRange.end }),
-        getAppointments()
       ]);
 
       if (salesRes.data.success) setSalesStats(salesRes.data.data);
@@ -153,11 +145,6 @@ const ManagerDashboard: React.FC = () => {
       if (reviewsRes.data.success) setReviews(reviewsRes.data.data);
       if (attRes.data.success) setAttendance(attRes.data.data);
       if (catRes.data.success) setCategories(catRes.data.data);
-      if (historyRes.data.success) setHistoricalData(historyRes.data.data);
-      if (appointmentsRes.data.success) {
-        const aptData = appointmentsRes.data.data;
-        setAppointments(Array.isArray(aptData) ? aptData : (aptData?.items || []));
-      }
 
     } catch (err: unknown) {
       console.error('Fetch error:', err instanceof Error ? err.message : err);

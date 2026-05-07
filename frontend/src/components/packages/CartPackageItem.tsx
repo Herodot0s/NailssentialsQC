@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -105,7 +104,7 @@ export default function CartPackageItem({ item, staffList, slots }: CartPackageI
                     </SelectTrigger>
                     <SelectContent className="rounded-none border-none shadow-xl">
                       {staffList.map(staff => (
-                        <SelectItem key={staff.id} value={staff.id.toString()} textvalue={staff.fullName} className="rounded-none py-3">
+                        <SelectItem key={staff.id} value={staff.id.toString()} className="rounded-none py-3">
                           <div className="flex flex-col gap-0.5">
                             <span className="font-medium text-sm">
                               {staff.fullName}
@@ -138,7 +137,6 @@ export default function CartPackageItem({ item, staffList, slots }: CartPackageI
                           key={slot.time} 
                           value={slot.time} 
                           disabled={!slot.available}
-                          textvalue={formatTime(slot.time)}
                           className="rounded-none py-3"
                         >
                           <div className="flex items-center justify-between w-full gap-4">

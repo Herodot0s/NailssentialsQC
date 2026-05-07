@@ -16,9 +16,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
@@ -41,13 +38,9 @@ import {
   Sparkles,
   AlertCircle,
   Loader2,
-  Settings,
-  DollarSign,
   Clock,
-  Filter,
   ImagePlus,
   X,
-  Upload,
 } from 'lucide-react';
 
 interface Category {

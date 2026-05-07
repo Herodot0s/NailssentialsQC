@@ -40,7 +40,6 @@ const Home = () => {
         tagline={s?.hero?.tagline}
         headline={s?.hero?.headline && s?.hero?.headline !== 'Elevate Your Natural Beauty' ? s?.hero?.headline : undefined}
         subheadline={s?.hero?.subheadline}
-        bgImageUrl={s?.hero?.bg_image_url || undefined}
         buttonLabel={s?.hero?.button_label}
       />
 

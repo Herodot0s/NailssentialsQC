@@ -8,7 +8,6 @@ interface HeroProps {
   tagline?: string;
   headline?: string;
   subheadline?: string;
-  bgImageUrl?: string;
   buttonLabel?: string;
 }
 
@@ -16,7 +15,6 @@ const Hero: React.FC<HeroProps> = ({
   tagline = 'Experience Pure Luxury',
   headline = 'Life Is Not Perfect, But Your Nails Can Be',
   subheadline = 'Discover a haven of serenity where expert craftsmanship meets premium self-care. Welcome to the NailssentialsQC sanctuary.',
-  bgImageUrl,
   buttonLabel = 'Book Your Appointment'
 }) => {
   const finalBgUrl = landingPageBg;
