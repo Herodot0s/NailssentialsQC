@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Sparkles, Leaf, ShieldCheck } from 'lucide-react';
 import Hero from '@/components/home/Hero';
 import TrendingTreatments from '@/components/home/TrendingTreatments';
-import landingPageBg from '@/assets/img/landing_page_bg.svg';
+
 import { ContactInfoSection } from '@/components/home/ContactInfoSection';
 import { FaqAccordionSection } from '@/components/home/FaqAccordionSection';
 import { getCmsSettings, getCmsContent } from '@/api/apiClient';
