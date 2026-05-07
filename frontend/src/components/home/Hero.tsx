@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import React, { useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import landingPageBg from '@/assets/img/landing_page_bg.svg';
 
 interface HeroProps {
@@ -31,8 +31,7 @@ const Hero: React.FC<HeroProps> = ({
   const textY = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
-  // Smooth springs for entrance
-  const springConfig = { damping: 20, stiffness: 100, mass: 0.5 };
+
   
   const headlineWords = headline.split(' ');
   const perfectIndex = headlineWords.findIndex(w => w.toLowerCase() === 'perfect');

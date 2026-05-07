@@ -10,7 +10,7 @@ interface FaqAccordionSectionProps {
 }
 
 export const FaqAccordionSection: React.FC<FaqAccordionSectionProps> = ({ faqs }) => {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   if (!faqs || faqs.length === 0) return null;
 

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Leaf, ShieldCheck, Star } from 'lucide-react';
+import { Sparkles, Leaf, ShieldCheck } from 'lucide-react';
 import Hero from '@/components/home/Hero';
 import TrendingTreatments from '@/components/home/TrendingTreatments';
 import landingPageBg from '@/assets/img/landing_page_bg.svg';
@@ -25,12 +25,7 @@ const Home = () => {
   const s = settingsRes;
   const faqs = faqRes ?? [];
 
-  // Fallback defaults
-  const sigLabel = s?.signature?.label ?? 'Signature Experience';
-  const sigHeadline = s?.signature?.headline ?? 'The Nailssentials Ritual';
-  const sigBody = s?.signature?.body ?? 'Step into a world where time slows down. Our signature ritual combines aromatherapy, precision technique, and an atmosphere of absolute luxury to revitalize your spirit.';
-  const sigLinkLabel = s?.signature?.link_label ?? 'Discover the Menu';
-  const sigBgUrl = s?.signature?.bg_image_url || landingPageBg;
+
   const footerHeadline = s?.footer?.headline ?? 'Prepare for your visit.';
   const footerButtonLabel = s?.footer?.button_label ?? 'JOIN THE PRIVILEGE CLUB';
 
