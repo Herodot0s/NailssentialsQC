@@ -30,6 +30,7 @@ import ManageServices from './ManageServices';
 import { ContentView } from '@/components/dashboard/cms/ContentView';
 import PackagesView from '@/components/packages/PackagesView';
 import { AnalyticsDashboard } from '@/components/dashboard/analytics/AnalyticsDashboard';
+import { MessagesView } from '@/components/dashboard/MessagesView';
 
 import { ManagerSidebar } from '@/components/dashboard/ManagerSidebar';
 import { DeductionsView } from '@/components/dashboard/payroll/DeductionsView';
@@ -156,6 +157,18 @@ const ManagerDashboard: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, [dateRange]);
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (activeView === 'attendance') {
+      interval = setInterval(() => {
+        getAllAttendance({ startDate: dateRange.start }).then(res => {
+          if (res.data.success) setAttendance(res.data.data);
+        });
+      }, 30000); // Poll every 30 seconds
+    }
+    return () => clearInterval(interval);
+  }, [activeView, dateRange.start]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -474,6 +487,12 @@ const ManagerDashboard: React.FC = () => {
         {activeView === 'advanced-analytics' && (
           <div className="animate-in fade-in duration-700">
             <AnalyticsDashboard />
+          </div>
+        )}
+
+        {activeView === 'messages' && (
+          <div className="animate-in fade-in duration-700">
+            <MessagesView />
           </div>
         )}
       </main>

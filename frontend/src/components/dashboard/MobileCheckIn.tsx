@@ -72,9 +72,15 @@ export const MobileCheckIn: React.FC<MobileCheckInProps> = ({
           <div className="bg-white rounded-full p-10 shadow-2xl flex flex-col items-center justify-center w-56 h-56 border border-primary/5">
             <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{weekday}</span>
             <span className="text-6xl font-bold font-serif text-primary my-2">{time}</span>
-            <Badge className={`rounded-none border-none text-[8px] uppercase tracking-widest font-bold ${isCheckedIn ? 'bg-success-color/90 text-white shadow-sm px-3 py-1' : 'bg-muted text-muted-foreground'}`}>
-              {isCheckedIn ? 'Status: Active' : 'Status: Off Duty'}
-            </Badge>
+            <div className="flex flex-col items-center gap-2">
+              <Badge className={`rounded-none border-none text-[8px] uppercase tracking-widest font-bold px-3 py-1 flex items-center gap-1.5 ${isCheckedIn ? 'bg-success-color text-white shadow-lg' : 'bg-muted text-muted-foreground'}`}>
+                {isCheckedIn && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+                {isCheckedIn ? 'Artisan On Duty' : 'Status: Off Duty'}
+              </Badge>
+              {isCheckedIn && (
+                <p className="text-[7px] uppercase tracking-[0.2em] font-bold text-success-color animate-bounce">Live Registry Active</p>
+              )}
+            </div>
           </div>
         </div>
 

@@ -66,6 +66,8 @@ export const getAttendanceStatus = async (req: AuthRequest, res: Response) => {
           checkInTime: attendance?.check_in ? new Date(attendance.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null,
           checkOutTime: attendance?.check_out ? new Date(attendance.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null,
           date: today.toISOString().split('T')[0],
+          scheduledStart: staffProfile.scheduled_start,
+          scheduledEnd: staffProfile.scheduled_end,
         },
         logs: formattedLogs,
       },
@@ -239,6 +241,18 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
       },
     });
 
+    // Calculate if early out
+    const scheduledEndStr = attendance.scheduled_end || staffProfile.scheduled_end || "22:00:00";
+    const endParts = scheduledEndStr.split(':');
+    const endHours = parseInt(endParts[0]);
+    const endMinutes = parseInt(endParts[1]);
+    
+    const scheduledEndTime = new Date(today);
+    scheduledEndTime.setHours(endHours, endMinutes, 0, 0);
+
+    const earlyOutMinutes = Math.floor((scheduledEndTime.getTime() - now.getTime()) / (1000 * 60));
+    const isEarlyOut = earlyOutMinutes > 0;
+
     // SEC-03: Capture caller identity for notification authorization
     const callerId = userId!;
     const callerRole = req.user?.role;
@@ -252,17 +266,26 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
           if (callerRole === 'customer' && callerId !== manager.id) {
             console.warn('[notification] Blocked cross-user notification attempt', { callerId, targetId: manager.id });
           } else {
+            let title = 'Staff Checked Out';
+            let message = `${staffProfile.full_name} checked out at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`;
+            
+            if (isEarlyOut) {
+              title = 'Early Shift Departure';
+              const hours = Math.floor(earlyOutMinutes / 60);
+              const mins = earlyOutMinutes % 60;
+              message = `${staffProfile.full_name} checked out EARLY at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} (${hours > 0 ? `${hours}h ` : ''}${mins}m before schedule).`;
+            }
+
             createNotification(
               manager.id,
-              'STAFF_CHECK_OUT',
-              'Staff Checked Out',
-              `${staffProfile.full_name} checked out at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`
+              isEarlyOut ? 'STAFF_EARLY_OUT' : 'STAFF_CHECK_OUT',
+              title,
+              message
             );
           }
         }
       } catch (err: unknown) {
         console.error('Manager notification error:', err);
-        const message = err instanceof Error ? err.message : 'Unknown error';
       }
     })();
 
