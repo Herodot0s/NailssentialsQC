@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import type { PayrollRunDialogProps } from './types';
+import type { PayrollRunDialogProps } from '../types';
 
 export const PayrollRunDialog: React.FC<PayrollRunDialogProps> = ({
   open,

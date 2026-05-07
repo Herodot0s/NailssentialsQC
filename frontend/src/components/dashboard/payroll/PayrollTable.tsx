@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { Lock, Check } from 'lucide-react';
-import type { PayrollTableProps } from './types';
+import type { PayrollTableProps } from '../types';
 
 export const PayrollTable: React.FC<PayrollTableProps> = ({ payrollReport, onPayrollRowClick, payrollPeriods, onLockPayroll }) => {
   return (

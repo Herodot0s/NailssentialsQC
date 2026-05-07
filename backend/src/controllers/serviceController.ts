@@ -124,10 +124,17 @@ export const updateCategory = async (req: AuthRequest, res: Response) => {
 
 export const createService = async (req: Request, res: Response) => {
   try {
-    const { name, description, duration_minutes, price, category_id, is_popular } = req.body;
+    const { name, description, duration_minutes, price, category_id, is_popular, image_url, experience_description, what_to_expect } = req.body;
 
     const parsedPrice = parseFloat(price);
     const parsedDuration = parseInt(duration_minutes);
+
+    if (isNaN(parsedPrice)) {
+      return res.status(400).json({ success: false, message: 'Invalid price format' });
+    }
+    if (isNaN(parsedDuration)) {
+      return res.status(400).json({ success: false, message: 'Invalid duration format' });
+    }
 
     if (parsedPrice < 0) {
       return res.status(400).json({ success: false, message: 'Price cannot be negative' });
@@ -142,8 +149,13 @@ export const createService = async (req: Request, res: Response) => {
         description,
         duration_minutes: parsedDuration,
         price: parsedPrice,
-        category_id: parseInt(category_id),
+        category: {
+          connect: { id: parseInt(category_id) }
+        },
         is_popular: is_popular || false,
+        image_url,
+        experience_description,
+        what_to_expect,
       },
     });
     return res.status(201).json({ success: true, data: service });
@@ -156,10 +168,17 @@ export const createService = async (req: Request, res: Response) => {
 export const updateService = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.validatedParams ?? {};
-    const { name, description, duration_minutes, price, category_id, is_popular, is_active } = req.body;
+    const { name, description, duration_minutes, price, category_id, is_popular, is_active, image_url, experience_description, what_to_expect } = req.body;
 
     const parsedPrice = price !== undefined ? parseFloat(price) : undefined;
     const parsedDuration = duration_minutes !== undefined ? parseInt(duration_minutes) : undefined;
+
+    if (parsedPrice !== undefined && isNaN(parsedPrice)) {
+      return res.status(400).json({ success: false, message: 'Invalid price format' });
+    }
+    if (parsedDuration !== undefined && isNaN(parsedDuration)) {
+      return res.status(400).json({ success: false, message: 'Invalid duration format' });
+    }
 
     if (parsedPrice !== undefined && parsedPrice < 0) {
       return res.status(400).json({ success: false, message: 'Price cannot be negative' });
@@ -175,9 +194,14 @@ export const updateService = async (req: AuthRequest, res: Response) => {
         description,
         duration_minutes: parsedDuration,
         price: parsedPrice,
-        category_id: category_id ? parseInt(category_id) : undefined,
+        category: category_id ? {
+          connect: { id: parseInt(category_id) }
+        } : undefined,
         is_popular,
         is_active,
+        image_url,
+        experience_description,
+        what_to_expect,
       },
     });
     return res.status(200).json({ success: true, data: service });

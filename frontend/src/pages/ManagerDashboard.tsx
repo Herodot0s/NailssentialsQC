@@ -23,9 +23,9 @@ import {
 } from '../api/apiClient';
 
 import SalarySlipModal from '@/components/SalarySlipModal';
-import { StaffTable } from '@/components/dashboard/StaffTable';
-import { PayrollTable } from '@/components/dashboard/PayrollTable';
-import { AttendanceLedger } from '@/components/dashboard/AttendanceLedger';
+import { StaffTable } from '@/components/dashboard/staff/StaffTable';
+import { PayrollTable } from '@/components/dashboard/payroll/PayrollTable';
+import { AttendanceLedger } from '@/components/dashboard/staff/AttendanceLedger';
 import { ReviewModeration } from '@/components/dashboard/ReviewModeration';
 import ManageExhibits from './ManageExhibits';
 import ManageServices from './ManageServices';
@@ -35,12 +35,12 @@ import { AnalyticsDashboard } from '@/components/dashboard/analytics/AnalyticsDa
 
 import { ManagerSidebar } from '@/components/dashboard/ManagerSidebar';
 import { OverviewView } from '@/components/dashboard/OverviewView';
-import { DeductionsView } from '@/components/dashboard/DeductionsView';
-import { StaffDetailSheet } from '@/components/dashboard/StaffDetailSheet';
-import { AddStaffDialog } from '@/components/dashboard/AddStaffDialog';
-import { ShiftEditDialog } from '@/components/dashboard/ShiftEditDialog';
-import { PayrollRunDialog } from '@/components/dashboard/PayrollRunDialog';
-import { DeductionEntryDialog } from '@/components/dashboard/DeductionEntryDialog';
+import { DeductionsView } from '@/components/dashboard/payroll/DeductionsView';
+import { StaffDetailSheet } from '@/components/dashboard/staff/StaffDetailSheet';
+import { AddStaffDialog } from '@/components/dashboard/staff/AddStaffDialog';
+import { ShiftEditDialog } from '@/components/dashboard/staff/ShiftEditDialog';
+import { PayrollRunDialog } from '@/components/dashboard/payroll/PayrollRunDialog';
+import { DeductionEntryDialog } from '@/components/dashboard/payroll/DeductionEntryDialog';
 import type { ActiveView } from '@/components/dashboard/types';
 
 import type {
@@ -423,6 +423,7 @@ const ManagerDashboard: React.FC = () => {
           <div className="animate-in fade-in duration-700">
             <AttendanceLedger
               attendance={attendance}
+              staffMembers={staffMembers}
               onUpdateAttendance={handleUpdateAttendance}
             />
           </div>

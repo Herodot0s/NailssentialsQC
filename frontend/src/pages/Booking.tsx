@@ -281,7 +281,7 @@ const Booking: React.FC = () => {
                                      </SelectTrigger>
                                      <SelectContent className="rounded-none border-none shadow-xl">
                                        {staffList.map(staff => (
-                                         <SelectItem key={staff.id} value={staff.id.toString()} textValue={staff.fullName} className="rounded-none py-3">
+                                         <SelectItem key={staff.id} value={staff.id.toString()} textvalue={staff.fullName} className="rounded-none py-3">
                                            <div className="flex flex-col gap-0.5">
                                              <span className="font-medium text-sm">
                                                {staff.fullName}
@@ -315,7 +315,7 @@ const Booking: React.FC = () => {
                                            key={slot.time} 
                                            value={slot.time} 
                                            disabled={!slot.available}
-                                           textValue={formatTime(slot.time)}
+                                           textvalue={formatTime(slot.time)}
                                            className="rounded-none py-3"
                                          >
                                            <div className="flex items-center justify-between w-full gap-4">

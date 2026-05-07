@@ -126,6 +126,11 @@
   box-shadow: 0 8px 32px rgba(184, 121, 78, 0.08);
 }
 
+/* Premium shadow for elevated states */
+.shadow-premium {
+  box-shadow: 0 16px 32px rgba(184, 121, 78, 0.12);
+}
+
 /* Featured Border for premium components */
 .featured-border {
   border: 1.5px solid var(--brand-primary);

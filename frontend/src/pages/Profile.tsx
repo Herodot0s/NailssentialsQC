@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import apiClient from '../api/apiClient';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +16,11 @@ import {
   Save,
   CheckCircle2,
   AlertCircle,
+  Calendar,
+  Sparkles,
 } from 'lucide-react';
+
+const PREMIUM_EASE = [0.32, 0.72, 0, 1];
 
 const Profile: React.FC = () => {
   const [profile, setProfile] = useState({
@@ -34,12 +39,9 @@ const Profile: React.FC = () => {
     try {
       setIsLoading(true);
       const res = await apiClient.get('/auth/me');
-
       const userData = res.data.data.user;
 
-      // Now fetch the actual customer profile for extended fields
       const profRes = await apiClient.get('/customers/profile');
-
       if (profRes.data.success) {
         const cp = profRes.data.data;
         setProfile({
@@ -87,165 +89,220 @@ const Profile: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-muted-foreground font-medium">Loading your profile...</p>
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gap-4 bg-warm-canvas">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="font-serif text-warm-stone italic">Refining your retreat...</p>
       </div>
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: PREMIUM_EASE },
+    },
+  };
+
+  // Artisanal Input Classes
+  const artisanalInput = "border-0 border-b-2 border-kiln-border rounded-none bg-transparent px-0 h-11 focus-visible:ring-0 focus-visible:border-primary transition-colors font-medium placeholder:text-clay-dust";
+  const artisanalTextarea = "border-0 border-b-2 border-kiln-border rounded-none bg-transparent px-0 focus-visible:ring-0 focus-visible:border-primary transition-colors font-medium placeholder:text-clay-dust resize-none";
+
   return (
-    <div className="container max-w-2xl mx-auto py-12 px-6">
-      <div className="flex items-center gap-4 mb-8">
-        <div className="bg-primary/10 p-3 rounded-full text-primary">
-          <User className="h-8 w-8" />
-        </div>
-        <div>
-          <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground">
-            My Profile
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your account information and preferences.
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-warm-canvas selection:bg-bisque-wash">
+      <motion.div 
+        className="max-w-7xl mx-auto py-16 px-6 lg:px-12"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
+          
+          {/* ASYMMETRIC LEAD: Editorial Column */}
+          <motion.div className="lg:col-span-5 space-y-10" variants={itemVariants}>
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 text-primary">
+                <Sparkles className="h-5 w-5" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Member Profile</span>
+              </div>
+              <h1 className="font-serif text-5xl lg:text-6xl font-light leading-[1.1] text-charcoal-bark">
+                Your <br />
+                <span className="italic text-primary/80">Signature</span> <br />
+                Retreat
+              </h1>
+              <p className="text-warm-stone text-lg max-w-md leading-relaxed">
+                Refine your personal preferences and requirements to ensure every visit to Nailssentials is perfectly tailored to you.
+              </p>
+            </div>
 
-      {message && (
-        <div
-          className={`p-4 rounded-lg flex items-center gap-3 mb-6 border ${
-            message.type === 'success'
-              ? 'bg-success-color/10 border-success-color/20 text-success-color'
-              : 'bg-destructive/10 border-destructive/20 text-destructive'
-          }`}
-        >
-          {message.type === 'success' ? (
-            <CheckCircle2 className="h-5 w-5" />
-          ) : (
-            <AlertCircle className="h-5 w-5" />
-          )}
-          <span className="font-medium">{message.text}</span>
-        </div>
-      )}
-
-      <form onSubmit={handleUpdate}>
-        <div className="grid gap-6">
-          <Card className="border-none shadow-sm overflow-hidden">
-            <CardHeader className="bg-primary/5 pb-6">
-              <CardTitle className="text-sm font-bold text-primary uppercase tracking-widest flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4" />
-                Basic Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="fullName"
-                    type="text"
-                    required
-                    value={profile.fullName}
-                    onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
-                    className="pl-10 h-11 focus-visible:ring-primary font-medium"
-                    placeholder="Juan Dela Cruz"
-                  />
+            <div className="pt-10 border-t border-kiln-border space-y-6">
+              <div className="flex items-center gap-4 text-charcoal-bark">
+                <div className="p-3 rounded-full bg-bisque-wash text-primary">
+                  <Calendar className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Member Since</p>
+                  <p className="font-medium font-serif italic text-lg">May 2026</p>
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-muted-foreground">
-                    Email (Locked)
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="text"
-                      disabled
-                      value={profile.email}
-                      className="pl-10 h-11 bg-muted/50 border-muted text-muted-foreground cursor-not-allowed"
-                    />
-                  </div>
+              <div className="flex items-center gap-4 text-charcoal-bark">
+                <div className="p-3 rounded-full bg-bisque-wash text-primary">
+                  <ShieldCheck className="h-5 w-5" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-muted-foreground">
-                    Phone (Locked)
-                  </Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="phone"
-                      type="text"
-                      disabled
-                      value={profile.phone}
-                      className="pl-10 h-11 bg-muted/50 border-muted text-muted-foreground cursor-not-allowed"
-                    />
-                  </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Account Status</p>
+                  <p className="font-medium font-serif italic text-lg">Verified Artisan</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
 
-          <Card className="border-none shadow-sm overflow-hidden">
-            <CardHeader className="bg-primary/5 pb-6">
-              <CardTitle className="text-sm font-bold text-primary uppercase tracking-widest flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                Special Requirements
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="allergies">Allergies</Label>
-                <Textarea
-                  id="allergies"
-                  value={profile.allergies}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setProfile({ ...profile, allergies: e.target.value })
-                  }
-                  rows={3}
-                  className="min-h-[100px] resize-none focus-visible:ring-primary"
-                  placeholder="Tell us about any allergies (e.g., Latex, specific products) to ensure your safety."
-                />
-              </div>
+          {/* FUNCTIONAL COLUMN: The Form */}
+          <div className="lg:col-span-7">
+            <form onSubmit={handleUpdate} className="space-y-12">
+              
+              {message && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className={`p-5 rounded-[20px] flex items-center gap-4 border ${
+                    message.type === 'success'
+                      ? 'bg-forest-confirm/5 border-forest-confirm/20 text-forest-confirm'
+                      : 'bg-brick-error/5 border-brick-error/20 text-brick-error'
+                  }`}
+                >
+                  {message.type === 'success' ? (
+                    <CheckCircle2 className="h-6 w-6" />
+                  ) : (
+                    <AlertCircle className="h-6 w-6" />
+                  )}
+                  <span className="font-serif italic text-lg">{message.text}</span>
+                </motion.div>
+              )}
 
-              <div className="space-y-2">
-                <Label htmlFor="notes">Special Notes / Preferences</Label>
-                <Textarea
-                  id="notes"
-                  value={profile.notes}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setProfile({ ...profile, notes: e.target.value })
-                  }
-                  rows={3}
-                  className="min-h-[100px] resize-none focus-visible:ring-primary"
-                  placeholder="Tell us your favorite technicians, coffee/tea preferences, or any other details."
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="bg-muted/10 border-t py-6 flex justify-end">
-              <Button
-                type="submit"
-                disabled={isSaving}
-                className="h-11 px-8 font-bold shadow-lg shadow-primary/20"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Saving Changes...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-5 w-5" />
-                    Save Profile Changes
-                  </>
-                )}
-              </Button>
-            </CardFooter>
-          </Card>
+              <motion.div variants={itemVariants}>
+                <Card className="border-none shadow-none bg-white rounded-[32px] overflow-hidden group transition-all duration-500 hover:shadow-premium">
+                  <CardContent className="p-10 space-y-10">
+                    <div className="flex items-center gap-3 pb-4 border-b border-kiln-border/50">
+                      <User className="h-5 w-5 text-primary" />
+                      <h2 className="font-serif text-2xl text-charcoal-bark">Basic Identity</h2>
+                    </div>
+                    
+                    <div className="space-y-8">
+                      <div className="space-y-2">
+                        <Label htmlFor="fullName" className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Full Name</Label>
+                        <Input
+                          id="fullName"
+                          type="text"
+                          required
+                          value={profile.fullName}
+                          onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+                          className={artisanalInput}
+                          placeholder="Juan Dela Cruz"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
+                        <div className="space-y-2 opacity-60">
+                          <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Email Address</Label>
+                          <div className="flex items-center gap-2 border-b-2 border-kiln-border h-11">
+                            <Mail className="h-4 w-4 text-clay-dust" />
+                            <span className="font-medium text-charcoal-bark">{profile.email || '—'}</span>
+                          </div>
+                        </div>
+                        <div className="space-y-2 opacity-60">
+                          <Label htmlFor="phone" className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Phone Number</Label>
+                          <div className="flex items-center gap-2 border-b-2 border-kiln-border h-11">
+                            <Phone className="h-4 w-4 text-clay-dust" />
+                            <span className="font-medium text-charcoal-bark">{profile.phone || '—'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div variants={itemVariants}>
+                <Card className="border-none shadow-none bg-white rounded-[32px] overflow-hidden group transition-all duration-500 hover:shadow-premium">
+                  <CardContent className="p-10 space-y-10">
+                    <div className="flex items-center gap-3 pb-4 border-b border-kiln-border/50">
+                      <AlertTriangle className="h-5 w-5 text-primary" />
+                      <h2 className="font-serif text-2xl text-charcoal-bark">Special Requirements</h2>
+                    </div>
+
+                    <div className="space-y-10">
+                      <div className="space-y-2">
+                        <Label htmlFor="allergies" className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Known Allergies</Label>
+                        <Textarea
+                          id="allergies"
+                          value={profile.allergies}
+                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                            setProfile({ ...profile, allergies: e.target.value })
+                          }
+                          rows={2}
+                          className={artisanalTextarea}
+                          placeholder="e.g., Latex, certain essential oils..."
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="notes" className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Signature Preferences</Label>
+                        <Textarea
+                          id="notes"
+                          value={profile.notes}
+                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                            setProfile({ ...profile, notes: e.target.value })
+                          }
+                          rows={2}
+                          className={artisanalTextarea}
+                          placeholder="Coffee preferences, favorite technicians, or ambient requests..."
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="flex justify-end pt-4">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button
+                    type="submit"
+                    disabled={isSaving}
+                    className="h-14 px-12 rounded-xl bg-primary text-white font-bold uppercase tracking-[0.2em] text-xs shadow-premium transition-all duration-300"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Refining...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-3 h-5 w-5" />
+                        Commit Changes
+                      </>
+                    )}
+                  </Button>
+                </motion.div>
+              </motion.div>
+            </form>
+          </div>
         </div>
-      </form>
+      </motion.div>
     </div>
   );
 };

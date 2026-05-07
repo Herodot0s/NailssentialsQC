@@ -31,7 +31,11 @@ interface SalarySlipModalProps {
 const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ open, onOpenChange, payroll }) => {
   if (!payroll) return null;
 
-  const grossPay = payroll.basePay + payroll.totalCommission;
+  const basePay = payroll.basePay || 0;
+  const totalCommission = payroll.totalCommission || 0;
+  const totalDeduction = payroll.totalDeduction || 0;
+  const netPay = payroll.netPay || 0;
+  const grossPay = basePay + totalCommission;
   const bonus = 0; // Quota bonus - to be wired from backend when available
 
   return (
@@ -65,11 +69,11 @@ const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ open, onOpenChange, p
               <div className="space-y-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground font-light italic">Weekly Base Pay</span>
-                  <span className="font-bold">₱{payroll.basePay.toLocaleString()}</span>
+                  <span className="font-bold">₱{basePay.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground font-light italic">Team Tier Commissions</span>
-                  <span className="font-bold">₱{payroll.totalCommission.toLocaleString()}</span>
+                  <span className="font-bold">₱{totalCommission.toLocaleString()}</span>
                 </div>
                 {bonus > 0 && (
                   <div className="flex justify-between text-sm">
@@ -91,7 +95,7 @@ const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ open, onOpenChange, p
               <div className="space-y-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground font-light italic">Lateness / Absence</span>
-                  <span className="font-bold text-destructive">-₱{payroll.totalDeduction.toLocaleString()}</span>
+                  <span className="font-bold text-destructive">-₱{totalDeduction.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground font-light italic">Other Adjustments</span>
@@ -99,7 +103,7 @@ const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ open, onOpenChange, p
                 </div>
                 <div className="flex justify-between text-sm pt-4 border-t border-gray-50 font-bold text-lg">
                   <span>Total Deducted</span>
-                  <span className="text-destructive">-₱{payroll.totalDeduction.toLocaleString()}</span>
+                  <span className="text-destructive">-₱{totalDeduction.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -111,7 +115,7 @@ const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ open, onOpenChange, p
               <p className="text-[9px] text-primary/40 italic">Final value post-attendance adjustments</p>
             </div>
             <p className="text-5xl font-serif font-light text-primary tracking-tighter">
-              ₱{payroll.netPay.toLocaleString()}
+              ₱{netPay.toLocaleString()}
             </p>
           </div>
         </div>

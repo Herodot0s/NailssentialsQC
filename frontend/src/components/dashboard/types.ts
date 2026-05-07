@@ -14,6 +14,7 @@ export interface PayrollTableProps {
 
 export interface AttendanceLedgerProps {
   attendance: AttendanceRecord[];
+  staffMembers: StaffMember[];
   onUpdateAttendance: (id: number, status: string) => void;
 }
 

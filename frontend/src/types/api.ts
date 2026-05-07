@@ -209,21 +209,31 @@ export interface Service {
   duration: number;
   category_id: number;
   is_active: boolean;
+  image_url?: string | null;
+  experience_description?: string | null;
+  what_to_expect?: string | null;
 }
 
 export interface CreateServiceRequest {
   name: string;
   price: number;
-  duration: number;
+  duration_minutes: number;
   category_id: number;
+  image_url?: string;
+  experience_description?: string;
+  what_to_expect?: string;
 }
 
 export interface UpdateServiceRequest {
   name?: string;
   price?: number;
-  duration?: number;
+  duration_minutes?: number;
   category_id?: number;
   is_active?: boolean;
+  is_popular?: boolean;
+  image_url?: string;
+  experience_description?: string;
+  what_to_expect?: string;
 }
 
 // Customer API types

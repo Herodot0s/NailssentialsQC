@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import type { DeductionEntryDialogProps } from './types';
+import type { DeductionEntryDialogProps } from '../types';
 
 export const DeductionEntryDialog: React.FC<DeductionEntryDialogProps> = ({
   open,
