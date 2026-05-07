@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,10 +6,9 @@ import { Package, Plus, Pencil, ToggleLeft, ToggleRight, Trash2 } from 'lucide-r
 import { getPackages, togglePackage, deletePackage } from '@/api/apiClient';
 import type { ServicePackage } from '@/types/api';
 import PackageBuilderDialog from './PackageBuilderDialog';
-import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
-const PREMIUM_EASE = [0.32, 0.72, 0, 1];
+const PREMIUM_EASE = [0.32, 0.72, 0, 1] as const;
 
 export default function PackagesView() {
   const queryClient = useQueryClient();

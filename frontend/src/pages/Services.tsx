@@ -61,11 +61,11 @@ const categoryConfigs: Record<string, { image: string, color: string, tint: stri
   },
 };
 
-const PREMIUM_EASE = [0.32, 0.72, 0, 1];
+const PREMIUM_EASE = [0.32, 0.72, 0, 1] as const;
 const morphTransition = {
   duration: 0.5,
   ease: PREMIUM_EASE
-};
+} as const;
 
 const Services: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);

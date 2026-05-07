@@ -97,7 +97,7 @@ export const RetentionTab: React.FC<RetentionTabProps> = ({ dateRange }) => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
                   <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 12 }} tickFormatter={(v) => `${v}%`} />
-                  <Tooltip formatter={(value: number) => [`${value}%`, 'Retention Rate']} />
+                  <Tooltip formatter={(value: any) => [`${value}%`, 'Retention Rate']} />
                   <Line type="monotone" dataKey="rate" stroke="#B8794E" strokeWidth={2} dot={{ fill: '#B8794E', r: 3 }} activeDot={{ r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>

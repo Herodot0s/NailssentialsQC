@@ -11,8 +11,8 @@ import ServiceChipSelector from './ServiceChipSelector';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const PREMIUM_EASE = [0.32, 0.72, 0, 1];
-const morphTransition = { duration: 0.5, ease: PREMIUM_EASE };
+const PREMIUM_EASE = [0.32, 0.72, 0, 1] as const;
+const morphTransition = { duration: 0.5, ease: PREMIUM_EASE } as const;
 
 interface PackageBuilderDialogProps {
   open: boolean;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import apiClient from '../api/apiClient';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  User,
+  User2,
   Mail,
   Phone,
   AlertTriangle,
@@ -20,7 +20,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-const PREMIUM_EASE = [0.32, 0.72, 0, 1];
+const PREMIUM_EASE = [0.32, 0.72, 0, 1] as const;
 
 const Profile: React.FC = () => {
   const [profile, setProfile] = useState({
@@ -96,7 +96,7 @@ const Profile: React.FC = () => {
     );
   }
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -106,7 +106,7 @@ const Profile: React.FC = () => {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -195,7 +195,7 @@ const Profile: React.FC = () => {
                 <Card className="border-none shadow-none bg-white rounded-[32px] overflow-hidden group transition-all duration-500 hover:shadow-premium">
                   <CardContent className="p-10 space-y-10">
                     <div className="flex items-center gap-3 pb-4 border-b border-kiln-border/50">
-                      <User className="h-5 w-5 text-primary" />
+                      <User2 className="h-5 w-5 text-primary" />
                       <h2 className="font-serif text-2xl text-charcoal-bark">Basic Identity</h2>
                     </div>
                     

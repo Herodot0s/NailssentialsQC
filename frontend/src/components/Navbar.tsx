@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { LogOut, User, Calendar, Settings, LayoutDashboard, Menu, ShoppingCart, Image as ImageIcon } from 'lucide-react';
+import { LogOut, User, Calendar, LayoutDashboard, Menu, ShoppingCart } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import { useCart } from '../context/CartContext';
 

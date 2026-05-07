@@ -24,7 +24,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@prisma/client": "6.4.1",
+    "@prisma/client": "^7.8.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
@@ -33,7 +33,7 @@
     "express-validator": "^7.3.2",
     "jsonwebtoken": "^9.0.3",
     "nodemailer": "^8.0.6",
-    "prisma": "6.4.1"
+    "prisma": "^7.8.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -42,6 +42,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.6.0",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "@prisma/config": "^7.8.0"
   }
 }

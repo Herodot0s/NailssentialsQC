@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getDay, addMonths, subMonths, isAfter, isBefore, min, max, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay, addMonths, subMonths, isAfter, isBefore, min, max } from 'date-fns';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { getStaffSchedule, getAllAttendance } from '@/api/apiClient';
 import type { AttendanceLedgerProps } from '../types';
 import type { StaffMember, ScheduleItem, AttendanceRecord } from '@/types/api';
-import { ChevronLeft, ChevronRight, Clock, CalendarDays, Activity } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 
 export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, staffMembers, onUpdateAttendance }) => {
   const [schedules, setSchedules] = useState<Record<number, ScheduleItem[]>>({});
