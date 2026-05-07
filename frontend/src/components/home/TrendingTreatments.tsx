@@ -33,7 +33,7 @@ const TrendingTreatments = ({ services: initialServices }: { services?: Service[
           const services: Service[] = response.data.data;
           const filtered = services
             .filter(s => s.is_popular)
-            .slice(0, 5); // Limit to 5 for optimal ribbon width
+            .slice(0, 4); // Limit to 4 per user request
           setPopularServices(filtered);
         }
       } catch (error) {
@@ -176,11 +176,11 @@ const TrendingTreatments = ({ services: initialServices }: { services?: Service[
                         <p className="text-white/80 font-light text-lg max-w-md leading-relaxed line-clamp-3 md:line-clamp-none">
                           {service.description}
                         </p>
-                        <Link to={`/booking?service=${service.id}`}>
+                        <Link to={`/services?id=${service.id}`}>
                           <Button
                             className="bg-white text-charcoal-bark hover:bg-bisque-wash rounded-full px-8 py-6 h-auto text-xs font-bold tracking-widest uppercase group/btn"
                           >
-                            Begin Ritual
+                            Details
                             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                           </Button>
                         </Link>

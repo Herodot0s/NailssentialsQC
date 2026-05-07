@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getCategories, getServices } from '../api/apiClient';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -75,7 +75,21 @@ const Services: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { cart, addToCart } = useCart();
+
+  // Auto-select service if ID is in URL
+  useEffect(() => {
+    if (!isLoading && services.length > 0) {
+      const serviceId = searchParams.get('id');
+      if (serviceId) {
+        const svc = services.find(s => s.id === parseInt(serviceId));
+        if (svc) {
+          setSelectedService(svc);
+        }
+      }
+    }
+  }, [isLoading, services, searchParams]);
 
   useEffect(() => {
     if (selectedService) {

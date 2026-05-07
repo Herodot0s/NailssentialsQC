@@ -87,6 +87,8 @@ const ManageServices: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'disabled'>('all');
 
+  const popularCount = useMemo(() => services.filter(s => s.is_popular).length, [services]);
+
   const getCategoryColor = (id: number | string) => {
     // Map category IDs to harmonious OKLCH colors
     const idNum = typeof id === 'string' ? parseInt(id) || 0 : id;
@@ -686,16 +688,21 @@ const ManageServices: React.FC = () => {
                       <Checkbox
                         id="is_popular"
                         checked={currentService?.is_popular}
+                        disabled={!currentService?.is_popular && popularCount >= 4}
                         onCheckedChange={(checked) =>
                           setCurrentService({ ...currentService!, is_popular: checked === true })
                         }
                         className="mt-1 data-[state=checked]:bg-kiln-terracotta data-[state=checked]:border-kiln-terracotta"
                       />
                       <div className="space-y-1">
-                        <Label htmlFor="is_popular" className="text-sm font-bold cursor-pointer text-kiln-terracotta flex items-center gap-1.5">
+                        <Label htmlFor="is_popular" className={`text-sm font-bold cursor-pointer flex items-center gap-1.5 ${!currentService?.is_popular && popularCount >= 4 ? 'text-clay-dust' : 'text-kiln-terracotta'}`}>
                           Featured / Popular <Sparkles className="h-3 w-3" />
                         </Label>
-                        <p className="text-xs text-clay-dust">Highlights this service with a special badge in the public catalog.</p>
+                        <p className="text-xs text-clay-dust">
+                          {!currentService?.is_popular && popularCount >= 4 
+                            ? 'Maximum of 4 trending treatments reached. Disable another to feature this one.' 
+                            : 'Highlights this service with a special badge in the public catalog (Max 4).'}
+                        </p>
                       </div>
                     </div>
                   </div>
