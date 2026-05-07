@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay, addMonths, subMonths, isAfter, isBefore, min, max } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay, addMonths, subMonths, subDays, isAfter, isBefore, min, max } from 'date-fns';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { getStaffSchedule, getAllAttendance } from '@/api/apiClient';
 import type { AttendanceLedgerProps } from '../types';
@@ -59,7 +59,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
           if (res.data.success) {
             // filter just for this staff
             const all = res.data.data as AttendanceRecord[];
-            setStaffAttendance(all.filter(a => a.staff_id === selectedStaff.id));
+            setStaffAttendance(all.filter(a => a.staff_id === selectedStaff.staffProfileId));
           }
         } catch (e) {
           console.error("Failed to fetch history");
@@ -69,15 +69,16 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
       };
       fetchHistory();
 
-      // Reset selections
-      setSelectedDate(new Date());
-      setRangeSelection(null);
-      setCustomRangeStart('');
-      setCustomRangeEnd('');
+      // Reset selections and set default 7-day range
+      const end = new Date();
+      const start = subDays(end, 6);
+      setSelectedDate(end);
+      setRangeSelection({ start, end });
+      setCustomRangeStart(format(start, 'yyyy-MM-dd'));
+      setCustomRangeEnd(format(end, 'yyyy-MM-dd'));
     }
   }, [selectedStaff]);
 
-  const todayStr = format(new Date(), 'yyyy-MM-dd');
   const todayDate = new Date();
   const apiDayOfWeek = todayDate.getDay() === 0 ? 7 : todayDate.getDay();
 
@@ -120,7 +121,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
     const interval = eachDayOfInterval(rangeSelection);
     return interval.map(day => {
       const dateStr = format(day, 'yyyy-MM-dd');
-      const record = staffAttendance.find(a => a.date.startsWith(dateStr));
+      const record = staffAttendance.find(a => isSameDay(new Date(a.date), day));
       const dOfWeek = day.getDay() === 0 ? 7 : day.getDay();
       const sched = schedules[selectedStaff.id]?.find(s => s.day_of_week === dOfWeek && s.is_active);
 
@@ -141,7 +142,8 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
         expected: expectedVal,
         actual: actualVal,
         expectedStr: sched ? sched.start_time : 'Off',
-        actualStr: record?.check_in ? format(new Date(record.check_in), 'HH:mm') : (dateStr > format(new Date(), 'yyyy-MM-dd') ? 'Upcoming' : 'Absent')
+        actualStr: record?.check_in ? format(new Date(record.check_in), 'HH:mm') : (dateStr > format(new Date(), 'yyyy-MM-dd') ? 'Upcoming' : 'Absent'),
+        actualOutStr: record?.check_out ? format(new Date(record.check_out), 'HH:mm') : (record?.check_in ? 'Active' : '-')
       };
     });
   }, [rangeSelection, selectedStaff, staffAttendance, schedules]);
@@ -152,7 +154,8 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
         <div className="bg-card border border-border p-3 shadow-premium rounded-none">
           <p className="font-semibold text-[11px] uppercase tracking-[0.2em] mb-2 text-foreground">{label}</p>
           <p className="text-[11px] uppercase tracking-wide"><span className="font-semibold text-warm-stone">Expected:</span> <span className="text-foreground">{payload[0]?.payload?.expectedStr}</span></p>
-          <p className="text-[11px] uppercase tracking-wide"><span className="font-semibold text-primary">Actual:</span> <span className="text-foreground">{payload[0]?.payload?.actualStr}</span></p>
+          <p className="text-[11px] uppercase tracking-wide"><span className="font-semibold text-primary">In:</span> <span className="text-foreground">{payload[0]?.payload?.actualStr}</span></p>
+          <p className="text-[11px] uppercase tracking-wide"><span className="font-semibold text-primary">Out:</span> <span className="text-foreground">{payload[0]?.payload?.actualOutStr}</span></p>
         </div>
       );
     }
@@ -174,7 +177,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
         </div>
         <div className="flex flex-col divide-y divide-border">
           {staffMembers?.map(staff => {
-            const todayRecord = attendance.find(a => a.staff_id === staff.id && a.date.startsWith(todayStr));
+            const todayRecord = attendance.find(a => a.staff_id === staff.staffProfileId && isSameDay(new Date(a.date), new Date()));
             const isTimedIn = todayRecord?.check_in && !todayRecord?.check_out;
             const sched = schedules[staff.id]?.find(s => s.day_of_week === apiDayOfWeek && s.is_active);
 
@@ -195,7 +198,16 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
 
                 <div className="col-span-1 md:col-span-2 flex items-center gap-2 md:block">
                   <span className="md:hidden text-xs font-semibold uppercase tracking-widest text-muted-foreground w-20">Status</span>
-                  <span className="font-mono text-sm font-medium">{todayRecord?.check_in ? format(new Date(todayRecord.check_in), 'HH:mm:ss') : <span className="text-muted-foreground uppercase text-xs tracking-widest">Pending</span>}</span>
+                  <div className="flex flex-col">
+                    <span className="font-mono text-sm font-medium">
+                      {todayRecord?.check_in ? format(new Date(todayRecord.check_in), 'HH:mm') : <span className="text-muted-foreground uppercase text-xs tracking-widest">Pending</span>}
+                    </span>
+                    {todayRecord && todayRecord.tardiness_minutes > 0 && (
+                      <Badge className="w-fit h-4 px-1.5 bg-brick-error/10 text-brick-error border-none text-[8px] uppercase tracking-tighter mt-1">
+                        {todayRecord.tardiness_minutes}m Tardy
+                      </Badge>
+                    )}
+                  </div>
                 </div>
 
                    <div className="col-span-1 md:col-span-3 lg:col-span-2 flex justify-start md:justify-end gap-2 mt-2 md:mt-0 pt-3 md:pt-0 border-t border-kiln-border md:border-t-0">
@@ -254,7 +266,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
                 {Array.from({ length: startDayPadding }).map((_, i) => <div key={`pad-${i}`} className="aspect-square" />)}
                 {daysInMonth.map(day => {
                   const dateStr = format(day, 'yyyy-MM-dd');
-                  const record = staffAttendance.find(a => a.date.startsWith(dateStr));
+                  const record = staffAttendance.find(a => isSameDay(new Date(a.date), day));
                   const isSel = selectedDate && isSameDay(day, selectedDate);
                   const isInRange = rangeSelection && isAfter(day, rangeSelection.start) && isBefore(day, rangeSelection.end);
                   const isRangeEdge = rangeSelection && (isSameDay(day, rangeSelection.start) || isSameDay(day, rangeSelection.end));
@@ -336,7 +348,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
 
                   {(() => {
                     const dateStr = format(selectedDate, 'yyyy-MM-dd');
-                    const record = staffAttendance.find(a => a.date.startsWith(dateStr));
+                    const record = staffAttendance.find(a => isSameDay(new Date(a.date), selectedDate));
                     const dOfWeek = selectedDate.getDay() === 0 ? 7 : selectedDate.getDay();
                     const sched = schedules[selectedStaff?.id || 0]?.find(s => s.day_of_week === dOfWeek && s.is_active);
 
@@ -349,7 +361,13 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
                         <div className="flex justify-between items-center border-b border-kiln-border/50 pb-4">
                           <span className="text-xs font-semibold uppercase tracking-widest text-warm-stone">Check In</span>
                           <span className={`font-mono text-lg ${record?.check_in ? (record.tardiness_minutes > 0 ? 'text-brick-error font-bold' : 'text-forest-confirm font-bold') : (dateStr > format(new Date(), 'yyyy-MM-dd') ? 'text-warm-stone' : '')}`}>
-                            {record?.check_in ? format(new Date(record.check_in), 'HH:mm:ss') : (dateStr > format(new Date(), 'yyyy-MM-dd') ? 'Upcoming' : 'No Record')}
+                            {record?.check_in ? format(new Date(record.check_in), 'HH:mm') : (dateStr > format(new Date(), 'yyyy-MM-dd') ? 'Upcoming' : 'No Record')}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center border-b border-kiln-border/50 pb-4">
+                          <span className="text-xs font-semibold uppercase tracking-widest text-warm-stone">Check Out</span>
+                          <span className="font-mono text-lg">
+                            {record?.check_out ? format(new Date(record.check_out), 'HH:mm') : (record?.check_in ? <span className="text-success-color animate-pulse">Active Now</span> : '-')}
                           </span>
                         </div>
                         <div className="flex justify-between items-center pb-2">

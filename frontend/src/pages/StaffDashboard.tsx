@@ -8,10 +8,11 @@ import {
   completeAppointment,
   getCommissionSummary,
   getMyPayroll,
-  getMyMessages,
   sendMessage,
+  getAllStaff,
 } from '../api/apiClient';
-import type { PayrollRecord, Message } from '@/types/api';
+import { MessagesView } from '@/components/dashboard/MessagesView';
+import type { PayrollRecord, StaffMember } from '@/types/api';
 import {
   Card,
   CardHeader,
@@ -61,6 +62,8 @@ interface AttendanceStatus {
   checkInTime: string | null;
   checkOutTime: string | null;
   date: string;
+  scheduledStart?: string;
+  scheduledEnd?: string;
 }
 
 interface Appointment {
@@ -85,24 +88,23 @@ const StaffDashboard: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [commission, setCommission] = useState({ today: 0, thisWeek: 0 });
   const [myPayrolls, setMyPayrolls] = useState<PayrollRecord[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [staff, setStaff] = useState<StaffMember[]>([]);
   
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Modals
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [newMessage, setNewMessage] = useState({ receiverId: '', subject: '', body: '' });
+  const [attendanceMessage, setAttendanceMessage] = useState<{ text: string, type: 'info' | 'warning' | 'error' | 'success' } | null>(null);
 
   const fetchDashboardData = async () => {
     try {
       setIsLoading(true);
-      const [attRes, aptRes, commRes, payrollRes, msgRes] = await Promise.all([
+      const [attRes, aptRes, commRes, payrollRes] = await Promise.all([
         getAttendanceStatus(),
         getAppointments(),
         getCommissionSummary(),
-        getMyPayroll(),
-        getMyMessages()
+        getMyPayroll()
       ]);
 
       if (attRes.data.success) setStatus(attRes.data.data.status);
@@ -116,7 +118,12 @@ const StaffDashboard: React.FC = () => {
       }
       if (commRes.data.success) setCommission(commRes.data.data);
       if (payrollRes.data.success) setMyPayrolls(payrollRes.data.data);
-      if (msgRes.data.success) setMessages(msgRes.data.data);
+      
+      const staffRes = await getAllStaff();
+      if (staffRes.data.success) {
+        const staffData = staffRes.data.data;
+        setStaff(Array.isArray(staffData) ? staffData : (staffData?.items || []));
+      }
 
     } catch (err: unknown) {
       console.error('Fetch error:', err instanceof Error ? err.message : err);
@@ -132,10 +139,76 @@ const StaffDashboard: React.FC = () => {
   }, []);
 
   const handleCheckIn = async () => {
-    try { await checkIn(); fetchDashboardData(); } catch { console.error('Check-in failed.'); }
+    // Manager Exception
+    if (user?.role === 'manager') {
+      try { await checkIn(); fetchDashboardData(); } catch { console.error('Check-in failed.'); }
+      return;
+    }
+
+    if (status?.scheduledStart) {
+      const now = new Date();
+      const [sHours, sMins] = status.scheduledStart.split(':').map(Number);
+      const scheduledStartTime = new Date();
+      scheduledStartTime.setHours(sHours, sMins, 0, 0);
+
+      const diffMinutes = (now.getTime() - scheduledStartTime.getTime()) / (1000 * 60);
+
+      // Early Logic
+      if (diffMinutes < -15) {
+        const earlyMins = Math.abs(Math.floor(diffMinutes));
+        setAttendanceMessage({
+          text: `You are early by ${earlyMins} minutes. Please wait until at least 15 minutes before your shift.`,
+          type: 'warning'
+        });
+        return;
+      }
+
+      // Late Logic
+      if (diffMinutes > 15) {
+        setAttendanceMessage({
+          text: `You are late by ${Math.floor(diffMinutes)} minutes. Deductions will be applied to your payroll.`,
+          type: 'error'
+        });
+      } else {
+        setAttendanceMessage(null);
+      }
+    }
+
+    try { 
+      await checkIn(); 
+      fetchDashboardData(); 
+    } catch { 
+      console.error('Check-in failed.'); 
+    }
   };
 
   const handleCheckOut = async () => {
+    // Manager Exception
+    if (user?.role === 'manager') {
+      try { await checkOut(); fetchDashboardData(); } catch { console.error('Check-out failed.'); }
+      return;
+    }
+
+    if (status?.scheduledEnd) {
+      const now = new Date();
+      const [eHours, eMins] = status.scheduledEnd.split(':').map(Number);
+      const scheduledEndTime = new Date();
+      scheduledEndTime.setHours(eHours, eMins, 0, 0);
+
+      const diffMinutes = (scheduledEndTime.getTime() - now.getTime()) / (1000 * 60);
+
+      // Early Out Logic
+      if (diffMinutes > 15) {
+        setAttendanceMessage({
+          text: `You are checking out early by ${Math.floor(diffMinutes)} minutes. Management has been notified.`,
+          type: 'warning'
+        });
+        // The notification is handled by the backend in our updated checkOut controller
+      } else {
+        setAttendanceMessage(null);
+      }
+    }
+
     try { await checkOut(); fetchDashboardData(); } catch { console.error('Check-out failed.'); }
   };
 
@@ -194,6 +267,12 @@ const StaffDashboard: React.FC = () => {
           <p className="text-[10px] tracking-[0.4em] uppercase font-bold text-primary">Artisan Terminal</p>
           <h1 className="font-serif text-5xl font-light tracking-tight text-foreground">
             {user?.fullName.split(' ')[0]}'s <span className="italic">Workspace</span>
+            {status?.isCheckedIn && (
+              <Badge className="ml-4 rounded-none bg-success-color text-white text-[8px] uppercase tracking-[0.2em] font-bold py-1 px-3 border-none animate-in fade-in slide-in-from-left-4 duration-1000">
+                <span className="w-1 h-1 rounded-full bg-white animate-pulse mr-2 inline-block" />
+                Active Duty
+              </Badge>
+            )}
           </h1>
         </div>
         <div className="flex gap-4">
@@ -239,6 +318,19 @@ const StaffDashboard: React.FC = () => {
                onCheckIn={handleCheckIn}
                onCheckOut={handleCheckOut}
              />
+
+             {attendanceMessage && (
+               <div className={`mt-4 p-4 text-[10px] uppercase tracking-widest font-bold border ${
+                 attendanceMessage.type === 'error' ? 'bg-destructive/10 text-destructive border-destructive/20' :
+                 attendanceMessage.type === 'warning' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' :
+                 'bg-success-color/10 text-success-color border-success-color/20'
+               } lg:col-span-12`}>
+                 <p className="flex items-center gap-2">
+                   <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                   {attendanceMessage.text}
+                 </p>
+               </div>
+             )}
 
              <Card className="lg:col-span-8 rounded-none border-none shadow-sm overflow-hidden">
                 <CardHeader className="bg-primary/5 border-b border-primary/5 pb-8">
@@ -373,38 +465,7 @@ const StaffDashboard: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="messages" className="mt-0">
-           <Card className="rounded-none border-none shadow-sm min-h-[400px]">
-              <CardHeader className="bg-primary/5 border-b border-primary/5 flex flex-row justify-between items-center">
-                 <CardTitle className="font-serif text-2xl">Internal Inbox</CardTitle>
-                 <Badge className="rounded-none bg-primary text-white text-[8px] uppercase tracking-widest font-bold">{messages.filter(m => !m.is_read).length} New</Badge>
-              </CardHeader>
-              <CardContent className="p-0">
-                 <div className="divide-y divide-primary/5">
-                    {messages.map(msg => (
-                      <div key={msg.id} className={`p-8 hover:bg-primary-ultra/10 transition-colors cursor-pointer group ${!msg.is_read ? 'bg-primary-ultra/30' : ''}`}>
-                         <div className="flex justify-between items-start mb-2">
-                            <div className="flex items-center gap-3">
-                               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary uppercase">
-                                  {msg.sender.username.charAt(0)}
-                               </div>
-                               <div className="space-y-0.5">
-                                  <p className="text-[10px] font-bold uppercase tracking-widest">{msg.sender.username} <span className="font-normal text-muted-foreground lowercase ml-1">({msg.sender.role})</span></p>
-                                  <p className="text-sm font-bold">{msg.subject}</p>
-                               </div>
-                            </div>
-                            <span className="text-[9px] font-bold text-muted-foreground uppercase">{new Date(msg.created_at).toLocaleDateString()}</span>
-                         </div>
-                         <p className="text-xs text-muted-foreground font-light leading-relaxed pl-11 line-clamp-2 group-hover:line-clamp-none transition-all">
-                            {msg.body}
-                         </p>
-                      </div>
-                    ))}
-                    {messages.length === 0 && (
-                      <div className="text-center py-32 text-muted-foreground italic text-[10px] uppercase tracking-widest font-bold">Inbox is empty.</div>
-                    )}
-                 </div>
-              </CardContent>
-           </Card>
+           <MessagesView />
         </TabsContent>
       </Tabs>
 
@@ -423,7 +484,9 @@ const StaffDashboard: React.FC = () => {
                 <Select required onValueChange={(val: string | null) => setNewMessage({...newMessage, receiverId: val || ''})}>
                    <SelectTrigger className="rounded-none border-primary/10 h-12"><SelectValue placeholder="Select User" /></SelectTrigger>
                    <SelectContent className="rounded-none border-none shadow-xl">
-                      <SelectItem value="1">Salon Management (System)</SelectItem>
+                      {staff.map(s => (
+                        <SelectItem key={s.id} value={s.id.toString()}>{s.fullName} ({s.role})</SelectItem>
+                      ))}
                    </SelectContent>
                 </Select>
 

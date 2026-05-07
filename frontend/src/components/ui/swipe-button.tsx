@@ -115,7 +115,7 @@ const SwipeButton: React.FC<SwipeButtonProps> = ({
     : 'transition-all duration-300 ease-out'; // Smooth return when released
 
   return (
-    <div className={cn('relative w-full h-14 rounded-none overflow-hidden cursor-pointer select-none', trackBgClass, className)}>
+    <div ref={trackRef} className={cn('relative w-full h-14 rounded-none overflow-hidden cursor-pointer select-none', trackBgClass, className)}>
       {/* Filled background that follows the thumb */}
       <div
         className={cn(
