@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-04)
 Phase: 07 (advanced-analytics-dashboard) — COMPLETE
 Plan: 3 of 3
 Status: All plans executed — analytics dashboard operational
-Last activity: 2026-05-06
+Last activity: 2026-05-07
 
 Progress: [██████████] 100%
 
@@ -52,9 +52,10 @@ Resume file: None
 | 20260506-consolidate-manager-tools | Consolidate Manager Tools to Dashboard | 2026-05-06 | pending | [20260506-consolidate-manager-tools](./quick/20260506-consolidate-manager-tools/) |
 | 20260506-categorize-manager-sidebar | Categorize Manager Sidebar & Refine Analytics | 2026-05-06 | pending | [20260506-categorize-manager-sidebar](./quick/20260506-categorize-manager-sidebar/) |
 | 20260506-add-login-shortcuts | Add login shortcut buttons for Customer, Staff, and Manager | 2026-05-06 | 4a0f944 | [20260506-add-login-shortcuts](./quick/20260506-add-login-shortcuts/) |
-| 20260506-refine-navbar | Refine Navbar: remove 'Book Now'/'My Appointments', reposition Cart | 2026-05-06 | pending | [20260506-refine-navbar](./quick/20260506-refine-navbar/) |
-| 20260506-fix-services-categories-ui | Fix Services Categories UI: replace wrapping with scrollable row | 20260506 | pending | [20260506-fix-services-categories-ui](./quick/20260506-fix-services-categories-ui/) |
-| 20260506-update-service-categories | Update Service Categories to Nails, Spa, Hair, Waxing & Threading, Eyelash | 2026-05-06 | pending | [20260506-update-service-categories](./quick/20260506-update-service-categories/) |
-| 20260506-overdrive-manage-services | Overdrive Manage Services: minimalist search, chips, and liquid transitions | 2026-05-06 | pending | [20260506-overdrive-manage-services](./quick/20260506-overdrive-manage-services/) |
-| 20260506-attendance-cards | Realtime Attendance Tracking Cards and Dossier Calendar | 2026-05-06 | pending | [20260506-attendance-cards](./quick/20260506-attendance-cards/) |
+| 20260506-refine-navbar | Refine Navbar: remove 'Book Now'/'My Appointments', reposition Cart | 2026-05-06 | 0138592 | [20260506-refine-navbar](./quick/20260506-refine-navbar/) |
+| 20260506-fix-services-categories-ui | Fix Services Categories UI: replace wrapping with scrollable row | 20260506 | 0138592 | [20260506-fix-services-categories-ui](./quick/20260506-fix-services-categories-ui/) |
+| 20260506-update-service-categories | Update Service Categories to Nails, Spa, Hair, Waxing & Threading, Eyelash | 2026-05-06 | 0138592 | [20260506-update-service-categories](./quick/20260506-update-service-categories/) |
+| 20260506-overdrive-manage-services | Overdrive Manage Services: minimalist search, chips, and liquid transitions | 2026-05-06 | 0138592 | [20260506-overdrive-manage-services](./quick/20260506-overdrive-manage-services/) |
+| 20260506-attendance-cards | Realtime Attendance Tracking Cards and Dossier Calendar | 2026-05-06 | 0138592 | [20260506-attendance-cards](./quick/20260506-attendance-cards/) |
+| 20260507-repository-migration | Migrate project to new repository NailssentialsQC | 2026-05-07 | 0138592 | [20260507-repository-migration-and-final-ship](./quick/20260507-repository-migration-and-final-ship/) |
 
