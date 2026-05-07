@@ -1,12 +1,8 @@
-/* Fonts loaded via @fontsource-variable packages below */
+@import "tailwindcss";
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import '@fontsource-variable/noto-sans';
 @import '@fontsource-variable/playfair-display';
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 :root {
   /* Brand Terracotta Palette */
