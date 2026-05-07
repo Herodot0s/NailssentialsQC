@@ -22,8 +22,6 @@ export const ContactInfoSection: React.FC<ContactInfoSectionProps> = ({
 
   const userImage = "https://scontent.fmnl3-3.fna.fbcdn.net/v/t39.30808-6/506120168_122108135750898795_5073906802378404612_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=111&ccb=1-7&_nc_sid=2a1932&_nc_eui2=AeEbmC_TATBbFX2bVq2E23r1yXGoMs0ewzzJcagyzR7DPKvMj7SjP1K6dQN3UysQwoeLpxcjbImSge_5b36rY-Xl&_nc_ohc=9x7So1tdgpYQ7kNvwE8yOPN&_nc_oc=Adqg0eq6u8IWc4w2DDRLQ8TMRAz8TpZEz8aqsWP8UhYJWrSiHm3xaFqhSlNB-bitHTI&_nc_zt=23&_nc_ht=scontent.fmnl3-3.fna&_nc_gid=MfU_u1wve31DOP8T264iRA&_nc_ss=7b2a8&oh=00_Af5xxizNKUXB6rGa_o_o9Ag9R58uxcTP6vVUxRRxoIvcJg&oe=6A01EAD3";
 
-  // If no mapsLink is provided, we can use a default search for Nailssentials QC
-  const embedUrl = `https://www.google.com/maps/embed/v1/place?key=REPLACE_WITH_YOUR_API_KEY&q=Nailssentials+QC+Quezon+City`;
   // For demonstration without an API key, we use a standard embed link pattern if possible, 
   // but usually standard iframes use the /place/address pattern.
   const mapEmbedSrc = mapsLink ? mapsLink.replace('https://goo.gl/maps/', 'https://www.google.com/maps/embed/v1/place?q=') : `https://www.google.com/maps?q=${encodeURIComponent(address || 'Nailssentials QC Quezon City')}&output=embed`;
@@ -44,7 +42,7 @@ export const ContactInfoSection: React.FC<ContactInfoSectionProps> = ({
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: PREMIUM_EASE }}
+              transition={{ duration: 0.8, ease: PREMIUM_EASE as any }}
               className="space-y-6"
             >
               <span className="inline-flex items-center gap-2 text-[11px] tracking-[0.3em] text-primary font-bold uppercase">
@@ -62,7 +60,7 @@ export const ContactInfoSection: React.FC<ContactInfoSectionProps> = ({
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 1, ease: PREMIUM_EASE }}
+              transition={{ duration: 1, ease: PREMIUM_EASE as any }}
               className="relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-premium group"
             >
               <img 
@@ -142,7 +140,7 @@ export const ContactInfoSection: React.FC<ContactInfoSectionProps> = ({
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.3, ease: PREMIUM_EASE }}
+              transition={{ duration: 0.8, delay: 0.3, ease: PREMIUM_EASE as any }}
               className="relative w-full aspect-video md:aspect-[21/9] rounded-[2rem] overflow-hidden shadow-premium border border-primary/10"
             >
               <iframe
