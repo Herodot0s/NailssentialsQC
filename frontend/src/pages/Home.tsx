@@ -82,33 +82,6 @@ const Home = () => {
 
       <TrendingTreatments />
 
-      {/* Signature Experience Section */}
-      <section className="bg-primary-ultra overflow-hidden">
-        <div className="container mx-auto px-6 py-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-center">
-            <div className="py-24 lg:py-32 lg:pr-24 space-y-10">
-              <div className="space-y-4">
-                <span className="flex items-center gap-2 text-primary font-bold tracking-[0.2em] text-[11px] uppercase">
-                  <Star className="h-3.5 w-3.5 fill-primary" /> {sigLabel}
-                </span>
-                <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-light text-foreground tracking-tight leading-tight max-w-xl">
-                  {sigHeadline}
-                </h2>
-              </div>
-              <p className="text-muted-foreground text-lg font-light leading-relaxed max-w-md">{sigBody}</p>
-              <div className="pt-6">
-                <Link to="/services" className="inline-block text-foreground text-sm font-bold tracking-[0.2em] uppercase border-b border-primary/40 pb-2 hover:border-primary transition-all duration-300">
-                  {sigLinkLabel}
-                </Link>
-              </div>
-            </div>
-            <div className="relative h-[400px] md:h-[600px] lg:h-[800px] w-full">
-              <img src={sigBgUrl} alt="Manicure Ritual" className="absolute inset-0 w-full h-full object-cover" />
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Contact Info Section (new — hidden when empty) */}
       <ContactInfoSection
         phone={s?.contact?.phone}
