@@ -60,3 +60,4 @@ Resume file: None
 | 20260507-repository-migration | Migrate project to new repository NailssentialsQC | 2026-05-07 | ff1a563 | [20260507-repository-migration-and-final-ship](./quick/20260507-repository-migration-and-final-ship/) |
 | 20260507-fix-prisma-datasource-url | Add missing DATABASE_URL to Prisma schema datasource | 2026-05-07 | 2789c85 | [20260507-fix-prisma-datasource-url](./quick/20260507-fix-prisma-datasource-url/) |
 | 20260507-sync-vercel-blob-token | Sync Vercel Blob Read/Write token for file storage | 2026-05-07 | local | [20260507-sync-vercel-blob-token](./quick/20260507-sync-vercel-blob-token/) |
+| 20260507-add-logo-to-home-and-favicon | Add Logo to Home and Favicon | 2026-05-07 | db21ef8 | [20260507-add-logo-to-home-and-favicon](./quick/20260507-add-logo-to-home-and-favicon/) |
