@@ -83,8 +83,6 @@ export const ContactInfoSection: React.FC<ContactInfoSectionProps> = ({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-charcoal-bark/60 via-charcoal-bark/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="absolute top-6 left-6 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
-                <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-                <span className="text-[10px] uppercase font-bold tracking-widest text-charcoal-bark">Studio Open</span>
               </div>
             </motion.div>
           </div>
