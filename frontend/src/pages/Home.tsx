@@ -84,6 +84,8 @@ const Home = () => {
         hours={s?.contact?.hours}
         email={s?.contact?.email}
         mapsLink={s?.contact?.maps_link}
+        facebookLink={s?.contact?.facebook}
+        instagramLink={s?.contact?.instagram}
       />
 
       {/* FAQ Accordion Section (new — hidden when no active FAQs) */}

@@ -323,6 +323,8 @@ export interface SiteSettingsData {
     hours?: string;
     email?: string;
     maps_link?: string;
+    facebook?: string;
+    instagram?: string;
   };
 }
 
