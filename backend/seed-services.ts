@@ -1,101 +1,105 @@
 import { PrismaClient } from '@prisma/client';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const prisma = new PrismaClient();
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({
+  adapter,
+  log: ['error'],
+});
 
 async function seedServices() {
   try {
-    // Users & staff already exist from prior run. Just add services + exhibits.
-    
-    const staffProfiles = await prisma.staffProfile.findMany({ select: { id: true, full_name: true } });
-    console.log('Found staff:', staffProfiles.map(s => `${s.id}: ${s.full_name}`));
+    console.log('=== RESETTING SERVICE MENU ===\n');
 
-    if (staffProfiles.length === 0) {
-      console.error('No staff found. Run full seed first.');
-      return;
-    }
+    // Step 1: Delete all ServicePackages and ServicePackageItems first
+    const deletedPackageItems = await prisma.servicePackageItem.deleteMany({});
+    console.log(`✓ Deleted ${deletedPackageItems.count} ServicePackageItem rows`);
 
-    // Create Service Categories (upsert to handle re-runs)
+    const deletedPackages = await prisma.servicePackage.deleteMany({});
+    console.log(`✓ Deleted ${deletedPackages.count} ServicePackage rows`);
+
+    // Step 2: Delete exhibits (references service_id)
+    const deletedExhibits = await prisma.exhibit.deleteMany({});
+    console.log(`✓ Deleted ${deletedExhibits.count} Exhibit rows`);
+
+    // Step 3: Delete Reviews (references appointment_item_id) before AppointmentItems
+    const deletedReviews = await prisma.review.deleteMany({});
+    console.log(`✓ Deleted ${deletedReviews.count} Review rows`);
+
+    // Step 4: Delete AppointmentItems (references service_id) before we can delete services
+    const deletedAppointmentItems = await prisma.appointmentItem.deleteMany({});
+    console.log(`✓ Deleted ${deletedAppointmentItems.count} AppointmentItem rows`);
+
+    // Step 5: Delete Commissions (references service_id) before we can delete services
+    const deletedCommissions = await prisma.commission.deleteMany({});
+    console.log(`✓ Deleted ${deletedCommissions.count} Commission rows`);
+
+    // Step 6: Now safe to delete all Services
+    const deletedServices = await prisma.service.deleteMany({});
+    console.log(`✓ Deleted ${deletedServices.count} Service rows`);
+
+    // Step 7: Delete all ServiceCategories
+    const deletedCategories = await prisma.serviceCategory.deleteMany({});
+    console.log(`✓ Deleted ${deletedCategories.count} ServiceCategory rows`);
+
+    console.log('\n--- Creating New Categories ---\n');
+
+    // Step 7: Create only the 4 allowed categories
     const catNails = await prisma.serviceCategory.upsert({
-      where: { name: 'Nail Art' },
+      where: { name: 'Nails' },
       update: {},
-      create: { name: 'Nail Art', description: 'Creative nail designs' },
+      create: {
+        name: 'Nails',
+        description: 'Nail services and addons',
+      },
     });
-    const catManicure = await prisma.serviceCategory.upsert({
-      where: { name: 'Manicure' },
+    console.log(`✓ Category: Nails (ID: ${catNails.id})`);
+
+    const catHandSpa = await prisma.serviceCategory.upsert({
+      where: { name: 'Hand Spa' },
       update: {},
-      create: { name: 'Manicure', description: 'Hand and nail care' },
+      create: {
+        name: 'Hand Spa',
+        description: 'Luxurious hand treatments and spa services',
+      },
     });
-    const catPedicure = await prisma.serviceCategory.upsert({
-      where: { name: 'Pedicure' },
+    console.log(`✓ Category: Hand Spa (ID: ${catHandSpa.id})`);
+
+    const catFootSpa = await prisma.serviceCategory.upsert({
+      where: { name: 'Foot Spa' },
       update: {},
-      create: { name: 'Pedicure', description: 'Foot and toe care' },
+      create: {
+        name: 'Foot Spa',
+        description: 'Relaxing foot treatments and spa services',
+      },
     });
-    console.log('✓ Categories ready');
+    console.log(`✓ Category: Foot Spa (ID: ${catFootSpa.id})`);
 
-    // Create Services
-    const svcGelNails = await prisma.service.create({
-      data: { name: 'Gel Nail Art', price: 800, duration_minutes: 90, category_id: catNails.id, is_popular: true },
+    const catWaxing = await prisma.serviceCategory.upsert({
+      where: { name: 'Waxing & Threading' },
+      update: {},
+      create: {
+        name: 'Waxing & Threading',
+        description: 'Hair removal services',
+      },
     });
-    const svcFrenchTips = await prisma.service.create({
-      data: { name: 'French Tips', price: 500, duration_minutes: 60, category_id: catManicure.id, is_popular: true },
-    });
-    const svcClassicMani = await prisma.service.create({
-      data: { name: 'Classic Manicure', price: 350, duration_minutes: 45, category_id: catManicure.id, is_popular: true },
-    });
-    const svcSpaPedi = await prisma.service.create({
-      data: { name: 'Spa Pedicure', price: 600, duration_minutes: 75, category_id: catPedicure.id },
-    });
-    console.log('✓ Services created');
-
-    // Create Exhibits
-    const exhibits = [
-      {
-        title: 'Midnight Bloom Collection',
-        image_url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&q=80&w=1200',
-        staff_id: staffProfiles[0].id,
-        service_id: svcGelNails.id,
-      },
-      {
-        title: 'French Elegance Reimagined',
-        image_url: 'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&q=80&w=1200',
-        staff_id: staffProfiles.length > 1 ? staffProfiles[1].id : staffProfiles[0].id,
-        service_id: svcFrenchTips.id,
-      },
-      {
-        title: 'Golden Hour Ombré',
-        image_url: 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&q=80&w=1200',
-        staff_id: staffProfiles[0].id,
-        service_id: svcGelNails.id,
-      },
-      {
-        title: 'Crystal Lattice Design',
-        image_url: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=1200',
-        staff_id: staffProfiles.length > 2 ? staffProfiles[2].id : staffProfiles[0].id,
-        service_id: svcClassicMani.id,
-      },
-      {
-        title: 'Cherry Blossom Spring Set',
-        image_url: 'https://images.unsplash.com/photo-1604902396830-aca29e19b067?auto=format&fit=crop&q=80&w=1200',
-        staff_id: staffProfiles.length > 1 ? staffProfiles[1].id : staffProfiles[0].id,
-        service_id: svcSpaPedi.id,
-      },
-      {
-        title: 'Minimalist Geometry',
-        image_url: 'https://images.unsplash.com/photo-1610992015732-2449b76344bc?auto=format&fit=crop&q=80&w=1200',
-        staff_id: staffProfiles[0].id,
-        service_id: svcFrenchTips.id,
-      },
-    ];
-
-    for (const ex of exhibits) {
-      const created = await prisma.exhibit.create({ data: ex });
-      console.log(`✓ Exhibit: "${created.title}" (ID: ${created.id})`);
-    }
+    console.log(`✓ Category: Waxing & Threading (ID: ${catWaxing.id})`);
 
     console.log('\n══════════════════════════════════════');
-    console.log('  SEED COMPLETE');
+    console.log('  SERVICE MENU RESET COMPLETE');
     console.log('══════════════════════════════════════');
-    console.log(`  6 exhibits seeded across 4 services`);
+    console.log('  Categories created: 4');
+    console.log('    - Nails');
+    console.log('    - Hand Spa');
+    console.log('    - Foot Spa');
+    console.log('    - Waxing & Threading');
+    console.log('  Services created: 0 (add via manager account)');
+    console.log('  All packages deleted');
+    console.log('  All old categories/services deleted');
     console.log('\nLogin Credentials:');
     console.log('  Manager:  manager1 / manager123');
     console.log('  Staff:    janedoe / staff123');
