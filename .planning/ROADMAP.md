@@ -1,165 +1,72 @@
-# Roadmap
+# Roadmap: NailssentialsQC
 
-## Completed Milestones (V1)
-- ✓ **Phase 1:** Critical Bug Fixes
-- ✓ **Phase 2:** Type Safety & Code Quality
-- ✓ **Phase 3:** Security Hardening
-- ✓ **Phase 4:** API Improvements
-- ✓ **Phase 5:** Performance Optimization
-- ✓ **Phase 6:** Missing Features
-- ✓ **Phase 7:** Backend Test Infrastructure
+## Milestones
 
-*(All V1 phases are fully complete. Below is the roadmap for Milestone V2: Premium Experience & Expansion).*
+- ✅ **v1.0 MVP** — Phases V1-1 through V1-7 (shipped 2026-05-04)
+- ✅ **v2.0 Premium Experience & Expansion** — Phases 1-7 (shipped 2026-05-10) — [milestones/v2.0-ROADMAP.md](./milestones/v2.0-ROADMAP.md)
+- 📋 **v2.1 Booking Flow** — Phase 2 remaining plans (02-02, 02-03, 02-04) — Planned
 
 ## Phases
 
-- [x] **Phase 1: Premium UI Foundations** - Establish global design tokens and transition animations
-- [ ] **Phase 2: Customer Journey Redesign** - Overhaul the landing page and booking flow with premium aesthetics
-- [x] **Phase 3: Nail Art Exhibit & Gallery** - Launch the public gallery with manager-led media management
-- [x] **Phase 4: Operations Interface Overhaul** - Modernize the staff and manager daily task views
-- [x] **Phase 5: Marketing CMS & Content Control** - Enable full manager control over landing page text and policies
-- [ ] **Phase 6: Service Packages & Bundling** - Implement creation and booking of service bundles with commission logic
-- [x] **Phase 7: Advanced Analytics Dashboard** - Provide deep business insights via interactive reporting
+### v1.0 MVP (Phases V1-1 through V1-7) — SHIPPED 2026-05-04
 
-## Phase Details
-### Phase 1: Premium UI Foundations
-**Goal**: Establish a consistent, premium design language and interaction model across the entire platform
-**Depends on**: Nothing
-**Requirements**: UI-01, UI-04
-**Success Criteria** (what must be TRUE):
-  1. User sees correct Airbnb-inspired colors (Terracotta/Rausch), typography, and spacing tokens applied globally
-  2. User experiences smooth page transitions and micro-interactions using framer-motion
-**Plans**:
-- **Wave 1**
-  - [x] 01-01-PLAN.md: Foundation & Testing Setup
-- **Wave 2 (Blocked on Wave 1)**
-  - [x] 01-02-PLAN.md: Global Design System (Tokens)
-  - [x] 01-03-PLAN.md: Animation Primitives
-- **Wave 3 (Blocked on Wave 2)**
-  - [x] 01-04-PLAN.md: Component & Route Integration
-**UI hint**: yes
+*(All v1.0 phases are complete. See archived milestones for details.)*
 
-### Phase 2: Customer Journey Redesign
-**Goal**: Customers enjoy a boutique, high-end experience from the first visit through to booking
-**Depends on**: Phase 1
-**Requirements**: UI-02
-**Success Criteria** (what must be TRUE):
-  1. Customer can navigate a visually stunning landing page that reflects the premium NailssentialsQC brand
-  2. Customer can book an appointment through a simplified, premium-feeling multi-step booking flow
-**Plans**:
-- **Wave 1**
-  - [x] 02-01-PLAN.md — Landing Page Refactor & Hero (D-01, D-02, D-03)
-- **Wave 2**
-  - [ ] 02-02-PLAN.md — Booking Ritual State Machine & Steps (D-04, D-06, D-09, D-10)
-  - [ ] 02-03-PLAN.md — Final Ritual Steps & Navigation (D-05)
-- **Wave 3**
-  - [ ] 02-04-PLAN.md — Visual Integration & Final Polish (D-07, D-08)
-**UI hint**: yes
+- [x] **Phase V1-1: Critical Bug Fixes** (5/5 plans) — completed 2026-05-02
+- [x] **Phase V1-2: Type Safety & Code Quality** (4/4 plans) — completed 2026-05-02
+- [x] **Phase V1-3: Security Hardening** (6/6 plans) — completed 2026-05-03
+- [x] **Phase V1-4: API Improvements** (3/3 plans) — completed 2026-05-03
+- [x] **Phase V1-5: Performance Optimization** (5/5 plans) — completed 2026-05-03
+- [x] **Phase V1-6: Missing Features** (3/3 plans) — completed 2026-05-03
+- [x] **Phase V1-7: Backend Test Infrastructure** (8/8 plans) — completed 2026-05-04
 
-### Phase 3: Nail Art Exhibit & Gallery
-**Goal**: Showcase salon quality through a public gallery managed directly by the salon staff
-**Depends on**: Phase 2
-**Requirements**: CMS-01, CMS-02
-**Success Criteria** (what must be TRUE):
-  1. Customer can browse a public "Nail Art Exhibit" gallery with high-resolution imagery
-  2. Manager can upload, name, and delete exhibit images via a simple drag-and-drop interface (Vercel Blob)
-**Plans**: 4 plans
-- **Wave 0**
-  - [x] 03-00-PLAN.md — Test Skeletons (Backend & Frontend)
-- **Wave 1**
-  - [x] 03-01-PLAN.md — Data Foundations (Prisma, API, Migration)
-- **Wave 2**
-  - [x] 03-02-PLAN.md — Management CMS (Manager Upload/List)
-- **Wave 3**
-  - [x] 03-03-PLAN.md — Public Gallery (Masonry Layout, Detail View)
-**UI hint**: yes
+### v2.0 Premium Experience & Expansion (Phases 1-7) — SHIPPED 2026-05-10
 
-### Phase 4: Operations Interface Overhaul
-**Goal**: Staff and managers use a professional, distraction-free environment for daily salon operations
-**Depends on**: Phase 1
-**Requirements**: UI-03
-**Success Criteria** (what must be TRUE):
-  1. Staff can manage attendance and view schedules in a modernized, mobile-responsive dashboard
-  2. Manager can oversee today's salon status and coordinate staff in an organized, cleaner layout
-**Plans**: 4 plans
-- **Wave 1**
-  - [x] 04-01-PLAN.md — Manager Dashboard Decomposition (D-01, D-02, D-05)
-- **Wave 2 (Blocked on Wave 1)**
-  - [x] 04-02-PLAN.md — Manager Dashboard Responsive Sidebar & Overview (D-01, D-04, D-08, D-09)
-  - [x] 04-03-PLAN.md — Staff Dashboard Mobile-First & Check-In Overhaul (D-03, D-06, D-07)
-- **Wave 3 (Blocked on Wave 2)**
-  - [x] 04-04-PLAN.md — Visual Polish & Integration Testing (all decisions)
-**UI hint**: yes
+<details>
+<summary>✅ v2.0 MVP (Phases 1-7) — SHIPPED 2026-05-10</summary>
 
-### Phase 5: Marketing CMS & Content Control
-**Goal**: Managers have full control over the salon's public-facing information without technical help
-**Depends on**: Phase 3, Phase 4
-**Requirements**: CMS-03
-**Success Criteria** (what must be TRUE):
-  1. Manager can update landing page hero text, descriptions, and contact info via the CMS dashboard
-  2. Manager can modify salon policies and FAQ sections directly through the interface
-**Plans**:
-- **Wave 1**
-  - [x] 05-01-PLAN.md — Prisma Schema & Database Foundation
-- **Wave 2**
-  - [x] 05-02-PLAN.md — Frontend Dependency Setup
-  - [x] 05-03-PLAN.md — CMS Backend API
-- **Wave 3**
-  - [x] 05-04-PLAN.md — CMS Manager Dashboard Editor
-  - [x] 05-05-PLAN.md — Public Landing Page CMS Integration
-**UI hint**: yes
+- [x] Phase 1: Premium UI Foundations (4/4 plans) — completed 2026-05-05
+- [x] Phase 2: Customer Journey Redesign (1/4 plans) — partial 2026-05-05
+- [x] Phase 3: Nail Art Exhibit & Gallery (4/4 plans) — completed 2026-05-05
+- [x] Phase 4: Operations Interface Overhaul (4/4 plans) — completed 2026-05-05
+- [x] Phase 5: Marketing CMS & Content Control (5/5 plans) — completed 2026-05-05
+- [x] Phase 6: Service Packages & Bundling (5/5 plans) — completed 2026-05-05
+- [x] Phase 7: Advanced Analytics Dashboard (3/3 plans) — completed 2026-05-06
 
-### Phase 6: Service Packages & Bundling
-**Goal**: The salon can offer curated service bundles to increase ticket size and simplify booking
-**Depends on**: Phase 2, Phase 4
-**Requirements**: PKG-01, PKG-02, PKG-03
-**Success Criteria** (what must be TRUE):
-  1. Manager can create service packages (e.g., "Mani-Pedi Bundle") with custom pricing and services
-  2. Customer can discover and book a service package as a single item in the booking flow
-  3. Staff receive accurate commission specifically calculated for services within a redeemed package
-**Plans**: 5 plans
-- **Wave 1**
-  - [x] 06-01-PLAN.md — Data Foundations: Schema, Migration & Types (PKG-01)
-- **Wave 2 *(blocked on Wave 1 completion)***
-  - [x] 06-02-PLAN.md — Package CRUD API: Controller, Routes & Registration (PKG-01)
-  - [x] 06-03-PLAN.md — Manager Package Studio: Dashboard UI & CRUD Interface (PKG-01)
-- **Wave 3 *(blocked on Wave 2 completion)***
-  - [x] 06-04-PLAN.md — Customer Package Discovery & Cart Integration (PKG-02)
-  - [x] 06-05-PLAN.md — Booking Flow Backend & Commission Integration (PKG-02, PKG-03)
-**UI hint**: yes
+</details>
 
-### Phase 7: Advanced Analytics Dashboard
-**Goal**: Provide actionable business insights through interactive data visualization and deep reporting
-**Depends on**: Phase 4
-**Requirements**: ANLY-01, ANLY-02, ANLY-03
-**Success Criteria** (what must be TRUE):
-  1. Manager can view interactive revenue charts and booking volume trends with date filtering
-  2. Manager can identify top-performing staff based on utilization and revenue generation metrics
-  3. Manager can analyze customer retention rates and cohort behavior over time
-**Plans**: 3 plans
-- **Wave 1**
-  - [x] 07-01-PLAN.md — Backend Analytics API: Staff Performance, Retention & KPI Endpoints (ANLY-01, ANLY-02, ANLY-03)
-- **Wave 2**
-  - [x] 07-02-PLAN.md — Analytics Dashboard Shell: Sidebar, Date Filter, KPI Cards & Tabs (ANLY-01)
-- **Wave 3**
-  - [x] 07-03-PLAN.md — Chart Components: Revenue Bar/Line, Staff Leaderboard & Retention Visualizations (ANLY-01, ANLY-02, ANLY-03)
-**UI hint**: yes
+---
+
+### v2.1 Booking Flow (Planned)
+
+Phase 2 remaining plans (deferred from v2.0):
+
+- [ ] 02-02: Booking Ritual State Machine & Steps
+- [ ] 02-03: Final Ritual Steps & Navigation
+- [ ] 02-04: Visual Integration & Final Polish
+
+**Depends on:** Phase 1 (Premium UI Foundations) — ✅ Complete
+**Requirements:** UI-02
 
 ## Progress
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| V1-1. Critical Bug Fixes | 5/5 | Complete | 2026-05-04 |
-| V1-2. Type Safety & Code Quality | 4/4 | Complete | 2026-05-04 |
-| V1-3. Security Hardening | 6/6 | Complete | 2026-05-04 |
-| V1-4. API Improvements | 3/3 | Complete | 2026-05-04 |
-| V1-5. Performance Optimization | 5/5 | Complete | 2026-05-04 |
-| V1-6. Missing Features | 3/3 | Complete | 2026-05-04 |
-| V1-7. Backend Test Infrastructure | 8/8 | Complete | 2026-05-04 |
-| 1. Premium UI Foundations | 4/4 | Complete | 2026-05-05 |
-| 2. Customer Journey Redesign | 4/4 | In progress | - |
-| 3. Nail Art Exhibit & Gallery | 4/4 | Complete | 2026-05-05 |
-| 4. Operations Interface Overhaul | 4/4 | Complete | 2026-05-05 |
-| 5. Marketing CMS & Content Control | 5/5 | Complete | 2026-05-05 |
-| 6. Service Packages & Bundling | 5/5 | Complete | 2026-05-05 |
-| 7. Advanced Analytics Dashboard | 3/3 | Complete | 2026-05-06 |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|----------|
+| V1-1. Critical Bug Fixes | v1.0 | 5/5 | Complete | 2026-05-02 |
+| V1-2. Type Safety & Code Quality | v1.0 | 4/4 | Complete | 2026-05-02 |
+| V1-3. Security Hardening | v1.0 | 6/6 | Complete | 2026-05-03 |
+| V1-4. API Improvements | v1.0 | 3/3 | Complete | 2026-05-03 |
+| V1-5. Performance Optimization | v1.0 | 5/5 | Complete | 2026-05-03 |
+| V1-6. Missing Features | v1.0 | 3/3 | Complete | 2026-05-03 |
+| V1-7. Backend Test Infrastructure | v1.0 | 8/8 | Complete | 2026-05-04 |
+| 1. Premium UI Foundations | v2.0 | 4/4 | Complete | 2026-05-05 |
+| 2. Customer Journey Redesign | v2.0 | 1/4 | Partial | 2026-05-05 |
+| 3. Nail Art Exhibit & Gallery | v2.0 | 4/4 | Complete | 2026-05-05 |
+| 4. Operations Interface Overhaul | v2.0 | 4/4 | Complete | 2026-05-05 |
+| 5. Marketing CMS & Content Control | v2.0 | 5/5 | Complete | 2026-05-05 |
+| 6. Service Packages & Bundling | v2.0 | 5/5 | Complete | 2026-05-05 |
+| 7. Advanced Analytics Dashboard | v2.0 | 3/3 | Complete | 2026-05-06 |
+
+---
+
+_Archived milestone details: [.planning/milestones/v2.0-ROADMAP.md](./milestones/v2.0-ROADMAP.md)_

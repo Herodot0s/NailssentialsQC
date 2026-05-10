@@ -23,84 +23,75 @@ A reliable, bug-free salon management system that customers, staff, and managers
 
 ### Validated
 
-<!-- Shipped and confirmed valuable. -->
+<!-- v1.0 milestone (shipped and confirmed valuable). -->
+- ✓ User registration and login (JWT auth with access/refresh tokens) — v1.0
+- ✓ Role-based access control (customer, staff, manager) — v1.0
+- ✓ Appointment booking with service items — v1.0
+- ✓ Staff clock in/out with attendance tracking — v1.0
+- ✓ Commission calculation on appointment completion — v1.0
+- ✓ Payroll generation and period management — v1.0
+- ✓ Manager dashboard with reports and analytics — v1.0
+- ✓ Profile management with picture uploads (Vercel Blob) — v1.0
+- ✓ Notification system (in-app and email) — v1.0
+- ✓ Service catalog with categories — v1.0
+- ✓ Bug fixes (JSX errors, hardcoded passwords, type mismatches, schedule upsert) — v1.0
+- ✓ Security hardening (JWT secrets, password strength, RBAC, rate limiting) — v1.0
+- ✓ Test infrastructure (Jest + Supertest backend, Vitest + RTL frontend) — v1.0
 
-- ✓ User registration and login (JWT auth with access/refresh tokens) — existing
-- ✓ Role-based access control (customer, staff, manager) — existing
-- ✓ Appointment booking with service items — existing
-- ✓ Staff clock in/out with attendance tracking — existing
-- ✓ Commission calculation on appointment completion — existing
-- ✓ Payroll generation and period management — existing
-- ✓ Manager dashboard with reports and analytics — existing
-- ✓ Profile management with picture uploads (Vercel Blob) — existing
-- ✓ Notification system (in-app) — existing
-- ✓ Email notifications for bookings and completions — existing
-- ✓ Service catalog with categories — existing
-
-**Completed V1 Tasks (Phases 1-7):**
-- ✓ **Bug Fixes:** Fix JSX syntax errors in Navbar, hardcoded passwords, type mismatches, and schedule upsert logic
-- ✓ **Tech Debt:** Replace `any` types, split components/controllers, add cursor-based pagination, extract helpers, add Zod schema, debounce localStorage
-- ✓ **Security:** Remove JWT secret fallbacks, add password strength validation, role-based permission checks, rate limiting, URL validation, fix refresh token rotation
-- ✓ **Performance:** Fix sequential awaits, N+1 query patterns, add DB index, stream large file uploads, fix appointment completion flow
-- ✓ **Missing Features:** Add audit trail, data export/backup endpoint, configurable sales target
-- ✓ **Test Coverage:** Setup Jest+Supertest for backend, Vitest+RTL for frontend, add unit/integration/component tests, add npm audit
+<!-- v2.0 milestone (shipped 2026-05-10). -->
+- ✓ **UI-04**: Smooth transitions using framer-motion — v2.0
+- ✓ **UI-03**: Redesign Manager & Staff Dashboards — v2.0
+- ✓ **CMS-01**: Public gallery page for Nail Art Exhibits — v2.0
+- ✓ **CMS-02**: Manager CRUD for uploading exhibit images (Vercel Blob) — v2.0
+- ✓ **CMS-03**: Manager CRUD for landing page content/policies — v2.0
+- ✓ **ANLY-01**: Revenue Dash charts (stacked bar, line) — v2.0
+- ✓ **ANLY-02**: Staff Analytics (leaderboard, performance metrics) — v2.0
+- ✓ **ANLY-03**: Retention Analytics (cohort analysis, donut chart) — v2.0
+- ✓ **PKG-01**: Managers can create fixed service bundles — v2.0
+- ✓ **PKG-02**: Customers can book a service package — v2.0
+- ✓ **PKG-03**: Commission logic handles package redemption — v2.0
 
 ### Active
 
-<!-- Current scope. Building toward these. -->
+<!-- Currently building toward these. -->
 
-**Premium UI/UX Overhaul:**
-- [ ] **UI-01**: Implement Airbnb DESIGN.md tokens (colors, typography, radii, spacing) across all components
-- [ ] **UI-02**: Redesign customer landing page with Premium aesthetic
-- [ ] **UI-03**: Redesign manager and staff dashboards for cleaner, softer UI
+**Premium UI/UX:**
+- [ ] **UI-01**: Implement Design Tokens (Airbnb radii, spacing, Rausch palette) — applied in Phase 1, needs formal closure
+- [ ] **UI-02**: Redesign Customer Landing Page & Booking Flow — partial (landing page done, booking flow deferred to v2.1)
 
-**Nail Art Exhibit:**
-- [ ] **ART-01**: Add public gallery page for Nail Art Exhibits
-- [ ] **ART-02**: Allow managers to upload and manage exhibit images and details
-
-**Manager CMS & Analytics:**
-- [ ] **CMS-01**: Add full CRUD for website content (landing info, policies, exhibit)
-- [ ] **ANLY-01**: Add Advanced Analytics dashboard (retention, staff performance, detailed revenue)
-
-**Service Expansion:**
-- [ ] **SERV-01**: Add support for Service Packages/Bundles (combining Nail, Spa, Hair, etc.)
+**v2.1 Planning:**
+- [ ] Complete Phase 2 remaining plans (02-02, 02-03, 02-04) for full booking flow redesign
 
 ### Out of Scope
 
-- [ ] **Payment gateway integration (Stripe, PayPal)** — Not required for v1, salon handles payments offline
-- [ ] **SMS notification service** — Email and in-app notifications sufficient for now
-- [ ] **Mobile app** — Web-first, mobile responsive is sufficient
-- [ ] **Real-time chat** — Not core to salon operations
-- [ ] **Video appointments** — Not applicable for nail salon
-- [ ] **Multi-tenant / multi-location support** — Single salon deployment only
-- [ ] **Switching from Nodemailer to SendGrid/Resend** — Current setup works
-- [ ] **Switching from bcrypt to bcryptjs** — Current version stable
+| Feature | Reason |
+|---------|--------|
+| Payment gateway integration (Stripe, PayPal) | Salon handles payments offline |
+| Multi-Staff Packages | Extreme scheduling complexity; deferred for v3+ |
+| Real-time chat | Not core to salon operations |
+| Multi-tenant / multi-location support | Single salon deployment only |
+| Switch from Nodemailer to SendGrid/Resend | Current setup works |
+| Switch from bcrypt to bcryptjs | Current version stable |
 
 ## Context
 
-**Existing Codebase (Brownfield):**
-- Built with React 19 + Vite (frontend), Express.js + TypeScript (backend), Prisma + PostgreSQL (database)
-- Docker Compose setup for local development, Vercel deployment target
+**v2.0 Shipped (2026-05-10):**
+- Premium UI/UX foundation (Rausch palette, organic radii, framer-motion)
+- Public Nail Art Exhibit gallery with Vercel Blob storage
+- Manager CMS (landing page content, policies, FAQ)
+- Manager & Staff dashboard overhaul with categorized sidebar
+- Advanced Analytics Dashboard (revenue, staff performance, retention)
+- Service Packages & Bundling (create, book, commission)
+- Photography-first landing page with Trending Treatments
+
+**v1.0 Baseline:**
+- Built with React 19 + Vite (frontend), Express.js + TypeScript (backend), Prisma + PostgreSQL
+- Docker Compose for local development, Vercel deployment target
 - UI components from Radix UI, Base UI, and shadcn with Tailwind CSS
-- Codebase mapped on 2026-05-01 with full architecture, stack, conventions, concerns, and testing docs in `.planning/codebase/`
-- 30+ documented concerns across bugs, tech debt, security, performance, and missing features
 
-**Timeline:**
-- 1-2 weeks to complete all fixes and achieve production-ready state
-
-**Approach:**
-- Parallel tracks: fix bugs, clear tech debt, add tests, and harden security simultaneously
-- All user types (customers, staff, managers) must have a perfect experience
-- No active fires — proactive comprehensive improvement
-
-**Known Issues to Address:**
-- JSX rendering errors in Navbar dropdown
-- Hardcoded secrets and passwords
-- Zero test coverage
-- Extensive `any` type usage
-- Large files exceeding maintainability thresholds
-- No pagination on list endpoints
-- Multiple security gaps (rate limiting, validation, authorization checks)
+**Known Technical Debt:**
+- Phase 2 remaining plans (02-02, 02-03, 02-04) deferred to v2.1 — booking flow redesign incomplete
+- UI-01 discrepancy: design tokens applied but not formally closed in requirements
 
 ## Constraints
 
@@ -114,10 +105,14 @@ A reliable, bug-free salon management system that customers, staff, and managers
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Parallel fix approach | 1-2 week timeline requires simultaneous work on bugs, debt, tests, security | — Pending |
-| Keep existing tech stack | No time for migrations, system is operational | — Pending |
-| Zod for validation | Modern, TypeScript-first, replaces express-validator incrementally | — Pending |
-| Jest + Supertest (backend), Vitest + RTL (frontend) | Recommended by codebase testing analysis, matches existing patterns | — Pending |
+| Rausch (#FF385C) as primary brand color | More vibrant, modern Airbnb-inspired palette | ✅ Shipped in v2.0, replaces Terracotta |
+| Organic radii system (32px/12px/8px) | Premium boutique aesthetic | ✅ Shipped in v2.0 |
+| framer-motion for transitions | Premium feel with minimal overhead | ✅ Shipped in v2.0, PageTransition + AnimatedCard |
+| React Query for CMS content (10-min stale) | Performance + simplicity for rarely-changing content | ✅ Shipped in v2.0 |
+| Service package transaction amount override | Bill customer package price, preserve catalog prices for commission | ✅ Shipped in v2.0 |
+| Keep existing tech stack | No time for migrations, system operational | ✅ Confirmed v2.0 — no migrations needed |
+| Zod for validation | Modern, TypeScript-first | ⚠️ Partially adopted — express-validator still in use |
+| Jest + Supertest (backend), Vitest + RTL (frontend) | Matches existing patterns | ⚠️ Infrastructure exists, coverage still being built |
 
 ## Evolution
 
@@ -137,4 +132,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-04 after milestone v2.0 start*
+*Last updated: 2026-05-10 after v2.0 milestone*

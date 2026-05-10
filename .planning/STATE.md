@@ -2,15 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Premium Experience & Expansion
-status: complete
-stopped_at: Phase 7 UAT complete — all 8 tests passed, analytics dashboard verified
-last_updated: "2026-05-07T14:18:00.000Z"
-last_activity: 2026-05-07
+status: milestone_complete
+stopped_at: v2.0 milestone archived — shipped 2026-05-10
+last_updated: "2026-05-10"
+last_activity: 2026-05-10
 progress:
   total_phases: 7
-  completed_phases: 7
-  total_plans: 26
-  completed_plans: 26
+  completed_phases: 6
+  partial_phases: 1
+  total_plans: 28
+  completed_plans: 25
+  deferred_plans: 3
   percent: 100
 ---
 
@@ -18,19 +20,19 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-04)
+See: .planning/PROJECT.md (updated 2026-05-10 after v2.0 milestone)
 
 **Core value:** A reliable, bug-free salon management system that customers, staff, and managers can trust for daily operations — with verified correctness through full test coverage.
-**Current focus:** Phase 07 — advanced-analytics-dashboard
+**Current focus:** v2.0 shipped — next: v2.1 Booking Flow
 
 ## Current Position
 
-Phase: 07 (advanced-analytics-dashboard) — COMPLETE
-Plan: 3 of 3
-Status: All plans executed — analytics dashboard operational
-Last activity: 2026-05-07
+Milestone: v2.0 Premium Experience & Expansion — SHIPPED 2026-05-10
+Phase: 7/7 complete (Phase 2 partial — 3 plans deferred to v2.1)
+Status: Ready for v2.1 planning
+Last activity: 2026-05-10
 
-Progress: [██████████] 100%
+Progress: [██████████] 100% — milestone shipped
 
 ## Session Continuity
 
