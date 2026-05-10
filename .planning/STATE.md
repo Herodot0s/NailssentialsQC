@@ -62,4 +62,5 @@ Resume file: None
 | 20260507-repository-migration | Migrate project to new repository NailssentialsQC | 2026-05-07 | ff1a563 | [20260507-repository-migration-and-final-ship](./quick/20260507-repository-migration-and-final-ship/) |
 | 20260507-fix-prisma-datasource-url | Add missing DATABASE_URL to Prisma schema datasource | 2026-05-07 | 2789c85 | [20260507-fix-prisma-datasource-url](./quick/20260507-fix-prisma-datasource-url/) |
 | 20260507-sync-vercel-blob-token | Sync Vercel Blob Read/Write token for file storage | 2026-05-07 | local | [20260507-sync-vercel-blob-token](./quick/20260507-sync-vercel-blob-token/) |
+| 260510-npk | move remaining file of manager's dashboard @frontend/src/pages/ to his respective folder for better readability of the files and codes. | 2026-05-10 | 21936f6 | [260510-npk-move-remaining-file-of-manager-s-dashboa](./quick/260510-npk-move-remaining-file-of-manager-s-dashboa/) |
 | 20260507-commit-changes-to-testings | Commit all changes to TESTINGS branch | 2026-05-07 | 60bc401 | [20260507-commit-changes-to-testings](./quick/20260507-commit-changes-to-testings/) |
