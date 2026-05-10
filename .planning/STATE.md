@@ -5,7 +5,7 @@ milestone_name: Premium Experience & Expansion
 status: milestone_complete
 stopped_at: v2.0 milestone archived — shipped 2026-05-10
 last_updated: "2026-05-10"
-last_activity: 2026-05-10
+last_activity: 2026-05-10 - Completed quick task 260510-oef: Manager redirect to manager dashboard
 progress:
   total_phases: 7
   completed_phases: 6
@@ -64,3 +64,4 @@ Resume file: None
 | 20260507-sync-vercel-blob-token | Sync Vercel Blob Read/Write token for file storage | 2026-05-07 | local | [20260507-sync-vercel-blob-token](./quick/20260507-sync-vercel-blob-token/) |
 | 260510-npk | move remaining file of manager's dashboard @frontend/src/pages/ to his respective folder for better readability of the files and codes. | 2026-05-10 | 21936f6 | [260510-npk-move-remaining-file-of-manager-s-dashboa](./quick/260510-npk-move-remaining-file-of-manager-s-dashboa/) |
 | 20260507-commit-changes-to-testings | Commit all changes to TESTINGS branch | 2026-05-07 | 60bc401 | [20260507-commit-changes-to-testings](./quick/20260507-commit-changes-to-testings/) |
+| 260510-oef | Manager redirect to manager dashboard instead of staff dashboard | 2026-05-10 | local | [260510-oef-manager-redirect-to-manager-dashboard-in](./quick/260510-oef-manager-redirect-to-manager-dashboard-in/) |
