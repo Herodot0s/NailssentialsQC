@@ -4,4 +4,5 @@ export interface User {
   phone: string | null;
   role: string;
   fullName: string;
+  staffProfileId?: number;
 }

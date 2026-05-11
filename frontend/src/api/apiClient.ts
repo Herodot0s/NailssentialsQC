@@ -93,6 +93,7 @@ export const updateCategory = (
   id: number,
   data: { name: string; description?: string; is_active: boolean },
 ) => apiClient.put(`/services/categories/${id}`, data);
+export const deleteCategory = (id: number) => apiClient.delete(`/services/categories/${id}`);
 
 export const getServices = (categoryId?: number) =>
   apiClient.get('/services', { params: { categoryId } });

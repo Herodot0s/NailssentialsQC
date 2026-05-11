@@ -245,6 +245,15 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
 
     // Use a transaction to update all schedules for the staff
     type ScheduleItem = { day_of_week: number; start_time: string; end_time: string; is_active: boolean };
+
+    // Normalize time to HH:MM:SS format
+    const normalizeTime = (time: string) => {
+      if (time.match(/^\d{2}:\d{2}$/)) {
+        return `${time}:00`;
+      }
+      return time;
+    };
+
     await prisma.$transaction(
       (schedules as ScheduleItem[]).map((s: ScheduleItem) =>
         prisma.staffSchedule.upsert({
@@ -257,15 +266,15 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
               }
             },
           update: {
-            start_time: s.start_time,
-            end_time: s.end_time,
+            start_time: normalizeTime(s.start_time),
+            end_time: normalizeTime(s.end_time),
             is_active: s.is_active,
           },
           create: {
             staff_id: staffId,
             day_of_week: s.day_of_week,
-            start_time: s.start_time,
-            end_time: s.end_time,
+            start_time: normalizeTime(s.start_time),
+            end_time: normalizeTime(s.end_time),
             is_active: s.is_active,
           },
         })

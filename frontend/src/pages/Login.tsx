@@ -164,8 +164,8 @@ const Login: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setValue('identifier', 'charlie_brown');
-                  setValue('password', 'password123');
+                  setValue('identifier', 'test_customer');
+                  setValue('password', 'Password121212');
                 }}
                 className="text-xs h-8 border-primary/20 hover:bg-primary/5 hover:text-primary"
               >
@@ -175,8 +175,8 @@ const Login: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setValue('identifier', 'john_smith');
-                  setValue('password', 'password123');
+                  setValue('identifier', 'test_staff');
+                  setValue('password', 'Password121212');
                 }}
                 className="text-xs h-8 border-primary/20 hover:bg-primary/5 hover:text-primary"
               >
@@ -186,8 +186,8 @@ const Login: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setValue('identifier', 'admin');
-                  setValue('password', 'password123');
+                  setValue('identifier', 'test_manager');
+                  setValue('password', 'Password121212');
                 }}
                 className="text-xs h-8 border-primary/20 hover:bg-primary/5 hover:text-primary"
               >

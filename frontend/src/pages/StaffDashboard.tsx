@@ -12,6 +12,7 @@ import {
   getAllStaff,
 } from '../api/apiClient';
 import { MessagesView } from '@/components/dashboard/MessagesView';
+import { LogWalkInDialog } from '@/components/dashboard/LogWalkInDialog';
 import type { PayrollRecord, StaffMember } from '@/types/api';
 import {
   Card,
@@ -93,6 +94,7 @@ const StaffDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  const [showWalkInModal, setShowWalkInModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [newMessage, setNewMessage] = useState({ receiverId: '', subject: '', body: '' });
   const [attendanceMessage, setAttendanceMessage] = useState<{ text: string, type: 'info' | 'warning' | 'error' | 'success' } | null>(null);
@@ -257,8 +259,8 @@ const StaffDashboard: React.FC = () => {
     );
   }
 
-  const todayStr = new Date().toISOString().split('T')[0];
-  const todayAppointments = appointments.filter((a) => a.appointment_date.startsWith(todayStr));
+  const todayStr = new Date().toLocaleDateString('en-CA'); // Gets YYYY-MM-DD in local time
+  const todayAppointments = appointments.filter((a) => a.appointment_date.split('T')[0] === todayStr);
 
   return (
     <div className="container max-w-7xl mx-auto py-12 px-6">
@@ -279,7 +281,7 @@ const StaffDashboard: React.FC = () => {
            <Button variant="outline" onClick={() => setShowMessageModal(true)} className="rounded-none gap-2 border-primary/20">
              <Mail className="h-4 w-4" /> Internal Inbox
            </Button>
-           <Button className="rounded-none gap-2">
+           <Button onClick={() => setShowWalkInModal(true)} className="rounded-none gap-2">
              <Plus className="h-4 w-4" /> Log Walk-in
            </Button>
         </div>
@@ -355,7 +357,7 @@ const StaffDashboard: React.FC = () => {
                         </TableHeader>
                         <TableBody>
                            {todayAppointments.map((apt) => {
-                             const myItems = apt.items.filter(i => i.staff_id === user?.id || !user?.id); 
+                             const myItems = apt.items.filter(i => i.staff_id === user?.staffProfileId || (!user?.staffProfileId && i.staff_id === user?.id));
                              return myItems.map(item => {
                                const isActive = item.status === 'in_progress';
                                const now = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -509,6 +511,12 @@ const StaffDashboard: React.FC = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      <LogWalkInDialog
+        open={showWalkInModal}
+        onOpenChange={setShowWalkInModal}
+        onSuccess={fetchDashboardData}
+      />
     </div>
   );
 };

@@ -38,10 +38,11 @@ import {
   Sparkles,
   AlertCircle,
   Loader2,
-  Clock,
   ImagePlus,
   X,
+  Tags,
 } from 'lucide-react';
+import { ManageCategoriesDialog } from './ManageCategoriesDialog';
 
 interface Category {
   id: number;
@@ -80,6 +81,7 @@ const ManageServices: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingCategories, setIsEditingCategories] = useState(false);
   const [currentService, setCurrentService] = useState<Partial<Service> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -260,13 +262,23 @@ const ManageServices: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-end gap-6">
           <div className="space-y-1">
           </div>
-          <Button
-            onClick={handleAddNew}
-            className="h-11 px-8 bg-gradient-to-br from-[#B8794E] to-[#9A6440] border-none shadow-premium hover:shadow-card transition-all active:scale-95 text-white font-bold"
-          >
-            <Plus className="mr-2 h-5 w-5" />
-            New Service
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setIsEditingCategories(true)}
+              variant="outline"
+              className="h-11 px-6 border-kiln-border text-warm-stone font-bold hover:bg-bisque-wash/30"
+            >
+              <Tags className="mr-2 h-5 w-5" />
+              Manage Categories
+            </Button>
+            <Button
+              onClick={handleAddNew}
+              className="h-11 px-8 bg-gradient-to-br from-[#B8794E] to-[#9A6440] border-none shadow-premium hover:shadow-card transition-all active:scale-95 text-white font-bold"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              New Service
+            </Button>
+          </div>
         </div>
 
         {/* Artisan's Toolbar */}
@@ -449,11 +461,11 @@ const ManageServices: React.FC = () => {
       </Card>
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent className="max-w-6xl sm:max-w-6xl w-[95vw] p-0 overflow-hidden bg-linen-mist gap-0 border-none shadow-2xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 h-[85vh]">
+        <DialogContent className="max-w-3xl w-[95vw] p-0 overflow-hidden bg-linen-mist gap-0 border-none shadow-2xl">
+          <div className="grid grid-cols-1 h-[85vh]">
             {/* LEFT PANE: Editor */}
-            <div className="h-full overflow-y-auto p-8 bg-white no-scrollbar flex flex-col gap-8 border-r border-kiln-border/30 relative">
-              
+            <div className="h-full overflow-y-auto p-8 bg-white no-scrollbar flex flex-col gap-8 relative">
+
               <div className="flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-md z-10 -mx-8 px-8 py-4 border-b border-kiln-border/20">
                 <DialogTitle className="font-serif text-2xl text-kiln-terracotta flex items-center gap-2">
                   <Sparkles className="h-5 w-5" />
@@ -481,24 +493,24 @@ const ManageServices: React.FC = () => {
                   <div className="relative group">
                     {currentService?.image_url ? (
                       <div className="relative h-64 w-full rounded-2xl overflow-hidden border border-kiln-border/30 shadow-inner">
-                        <img 
-                          src={currentService.image_url} 
-                          alt="Preview" 
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                        <img
+                          src={currentService.image_url}
+                          alt="Preview"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-charcoal-bark/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                          <Button 
-                            type="button" 
-                            variant="secondary" 
+                          <Button
+                            type="button"
+                            variant="secondary"
                             size="sm"
                             className="bg-white/90 hover:bg-white text-charcoal-bark"
                             onClick={() => document.getElementById('image-upload')?.click()}
                           >
                             <Edit className="h-4 w-4 mr-2" /> Change Image
                           </Button>
-                          <Button 
-                            type="button" 
-                            variant="destructive" 
+                          <Button
+                            type="button"
+                            variant="destructive"
                             size="sm"
                             onClick={() => setCurrentService(prev => ({ ...prev!, image_url: '' }))}
                           >
@@ -524,12 +536,12 @@ const ManageServices: React.FC = () => {
                         )}
                       </label>
                     )}
-                    <input 
-                      id="image-upload" 
-                      type="file" 
-                      accept="image/*" 
-                      className="hidden" 
-                      onChange={handleImageUpload} 
+                    <input
+                      id="image-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
                       disabled={isUploading}
                     />
                   </div>
@@ -614,7 +626,7 @@ const ManageServices: React.FC = () => {
                 {/* Editorial Content */}
                 <div className="space-y-5">
                   <Label className="text-warm-stone font-bold uppercase tracking-wider text-xs border-b border-kiln-border/30 pb-2 block">Editorial Storytelling</Label>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="description" className="flex justify-between items-center">
                       Short Description
@@ -683,7 +695,7 @@ const ManageServices: React.FC = () => {
                         <p className="text-xs text-clay-dust">When active, customers can discover and book this service.</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-start space-x-3">
                       <Checkbox
                         id="is_popular"
@@ -699,8 +711,8 @@ const ManageServices: React.FC = () => {
                           Featured / Popular <Sparkles className="h-3 w-3" />
                         </Label>
                         <p className="text-xs text-clay-dust">
-                          {!currentService?.is_popular && popularCount >= 4 
-                            ? 'Maximum of 4 trending treatments reached. Disable another to feature this one.' 
+                          {!currentService?.is_popular && popularCount >= 4
+                            ? 'Maximum of 4 trending treatments reached. Disable another to feature this one.'
                             : 'Highlights this service with a special badge in the public catalog (Max 4).'}
                         </p>
                       </div>
@@ -710,100 +722,17 @@ const ManageServices: React.FC = () => {
 
               </div>
             </div>
-            
-            {/* RIGHT PANE: Live Preview */}
-            <div className="h-full bg-charcoal-bark hidden lg:flex flex-col items-center justify-center relative overflow-hidden p-8">
-              {/* Background abstract element */}
-              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-kiln-terracotta/20 rounded-full blur-[100px] mix-blend-screen pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-forest-confirm/10 rounded-full blur-[80px] mix-blend-screen pointer-events-none" />
-              
-              <div className="w-full max-w-sm relative z-10 flex flex-col items-center gap-4">
-                <p className="text-white/50 text-xs font-bold uppercase tracking-widest text-center w-full mb-2">Live Customer Preview</p>
-                
-                <div className="bg-white rounded-[2rem] w-[340px] h-[640px] shadow-2xl overflow-hidden flex flex-col border-[6px] border-charcoal-bark/50 relative">
-                  {/* Notch */}
-                  <div className="absolute top-0 inset-x-0 h-6 flex justify-center z-20 pointer-events-none">
-                    <div className="w-32 h-6 bg-charcoal-bark/50 rounded-b-xl backdrop-blur-md" />
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
-                    {/* Header Image */}
-                    <div className="relative h-72 w-full bg-bisque-wash flex items-center justify-center overflow-hidden">
-                      {currentService?.image_url ? (
-                        <img src={currentService.image_url} alt="Service" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="text-clay-dust flex flex-col items-center gap-2 opacity-50">
-                          <ImagePlus className="h-10 w-10" />
-                          <span className="text-xs font-serif italic">No image provided</span>
-                        </div>
-                      )}
-                      
-                      {currentService?.is_popular && (
-                        <div className="absolute top-8 left-4">
-                          <Badge className="bg-white/90 text-kiln-terracotta border-none shadow-sm font-bold uppercase tracking-widest text-[9px] px-2 py-1 backdrop-blur-md">
-                            Popular Choice
-                          </Badge>
-                        </div>
-                      )}
-
-                      {/* Floating Category Badge */}
-                      <div className="absolute bottom-4 left-4">
-                        <Badge className="bg-charcoal-bark/80 text-white border-none backdrop-blur-md uppercase tracking-widest text-[9px]">
-                          {categories.find(c => c.id === currentService?.category_id)?.name || 'Category'}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div className="p-6 space-y-6">
-                      <div className="space-y-2">
-                        <h3 className="font-serif text-2xl text-charcoal-bark leading-tight">
-                          {currentService?.name || 'Service Name'}
-                        </h3>
-                        <div className="flex items-center gap-4 text-warm-stone text-sm font-medium">
-                          <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {currentService?.duration_minutes || 0} min</span>
-                          <span className="text-kiln-terracotta font-serif font-bold text-lg">₱{parseFloat(currentService?.price || '0').toLocaleString()}</span>
-                        </div>
-                      </div>
-
-                      {currentService?.description && (
-                        <p className="text-clay-dust text-sm leading-relaxed">
-                          {currentService.description}
-                        </p>
-                      )}
-
-                      {currentService?.experience_description && (
-                        <div className="space-y-3 pt-4 border-t border-linen-mist">
-                          <h4 className="font-serif text-lg text-kiln-terracotta">The Experience</h4>
-                          <p className="text-charcoal-bark/80 text-sm leading-relaxed whitespace-pre-wrap">
-                            {currentService.experience_description}
-                          </p>
-                        </div>
-                      )}
-
-                      {currentService?.what_to_expect && (
-                        <div className="space-y-3 pt-4 border-t border-linen-mist">
-                          <h4 className="font-serif text-lg text-charcoal-bark">What to Expect</h4>
-                          <p className="text-charcoal-bark/80 text-sm leading-relaxed whitespace-pre-wrap">
-                            {currentService.what_to_expect}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Fixed Bottom Action */}
-                  <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-white via-white to-transparent pt-12">
-                    <Button className="w-full h-12 rounded-full bg-charcoal-bark text-white shadow-lg pointer-events-none">
-                      Book Appointment
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
 
           </div>
         </DialogContent>
       </Dialog>
+      <ManageCategoriesDialog
+        open={isEditingCategories}
+        onOpenChange={setIsEditingCategories}
+        categories={categories}
+        onSuccess={fetchData}
+        setError={setError}
+      />
     </div>
   );
 };

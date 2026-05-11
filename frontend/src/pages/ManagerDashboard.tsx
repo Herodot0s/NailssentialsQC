@@ -31,6 +31,7 @@ import { ContentView } from '@/components/dashboard/cms/ContentView';
 import PackagesView from '@/components/packages/PackagesView';
 import { AnalyticsDashboard } from '@/components/dashboard/analytics/AnalyticsDashboard';
 import { MessagesView } from '@/components/dashboard/MessagesView';
+import { LogWalkInDialog } from '@/components/dashboard/LogWalkInDialog';
 
 import { ManagerSidebar } from '@/components/dashboard/ManagerSidebar';
 import { DeductionsView } from '@/components/dashboard/payroll/DeductionsView';
@@ -39,6 +40,7 @@ import { AddStaffDialog } from '@/components/dashboard/staff/AddStaffDialog';
 import { ShiftEditDialog } from '@/components/dashboard/staff/ShiftEditDialog';
 import { PayrollRunDialog } from '@/components/dashboard/payroll/PayrollRunDialog';
 import { DeductionEntryDialog } from '@/components/dashboard/payroll/DeductionEntryDialog';
+import { StatusModal } from '@/components/dashboard/StatusModal';
 import type { ActiveView } from '@/components/dashboard/types';
 
 import type {
@@ -67,7 +69,7 @@ const ManagerDashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-
+  const [showWalkInModal, setShowWalkInModal] = useState(false);
 
   // Modals & Sheets
   const [showAddStaffModal, setShowAddStaffModal] = useState(false);
@@ -83,6 +85,19 @@ const ManagerDashboard: React.FC = () => {
   // Salary Slip State
   const [showSalarySlip, setShowSalarySlip] = useState(false);
   const [selectedPayroll, setSelectedPayroll] = useState<PayrollRecord | null>(null);
+
+  // Status Modal State
+  const [statusModal, setStatusModal] = useState<{
+    open: boolean;
+    type: 'success' | 'error';
+    title: string;
+    description: string;
+  }>({
+    open: false,
+    type: 'success',
+    title: '',
+    description: '',
+  });
 
   const [newStaffForm, setNewStaffForm] = useState({
     fullName: '',
@@ -205,7 +220,12 @@ const ManagerDashboard: React.FC = () => {
       fetchData();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to add staff member.';
-      alert(message);
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Operation Failed',
+        description: message,
+      });
     }
   };
 
@@ -221,10 +241,20 @@ const ManagerDashboard: React.FC = () => {
           govId: selectedStaff.govId,
           profilePictureUrl: selectedStaff.profilePictureUrl
        });
-       alert('Employee file updated successfully.');
+       setStatusModal({
+         open: true,
+         type: 'success',
+         title: 'Update Successful',
+         description: 'Employee file updated successfully.',
+       });
        fetchData();
     } catch (err) {
-       alert('Failed to update employee file.');
+       setStatusModal({
+         open: true,
+         type: 'error',
+         title: 'Update Failed',
+         description: 'Failed to update employee file.',
+       });
     }
   };
 
@@ -240,7 +270,12 @@ const ManagerDashboard: React.FC = () => {
       fetchData();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to generate payroll.';
-      alert(message);
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Generation Failed',
+        description: message,
+      });
     }
   };
 
@@ -250,7 +285,12 @@ const ManagerDashboard: React.FC = () => {
       await lockPayroll(id);
       fetchData();
     } catch (err) {
-      alert('Failed to lock payroll.');
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Operation Failed',
+        description: 'Failed to lock payroll.',
+      });
     }
   };
 
@@ -259,7 +299,12 @@ const ManagerDashboard: React.FC = () => {
       await moderateReview(id, approved);
       fetchData();
     } catch (err) {
-      alert('Failed to moderate review.');
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Operation Failed',
+        description: 'Failed to moderate review.',
+      });
     }
   };
 
@@ -276,7 +321,12 @@ const ManagerDashboard: React.FC = () => {
       setDeductionForm({ staffId: '', type: 'Cash Advance', amount: '', notes: '' });
       fetchData();
     } catch (err) {
-      alert('Failed to add deduction.');
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Operation Failed',
+        description: 'Failed to add deduction.',
+      });
     }
   };
 
@@ -330,7 +380,12 @@ const ManagerDashboard: React.FC = () => {
         });
         setShowShiftEditModal(false);
      } catch (err) {
-        alert('Failed to update shift.');
+        setStatusModal({
+          open: true,
+          type: 'error',
+          title: 'Update Failed',
+          description: 'Failed to update shift.',
+        });
      }
   };
 
@@ -350,7 +405,12 @@ const ManagerDashboard: React.FC = () => {
       await updateAttendance(id, data);
       fetchData();
     } catch (err) {
-      alert('Failed to update attendance.');
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Update Failed',
+        description: 'Failed to update attendance.',
+      });
     }
   };
 
@@ -389,8 +449,11 @@ const ManagerDashboard: React.FC = () => {
               <h1 className="font-serif text-4xl font-light text-foreground capitalize">{activeView.replace('-', ' ')} <span className="italic text-primary/40">Toolbox</span></h1>
            </div>
            </div>
-           
+
            <div className="flex gap-4">
+              <Button onClick={() => setShowWalkInModal(true)} variant="outline" className="rounded-none gap-2 px-6 h-12 text-[10px] uppercase font-bold tracking-widest border-primary/20">
+                <Plus className="h-4 w-4" /> Log Walk-in
+              </Button>
               {activeView === 'staff' && (
                 <Button onClick={() => setShowAddStaffModal(true)} className="rounded-none gap-2 px-6 h-12 text-[10px] uppercase font-bold tracking-widest">
                   <Plus className="h-4 w-4" /> New Employee
@@ -544,8 +607,22 @@ const ManagerDashboard: React.FC = () => {
         onOpenChange={setShowDeductionModal} 
         staffMembers={staffMembers} 
         form={deductionForm} 
-        onFormChange={setDeductionForm} 
-        onSubmit={handleAddDeduction} 
+        onFormChange={setDeductionForm}
+        onSubmit={handleAddDeduction}
+      />
+
+      <LogWalkInDialog
+        open={showWalkInModal}
+        onOpenChange={setShowWalkInModal}
+        onSuccess={fetchData}
+      />
+
+      <StatusModal
+        open={statusModal.open}
+        onOpenChange={(open) => setStatusModal(prev => ({ ...prev, open }))}
+        type={statusModal.type}
+        title={statusModal.title}
+        description={statusModal.description}
       />
 
     </div>

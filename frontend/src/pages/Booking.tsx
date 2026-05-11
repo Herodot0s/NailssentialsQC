@@ -129,7 +129,7 @@ const Booking: React.FC = () => {
 
       await createAppointment({
         items: itemsToBook,
-        date: selectedDate,
+        date: selectedDate, // YYYY-MM-DD format as expected by backend regex now
         notes,
       });
       setSuccess(true);

@@ -11,8 +11,8 @@ const idParamSchema = z.object({
 
 const scheduleEntrySchema = z.object({
   day_of_week: z.number().min(0).max(6),
-  start_time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/),
-  end_time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/),
+  start_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
+  end_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
   is_active: z.boolean().optional()
 });
 

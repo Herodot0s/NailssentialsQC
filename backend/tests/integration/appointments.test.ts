@@ -93,13 +93,14 @@ describe('Appointment Integration Tests', () => {
 
     describe('POST /api/v1/appointments', () => {
       it('should successfully create an appointment as a customer', async () => {
-        const appointmentDate = format(addDays(new Date(), 1), 'yyyy-MM-dd');
+        const appointmentDate = new Date();
+        appointmentDate.setDate(appointmentDate.getDate() + 1);
         const payload = {
-          date: appointmentDate,
+          date: appointmentDate.toISOString(),
           items: [
             {
-              serviceId: serviceId.toString(),
-              staffId: staffId.toString(),
+              serviceId: serviceId,
+              staffId: staffId,
               startTime: '14:00',
             }
           ],
@@ -127,14 +128,14 @@ describe('Appointment Integration Tests', () => {
       });
 
       it('should successfully create a walk-in appointment as a manager', async () => {
-        const appointmentDate = format(new Date(), 'yyyy-MM-dd');
+        const appointmentDate = new Date().toISOString();
         const payload = {
           date: appointmentDate,
           isWalkIn: true,
           items: [
             {
-              serviceId: serviceId.toString(),
-              staffId: staffId.toString(),
+              serviceId: serviceId,
+              staffId: staffId,
               startTime: '10:00',
             }
           ],
@@ -195,28 +196,35 @@ describe('Appointment Integration Tests', () => {
         expect(allAvailable).toBe(true);
       });
 
-      it('should mark slot as unavailable when staff is booked', async () => {
+      it('should mark slot as unavailable when ALL available staff are booked', async () => {
         const date = format(addDays(new Date(), 3), 'yyyy-MM-dd');
         const startTime = '14:00';
 
-        // Book an appointment
-        await prisma.appointment.create({
-          data: {
-            customer_id: customerId,
-            appointment_date: new Date(date),
-            status: 'confirmed',
-            items: {
-              create: {
-                service_id: serviceId,
-                staff_id: staffId,
-                start_time: startTime,
-                end_time: '14:30',
-                price_at_booking: 500,
-                status: 'confirmed',
+        // 1. Find all currently available technicians
+        const technicians = await prisma.staffProfile.findMany({
+          where: { is_available: true }
+        });
+
+        // 2. Book an appointment for EVERY technician at the same time
+        for (const tech of technicians) {
+          await prisma.appointment.create({
+            data: {
+              customer_id: customerId,
+              appointment_date: new Date(date),
+              status: 'confirmed',
+              items: {
+                create: {
+                  service_id: serviceId,
+                  staff_id: tech.id,
+                  start_time: startTime,
+                  end_time: '14:30',
+                  price_at_booking: 500,
+                  status: 'confirmed',
+                }
               }
             }
-          }
-        });
+          });
+        }
 
         const response = await request(app)
           .get(`/api/v1/appointments/availability?date=${date}`);
@@ -340,8 +348,8 @@ describe('Appointment Integration Tests', () => {
           commission_amount: 300,
           commission_date: new Date(),
           period_week: 1,
-          period_month: 1,
-          period_year: 2024,
+          period_month: new Date().getMonth() + 1,
+          period_year: new Date().getFullYear(),
         }
       });
 
@@ -370,10 +378,10 @@ describe('Appointment Integration Tests', () => {
         .set('Authorization', `Bearer ${managerToken}`)
         .send({ paymentMethod: 'INVALID_METHOD' });
 
-      expect(response.status).toBe(500);
-      
+      expect(response.status).toBe(400);
+
       // Verify no transaction was created for this appointment
-      // Wait, there might be other transactions if tests run in parallel, 
+      // Wait, there might be other transactions if tests run in parallel,
       // but findFirst with appointment_id should be specific to this test's appt.
       const transaction = await prisma.transaction.findFirst({
         where: { appointment_id: appointmentId }

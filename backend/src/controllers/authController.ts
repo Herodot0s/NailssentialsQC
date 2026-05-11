@@ -204,6 +204,7 @@ export const login = async (req: AuthRequest, res: Response) => {
           phone: user.phone,
           role: user.role,
           fullName,
+          staffProfileId: user.staff_profile?.id,
         },
         tokens: {
           accessToken,
@@ -332,6 +333,7 @@ export const getMe = async (req: AuthRequest, res: Response) => {
     }
 
     const fullName = (user as { customer_profile?: { full_name: string } | null; staff_profile?: { full_name: string } | null }).customer_profile?.full_name || (user as { staff_profile?: { full_name: string } | null }).staff_profile?.full_name || 'User';
+    const staffProfileId = (user as { staff_profile?: { id: number } | null }).staff_profile?.id;
 
     return sendSuccess(
       res,
@@ -342,6 +344,7 @@ export const getMe = async (req: AuthRequest, res: Response) => {
           phone: user.phone,
           role: user.role,
           fullName,
+          staffProfileId,
         },
       },
       200

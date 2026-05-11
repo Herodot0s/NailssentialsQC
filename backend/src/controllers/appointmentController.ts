@@ -2,16 +2,13 @@ import { Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
-import { addMinutes, parse, format } from 'date-fns';
+import { addMinutes, format } from 'date-fns';
 import { sendBookingConfirmation } from '../utils/email';
 import { createNotification } from './notificationController';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import { sendSuccess, sendError, getCurrentUser } from '../utils/apiHelpers';
-
-function getFullDate(dateStr: string, timeStr: string): Date {
-  return parse(`${dateStr} ${timeStr}`, 'yyyy-MM-dd HH:mm', new Date());
-}
+import { getFullDate } from '../utils/dateUtils';
 
 function generateRandomPassword(length: number = 12): string {
   return crypto.randomBytes(length).toString('base64').slice(0, length);
