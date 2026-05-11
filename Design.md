@@ -1,241 +1,358 @@
 ---
 name: NailssentialsQC
-description: Premium nail salon management and booking system in Quezon City
+description: Salon management system
 colors:
-  kiln-terracotta: "#B8794E"
-  kiln-terracotta-hover: "#9A6440"
-  bisque-wash: "#F5E6D9"
-  linen-mist: "#FDF8F4"
-  warm-canvas: "#FAFAF9"
-  charcoal-bark: "#2D2723"
-  warm-stone: "#5C544F"
-  clay-dust: "#8E8680"
-  kiln-border: "#E7E2DF"
-  forest-confirm: "#435334"
-  brick-error: "#A94438"
-  slate-info: "#5D7285"
-  muted-terracotta-warning: "#C08261"
+  primary: "#B8794E"
+  canvas: "#eeefe9"
+  ink: "#23251d"
+  body: "#4d4f46"
 typography:
-  display:
-    fontFamily: "Playfair Display, ui-serif, Georgia, serif"
-    fontSize: "clamp(2rem, 5vw, 4.5rem)"
-    fontWeight: 300
-    lineHeight: 1.1
-    letterSpacing: "normal"
-  headline:
-    fontFamily: "Playfair Display, ui-serif, Georgia, serif"
-    fontSize: "clamp(1.5rem, 3vw, 2.25rem)"
-    fontWeight: 400
-    lineHeight: 1.25
-    letterSpacing: "normal"
-  title:
-    fontFamily: "Playfair Display, ui-serif, Georgia, serif"
-    fontSize: "1.25rem"
-    fontWeight: 500
-    lineHeight: 1.3
-  body:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1rem"
-    fontWeight: 400
-    lineHeight: 1.6
-    letterSpacing: "normal"
-  label:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.75rem"
-    fontWeight: 600
-    lineHeight: 1
-    letterSpacing: "0.2em"
+  display-xl:
+    fontFamily: "IBM Plex Sans Variable"
+    fontSize: "36px"
+    fontWeight: 700
 rounded:
-  container: "32px"
-  utility: "12px"
-  data: "8px"
-  data-sm: "4px"
+  md: "6px"
 spacing:
-  xs: "4px"
-  sm: "8px"
-  md: "16px"
-  lg: "24px"
-  xl: "32px"
-  2xl: "48px"
-  3xl: "64px"
+  section: "80px"
 components:
   button-primary:
-    backgroundColor: "{colors.kiln-terracotta}"
-    textColor: "#FFFFFF"
-    rounded: "{rounded.utility}"
-    padding: "0 32px"
-    height: "44px"
-  button-primary-hover:
-    backgroundColor: "hsl(25 44% 51% / 0.8)"
-  button-outline:
-    backgroundColor: "transparent"
-    textColor: "{colors.charcoal-bark}"
-    rounded: "{rounded.utility}"
-    padding: "0 24px"
-    height: "40px"
-  button-ghost:
-    backgroundColor: "transparent"
-    textColor: "{colors.charcoal-bark}"
-    rounded: "{rounded.utility}"
-    padding: "0 24px"
-    height: "40px"
-  button-destructive:
-    backgroundColor: "hsl(0 60% 50% / 0.1)"
-    textColor: "{colors.brick-error}"
-    rounded: "{rounded.utility}"
-    padding: "0 24px"
-  card-default:
-    backgroundColor: "#FFFFFF"
-    rounded: "{rounded.container}"
-    padding: "32px"
-  input-default:
-    backgroundColor: "transparent"
-    textColor: "{colors.charcoal-bark}"
-    height: "40px"
-  tab-active:
-    backgroundColor: "#FFFFFF"
-    textColor: "{colors.kiln-terracotta}"
+    backgroundColor: "{colors.primary}"
+    textColor: "#ffffff"
+    rounded: "{rounded.md}"
 ---
 
-# Design System: NailssentialsQC
+## Overview
 
-## 1. Overview
+NailssentialsQC's marketing system is built on the visual contradiction at the heart of the brand: a serious open-source product analytics platform rendered as if it were a friendly engineering sketchbook. The chrome runs on a warm cream canvas (`{colors.canvas}` — `#eeefe9`) — not white — and every page is dotted with hand-drawn lotus mascots in lab coats, lounge chairs, terminals, and reading glasses, scattered across the layout like marginalia in a textbook. Type sits in IBM Plex Sans Variable at olive-gray (`{colors.body}` — `#4d4f46`) for body and deep olive-charcoal (`{colors.ink}` — `#23251d`) for headlines, with weights stepped tightly between 400, 600, 700, and 800 to create hierarchy without color. The single saturated yellow-orange pill (`{colors.primary}` — `#B8794E`) is the brand's only loud chromatic moment; everything else is cream, olive, white card, and the occasional pastel callout band.
 
-**Creative North Star: "The Artisan's Alcove"**
+The system has a distinctive **two-mode body layout**: marketing pages (home, workflows, pricing) lean on alternating-pastel callout bands and feature tiles in white cards on cream, while documentation pages add a sticky 240px left sidebar with a rounded outline-icon section list. Code samples are full-width dark blocks on `{colors.surface-dark}` (the same olive-charcoal that carries body ink, used inverted) inside white doc cards, creating the system's most distinctive visual moment: a dark-on-dark code island floating inside a white card on a cream canvas, with a lotus mascot doodled in the margin.
 
-NailssentialsQC is a private retreat where every visual detail feels handmade. The system conveys warmth without saccharine, luxury without ostentation, and craft without pretension. Surfaces are warm off-white with terracotta accents that feel like fired clay, not digital gradient. The density is generous; spacing breathes. The overall impression is of walking into a well-lit studio where someone who cares deeply about their work has arranged everything with quiet intention.
-
-The system explicitly rejects: clinical SaaS aesthetics, generic AI-generated spa templates, glassmorphism as decoration, identical card grids with icon-title-text patterns, and gradient text effects. If someone could look at a screen and say "AI made that," the implementation has failed.
-
-Motion is responsive, not choreographed. Elements acknowledge interaction (hover lifts, focus rings, tap feedback) but don't perform. The one exception is the marketing landing page hero, which earns its entrance animation because first impressions are the product.
+Sections stack at `{spacing.section}` (80px) rhythm with cream canvas continuing edge-to-edge between them. The only color bands that interrupt the cream are pastel `{component.banner-tip-blue}` / `-green` / `-red` / `-purple` callout panels inside doc articles — soft tinted boxes that carry "💡 Tip", "✅ Success", "⚠️ Warning", "📘 Info" inline annotations. There are no decorative gradients, no atmospheric mesh backgrounds, and no full-bleed dark hero chapters; the cream canvas runs uninterrupted top to bottom and the lotuss are the entire visual identity.
 
 **Key Characteristics:**
-- Warm terracotta-tinted palette with restrained accent usage in product surfaces, committed usage on brand surfaces
-- Serif display + sans body pairing (Playfair Display + Inter)
-- Flat-by-default elevation with terracotta-tinted shadows on state change
-- Scale-based micro-interactions via Framer Motion (1.02× hover, 0.98× tap)
-- Premium easing curve: `cubic-bezier(0.32, 0.72, 0, 1)` for all motion
+- Warm cream canvas (`{colors.canvas}` — #eeefe9) end-to-end with no surface alternation between sections — the page is one continuous sheet
+- Single yellow-orange CTA pill (`{colors.primary}` — #B8794E) with deep olive text (`{colors.on-primary}`) — the brand's only saturated color
+- IBM Plex Sans Variable across every text role with weights 400/500/600/700/800 — no other typeface in the system
+- Hand-drawn lotus mascots scattered across the layout as the entire decorative system — no gradients, no mesh, no atmospheric backgrounds
+- 4–8px radius card vocabulary: `{rounded.md}` (6px) for most components, `{rounded.lg}` (8px) for select containers, fully rounded for pill chips
+- Pastel callout banners (`{colors.accent-blue-soft}`, `{colors.accent-green-soft}`, `{colors.accent-red-soft}`, `{colors.accent-purple-soft}`) break up doc article body with soft tinted side rails for tips/warnings/info
+- Documentation pages add a sticky 240px `{component.doc-sidebar}` with rounded outline-icon section nav and an "Ask NailssentialsQC AI" CTA at the top
 
-## 2. Colors: The Kiln Palette
+## Colors
 
-A terracotta-anchored palette tinted warm throughout. No pure black, no pure white. Every neutral leans toward hue 25 (warm amber-brown).
+> **Source pages:** `/` (home), `/pricing` (pricing detail), `/docs/product-analytics` (docs article), `/workflows` (product feature page). The chrome palette is identical across all four pages — only doc-specific accents (callout-banner pastels, code-block dark surface) appear exclusively inside the docs experience.
 
-### Primary
-- **Kiln Terracotta** (`#B8794E`, HSL 25 44% 51%): The brand identity color. Used on primary buttons, active states, accent icons, and the hero CTA. On brand surfaces (landing page), it carries 30-60% of the section in backgrounds and CTAs. On product surfaces (dashboards, forms), it stays below 10%.
-- **Kiln Terracotta Hover** (`#9A6440`): Active/pressed state for primary buttons. Darker and warmer.
-- **Bisque Wash** (`#F5E6D9`): Light tinted backgrounds for selected tabs, active filter pills, and subtle section differentiation. The "warm glow" behind featured elements.
-- **Linen Mist** (`#FDF8F4`): The lightest brand tint. Card accents, signature section backgrounds, barely-visible hover surfaces.
+### Brand & Accent
+- **NailssentialsQC Yellow** (`{colors.primary}` — `#B8794E`): the universal primary CTA. Sticky "Get started — free" pill in the top-right of every nav, hero CTAs, pricing-tier subscribe buttons, footer signup pill. The system's only saturated chromatic moment.
+- **Yellow Pressed** (`{colors.primary-pressed}` — `#dd9001`): pressed state for the primary pill.
+- **Yellow Active** (`{colors.primary-active}` — `#b17816`): deeply-pressed yellow + the system's gold-toned border accent (rare 1px gold rule on inline form elements).
 
-### Neutral
-- **Warm Canvas** (`#FAFAF9`, HSL 20 10% 98%): Page background. Not white, not gray; a warm off-white with enough hue to feel intentional.
-- **Charcoal Bark** (`#2D2723`, HSL 25 20% 12%): Primary text and headings. Deep enough for contrast, warm enough to avoid coldness.
-- **Warm Stone** (`#5C544F`, HSL 25 10% 45%): Secondary text, muted-foreground. Labels, subtitles, body copy that doesn't need to shout.
-- **Clay Dust** (`#8E8680`): Disabled text, placeholder text. Never used for information a user needs to read.
-- **Kiln Border** (`#E7E2DF`, HSL 25 15% 90%): Dividers, input borders, table lines. Warm enough to not feel stark.
+### Surface
+- **Canvas** (`{colors.canvas}` — `#eeefe9`): the warm cream page background. End-to-end on every page; the brand's most distinctive surface choice.
+- **Soft Surface** (`{colors.surface-soft}` — `#e5e7e0`): button-secondary fill, sub-nav strip background, inline-code chip background.
+- **Surface Card** (`{colors.surface-card}` — `#ffffff`): true white card and tile background sitting on top of the cream canvas. The dominant card surface.
+- **Surface Doc** (`{colors.surface-doc}` — `#fcfcfa`): a faintly cream-warm white used inside doc article body cards — slightly softer than pure white to keep the page tonally unified.
+- **Surface Dark** (`{colors.surface-dark}` — `#23251d`): the deep olive-charcoal used inverted as code-block background. The same hex as `{colors.ink}` — the brand uses one olive-near-black for both text and dark code surfaces.
+- **Hairline** (`{colors.hairline}` — `#bfc1b7`): 1px card border, table rule, footer column dividers.
+- **Hairline Soft** (`{colors.hairline-soft}` — `#dcdfd2`): in-card row divider, soft inset rule.
+- **On Dark** (`{colors.on-dark}` — `#ffffff`): primary text on `{colors.surface-dark}` code blocks.
+
+### Text
+- **Ink** (`{colors.ink}` — `#23251d`): headlines, button text on light, primary nav links — deep olive-charcoal that reads near-black against cream.
+- **Body** (`{colors.body}` — `#4d4f46`): default paragraph text, doc article body, inline link color before hover. The brand's most-used text color.
+- **Charcoal** (`{colors.charcoal}` — `#33342d`): emphasized body text where body is too soft.
+- **Mute** (`{colors.mute}` — `#6c6e63`): metadata, footer link text, in-list secondary annotations.
+- **Ash** (`{colors.ash}` — `#9b9c92`): disabled-state text and lowest-emphasis utility.
+- **Stone** (`{colors.stone}` — `#b6b7af`): least-emphasis caption text and disabled icon color.
 
 ### Semantic
-- **Forest Confirm** (`#435334`): Success states. Deep muted green, not the generic `#4CAF50`. Always paired with a checkmark icon.
-- **Brick Error** (`#A94438`): Error and destructive states. Deep brick red, earthy rather than alarming.
-- **Slate Info** (`#5D7285`): Links, help text, informational badges. A cool counterpoint to the warm palette.
-- **Muted Terracotta Warning** (`#C08261`): Pending/attention states. Stays in the terracotta family rather than introducing orange.
+- **Link Blue** (`{colors.link-blue}` — `#1d4ed8`): inline anchor link inside body prose. The system's primary informational link color.
+- **Link Teal** (`{colors.link-teal}` — `#1078a3`): doc-article inline link variant, paired with body text.
+- **Accent Blue** (`{colors.accent-blue}` — `#2c84e0`) + **Accent Blue Soft** (`{colors.accent-blue-soft}` — `#dceaf6`): "💡 Tip / Info" callout banner inside docs.
+- **Accent Red** (`{colors.accent-red}` — `#cd4239`) + **Accent Red Soft** (`{colors.accent-red-soft}` — `#f7d6d3`): "⚠️ Warning / Caution" callout banner.
+- **Accent Green** (`{colors.accent-green}` — `#2c8c66`) + **Accent Green Soft** (`{colors.accent-green-soft}` — `#d9eddf`): "✅ Success / Positive" callout banner.
+- **Accent Purple** (`{colors.accent-purple}` — `#7c44a6`) + **Accent Purple Soft** (`{colors.accent-purple-soft}` — `#e7d8ee`): "📘 Note / Reference" callout banner.
+- **Focus Ring** (`{colors.focus-ring}` — `rgba(59,130,246,0.5)`): translucent blue browser-default focus ring around interactive elements.
 
-### Named Rules
-**The Tinted Neutral Rule.** Every neutral surface uses HSL hue 25 (warm amber). Pure `#000000` and `#FFFFFF` are prohibited. Even "white" cards are `hsl(0 0% 100%)` which is the one exception; all backgrounds, foregrounds, and borders carry warmth.
+## Typography
 
-**The Committed Brand Rule.** On brand surfaces (the landing page, marketing sections), terracotta carries 30-60% of the surface area in at least one section. On product surfaces (dashboards, forms, dialogs), terracotta stays below 10% as an accent. Never collapse the brand register to restrained.
+### Font Family
+**IBM Plex Sans Variable** is the system's primary face — used across every text role on every page at weights 400 (regular), 500 (medium), 600 (semibold), 700 (bold), and 800 (extra-bold). Falls back through `IBM Plex Sans` → `-apple-system` → `system-ui` → broad cross-platform sans stack.
 
-## 3. Typography
+**ui-monospace** + **Source Code Pro** carry code samples and inline-code chips at 14px / 1.43 line-height. Source Code Pro is the explicit display monospace; ui-monospace handles inline `<code>` chips.
 
-**Display Font:** Playfair Display (with Georgia, serif fallback)
-**Body Font:** Inter (with system-ui, sans-serif fallback)
-**Label Font:** Inter (uppercase, tracked)
-
-**Character:** Playfair Display brings editorial gravity to headings without being ornate. Its contrast strokes pair cleanly with Inter's geometric neutrality. The combination is warm-editorial, not magazine-precious; headings rarely go below `font-weight: 300` to keep the display cuts elegant.
+The brand-distinctive choice is the **mixed weight ladder** (400 / 500 / 600 / 700 / 800) — most chrome lives in the 400–700 band, with weight 800 reserved exclusively for the larger display headlines on home and pricing. This gives the system its "engineering blog" feel: hierarchy is built from weight contrast much more than from size.
 
 ### Hierarchy
-- **Display** (300, `clamp(2rem, 5vw, 4.5rem)`, line-height 1.1): Hero headlines and full-bleed section titles. Reserved for the landing page and signature moments. Font-light only.
-- **Headline** (400, `clamp(1.5rem, 3vw, 2.25rem)`, line-height 1.25): Section headings across all surfaces. The primary structural marker.
-- **Title** (500, `1.25rem`, line-height 1.3): Card titles, dialog headers, list item names. The workhorse heading level.
-- **Body** (400, `1rem`, line-height 1.6, max 65-75ch): All running text. Inter at 16px base prevents iOS auto-zoom. Line length capped for readability.
-- **Label** (600, `0.75rem`, letter-spacing 0.2em, uppercase): Eyebrow text, category labels, metadata. Always uppercase with wide tracking. Minimum rendered size is 11px.
 
-### Named Rules
-**The Minimum Legibility Rule.** No rendered text below 11px. The `text-[10px]` utility is prohibited. Label-size text uses `text-[11px]` or `text-xs` (12px) minimum.
+| Token | Size | Weight | Line Height | Letter Spacing | Use |
+|---|---|---|---|---|---|
+| `{typography.display-xl}` | 36px | 700 | 1.5 | 0 | Hero headline ("The new way to build products") |
+| `{typography.display-lg}` | 24px | 800 | 1.33 | -0.6px | Section headline, pricing tier name |
+| `{typography.heading-lg}` | 21px | 700 | 1.4 | -0.5px | Sub-section heading, doc-article H2 |
+| `{typography.heading-md}` | 20px | 700 | 1.4 | 0 | Card group title, in-grid heading |
+| `{typography.heading-sm}` | 18px | 700 | 1.5 | 0 (uppercase) | Section eyebrow ("UNDERSTAND PRODUCT USAGE") |
+| `{typography.heading-sm-mixed}` | 18px | 600 | 1.56 | 0 | Card title in mixed-case (no uppercase transform) |
+| `{typography.body-md}` | 16px | 400 | 1.5 | 0 | Body copy, default paragraph |
+| `{typography.body-strong}` | 16px | 600 | 1.5 | 0 | Inline emphasis, primary nav link, in-card label |
+| `{typography.body-sm}` | 15px | 400 | 1.71 | 0 | Doc article body, marketing card description |
+| `{typography.body-sm-strong}` | 15px | 600 | 1.71 | 0 | Sub-section emphasis inside doc article |
+| `{typography.body-xs}` | 14px | 500 | 1.43 | 0 | Doc sidebar item, metadata, in-list caption |
+| `{typography.caption-md}` | 14px | 700 | 1.71 | 0 | Card eyebrow, link cluster header |
+| `{typography.caption-sm}` | 13px | 500 | 1.5 | 0 | Compact metadata caption |
+| `{typography.caption-xs}` | 12px | 600 | 1.33 | 0 (uppercase) | Inline badge label |
+| `{typography.utility-xs}` | 12px | 700 | 1.33 | 0 (uppercase) | Section-eyebrow utility text, footer category header |
+| `{typography.link-md}` | 16px | 400 | 1.5 | 0 | Inline body anchor link |
+| `{typography.button-md}` | 14px | 700 | 1.5 | 0 | Standard primary/secondary button label |
+| `{typography.button-sm}` | 13px | 500 | 1 | 0 | Pill chip / compact CTA |
+| `{typography.code-sm}` | 14px | 400 | 1.43 | 0 | Code block content |
+| `{typography.code-xs}` | 14px | 500 | 1.43 | 0 | Inline code chip |
 
-**The Italic Restraint Rule.** Italic spans wrapping single words for decoration are prohibited. Italic is for emphasis within running text or for the Display headline's signature treatment (one word per hero, maximum).
+### Principles
+The hierarchy is explicitly built from weight + size + occasional uppercase transform — there is no italic style, no decorative display variant, no proprietary face. The biggest display moments use weight 800 with -0.6px tracking, and the body settles at 400 with 1.5 line-height; everything else fills the band between. Section eyebrows (`{typography.heading-sm}` and `{typography.utility-xs}`) consistently render uppercase, which gives the doc layout its textbook-chapter feel.
 
-## 4. Elevation
+### Note on Font Substitutes
+IBM Plex Sans Variable is open-source and Google-Fonts-hosted. There is no need for a substitute — load it directly. If a substitute is genuinely needed, **Inter** is the closest geometric match at all five weights; pair with Inter's letter-spacing -0.5 to -0.6px on display sizes to approximate Plex's display tracking. For monospace, **JetBrains Mono** is a near-perfect substitute for Source Code Pro at body sizes.
 
-Surfaces are flat by default. The system uses tonal layering (warmer/cooler tints of hue 25) to establish hierarchy, not shadow depth. Shadows appear as responses to state, not as resting decoration.
+## Layout
 
-### Shadow Vocabulary
-- **Premium** (`0 16px 32px rgba(184, 121, 78, 0.12)`): Featured cards, hero CTAs, elevated dialogs. The terracotta tint makes shadows feel warm rather than gray. Used via `shadow-premium` utility.
-- **Card** (`0 8px 32px rgba(184, 121, 78, 0.08)`): Subtle resting shadow for interactive cards. Used via `shadow-card` utility.
-- **Focus Ring** (`0 0 0 2px #F5E6D9, 0 0 0 4px #B8794E`): Double-ring focus indicator. Inner ring is Bisque Wash, outer is Kiln Terracotta. Applied via `focus-visible:ring` utilities.
-- **Featured Border** (`border: 1.5px solid #B8794E` + `box-shadow: 0 0 0 4px #F5E6D9`): Selected/featured state for cards and packages. A warm glow ring via `.featured-border` utility.
+### Spacing System
+- **Base unit:** 8px (with finer 2/4/6px steps for tight inline gaps in callout banners and pill buttons).
+- **Tokens (front matter):** `{spacing.xxs}` (2px) · `{spacing.xs}` (4px) · `{spacing.sm}` (8px) · `{spacing.md}` (12px) · `{spacing.lg}` (16px) · `{spacing.xl}` (24px) · `{spacing.xxl}` (32px) · `{spacing.section}` (80px).
+- **Universal section rhythm:** every page in the set uses `{spacing.section}` (80px) as the vertical gap between major content blocks. Card grids use `{spacing.lg}` (16px) gutters; card internal padding sits at `{spacing.xl}` (24px) for product cards and `{spacing.xxl}` (32px) for pricing tier cards.
 
-### Named Rules
-**The Flat-By-Default Rule.** Surfaces are flat at rest. Shadows appear only as a response to state (hover, focus, elevation change). A card sitting untouched has no visible shadow; hovering adds `shadow-premium`. The exception is persistent premium cards (featured items, hero CTAs) that communicate permanence.
+### Grid & Container
+- **Max width:** ~1280px content area at desktop with 24px gutters (~48px at ultrawide). Doc article body sits at ~720px max width with the 240px sidebar pushing the article column right of center.
+- **Marketing card grid:** 4-up at desktop, 3-up at 1024px, 2-up at 768px, 1-up at 480px. Cards preserve a fixed 1:1 or 4:3 ratio.
+- **Pricing tier grid:** 3-up at desktop with a left rail of plan info, collapsing to 2-up + 1 at tablet and 1-up at mobile.
+- **Doc layout:** desktop 240px sticky left sidebar + ~720px article body + (optional) 200px right TOC rail = ~1160px content width.
+- **Footer:** 6-column horizontal link grid at desktop, 3-up at tablet, 2-up at mobile.
 
-## 5. Components
+### Whitespace Philosophy
+Whitespace is generous on marketing pages and tight on doc pages. The home and workflows pages stack feature tiles with `{spacing.lg}` (16px) gutters and 24px internal padding, while doc articles tighten internal spacing to `{spacing.md}` (12px) between paragraphs to maximize information density. The cream canvas runs continuously through every section — there are no decorative dividers, no shaded section bands; only the 1px hairline beneath section eyebrows and footer column rules separate content blocks.
+
+## Elevation & Depth
+
+| Level | Treatment | Use |
+|---|---|---|
+| 0 — Flat | No border, no shadow | Default for canvas-on-canvas blocks, hero text, body sections |
+| 1 — Hairline border | 1px solid `{colors.hairline}` | Marketing cards, pricing tier cards, doc sidebar items, footer column rules |
+| 2 — Hairline soft | 1px solid `{colors.hairline-soft}` | In-card row divider between adjacent rows |
+| 3 — Inverted dark code block | `{colors.surface-dark}` fill | Code samples inside doc cards — the system's only "elevated" surface uses color, not shadow |
+
+The system has no drop-shadow elevation in marketing or product chrome. Cards sit flat on cream with thin olive borders. The single inverted moment is the dark code-block surface used inside doc article body cards.
+
+### Decorative Depth
+Depth comes entirely from illustration and the pastel callout band system, not from CSS effects:
+- **Hand-drawn lotus mascots** — characters in various costumes (lab coat, terminal, lounge chair, magnifying glass, hammock, hat) scattered across pages as marginalia. Always rendered as flat color illustrations, never photographs.
+- **Pastel callout banners** — `{component.banner-tip-blue}` / `-green` / `-red` / `-purple` soft tinted side-rail panels inside doc articles, each prefixed with an emoji icon (💡 ✅ ⚠️ 📘) and carrying tip/warning/note copy.
+- **Code blocks** — full-width dark olive-charcoal panels on `{colors.surface-dark}` with white code text. The system's most cinematic surface, used inside white doc cards.
+- **Outline product icons** in the doc sidebar — small rounded-square mini-illustrations (chart icon, funnel, session-replay icon) mark each major product section.
+
+## Shapes
+
+### Border Radius Scale
+
+| Token | Value | Use |
+|---|---|---|
+| `{rounded.none}` | 0px | Sub-nav strip, footer, doc sidebar, primary nav — flat structural surfaces |
+| `{rounded.xs}` | 2px | Inline `<code>` chips, micro-rule highlights |
+| `{rounded.sm}` | 4px | Inline buttons, form inputs, micro chips |
+| `{rounded.md}` | 6px | Marketing cards, pricing cards, doc cards, code blocks, every standard CTA |
+| `{rounded.lg}` | 8px | Tab top corners (`6px 6px 0 0` on active tab) and rare large containers |
+| `{rounded.full}` | 9999px | Pill chips and pill-style CTAs ("Get started — free" sticky CTA in nav) |
+
+The radius vocabulary clusters around 4–6px for nearly everything; the only fully-rounded element is the pill-style sticky nav CTA and inline pill chips.
+
+### Photography Geometry
+There is no photography. Visual elements are limited to:
+- **lotus character illustrations** — flat-color cartoon lotuss ranging from ~80px (in-card mascot) to ~240px (hero illustration). Always at native aspect, never cropped to a frame.
+- **Outline product icons** in the doc sidebar — 20–24px rounded-square illustrations.
+- **Inline emoji** at 14–16px inside callout banners (💡 ✅ ⚠️ 📘) — used as functional iconography rather than decoration.
+- **Section illustrations** on the home page — small lotus vignettes paired with each "Understand product usage" / "Build sticky habits" / "Test before launch" feature row.
+
+## Components
+
+> **No hover states documented** per system policy. Each spec covers Default and Active/Pressed only.
 
 ### Buttons
-Tactile and responsive. Every button uses Framer Motion for scale-based micro-interactions.
 
-- **Shape:** Generous rounding (12px / `rounded-xl`), uppercase text, wide letter-spacing (0.05em+), font-weight 600
-- **Primary:** Kiln Terracotta background, white text, 44px minimum height (touch-safe), 32px horizontal padding. Hover: 80% opacity. Motion: `whileHover: scale(1.02)`, `whileTap: scale(0.98)`, easing `[0.32, 0.72, 0, 1]` over 200ms
-- **Outline:** Transparent background, Kiln Border stroke, foreground text. Hover: muted background fill
-- **Ghost:** No background, no border. Hover: muted background. Used in toolbars, secondary actions
-- **Destructive:** 10% opacity brick-error background, brick-error text. Soft and reversible-feeling, not alarming
-- **Link:** Underlined text in primary color. For inline text actions only
+**`button-primary`** — the universal NailssentialsQC CTA
+- Background `{colors.primary}` (yellow-orange), text `{colors.on-primary}` (deep olive), type `{typography.button-md}`, padding `8px 16px`, height `40px`, rounded `{rounded.md}`.
+- Used for "Get started — free" (sticky top-nav CTA), "Sign up", "Try it free", "Subscribe" — every primary action.
+- Pressed state lives in `button-primary-pressed` — background drops to `{colors.primary-pressed}`.
 
-### Cards / Containers
-- **Corner Style:** Large rounded corners (32px / `rounded-3xl`). The signature shape of the system. Organic and spa-like.
-- **Background:** Pure white (`hsl(0 0% 100%)`) on warm canvas. The contrast between warm background and white card creates depth without shadow.
-- **Shadow Strategy:** Flat at rest. `shadow-premium` on hover via AnimatedCard wrapper. Motion: `whileHover: scale(1.02)` with staggered entrance animations.
-- **Border:** None by default. `featured-border` class for selected/premium state.
-- **Internal Padding:** 32px default (`px-8 py-8`), 20px compact (`data-[size=sm]`)
+**`button-secondary`** — soft alternative on cream canvas
+- Background `{colors.surface-soft}` (`#e5e7e0`), text `{colors.ink}`, type `{typography.button-md}`, padding `8px 16px`, height `40px`, rounded `{rounded.md}`.
+- "Talk to sales", "Read docs", "Watch demo" — second-tier actions paired with the yellow primary.
 
-### Inputs / Fields
-- **Style:** Borderless top/sides, bottom border only (`border-b-input`). Transparent background. Minimal and understated.
-- **Focus:** Bottom border shifts to ring color (Kiln Terracotta). Clean focus transition without box shadows.
-- **Error:** Bottom border shifts to destructive red. Error text appears below inline.
-- **Height:** 40px default, 48px for prominent forms (booking flow)
+**`button-tertiary`** — ghost text button
+- Background transparent, text `{colors.ink}`, type `{typography.button-md}`, padding `8px 12px`, rounded `{rounded.md}`.
+- Lowest-emphasis action: "See all docs →", "Browse all features".
+
+**`button-disabled`**
+- Background `{colors.surface-soft}`, text `{colors.ash}` — flat soft cream-gray.
+
+### Tabs & Chips
+
+**`product-tab`** + **`product-tab-active`** — major product section tabs
+- Default: transparent background, text `{colors.body}`, type `{typography.body-strong}`, padding `8px 12px`, rounded `{rounded.md}`.
+- Active: background flips to `{colors.surface-card}` (white), text `{colors.ink}` — the tab card lifts off the cream canvas as the visual signal of selection.
+
+**`pill-tab`** + **`pill-tab-active`** — compact filter pill
+- Default: transparent background, text `{colors.body}`, type `{typography.button-sm}`, padding `6px 14px`, rounded `{rounded.full}`.
+- Active: background flips to `{colors.ink}`, text `{colors.on-dark}` — the chip flips fully inverted on selection.
+
+**`badge-uppercase`** — text-only utility label
+- Background transparent, text `{colors.body}` in `{typography.utility-xs}` (uppercase) — used as in-list category prefix ("FEATURE FLAG", "EXPERIMENT", "HEATMAP").
+
+**`badge-promo`** — small inline pill chip
+- Background `{colors.accent-blue-soft}`, text `{colors.link-blue}`, type `{typography.caption-xs}`, padding `2px 8px`, rounded `{rounded.full}`.
+- "New", "Beta", "Coming soon" pill labels overlaid on cards.
+
+### Inputs & Forms
+
+**`text-input`** + **`text-input-focused`**
+- Default: background `{colors.surface-card}`, text `{colors.ink}`, 1px solid `{colors.hairline}`, type `{typography.body-md}`, padding `8px 12px`, height `36px`, rounded `{rounded.md}`.
+- Focused: same surface; 2px solid `{colors.accent-blue}` border replaces the 1px hairline + a translucent `{colors.focus-ring}` outline.
+
+**`search-input`** — utility search field (doc sidebar, "Ask NailssentialsQC AI")
+- Same dimensions as `text-input` with a magnifier glyph at the left edge in `{colors.mute}`.
+
+### Cards & Containers
+
+**`product-card`** — marketing tile / feature card
+- Container: background `{colors.surface-card}` (white), 1px solid `{colors.hairline}`, padding `{spacing.xl}` (24px), rounded `{rounded.md}`.
+- Layout: small lotus illustration at top-left, `{typography.heading-sm-mixed}` title, `{typography.body-sm}` description, optional `{component.button-tertiary}` "Learn more →" link.
+
+**`doc-card`** — doc article body card
+- Container: background `{colors.surface-doc}` (`#fcfcfa` warm-white), 1px solid `{colors.hairline}`, padding `{spacing.xl}` (24px), rounded `{rounded.md}`.
+- Carries article body sections, code blocks, callout banners, and tables inside doc pages.
+
+**`feature-tile`** — small marketing feature tile
+- Container: background `{colors.surface-card}`, 1px solid `{colors.hairline}`, padding `{spacing.lg}` (20px), rounded `{rounded.md}`.
+- Used in 3-up or 4-up grids on home and workflows pages — paired with a small icon and a 1-line description.
+
+**`pricing-tier-card`** — pricing plan card
+- Container: background `{colors.surface-card}`, 1px solid `{colors.hairline}`, padding `{spacing.xxl}` (32px), rounded `{rounded.md}`.
+- Layout: tier name in `{typography.display-lg}` (24px / 800 / -0.6px), large price + period, feature checklist with check-icon bullets, primary or secondary CTA at bottom.
+
+**`lotus-mascot-card`** — feature card with margin-anchored lotus
+- Same chrome as `{component.product-card}` but with a hand-drawn lotus illustration anchored in the right margin or top-right corner — the brand's signature card variant.
+
+### Callout Banners
+
+**`banner-tip-blue`** + **`banner-tip-green`** + **`banner-tip-red`** + **`banner-tip-purple`**
+- Background `{colors.accent-blue-soft}` / `{colors.accent-green-soft}` / `{colors.accent-red-soft}` / `{colors.accent-purple-soft}`, text `{colors.ink}`, type `{typography.body-md}`, padding `16px 20px`, rounded `{rounded.md}`.
+- Each prefixed with an inline emoji icon (💡 / ✅ / ⚠️ / 📘) followed by an inline label and body copy.
+- Only appear inside doc article body. The four-color callout family is the brand's information-architecture vocabulary for inline tips/warnings/info inside long-form documentation.
+
+### Code
+
+**`code-block`** — dark code sample inside doc card
+- Container: background `{colors.surface-dark}` (deep olive-charcoal), text `{colors.on-dark}` in `{typography.code-sm}`, padding `16px 20px`, rounded `{rounded.md}`.
+- Syntax highlighting uses muted accent colors (blue for keywords, green for strings, purple for numbers) — never the bright accent colors used in callout banners.
+
+**`inline-code`** — small inline `<code>` chip
+- Background `{colors.surface-soft}`, text `{colors.ink}` in `{typography.code-xs}`, padding `2px 6px`, rounded `{rounded.xs}` (2px).
+- Used inside body prose to mark code snippets and identifiers.
 
 ### Navigation
-- **Desktop Sidebar:** Fixed 240px width, white background, primary-highlighted active item
-- **Mobile Bottom Nav:** Fixed bottom bar, max 5 items, active item highlighted with Kiln Terracotta fill
-- **Tabs (Default variant):** Muted background container, white active tab with subtle shadow and primary text color
-- **Tabs (Line variant):** Transparent background, 2px primary underline on active tab
 
-### Signature: AnimatedCard
-The system's distinctive motion component. Wraps any Card in a Framer Motion container with:
-- Entrance: fade-in + 20px upward slide, staggered by 100ms per card
-- Hover: scale to 1.02×
-- Tap: scale to 0.98×
-- Easing: `PREMIUM_EASE [0.32, 0.72, 0, 1]` (a custom expo-out curve)
-- Duration: 250ms for interactions, 400ms for page transitions
+**`primary-nav`**
+- Background `{colors.canvas}` (cream — same as the page), text `{colors.ink}`, height `56px`, type `{typography.body-strong}`, rounded `{rounded.none}`.
+- Layout (desktop): NailssentialsQC wordmark + lotus logo at left, nav menu cluster ("Pricing · Docs · Community · Company"), right cluster with a search-glyph, "Login" link, and the always-yellow `{component.button-primary}` "Get started — free" pill anchored to the far right.
 
-## 6. Do's and Don'ts
+**`sub-nav-strip`** — secondary nav bar (under primary)
+- Background `{colors.surface-soft}`, text `{colors.body}` in `{typography.body-xs}`, height `40px`, rounded `{rounded.none}`.
+- Sits directly below the primary nav on workflows / product pages with section anchor links and a contextual "Get started →" link at the right.
 
-### Do:
-- **Do** tint every neutral toward hue 25. The warmth is the identity.
-- **Do** use `shadow-premium` with terracotta-tinted rgba for elevated elements. Gray shadows feel foreign.
-- **Do** use Framer Motion `whileHover: scale(1.02)` for interactive cards and buttons. The tactile feel is the signature.
-- **Do** keep primary text at Charcoal Bark (`#2D2723`), never pure black. The contrast is sufficient (>7:1 on Warm Canvas) and the warmth is intentional.
-- **Do** use the `featured-border` class (1.5px terracotta + 4px bisque glow) for selected/premium states instead of side-stripe borders.
-- **Do** vary section layouts on the landing page. The Signature Experience's asymmetric split is the model; centered stacks are the exception.
-- **Do** use `rounded-3xl` (32px) for cards and containers. The large radius is the system's shape signature.
-- **Do** use Kiln Terracotta (`#B8794E`) at 30-60% surface coverage on at least one brand section (e.g., the Footer CTA with `bg-primary text-primary-foreground`).
+**`doc-sidebar`** — sticky doc-page left sidebar
+- Background `{colors.canvas}`, text `{colors.body}` in `{typography.body-xs}`, width `240px`, rounded `{rounded.none}`.
+- Layout: search-input "Ask NailssentialsQC AI" at top, then a vertical list of section headers each with a small rounded outline-icon mini-illustration, then nested item links indented under the active header.
 
-### Don't:
-- **Don't** use `border-left` or `border-right` greater than 1px as a colored accent stripe. Use `featured-border`, background tints, or icons instead.
-- **Don't** use `background-clip: text` with gradient backgrounds. Text is always a single solid color.
-- **Don't** use `backdrop-blur` or glassmorphism as decoration. The hero card glassmorphism pattern was removed for this reason.
-- **Don't** create identical card grids (same size, same icon + heading + text structure, repeated 3+ times). Vary the grid: feature one item large, size others differently, or use an asymmetric layout.
-- **Don't** use `text-[10px]` or any rendered text below 11px. It fails WCAG readability.
-- **Don't** wrap random words in `<span className="italic">` for decoration. One italic word per hero headline maximum; none in body copy.
-- **Don't** use pure `#000000` or `#FFFFFF` for text or backgrounds. Tint toward hue 25.
-- **Don't** use generic `#4CAF50` green or `#DC2626` red for semantic colors. Use the kiln-palette versions: Forest Confirm (`#435334`) and Brick Error (`#A94438`).
-- **Don't** center-stack every section on the landing page. Asymmetric splits, left-aligned leads, and varied grids are what distinguish this from a template.
-- **Don't** use `dangerouslySetInnerHTML` for decorative text effects. Use React nodes.
+**Top Nav (Mobile)**
+- Hamburger menu icon at left, NailssentialsQC wordmark + lotus at center, search + sticky yellow "Get started — free" CTA at right. Primary nav collapses into a full-height drawer that slides from the left.
+
+### Footer
+
+**`footer-section`**
+- Background `{colors.canvas}`, text `{colors.body}` in `{typography.body-xs}`, padding `32px 24px`, rounded `{rounded.none}`, with a 1px `{colors.hairline}` top rule.
+- Layout: 6-column horizontal link grid (Product · Resources · Company · Community · Pricing · Legal), each column with a `{typography.utility-xs}` (uppercase) header and a vertical list of links in `{typography.body-xs}` `{colors.body}`.
+- Bottom row: NailssentialsQC wordmark + small lotus illustration, copyright in `{typography.caption-xs}` `{colors.mute}`, social-icon row at far-right.
+
+### Inline
+
+**`link-inline`** — body-prose anchor link
+- `{colors.link-teal}` (`#1078a3`) in body prose with no underline by default; underline appears on focus. The brand's primary inline link color.
+
+## Do's and Don'ts
+
+### Do
+- Use `{colors.primary}` (yellow-orange — `#B8794E`) as the page body. Never substitute pure white as the canvas.
+- Reserve `{colors.primary}` (yellow-orange — `#B8794E`) for the primary CTA pill only. The "Get started — free" treatment is the brand's anchor.
+- Render the brand wordmark with the lotus illustration alongside it, not as a stand-alone wordmark. The lotus IS the brand identity.
+- Use IBM Plex Sans Variable across every text role — body 400, emphasis 600/700, display 800.
+- Stack content sections at `{spacing.section}` (80px) rhythm with no decorative dividers between them; let the cream canvas continue uninterrupted.
+- Use `{component.banner-tip-blue}` / `-green` / `-red` / `-purple` only inside doc article body for tip/warning/note panels — keep marketing chrome out of the four-color callout family.
+- Pair every code sample with the dark `{component.code-block}` surface; inline `<code>` chips use `{component.inline-code}` (cream surface-soft chip).
+- Anchor a lotus mascot illustration in feature tile margins on home and workflows pages — the system's signature decoration.
+
+### Don't
+- Don't introduce drop shadows on cards. Cards sit flat on cream with thin olive borders only.
+- Don't add a second saturated chromatic CTA. Yellow-orange is the only loud color in the system.
+- Don't replace the cream canvas with pure white or full-bleed dark hero bands. The cream is the brand.
+- Don't use the four-color callout banner pastels (`{colors.accent-blue-soft}`, `-green`, `-red`, `-purple`) as marketing-card backgrounds. They belong to inline doc content only.
+- Don't substitute the lotus illustration with a generic icon set. The character system is the brand.
+- Don't use uppercase transform outside of `{typography.heading-sm}`, `{typography.utility-xs}`, and `{typography.caption-xs}`. Uppercase is reserved for eyebrows and footer category headers.
+- Don't pad cards with 32px+ on all sides except for `{component.pricing-tier-card}`. Standard cards sit at 24px internal padding.
+
+## Responsive Behavior
+
+### Breakpoints
+
+| Name | Width | Key Changes |
+|---|---|---|
+| ultrawide | 1920px+ | Content max-width holds at 1280px; outer gutters grow to ~80px |
+| desktop-large | 1440px | Default — 4-up feature tile grid, 240px sticky doc sidebar visible |
+| desktop | 1280px | Same layout with narrower outer gutters |
+| desktop-small | 1024px | 4-up tiles collapse to 3-up; doc sidebar remains visible |
+| tablet | 768px | 3-up tiles collapse to 2-up; doc sidebar collapses into a top accordion; primary nav becomes hamburger |
+| mobile | 480px | Single-column everything; hero `{typography.display-xl}` scales 36px → ~28px |
+| mobile-narrow | 320px | Section padding tightens to 32px |
+
+### Touch Targets
+All interactive elements meet WCAG AA (≥ 40×40px). `{component.button-primary}` and `{component.button-secondary}` sit at 40px height with 16px padding. `{component.text-input}` sits at 36px (just under AAA but above AA at this size). `{component.pill-tab}` is ~32–36px height with 14px padding extending to ~44px tappable via inline padding. Doc-sidebar items use 14px text with ~32px line-height + 6px vertical padding for ~44px tap rows.
+
+### Collapsing Strategy
+- **Primary nav:** desktop horizontal cluster → tablet hamburger drawer at 768px. The yellow "Get started — free" CTA stays visible at every breakpoint.
+- **Sub-nav strip:** desktop horizontal anchor row → tablet horizontal scroll → mobile select dropdown.
+- **Marketing card grid:** 4-up → 3-up → 2-up → 1-up at 1024, 768, and 480px; gutters drop from 16px to 12px on mobile.
+- **Pricing grid:** 3-up → 2+1 → 1-up stacked at tablet and below.
+- **Doc layout:** desktop 240px sidebar + 720px article → tablet sidebar collapses to a top accordion → mobile fully collapsed accordion.
+- **Footer:** 6-up link columns → 3-up at tablet → 2-up at mobile.
+- **Section padding:** `{spacing.section}` (80px) desktop → 64px tablet → 48px mobile.
+- **Hero headline:** `{typography.display-xl}` (36px) at desktop, scaling to ~28px at mobile, line-height holding at 1.5.
+
+### Image Behavior
+The only "imagery" in the system is hand-drawn lotus illustrations rendered as inline SVG. They preserve their natural aspect at every breakpoint and scale via CSS `width: auto; max-width: 100%`. There is no responsive art-direction needed because there is no photography.
+
+## Iteration Guide
+
+1. Focus on ONE component at a time. Pull its YAML entry and verify every property resolves.
+2. Reference component names and tokens directly (`{colors.primary}`, `{component.button-primary-pressed}`, `{rounded.md}`) — do not paraphrase.
+3. Run `npx @google/design.md lint DESIGN.md` after edits — `broken-ref`, `contrast-ratio`, and `orphaned-tokens` warnings flag issues automatically.
+4. Add new variants as separate component entries (`-pressed`, `-disabled`, `-focused`) — do not bury them inside prose.
+5. Default body to `{typography.body-md}` (16px / 400 / 1.5); reach for `{typography.body-strong}` for emphasis; reserve `{typography.display-lg}` (24px / 800) strictly for marketing display moments.
+6. Keep `{colors.primary}` scarce per viewport — at most one yellow-orange pill per fold.
+7. When introducing a new component, ask whether it can be expressed with the existing card + 6px-radius + cream-canvas vocabulary before adding new tokens. The system's strength is that it almost never needs new ones.
+
+## Known Gaps
+
+- **Mobile screenshots not captured** — responsive behavior synthesizes NailssentialsQC's mobile pattern (hamburger drawer, single-column grid, doc sidebar accordion) from desktop evidence and the breakpoint stack.
+- **Hover states not documented** by system policy.
+- **In-product app chrome** (NailssentialsQC dashboard, charts, session replay player) not in the captured set — the marketing site is documented here, not the in-product analytics interface.
+- **Authenticated chrome** (login modal, account dashboard, billing settings) not in the captured pages.
+- **Form validation states** beyond the focused-state input not present in the captured surfaces.
+- **Marketing illustration set** — the full library of lotus character poses is not enumerated here; specific poses (lab coat lotus, terminal lotus, hammock lotus) are noted as visible in screenshots but the full asset library is page-specific.

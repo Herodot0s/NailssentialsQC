@@ -154,7 +154,10 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                                   <Input 
                                     type="number" 
                                     value={staff.basePayPerWeek} 
-                                    onChange={e => onStaffChange({...staff, basePayPerWeek: parseFloat(e.target.value)})}
+                                     onChange={e => {
+                                        const val = e.target.value;
+                                        onStaffChange({...staff, basePayPerWeek: val === '' ? 0 : parseFloat(val)});
+                                     }}
                                     className="w-32 text-right font-serif text-2xl border-none focus-visible:ring-0 h-auto p-0"
                                   />
                                </div>
@@ -163,7 +166,10 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                                   <Input 
                                     type="number" 
                                     value={staff.dailyTarget} 
-                                    onChange={e => onStaffChange({...staff, dailyTarget: parseFloat(e.target.value)})}
+                                     onChange={e => {
+                                        const val = e.target.value;
+                                        onStaffChange({...staff, dailyTarget: val === '' ? 0 : parseFloat(val)});
+                                     }}
                                     className="w-32 text-right font-serif text-2xl border-none focus-visible:ring-0 h-auto p-0"
                                   />
                                </div>

@@ -104,18 +104,6 @@ const ManageServices: React.FC = () => {
     return colors[idNum % colors.length];
   };
 
-  const getCategoryBg = (id: number | string) => {
-    const idNum = typeof id === 'string' ? parseInt(id) || 0 : id;
-    const colors = [
-      'oklch(95% 0.02 35)',
-      'oklch(95% 0.02 145)',
-      'oklch(95% 0.02 65)',
-      'oklch(95% 0.02 25)',
-      'oklch(95% 0.02 240)',
-    ];
-    return colors[idNum % colors.length];
-  };
-
   const deferredSearch = useDeferredValue(searchQuery);
 
   const filteredServices = useMemo(() => {
@@ -255,6 +243,7 @@ const ManageServices: React.FC = () => {
     );
   }
 
+  // Floating Manage Services
   return (
     <div className="container max-w-7xl mx-auto py-12 px-6">
       <style>{scrollbarHideStyles}</style>
@@ -282,7 +271,7 @@ const ManageServices: React.FC = () => {
         </div>
 
         {/* Artisan's Toolbar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-6 border-y border-kiln-border/50 bg-linen-mist/30 -mx-6 px-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-6 border-y border-kiln-border/20 bg-bisque-wash/10 -mx-6 px-6">
           <div className="flex flex-1 items-center gap-6 w-full md:w-auto">
             <div className="relative flex-1 max-w-md group">
               <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-4 text-clay-dust group-focus-within:text-kiln-terracotta transition-colors" />
@@ -290,16 +279,16 @@ const ManageServices: React.FC = () => {
                 placeholder="Search services..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-7 border-0 border-b border-kiln-border rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-kiln-terracotta transition-all h-10 text-charcoal-bark placeholder:text-clay-dust"
+                className="pl-7 border-0 border-b border-kiln-border/30 rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-kiln-terracotta transition-all h-10 text-charcoal-bark placeholder:text-clay-dust font-serif italic"
               />
             </div>
 
             <div className="hidden md:flex items-center gap-2 overflow-x-auto no-scrollbar">
               <button
                 onClick={() => setSelectedCategoryId('all')}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all ${selectedCategoryId === 'all'
-                  ? 'bg-kiln-terracotta text-white shadow-card'
-                  : 'bg-bisque-wash/50 text-warm-stone hover:bg-bisque-wash'
+                className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${selectedCategoryId === 'all'
+                  ? 'bg-kiln-terracotta text-white shadow-premium'
+                  : 'bg-white/50 text-warm-stone border border-kiln-border/20 hover:bg-white'
                   }`}
               >
                 All
@@ -309,10 +298,11 @@ const ManageServices: React.FC = () => {
                   key={cat.id}
                   onClick={() => setSelectedCategoryId(cat.id)}
                   style={{
-                    backgroundColor: selectedCategoryId === cat.id ? getCategoryColor(cat.id) : getCategoryBg(cat.id),
+                    backgroundColor: selectedCategoryId === cat.id ? getCategoryColor(cat.id) : 'rgba(255,255,255,0.5)',
                     color: selectedCategoryId === cat.id ? 'white' : getCategoryColor(cat.id),
+                    borderColor: selectedCategoryId === cat.id ? 'transparent' : `${getCategoryColor(cat.id)}30`,
                   }}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase whitespace-nowrap transition-all shadow-sm hover:brightness-95`}
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase whitespace-nowrap border transition-all hover:brightness-95`}
                 >
                   {cat.name}
                 </button>
@@ -321,13 +311,13 @@ const ManageServices: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 w-full md:w-auto justify-end">
-            <div className="flex items-center bg-bisque-wash/30 rounded-full p-1 border border-kiln-border/30">
+            <div className="flex items-center bg-white/40 rounded-full p-1 border border-kiln-border/20 backdrop-blur-sm">
               {(['all', 'active', 'disabled'] as const).map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
-                  className={`px-4 py-1.5 rounded-full text-[11px] font-bold tracking-widest uppercase transition-all ${statusFilter === status
-                    ? 'bg-white text-kiln-terracotta shadow-sm'
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${statusFilter === status
+                    ? 'bg-white text-kiln-terracotta shadow-sm ring-1 ring-kiln-border/10'
                     : 'text-clay-dust hover:text-warm-stone'
                     }`}
                 >
@@ -340,23 +330,23 @@ const ManageServices: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-4 rounded-lg flex items-center gap-3 mb-8">
+        <div className="bg-brick-error/5 border border-brick-error/20 text-brick-error text-sm p-4 rounded-2xl flex items-center gap-3 mb-8 animate-in fade-in slide-in-from-top-2">
           <AlertCircle className="h-5 w-5 shrink-0" />
-          <span>{error}</span>
+          <span className="font-medium">{error}</span>
         </div>
       )}
 
-      <Card className="border-none shadow-sm overflow-hidden">
+      <Card className="border-none shadow-premium bg-white/80 backdrop-blur-md overflow-hidden rounded-3xl">
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-muted/50">
-              <TableRow>
-                <TableHead className="pl-6 font-bold">Service Name</TableHead>
-                <TableHead className="font-bold">Category</TableHead>
-                <TableHead className="font-bold">Price</TableHead>
-                <TableHead className="font-bold">Duration</TableHead>
-                <TableHead className="font-bold">Status</TableHead>
-                <TableHead className="pr-6 text-right font-bold">Actions</TableHead>
+            <TableHeader className="bg-bisque-wash/20 border-b border-kiln-border/10">
+              <TableRow className="hover:bg-transparent border-none">
+                <TableHead className="pl-8 h-14 text-[10px] font-bold uppercase tracking-widest text-clay-dust">Service Name</TableHead>
+                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-clay-dust">Category</TableHead>
+                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-clay-dust">Price</TableHead>
+                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-clay-dust">Duration</TableHead>
+                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-clay-dust">Status</TableHead>
+                <TableHead className="pr-8 h-14 text-right text-[10px] font-bold uppercase tracking-widest text-clay-dust">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -365,23 +355,19 @@ const ManageServices: React.FC = () => {
                   <motion.tr
                     key={svc.id}
                     layout
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{
-                      duration: 0.25,
-                      ease: [0.32, 0.72, 0, 1],
-                    }}
-                    className="group border-b hover:bg-linen-mist/50 transition-colors"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    className="group border-b border-kiln-border/5 hover:bg-bisque-wash/10 transition-colors"
                   >
-                    <TableCell className="pl-6 py-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="font-semibold text-charcoal-bark group-hover:text-kiln-terracotta transition-colors">
+                    <TableCell className="pl-8 py-5">
+                      <div className="flex flex-col gap-1.5">
+                        <span className="font-serif text-lg text-charcoal-bark group-hover:text-kiln-terracotta transition-colors leading-none">
                           {svc.name}
                         </span>
                         {svc.is_popular && (
-                          <Badge className="w-fit text-[9px] h-4 px-1.5 bg-kiln-terracotta text-white border-none font-bold uppercase tracking-widest shadow-sm">
-                            Popular
+                          <Badge className="w-fit text-[9px] h-4 px-2 bg-kiln-terracotta/10 text-kiln-terracotta border border-kiln-terracotta/20 font-bold uppercase tracking-widest rounded-full">
+                            Featured
                           </Badge>
                         )}
                       </div>
@@ -389,53 +375,54 @@ const ManageServices: React.FC = () => {
                     <TableCell>
                       <span
                         style={{
-                          backgroundColor: getCategoryBg(svc.category_id),
+                          backgroundColor: `${getCategoryColor(svc.category_id)}10`,
                           color: getCategoryColor(svc.category_id),
                           borderColor: `${getCategoryColor(svc.category_id)}20`,
                         }}
-                        className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-md border"
+                        className="text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full border"
                       >
                         {svc.category?.name}
                       </span>
                     </TableCell>
-                    <TableCell className="font-serif font-bold text-kiln-terracotta">
+                    <TableCell className="font-serif font-bold text-xl text-kiln-terracotta/90">
                       ₱{parseFloat(svc.price).toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-warm-stone text-sm">
-                      {svc.duration_minutes} min
+                    <TableCell className="text-warm-stone text-sm font-medium">
+                      {svc.duration_minutes} <span className="text-[10px] uppercase tracking-tighter opacity-60">min</span>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2.5">
                         <div
-                          className={`h-2 w-2 rounded-full shadow-[0_0_8px] ${svc.is_active ? 'bg-forest-confirm shadow-forest-confirm/50' : 'bg-clay-dust shadow-clay-dust/30'
+                          className={`h-2 w-2 rounded-full ring-4 ${svc.is_active
+                            ? 'bg-forest-confirm ring-forest-confirm/10'
+                            : 'bg-clay-dust ring-clay-dust/10'
                             }`}
                         />
                         <span
-                          className={`text-xs font-bold tracking-tight ${svc.is_active ? 'text-forest-confirm' : 'text-warm-stone'
+                          className={`text-[10px] font-bold tracking-widest uppercase ${svc.is_active ? 'text-forest-confirm' : 'text-clay-dust'
                             }`}
                         >
-                          {svc.is_active ? 'Active' : 'Disabled'}
+                          {svc.is_active ? 'Active' : 'Hidden'}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="pr-6 text-right">
-                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <TableCell className="pr-8 text-right">
+                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => handleEdit(svc)}
-                          className="h-8 w-8 p-0 rounded-full hover:bg-kiln-terracotta/10 hover:text-kiln-terracotta"
+                          className="h-9 w-9 rounded-full bg-white border border-kiln-border/10 shadow-sm text-warm-stone hover:text-kiln-terracotta hover:border-kiln-terracotta/20"
                         >
                           <Edit className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
                         </Button>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => toggleStatus(svc)}
-                          className={`h-8 w-8 p-0 rounded-full ${svc.is_active
-                            ? 'hover:bg-brick-error/10 hover:text-brick-error'
-                            : 'hover:bg-forest-confirm/10 hover:text-forest-confirm'
+                          className={`h-9 w-9 rounded-full bg-white border border-kiln-border/10 shadow-sm ${svc.is_active
+                            ? 'text-brick-error hover:bg-brick-error/5 hover:border-brick-error/20'
+                            : 'text-forest-confirm hover:bg-forest-confirm/5 hover:border-forest-confirm/20'
                             }`}
                         >
                           {svc.is_active ? (
@@ -443,7 +430,6 @@ const ManageServices: React.FC = () => {
                           ) : (
                             <Power className="h-4 w-4" />
                           )}
-                          <span className="sr-only">{svc.is_active ? 'Disable' : 'Enable'}</span>
                         </Button>
                       </div>
                     </TableCell>

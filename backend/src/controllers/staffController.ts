@@ -162,7 +162,10 @@ export const updateStaff = async (req: Request, res: Response) => {
   const { id } = req.params;
   const idStr = (Array.isArray(id) ? id[0] : id) as string;
   const idNum = parseInt(idStr);
-  const { fullName, email, phone, isActive, specializations, basePayPerWeek, dailyTarget, sssNumber, tinNumber, govId, profilePictureUrl, role } = req.body;
+  
+  // Use validatedBody from Zod middleware if available
+  const body = (req as AuthRequest).validatedBody || req.body;
+  const { fullName, email, phone, isActive, specializations, basePayPerWeek, dailyTarget, sssNumber, tinNumber, govId, profilePictureUrl, role } = body;
 
   try {
     const updatedUser = await prisma.user.update({
@@ -181,14 +184,14 @@ export const updateStaff = async (req: Request, res: Response) => {
             update: {
               full_name: fullName,
               specializations,
-              base_pay_per_week: basePayPerWeek ? parseFloat(basePayPerWeek) : undefined,
-              daily_target: dailyTarget ? parseFloat(dailyTarget) : undefined,
+              base_pay_per_week: (basePayPerWeek !== undefined && basePayPerWeek !== null) ? parseFloat(basePayPerWeek) : undefined,
+              daily_target: (dailyTarget !== undefined && dailyTarget !== null) ? parseFloat(dailyTarget) : undefined,
             },
             create: {
               full_name: fullName || 'New Staff',
               specializations: specializations || 'General',
-              base_pay_per_week: basePayPerWeek ? parseFloat(basePayPerWeek) : 2500.00,
-              daily_target: dailyTarget ? parseFloat(dailyTarget) : 6000.00,
+              base_pay_per_week: (basePayPerWeek !== undefined && basePayPerWeek !== null) ? parseFloat(basePayPerWeek) : 2500.00,
+              daily_target: (dailyTarget !== undefined && dailyTarget !== null) ? parseFloat(dailyTarget) : 6000.00,
             }
           },
         },

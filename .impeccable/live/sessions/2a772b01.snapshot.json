@@ -1,0 +1,20 @@
+{
+  "id": "2a772b01",
+  "phase": "variants_ready",
+  "pageUrl": "/dashboard",
+  "sourceFile": "frontend/src/components/dashboard/MobileCheckIn.tsx",
+  "expectedVariants": 3,
+  "arrivedVariants": 0,
+  "visibleVariant": 0,
+  "paramValues": {},
+  "pendingEventSeq": null,
+  "pendingEvent": null,
+  "deliveryLease": null,
+  "checkpointRevision": 1,
+  "activeOwner": "a032a0fe",
+  "sourceMarkers": {},
+  "fallbackMode": null,
+  "annotationArtifacts": [],
+  "diagnostics": [],
+  "updatedAt": "2026-05-11T09:28:14.624Z"
+}

@@ -34,6 +34,7 @@ export const getAttendanceStatus = async (req: AuthRequest, res: Response) => {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const dayOfWeek = today.getDay();
 
     const attendance = await prisma.attendance.findUnique({
       where: {
@@ -43,6 +44,19 @@ export const getAttendanceStatus = async (req: AuthRequest, res: Response) => {
         },
       },
     });
+
+    // Fetch day-specific schedule
+    const daySchedule = await prisma.staffSchedule.findUnique({
+      where: {
+        staff_day_unique: {
+          staff_id: staffProfile.id,
+          day_of_week: dayOfWeek,
+        }
+      }
+    });
+
+    const scheduledStart = (daySchedule && daySchedule.is_active) ? daySchedule.start_time : staffProfile.scheduled_start;
+    const scheduledEnd = (daySchedule && daySchedule.is_active) ? daySchedule.end_time : staffProfile.scheduled_end;
 
     const logs = await prisma.attendance.findMany({
       where: { staff_id: staffProfile.id },
@@ -64,10 +78,12 @@ export const getAttendanceStatus = async (req: AuthRequest, res: Response) => {
         status: {
           isCheckedIn: !!attendance?.check_in && !attendance?.check_out,
           checkInTime: attendance?.check_in ? new Date(attendance.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null,
+          checkInRaw: attendance?.check_in?.toISOString() || null,
           checkOutTime: attendance?.check_out ? new Date(attendance.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null,
+          checkOutRaw: attendance?.check_out?.toISOString() || null,
           date: today.toISOString().split('T')[0],
-          scheduledStart: staffProfile.scheduled_start,
-          scheduledEnd: staffProfile.scheduled_end,
+          scheduledStart: attendance?.scheduled_start || scheduledStart,
+          scheduledEnd: attendance?.scheduled_end || scheduledEnd,
         },
         logs: formattedLogs,
       },
@@ -102,6 +118,7 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
     const now = new Date();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const dayOfWeek = today.getDay();
 
     // Check if already checked out (Review Finding: Logic Edge Case)
     const existingAttendance = await prisma.attendance.findUnique({
@@ -120,11 +137,23 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Fetch day-specific schedule
+    const daySchedule = await prisma.staffSchedule.findUnique({
+      where: {
+        staff_day_unique: {
+          staff_id: staffProfile.id,
+          day_of_week: dayOfWeek,
+        }
+      }
+    });
+
+    const scheduledStartStr = (daySchedule && daySchedule.is_active) ? daySchedule.start_time : (staffProfile.scheduled_start || "12:00:00");
+    const scheduledEndStr = (daySchedule && daySchedule.is_active) ? daySchedule.end_time : (staffProfile.scheduled_end || "22:00:00");
+
     // Calculate tardiness
-    const scheduledStartStr = staffProfile.scheduled_start || "12:00:00"; // "12:00:00"
     const scheduledParts = scheduledStartStr.split(':');
-    const scheduledHours = parseInt(scheduledParts[0]) || 12;
-    const scheduledMinutes = parseInt(scheduledParts[1]) || 0;
+    const scheduledHours = parseInt(scheduledParts[0]);
+    const scheduledMinutes = parseInt(scheduledParts[1]);
     
     const scheduledStartTime = new Date(today);
     scheduledStartTime.setHours(scheduledHours, scheduledMinutes, 0, 0);
@@ -152,7 +181,7 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
       update: {
         check_in: now,
         scheduled_start: scheduledStartStr,
-        scheduled_end: staffProfile.scheduled_end || "22:00:00",
+        scheduled_end: scheduledEndStr,
         tardiness_minutes: tardinessMinutes,
         deduction_amount: deductionAmount,
       },
@@ -161,7 +190,7 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
         date: today,
         check_in: now,
         scheduled_start: scheduledStartStr,
-        scheduled_end: staffProfile.scheduled_end || "22:00:00",
+        scheduled_end: scheduledEndStr,
         tardiness_minutes: tardinessMinutes,
         deduction_amount: deductionAmount,
       },

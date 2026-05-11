@@ -239,7 +239,8 @@ const ManagerDashboard: React.FC = () => {
           sssNumber: selectedStaff.sssNumber,
           tinNumber: selectedStaff.tinNumber,
           govId: selectedStaff.govId,
-          profilePictureUrl: selectedStaff.profilePictureUrl
+          profilePictureUrl: selectedStaff.profilePictureUrl,
+          specializations: selectedStaff.specializations
        });
        setStatusModal({
          open: true,
@@ -248,12 +249,13 @@ const ManagerDashboard: React.FC = () => {
          description: 'Employee file updated successfully.',
        });
        fetchData();
-    } catch (err) {
+    } catch (err: any) {
+       const message = err.response?.data?.error?.message || err.response?.data?.message || err.message || 'Failed to update employee file.';
        setStatusModal({
          open: true,
          type: 'error',
          title: 'Update Failed',
-         description: 'Failed to update employee file.',
+         description: message,
        });
     }
   };
@@ -384,7 +386,7 @@ const ManagerDashboard: React.FC = () => {
           open: true,
           type: 'error',
           title: 'Update Failed',
-          description: 'Failed to update shift.',
+          description: `Failed to update shift: ${(err as any).response?.data?.message || 'Unknown error'}`,
         });
      }
   };

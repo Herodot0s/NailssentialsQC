@@ -2,88 +2,107 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-function Card({
-  className,
-  size = 'default',
-  ...props
-}: React.ComponentProps<'div'> & { size?: 'default' | 'sm' }) {
-  return (
-    <div
-      data-slot="card"
-      data-size={size}
-      className={cn(
-        'group/card flex flex-col gap-8 overflow-hidden bg-card py-8 text-sm text-card-foreground rounded-3xl shadow-premium has-[>img:first-child]:pt-0 data-[size=sm]:gap-5 data-[size=sm]:py-5',
-        className,
-      )}
-      {...props}
-    />
-  );
-}
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<'div'> & { size?: 'default' | 'sm' }
+>(({ className, size = 'default', ...props }, ref) => (
+  <div
+    ref={ref}
+    data-impeccable-variants="2a772b01"
+    data-impeccable-variant-count="3"
+    style={{ display: 'contents' }}
+  >
+    {/* impeccable-variants-start 2a772b01 */}
+    <div data-impeccable-variant="original">
+      <div
+        data-slot="card"
+        data-size={size}
+        className={cn(
+          'group/card flex flex-col overflow-hidden bg-card text-card-foreground rounded-xl border shadow-sm transition-all duration-200 has-[>img:first-child]:pt-0',
+          className,
+        )}
+        {...props}
+      />
+    </div>
+    {/* Variants: insert below this line */}
+    {/* impeccable-variants-end 2a772b01 */}
+  </div>
+));
+Card.displayName = 'Card';
 
-function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
-  return (
+const CardHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
+  ({ className, ...props }, ref) => (
     <div
+      ref={ref}
       data-slot="card-header"
       className={cn(
-        'group/card-header @container/card-header grid auto-rows-min items-start gap-1.5 px-8 group-data-[size=sm]/card:px-5 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-8 group-data-[size=sm]/card:[.border-b]:pb-5',
+        'group/card-header flex flex-col gap-1.5 p-6 group-data-[size=sm]/card:p-4',
         className,
       )}
       {...props}
     />
-  );
-}
+  ),
+);
+CardHeader.displayName = 'CardHeader';
 
-function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
-  return (
+const CardTitle = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
+  ({ className, ...props }, ref) => (
     <div
+      ref={ref}
       data-slot="card-title"
-      className={cn('font-heading text-lg font-semibold tracking-wider uppercase', className)}
+      className={cn('font-heading text-xl font-bold leading-none tracking-tight', className)}
       {...props}
     />
-  );
-}
+  ),
+);
+CardTitle.displayName = 'CardTitle';
 
-function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {
-  return (
+const CardDescription = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
+  ({ className, ...props }, ref) => (
     <div
+      ref={ref}
       data-slot="card-description"
-      className={cn('text-sm leading-relaxed text-muted-foreground', className)}
+      className={cn('text-sm text-muted-foreground leading-relaxed', className)}
       {...props}
     />
-  );
-}
+  ),
+);
+CardDescription.displayName = 'CardDescription';
 
-function CardAction({ className, ...props }: React.ComponentProps<'div'>) {
-  return (
+const CardAction = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
+  ({ className, ...props }, ref) => (
     <div
+      ref={ref}
       data-slot="card-action"
-      className={cn('col-start-2 row-span-2 row-start-1 self-start justify-self-end', className)}
+      className={cn('ml-auto self-start', className)}
       {...props}
     />
-  );
-}
+  ),
+);
+CardAction.displayName = 'CardAction';
 
-function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
-  return (
+const CardContent = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
+  ({ className, ...props }, ref) => (
     <div
+      ref={ref}
       data-slot="card-content"
-      className={cn('px-8 group-data-[size=sm]/card:px-5', className)}
+      className={cn('p-6 pt-0 group-data-[size=sm]/card:p-4 group-data-[size=sm]/card:pt-0', className)}
       {...props}
     />
-  );
-}
+  ),
+);
+CardContent.displayName = 'CardContent';
 
-function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
-  return (
+const CardFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
+  ({ className, ...props }, ref) => (
     <div
+      ref={ref}
       data-slot="card-footer"
-      className={cn(
-        'flex items-center px-8 group-data-[size=sm]/card:px-5 [.border-t]:pt-8 group-data-[size=sm]/card:[.border-t]:pt-5',
-        className,
-      )}
+      className={cn('flex items-center p-6 pt-0 group-data-[size=sm]/card:p-4 group-data-[size=sm]/card:pt-0', className)}
       {...props}
     />
-  );
-}
+  ),
+);
+CardFooter.displayName = 'CardFooter';
 
 export { Card, CardHeader, CardFooter, CardTitle, CardAction, CardDescription, CardContent };
