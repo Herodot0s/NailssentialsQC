@@ -19,6 +19,10 @@ import packageRoutes from './routes/packageRoutes';
 
 dotenv.config();
 
+// Ensure the application uses Philippines time regardless of server location
+process.env.TZ = 'Asia/Manila';
+
+
 const app = express();
 const port = process.env.PORT || 3000;
 
