@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -7,7 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Briefcase, Check, Wallet, Fingerprint } from 'lucide-react';
+import { Briefcase, Check, Wallet, Fingerprint, Key } from 'lucide-react';
 import type { StaffDetailSheetProps } from '../types';
 
 export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
@@ -20,6 +20,7 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
   onEditShift,
   onUpdateBaseline
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent 
@@ -115,6 +116,49 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                           </div>
                         </div>
 
+                        <div className="p-5 bg-white border border-[#bfc1b7] rounded-[6px] space-y-2">
+                          <div className="flex justify-between items-center">
+                            <div className="space-y-0.5">
+                              <Label className="text-[10px] uppercase font-bold text-[#6c6e63] tracking-wider">Reset Credentials</Label>
+                              <div className="text-[9px] text-[#9b9c92] font-medium leading-tight">
+                                Existing passwords are encrypted and cannot be retrieved.
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="ghost" 
+                                className="h-6 px-2 text-[10px] font-bold text-[#B8794E] uppercase tracking-wider hover:bg-[#B8794E]/5"
+                                onClick={() => {
+                                  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+                                  let pass = "";
+                                  for (let i = 0; i < 12; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
+                                  onStaffChange({...staff, password: pass});
+                                  setShowPassword(true);
+                                }}
+                              >
+                                Gen
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                className="h-6 px-2 text-[10px] font-bold text-[#23251d] uppercase tracking-wider hover:bg-black/5"
+                                onClick={() => setShowPassword(!showPassword)}
+                              >
+                                {showPassword ? 'Hide' : 'Show'}
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="relative">
+                            <Input 
+                              type={showPassword ? 'text' : 'password'}
+                              placeholder="Type new password to override..."
+                              value={staff.password || ''} 
+                              onChange={e => onStaffChange({...staff, password: e.target.value})}
+                              className="rounded-[4px] border-[#bfc1b7] bg-[#fcfcfa] text-sm focus-visible:ring-[#B8794E] pr-10" 
+                            />
+                            <Key className="absolute right-3 top-2.5 h-3.5 w-3.5 text-[#bfc1b7]" />
+                          </div>
+                        </div>
+
                         <div className="p-5 bg-white border border-[#bfc1b7] rounded-[6px] grid grid-cols-2 gap-8 items-center">
                           <div className="space-y-1">
                             <Label className="text-[10px] uppercase font-bold text-[#6c6e63] tracking-wider">Compliance IDs</Label>
@@ -181,11 +225,19 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                             <span className="text-[11px] font-bold uppercase tracking-wider text-[#4d4f46]">{day}</span>
                             <div className="flex items-center gap-4">
                               {sched?.is_active ? (
-                                <div className="font-mono text-xs font-bold text-[#23251d]">
+                                <div 
+                                  style={{ viewTransitionName: `shift-edit-${idx}` }}
+                                  className="font-mono text-xs font-bold text-[#23251d]"
+                                >
                                   {sched.start_time}—{sched.end_time}
                                 </div>
                               ) : (
-                                <span className="text-[10px] uppercase font-bold text-[#9b9c92]">Rest Day</span>
+                                <span 
+                                  style={{ viewTransitionName: `shift-edit-${idx}` }}
+                                  className="text-[10px] uppercase font-bold text-[#9b9c92]"
+                                >
+                                  Rest Day
+                                </span>
                               )}
                               <button 
                                 onClick={() => onEditShift(idx)}

@@ -239,7 +239,8 @@ const ManagerDashboard: React.FC = () => {
           profilePictureUrl: selectedStaff.profilePictureUrl,
           specializations: selectedStaff.specializations ?? undefined,
           email: selectedStaff.email ?? undefined,
-          phone: selectedStaff.phone ?? undefined
+          phone: selectedStaff.phone ?? undefined,
+          password: selectedStaff.password
        });
        setStatusModal({
          open: true,
@@ -344,13 +345,21 @@ const ManagerDashboard: React.FC = () => {
 
   const handleEditShift = (dayOfWeek: number) => {
      const current = staffSchedule.find(s => s.day_of_week === dayOfWeek);
-     setEditingDay(dayOfWeek);
-     setShiftForm({
-        start: current?.start_time || '12:00',
-        end: current?.end_time || '22:00',
-        isActive: current?.is_active ?? true
-     });
-     setShowShiftEditModal(true);
+     const updateState = () => {
+        setEditingDay(dayOfWeek);
+        setShiftForm({
+           start: current?.start_time || '12:00',
+           end: current?.end_time || '22:00',
+           isActive: current?.is_active ?? true
+        });
+        setShowShiftEditModal(true);
+     };
+
+     if ('startViewTransition' in document) {
+        (document as any).startViewTransition(updateState);
+     } else {
+        updateState();
+     }
   };
 
   const handleSaveShift = async (e: React.FormEvent) => {
@@ -589,7 +598,14 @@ const ManagerDashboard: React.FC = () => {
 
       <ShiftEditDialog 
         open={showShiftEditModal} 
-        onOpenChange={setShowShiftEditModal} 
+        onOpenChange={(open) => {
+           const update = () => setShowShiftEditModal(open);
+           if ('startViewTransition' in document) {
+              (document as any).startViewTransition(update);
+           } else {
+              update();
+           }
+        }} 
         editingDay={editingDay} 
         form={shiftForm} 
         onFormChange={setShiftForm} 

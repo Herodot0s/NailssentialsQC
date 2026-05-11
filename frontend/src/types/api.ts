@@ -29,7 +29,7 @@ export interface CreateStaffRequest {
   email?: string;
   phone?: string;
   username: string;
-  password: string;
+  password?: string;
   specializations?: string;
   basePayPerWeek: number;
   dailyTarget: number;
@@ -53,6 +53,7 @@ export interface StaffMember {
   sssNumber?: string;
   pagIbigNumber?: string;
   profilePictureUrl?: string;
+  password?: string;
   createdAt: string;
 }
 

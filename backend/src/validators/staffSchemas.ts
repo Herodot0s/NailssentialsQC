@@ -15,4 +15,4 @@ export const createStaffSchema = z.object({
   role: z.enum(['staff', 'manager']).optional(),
 });
 
-export const updateStaffSchema = createStaffSchema.partial().omit({ password: true });
+export const updateStaffSchema = createStaffSchema.partial();

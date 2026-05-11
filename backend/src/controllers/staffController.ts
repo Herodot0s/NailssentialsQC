@@ -163,36 +163,42 @@ export const updateStaff = async (req: Request, res: Response) => {
   
   // Use validatedBody from Zod middleware if available
   const body = (req as AuthRequest).validatedBody || req.body;
-  const { fullName, email, phone, isActive, specializations, basePayPerWeek, dailyTarget, sssNumber, pagIbigNumber, profilePictureUrl, role } = body;
+  const { fullName, email, phone, password, isActive, specializations, basePayPerWeek, dailyTarget, sssNumber, pagIbigNumber, profilePictureUrl, role } = body;
 
   try {
-    const updatedUser = await prisma.user.update({
-      where: { id: idNum },
-      data: {
-        email,
-        phone,
-        is_active: isActive,
-        role,
-        sss_number: sssNumber,
-        tin_number: pagIbigNumber,
-        profile_picture_url: profilePictureUrl,
-        staff_profile: {
-          upsert: {
-            update: {
-              full_name: fullName,
-              specializations,
-              base_pay_per_week: (basePayPerWeek !== undefined && basePayPerWeek !== null) ? parseFloat(basePayPerWeek) : undefined,
-              daily_target: (dailyTarget !== undefined && dailyTarget !== null) ? parseFloat(dailyTarget) : undefined,
-            },
-            create: {
-              full_name: fullName || 'New Staff',
-              specializations: specializations || 'General',
-              base_pay_per_week: (basePayPerWeek !== undefined && basePayPerWeek !== null) ? parseFloat(basePayPerWeek) : 2500.00,
-              daily_target: (dailyTarget !== undefined && dailyTarget !== null) ? parseFloat(dailyTarget) : 6000.00,
-            }
+    const data: Prisma.UserUpdateInput = {
+      email,
+      phone,
+      is_active: isActive,
+      role,
+      sss_number: sssNumber,
+      tin_number: pagIbigNumber,
+      profile_picture_url: profilePictureUrl,
+      staff_profile: {
+        upsert: {
+          update: {
+            full_name: fullName,
+            specializations,
+            base_pay_per_week: (basePayPerWeek !== undefined && basePayPerWeek !== null) ? parseFloat(basePayPerWeek as any) : undefined,
+            daily_target: (dailyTarget !== undefined && dailyTarget !== null) ? parseFloat(dailyTarget as any) : undefined,
           },
+          create: {
+            full_name: fullName || 'New Staff',
+            specializations: specializations || 'General',
+            base_pay_per_week: (basePayPerWeek !== undefined && basePayPerWeek !== null) ? parseFloat(basePayPerWeek as any) : 2500.00,
+            daily_target: (dailyTarget !== undefined && dailyTarget !== null) ? parseFloat(dailyTarget as any) : 6000.00,
+          }
         },
       },
+    };
+
+    if (password) {
+      data.password_hash = await bcrypt.hash(password, 10);
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: idNum },
+      data,
       include: {
         staff_profile: true,
       },
