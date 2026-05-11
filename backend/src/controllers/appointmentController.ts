@@ -46,7 +46,7 @@ export const getAppointments = async (req: AuthRequest, res: Response) => {
     const appointments = await prisma.appointment.findMany({
       where,
       take: limit + 1, // Fetch one extra to detect hasMore (D-12: cursor-only)
-      orderBy: { id: 'asc' },
+      orderBy: { appointment_date: 'desc' },
       include: {
         customer: true,
         items: { include: { service: true, staff: true } },
@@ -169,6 +169,12 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
         const service = await tx.service.findUnique({ where: { id: parseInt(serviceId) } });
         if (!service) throw new Error(`Service ${serviceId} not found`);
 
+        // staffId from frontend is User.id — resolve to StaffProfile.id for storage
+        const staffProfile = await tx.staffProfile.findFirst({
+          where: { user_id: parseInt(staffId) },
+        });
+        if (!staffProfile) throw new Error(`Staff profile for user ${staffId} not found`);
+
         const startDateTime = getFullDate(date, startTime);
         const endDateTime = addMinutes(startDateTime, service.duration_minutes);
         const endTimeStr = format(endDateTime, 'HH:mm');
@@ -177,7 +183,7 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
           data: {
             appointment_id: apt.id,
             service_id: service.id,
-            staff_id: parseInt(staffId),
+            staff_id: staffProfile.id,
             status: isWalkIn ? 'in_progress' : 'pending',
             start_time: startTime,
             end_time: endTimeStr,
@@ -212,7 +218,10 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
         }
 
         for (const item of items) {
-          const staff = await prisma.staffProfile.findUnique({ where: { id: parseInt(item.staffId) } });
+          // item.staffId here is User.id — resolve to StaffProfile.user_id for notification targeting
+          const staff = await prisma.staffProfile.findFirst({
+            where: { user_id: parseInt(item.staffId) },
+          });
           if (staff) {
             // D-05: Customers cannot notify other users
             if (callerRole === 'customer' && callerId !== staff.user_id) {

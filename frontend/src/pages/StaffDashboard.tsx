@@ -262,6 +262,16 @@ const StaffDashboard: React.FC = () => {
   const todayStr = new Date().toLocaleDateString('en-CA'); // Gets YYYY-MM-DD in local time
   const todayAppointments = appointments.filter((a) => a.appointment_date.split('T')[0] === todayStr);
 
+  const upcomingAppointments = appointments.filter((a) => {
+    const aptDateStr = a.appointment_date.split('T')[0];
+    if (aptDateStr === todayStr) return false;
+
+    const aptDate = new Date(aptDateStr);
+    const today = new Date(todayStr);
+    const diffDays = (aptDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+    return diffDays > 0 && diffDays <= 14; // Show next 14 days
+  }).sort((a, b) => a.appointment_date.localeCompare(b.appointment_date));
+
   return (
     <div className="container max-w-7xl mx-auto py-12 px-6">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
@@ -286,6 +296,14 @@ const StaffDashboard: React.FC = () => {
            </Button>
         </div>
       </header>
+
+      {!status?.isCheckedIn && (
+        <div className="mb-8 bg-primary/5 border border-primary/10 p-4 flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-700">
+          <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-primary/70">
+            <span className="italic mr-2">Note:</span> Check-in is required only to log hours and commission. You can view and manage your schedule anytime.
+          </p>
+        </div>
+      )}
 
       <Tabs defaultValue="schedule" className="space-y-12">
         <TabsList className="bg-transparent p-0 h-auto gap-8 border-b border-primary/5 w-full justify-start rounded-none">
@@ -334,55 +352,102 @@ const StaffDashboard: React.FC = () => {
                </div>
              )}
 
-             <Card className="lg:col-span-8 rounded-none border-none shadow-sm overflow-hidden">
-                <CardHeader className="bg-primary/5 border-b border-primary/5 pb-8">
-                   <CardTitle className="font-serif text-2xl">Today's Rituals</CardTitle>
-                   <CardDescription className="text-[10px] uppercase font-bold tracking-widest">Managing {todayAppointments.length} scheduled treatment sessions</CardDescription>
-                </CardHeader>
-                <CardContent className="p-0">
-                   {todayAppointments.length === 0 ? (
-                     <div className="text-center py-32 text-muted-foreground italic text-[10px] uppercase tracking-widest bg-muted/5 font-bold">
-                        No rituals scheduled for this cycle.
-                     </div>
-                   ) : (
-                     <Table>
-                        <TableHeader className="bg-muted/30 border-none">
-                           <TableRow className="border-none">
-                              <TableHead className="pl-8 font-bold text-[9px] uppercase tracking-widest">Timeline</TableHead>
-                              <TableHead className="font-bold text-[9px] uppercase tracking-widest">Client</TableHead>
-                              <TableHead className="font-bold text-[9px] uppercase tracking-widest">Treatment</TableHead>
-                              <TableHead className="font-bold text-[9px] uppercase tracking-widest">Status</TableHead>
-                              <TableHead className="pr-8 text-right font-bold text-[9px] uppercase tracking-widest">Actions</TableHead>
-                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                           {todayAppointments.map((apt) => {
-                             const myItems = apt.items.filter(i => i.staff_id === user?.staffProfileId || (!user?.staffProfileId && i.staff_id === user?.id));
-                             return myItems.map(item => {
-                               const isActive = item.status === 'in_progress';
-                               const now = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-                               const isCurrentTimeSlot = now >= item.start_time && now <= item.end_time;
-                               
-                               return (
-                               <TableRow key={item.id} className={`hover:bg-primary-ultra/10 border-primary/5 transition-colors ${isActive ? 'border-l-2 border-l-info-color' : ''} ${isCurrentTimeSlot ? 'bg-info-color/5' : ''}`}>
-                                 <TableCell className="pl-4 md:pl-8 py-4 md:py-6 font-bold text-xs block md:table-cell w-full">{item.start_time} — {item.end_time}</TableCell>
-                                 <TableCell className="font-serif text-lg block md:table-cell w-full">{apt.customer.full_name}</TableCell>
-                                 <TableCell className="font-medium text-xs block md:table-cell w-full">{item.service.name}</TableCell>
-                                 <TableCell className="block md:table-cell w-full mt-2 md:mt-0">{getStatusBadge(item.status)}</TableCell>
-                                 <TableCell className="pr-4 md:pr-8 md:text-right block md:table-cell w-full mt-4 md:mt-0">
-                                    {item.status !== 'completed' && (
-                                       <Button onClick={() => handleComplete(apt.id)} size="sm" className="rounded-none h-8 text-[9px] uppercase font-bold tracking-widest px-4 bg-success-color hover:bg-success-color/90 w-full md:w-auto">Finalize Ritual</Button>
-                                    )}
-                                 </TableCell>
-                               </TableRow>
-                               );
-                             });
-                           })}
-                        </TableBody>
-                     </Table>
-                   )}
-                </CardContent>
-             </Card>
+             <div className="lg:col-span-8 space-y-12">
+                <Card className="rounded-none border-none shadow-sm overflow-hidden">
+	                <CardHeader className="bg-primary/5 border-b border-primary/5 pb-8">
+	                   <CardTitle className="font-serif text-2xl">Today's Rituals</CardTitle>
+	                   <CardDescription className="text-[10px] uppercase font-bold tracking-widest flex items-center gap-2">
+                       <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                       Managing {todayAppointments.length} scheduled treatment sessions
+                     </CardDescription>
+	                </CardHeader>
+	                <CardContent className="p-0">
+	                   {todayAppointments.length === 0 ? (
+	                     <div className="text-center py-32 text-muted-foreground italic text-[10px] uppercase tracking-widest bg-muted/5 font-bold">
+	                        No rituals scheduled for this cycle.
+	                     </div>
+	                   ) : (
+	                     <Table>
+	                        <TableHeader className="bg-muted/30 border-none">
+	                           <TableRow className="border-none">
+	                              <TableHead className="pl-8 font-bold text-[9px] uppercase tracking-widest">Timeline</TableHead>
+	                              <TableHead className="font-bold text-[9px] uppercase tracking-widest">Client</TableHead>
+	                              <TableHead className="font-bold text-[9px] uppercase tracking-widest">Treatment</TableHead>
+	                              <TableHead className="font-bold text-[9px] uppercase tracking-widest">Status</TableHead>
+	                              <TableHead className="pr-8 text-right font-bold text-[9px] uppercase tracking-widest">Actions</TableHead>
+	                           </TableRow>
+	                        </TableHeader>
+	                        <TableBody>
+	                           {todayAppointments.map((apt) => {
+	                             const myItems = apt.items.filter(i => i.staff_id === user?.staffProfileId || (!user?.staffProfileId && i.staff_id === user?.id));
+	                             return myItems.map(item => {
+	                               const isActive = item.status === 'in_progress';
+	                               const now = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+	                               const isCurrentTimeSlot = now >= item.start_time && now <= item.end_time;
+
+	                               return (
+	                               <TableRow key={item.id} className={`hover:bg-primary-ultra/10 border-primary/5 transition-colors ${isActive ? 'border-l-2 border-l-info-color' : ''} ${isCurrentTimeSlot ? 'bg-info-color/5' : ''}`}>
+	                                 <TableCell className="pl-4 md:pl-8 py-4 md:py-6 font-bold text-xs block md:table-cell w-full">{item.start_time} — {item.end_time}</TableCell>
+	                                 <TableCell className="font-serif text-lg block md:table-cell w-full">{apt.customer.full_name}</TableCell>
+	                                 <TableCell className="font-medium text-xs block md:table-cell w-full">{item.service.name}</TableCell>
+	                                 <TableCell className="block md:table-cell w-full mt-2 md:mt-0">{getStatusBadge(item.status)}</TableCell>
+	                                 <TableCell className="pr-4 md:pr-8 md:text-right block md:table-cell w-full mt-4 md:mt-0">
+	                                    {item.status !== 'completed' && (
+	                                       <Button onClick={() => handleComplete(apt.id)} size="sm" className="rounded-none h-8 text-[9px] uppercase font-bold tracking-widest px-4 bg-success-color hover:bg-success-color/90 w-full md:w-auto">Finalize Ritual</Button>
+	                                    )}
+	                                 </TableCell>
+	                               </TableRow>
+	                               );
+	                             });
+	                           })}
+	                        </TableBody>
+	                     </Table>
+	                   )}
+	                </CardContent>
+                </Card>
+
+                <Card className="rounded-none border-none shadow-sm overflow-hidden">
+	                <CardHeader className="bg-muted/30 border-b border-primary/5 pb-8">
+	                   <CardTitle className="font-serif text-2xl text-muted-foreground">Upcoming Rituals</CardTitle>
+	                   <CardDescription className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60">Your schedule for the next 14 days</CardDescription>
+	                </CardHeader>
+	                <CardContent className="p-0">
+	                   {upcomingAppointments.length === 0 ? (
+	                     <div className="text-center py-24 text-muted-foreground italic text-[10px] uppercase tracking-widest bg-muted/5 font-bold">
+	                        No upcoming sessions detected.
+	                     </div>
+	                   ) : (
+	                     <Table>
+	                        <TableHeader className="bg-muted/30 border-none">
+	                           <TableRow className="border-none">
+	                              <TableHead className="pl-8 font-bold text-[9px] uppercase tracking-widest">Date</TableHead>
+	                              <TableHead className="font-bold text-[9px] uppercase tracking-widest">Timeline</TableHead>
+	                              <TableHead className="font-bold text-[9px] uppercase tracking-widest">Client</TableHead>
+	                              <TableHead className="font-bold text-[9px] uppercase tracking-widest">Treatment</TableHead>
+	                              <TableHead className="pr-8 text-right font-bold text-[9px] uppercase tracking-widest">Status</TableHead>
+	                           </TableRow>
+	                        </TableHeader>
+	                        <TableBody>
+	                           {upcomingAppointments.map((apt) => {
+	                             const myItems = apt.items.filter(i => i.staff_id === user?.staffProfileId || (!user?.staffProfileId && i.staff_id === user?.id));
+	                             return myItems.map(item => (
+	                               <TableRow key={item.id} className="hover:bg-primary-ultra/10 border-primary/5 transition-colors opacity-70 grayscale-[0.5] hover:opacity-100 hover:grayscale-0">
+	                                 <TableCell className="pl-4 md:pl-8 py-4 md:py-6 font-bold text-xs block md:table-cell w-full text-primary">
+                                     {new Date(apt.appointment_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', weekday: 'short' })}
+                                   </TableCell>
+	                                 <TableCell className="py-4 md:py-6 font-medium text-xs block md:table-cell w-full">{item.start_time} — {item.end_time}</TableCell>
+	                                 <TableCell className="font-serif text-lg block md:table-cell w-full">{apt.customer.full_name}</TableCell>
+	                                 <TableCell className="font-medium text-xs block md:table-cell w-full">{item.service.name}</TableCell>
+	                                 <TableCell className="pr-4 md:pr-8 md:text-right block md:table-cell w-full mt-2 md:mt-0">{getStatusBadge(item.status)}</TableCell>
+	                               </TableRow>
+	                             ));
+	                           })}
+	                        </TableBody>
+	                     </Table>
+	                   )}
+	                </CardContent>
+                </Card>
+	             </div>
           </div>
         </TabsContent>
 

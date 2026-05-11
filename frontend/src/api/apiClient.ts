@@ -111,7 +111,8 @@ export const updateStaffSchedule = (id: number, data: { schedules: ScheduleItem[
 export const getAvailability = (date: string) =>
   apiClient.get('/appointments/availability', { params: { date } });
 export const createAppointment = (bookingData: CreateAppointmentRequest) => apiClient.post('/appointments', bookingData);
-export const getAppointments = () => apiClient.get('/appointments');
+export const getAppointments = (params?: { cursor?: string; limit?: number }) =>
+  apiClient.get('/appointments', { params });
 export const completeAppointment = (id: number, data: { paymentMethod: 'cash' | 'gcash' }) =>
   apiClient.post(`/appointments/${id}/complete`, data);
 export const getCommissionSummary = () => apiClient.get('/appointments/commission-summary');
