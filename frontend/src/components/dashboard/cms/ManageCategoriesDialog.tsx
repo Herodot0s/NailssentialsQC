@@ -25,7 +25,6 @@ interface ManageCategoriesDialogProps {
   onOpenChange: (open: boolean) => void;
   categories: Category[];
   onSuccess: () => void;
-  setError: (error: string | null) => void;
 }
 
 export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
@@ -33,7 +32,6 @@ export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
   onOpenChange,
   categories,
   onSuccess,
-  setError,
 }) => {
   const [currentCategory, setCurrentCategory] = useState<Partial<Category> | null>(null);
   const [isLoading, setIsLoading] = useState(false);

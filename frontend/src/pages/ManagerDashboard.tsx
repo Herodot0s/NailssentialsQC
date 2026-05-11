@@ -240,7 +240,7 @@ const ManagerDashboard: React.FC = () => {
           tinNumber: selectedStaff.tinNumber,
           govId: selectedStaff.govId,
           profilePictureUrl: selectedStaff.profilePictureUrl,
-          specializations: selectedStaff.specializations
+          specializations: selectedStaff.specializations ?? undefined
        });
        setStatusModal({
          open: true,

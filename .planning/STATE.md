@@ -65,3 +65,4 @@ Resume file: None
 | 260510-npk | move remaining file of manager's dashboard @frontend/src/pages/ to his respective folder for better readability of the files and codes. | 2026-05-10 | 21936f6 | [260510-npk-move-remaining-file-of-manager-s-dashboa](./quick/260510-npk-move-remaining-file-of-manager-s-dashboa/) |
 | 20260507-commit-changes-to-testings | Commit all changes to TESTINGS branch | 2026-05-07 | 60bc401 | [20260507-commit-changes-to-testings](./quick/20260507-commit-changes-to-testings/) |
 | 260510-oef | Manager redirect to manager dashboard instead of staff dashboard | 2026-05-10 | local | [260510-oef-manager-redirect-to-manager-dashboard-in](./quick/260510-oef-manager-redirect-to-manager-dashboard-in/) |
+| 20260511-fix-typescript-errors | Fix 6 TypeScript errors (unused variables, type mismatches, useRef init) | 2026-05-11 | local | [20260511-fix-typescript-errors](./quick/20260511-fix-typescript-errors/) |

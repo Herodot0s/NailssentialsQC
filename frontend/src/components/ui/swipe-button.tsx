@@ -24,7 +24,7 @@ const SwipeButton: React.FC<SwipeButtonProps> = ({
   const [velocity, setVelocity] = useState(0);
   const [lastX, setLastX] = useState(0);
   const [lastTime, setLastTime] = useState(0);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | null>(null);
 
   const getMaxThumbPosition = useCallback(() => {
     const trackWidth = trackRef.current?.offsetWidth || 0;
@@ -39,7 +39,7 @@ const SwipeButton: React.FC<SwipeButtonProps> = ({
     const damping = 25;
     const mass = 1;
     
-    const step = (t: number) => {
+    const step = () => {
       const dt = 0.016; // Fixed timestep for simplicity
       const force = -stiffness * (currentPos - target);
       const acceleration = force / mass;
@@ -119,11 +119,6 @@ const SwipeButton: React.FC<SwipeButtonProps> = ({
   // Touch event handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     handleDragStart(e.touches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    // Note: preventDefault is handled in the global listener for touchmove
-    handleDragMove(e.touches[0].clientX);
   };
 
   // Global event listeners for drag

@@ -717,7 +717,6 @@ const ManageServices: React.FC = () => {
         onOpenChange={setIsEditingCategories}
         categories={categories}
         onSuccess={fetchData}
-        setError={setError}
       />
     </div>
   );
