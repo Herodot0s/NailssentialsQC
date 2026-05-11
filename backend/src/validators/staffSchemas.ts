@@ -10,8 +10,7 @@ export const createStaffSchema = z.object({
   basePayPerWeek: z.coerce.number().nonnegative().optional().nullable(),
   dailyTarget: z.coerce.number().nonnegative().optional().nullable(),
   sssNumber: z.string().optional().nullable(),
-  tinNumber: z.string().optional().nullable(),
-  govId: z.string().optional().nullable(),
+  pagIbigNumber: z.string().optional().nullable(),
   profilePictureUrl: z.string().url().optional().or(z.literal('')).nullable(),
   role: z.enum(['staff', 'manager']).optional(),
 });

@@ -109,8 +109,7 @@ const ManagerDashboard: React.FC = () => {
     basePayPerWeek: '2500',
     dailyTarget: '6000',
     sssNumber: '',
-    tinNumber: '',
-    govId: '',
+    pagIbigNumber: '',
     profilePictureUrl: '',
   });
 
@@ -213,8 +212,7 @@ const ManagerDashboard: React.FC = () => {
         basePayPerWeek: '2500',
         dailyTarget: '6000',
         sssNumber: '',
-        tinNumber: '',
-        govId: '',
+        pagIbigNumber: '',
         profilePictureUrl: '',
       });
       fetchData();
@@ -237,10 +235,11 @@ const ManagerDashboard: React.FC = () => {
           basePayPerWeek: selectedStaff.basePayPerWeek,
           dailyTarget: selectedStaff.dailyTarget,
           sssNumber: selectedStaff.sssNumber,
-          tinNumber: selectedStaff.tinNumber,
-          govId: selectedStaff.govId,
+          pagIbigNumber: selectedStaff.pagIbigNumber,
           profilePictureUrl: selectedStaff.profilePictureUrl,
-          specializations: selectedStaff.specializations ?? undefined
+          specializations: selectedStaff.specializations ?? undefined,
+          email: selectedStaff.email ?? undefined,
+          phone: selectedStaff.phone ?? undefined
        });
        setStatusModal({
          open: true,
@@ -582,6 +581,7 @@ const ManagerDashboard: React.FC = () => {
       <AddStaffDialog 
         open={showAddStaffModal} 
         onOpenChange={setShowAddStaffModal} 
+        categories={categories}
         form={newStaffForm} 
         onFormChange={setNewStaffForm} 
         onSubmit={handleAddStaff} 

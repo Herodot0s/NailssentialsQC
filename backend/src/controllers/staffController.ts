@@ -75,8 +75,7 @@ export const getAllStaff = async (req: Request, res: Response) => {
         basePayPerWeek: isManager ? u.staff_profile?.base_pay_per_week : undefined,
         dailyTarget: isManager ? u.staff_profile?.daily_target : undefined,
         sssNumber: isManager ? u.sss_number : undefined,
-        tinNumber: isManager ? u.tin_number : undefined,
-        govId: isManager ? u.gov_id : undefined,
+        pagIbigNumber: isManager ? u.tin_number : undefined,
         createdAt: isManager ? u.created_at : undefined,
       })),
       nextCursor,
@@ -93,7 +92,7 @@ export const getAllStaff = async (req: Request, res: Response) => {
  * Create a new staff member
  */
 export const createStaff = async (req: Request, res: Response) => {
-  const { fullName, email, phone, password, username, specializations, basePayPerWeek, dailyTarget, sssNumber, tinNumber, govId, profilePictureUrl, role } = req.body;
+  const { fullName, email, phone, password, username, specializations, basePayPerWeek, dailyTarget, sssNumber, pagIbigNumber, profilePictureUrl, role } = req.body;
 
   try {
     // Check if user already exists
@@ -121,8 +120,7 @@ export const createStaff = async (req: Request, res: Response) => {
         password_hash: hashedPassword,
         role: role || 'staff',
         sss_number: sssNumber,
-        tin_number: tinNumber,
-        gov_id: govId,
+        tin_number: pagIbigNumber,
         profile_picture_url: profilePictureUrl,
         staff_profile: {
           create: {
@@ -165,7 +163,7 @@ export const updateStaff = async (req: Request, res: Response) => {
   
   // Use validatedBody from Zod middleware if available
   const body = (req as AuthRequest).validatedBody || req.body;
-  const { fullName, email, phone, isActive, specializations, basePayPerWeek, dailyTarget, sssNumber, tinNumber, govId, profilePictureUrl, role } = body;
+  const { fullName, email, phone, isActive, specializations, basePayPerWeek, dailyTarget, sssNumber, pagIbigNumber, profilePictureUrl, role } = body;
 
   try {
     const updatedUser = await prisma.user.update({
@@ -176,8 +174,7 @@ export const updateStaff = async (req: Request, res: Response) => {
         is_active: isActive,
         role,
         sss_number: sssNumber,
-        tin_number: tinNumber,
-        gov_id: govId,
+        tin_number: pagIbigNumber,
         profile_picture_url: profilePictureUrl,
         staff_profile: {
           upsert: {

@@ -26,14 +26,15 @@ export interface AuthResponse {
 // Staff API types
 export interface CreateStaffRequest {
   fullName: string;
+  email?: string;
+  phone?: string;
   username: string;
   password: string;
   specializations?: string;
   basePayPerWeek: number;
   dailyTarget: number;
   sssNumber?: string;
-  tinNumber?: string;
-  govId?: string;
+  pagIbigNumber?: string;
   profilePictureUrl?: string;
 }
 
@@ -50,8 +51,7 @@ export interface StaffMember {
   basePayPerWeek: number;
   dailyTarget: number;
   sssNumber?: string;
-  tinNumber?: string;
-  govId?: string;
+  pagIbigNumber?: string;
   profilePictureUrl?: string;
   createdAt: string;
 }
