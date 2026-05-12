@@ -145,27 +145,27 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4, ease: PREMIUM_EASE }}
-            className="fixed inset-0 bg-warm-canvas/80 backdrop-blur-md pointer-events-auto"
+            className="fixed inset-0 bg-canvas/80 backdrop-blur-sm pointer-events-auto"
             onClick={() => onOpenChange(false)}
           />
           
           <motion.div
             layoutId={layoutId}
             transition={morphTransition}
-            className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[32px] shadow-premium relative z-10 pointer-events-auto flex flex-col"
+            className="bg-surface-card w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg border border-hairline relative z-10 pointer-events-auto flex flex-col"
           >
-            <div className="sticky top-0 z-20 flex justify-between items-center bg-white/95 backdrop-blur-md px-10 py-8 border-b border-kiln-border/50">
-              <motion.h2 layoutId={titleLayoutId} className="font-serif text-3xl font-light text-charcoal-bark" transition={morphTransition}>
+            <div className="sticky top-0 z-20 flex justify-between items-center bg-surface-card/95 backdrop-blur-md px-10 py-6 border-b border-hairline">
+              <motion.h2 layoutId={titleLayoutId} className="display-lg text-ink" transition={morphTransition}>
                 {editPackage ? 'Edit Package' : 'New Package'}
               </motion.h2>
-              <button type="button" onClick={() => onOpenChange(false)} className="w-10 h-10 rounded-full bg-bisque-wash/50 flex items-center justify-center text-charcoal-bark hover:bg-bisque-wash transition-colors">
-                <X className="w-5 h-5" />
+              <button type="button" onClick={() => onOpenChange(false)} className="w-8 h-8 rounded-md bg-surface-soft flex items-center justify-center text-ink hover:bg-hairline-soft transition-colors">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-10 space-y-12">
+            <form onSubmit={handleSubmit} className="p-10 space-y-10">
               {error && (
-                <motion.div initial={{opacity: 0, height: 0}} animate={{opacity: 1, height: 'auto'}} className="p-4 bg-brick-error/10 text-brick-error text-[11px] uppercase tracking-widest font-bold rounded-xl border border-brick-error/20">
+                <motion.div initial={{opacity: 0, height: 0}} animate={{opacity: 1, height: 'auto'}} className="p-4 bg-accent-red-soft text-ink utility-xs font-bold rounded-md border border-accent-red/20">
                   {error}
                 </motion.div>
               )}
@@ -174,16 +174,16 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 {/* Featured Image */}
                 <div className="space-y-4">
-                  <Label className="text-[11px] uppercase tracking-[0.2em] font-bold text-warm-stone">Featured Image</Label>
-                  <motion.div layoutId={imgLayoutId} transition={morphTransition} className="relative aspect-square w-full rounded-[24px] border border-kiln-border overflow-hidden bg-bisque-wash/30 group hover:border-kiln-terracotta/40 transition-colors">
+                  <Label className="utility-xs text-mute">Featured Image</Label>
+                  <motion.div layoutId={imgLayoutId} transition={morphTransition} className="relative aspect-square w-full rounded-md border border-hairline overflow-hidden bg-surface-soft/30 group hover:border-primary/40 transition-colors">
                     {previewUrl ? (
                       <>
                         <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="absolute inset-0 bg-ink/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <button
                             type="button"
                             onClick={() => { setImageFile(null); setPreviewUrl(null); }}
-                            className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-brick-error transition-colors"
+                            className="p-3 bg-white/20 backdrop-blur-md rounded-md text-white hover:bg-accent-red transition-colors"
                           >
                             <X className="h-5 w-5" />
                           </button>
@@ -191,9 +191,9 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
                       </>
                     ) : (
                       <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer p-6 text-center">
-                        <Upload className="h-10 w-10 text-kiln-terracotta/40 stroke-[1.5] mb-4" />
-                        <span className="text-[11px] uppercase tracking-[0.2em] font-bold text-kiln-terracotta mb-1">Upload File</span>
-                        <span className="text-xs font-light text-warm-stone">or drag and drop</span>
+                        <Upload className="h-10 w-10 text-primary/40 stroke-[1.5] mb-4" />
+                        <span className="utility-xs text-primary mb-1">Upload File</span>
+                        <span className="body-xs text-mute">or drag and drop</span>
                         <input type="file" className="sr-only" accept="image/*" onChange={handleFileChange} />
                       </label>
                     )}
@@ -203,33 +203,33 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
                 {/* Basic Info */}
                 <div className="space-y-8 flex flex-col justify-center">
                   <div className="space-y-4">
-                    <Label className="text-[11px] uppercase tracking-[0.2em] font-bold text-warm-stone">Package Name *</Label>
+                    <Label className="utility-xs text-mute">Package Name *</Label>
                     <Input
                       value={name}
                       onChange={e => setName(e.target.value)}
                       required
-                      className="rounded-xl border-kiln-border h-14 text-lg font-serif text-charcoal-bark focus-visible:ring-kiln-terracotta bg-transparent"
+                      className="rounded-md border-hairline h-12 heading-md text-ink focus-visible:ring-primary bg-transparent"
                     />
                   </div>
                   <div className="space-y-4">
-                    <Label className="text-[11px] uppercase tracking-[0.2em] font-bold text-warm-stone">Description</Label>
+                    <Label className="utility-xs text-mute">Description</Label>
                     <Textarea
                       value={description}
                       onChange={e => setDescription(e.target.value)}
                       rows={5}
-                      className="rounded-xl border-kiln-border text-base font-light text-charcoal-bark focus-visible:ring-kiln-terracotta resize-none bg-transparent"
+                      className="rounded-md border-hairline body-md text-body focus-visible:ring-primary resize-none bg-transparent"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Section 2 - Services */}
-              <div className="space-y-6 pt-8 border-t border-kiln-border/50">
+              <div className="space-y-6 pt-8 border-t border-hairline">
                 <div className="flex justify-between items-end">
-                  <h3 className="font-serif text-2xl font-light text-charcoal-bark">Included Rituals</h3>
-                  <span className="text-[11px] tracking-[0.2em] uppercase font-bold text-warm-stone">Select 2 or more</span>
+                  <h3 className="heading-md text-ink">Included Rituals</h3>
+                  <span className="utility-xs text-mute">Select 2 or more</span>
                 </div>
-                <div className="bg-linen-mist rounded-[24px] p-8 border border-kiln-border/30">
+                <div className="bg-canvas/30 rounded-md p-6 border border-hairline-soft">
                   <ServiceChipSelector
                     selectedServiceIds={selectedServiceIds}
                     onSelectionChange={setSelectedServiceIds}
@@ -239,65 +239,65 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
               </div>
 
               {/* Section 3 & 5 - Pricing & Settings */}
-              <div className="space-y-8 pt-8 border-t border-kiln-border/50">
-                <h3 className="font-serif text-2xl font-light text-charcoal-bark">Pricing & Configuration</h3>
+              <div className="space-y-8 pt-8 border-t border-hairline">
+                <h3 className="heading-md text-ink">Pricing & Configuration</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
                   <div className="space-y-4">
-                    <Label className="text-[11px] uppercase tracking-[0.2em] font-bold text-warm-stone">Package Price *</Label>
+                    <Label className="utility-xs text-mute">Package Price *</Label>
                     <div className="relative">
-                      <span className="absolute left-4 top-3.5 text-kiln-terracotta font-serif text-xl">₱</span>
+                      <span className="absolute left-4 top-3 text-primary heading-md">₱</span>
                       <Input
                         type="number" min="1" step="0.01"
                         value={price}
                         onChange={e => setPrice(e.target.value)}
                         required
-                        className="rounded-xl border-kiln-border h-14 pl-10 text-xl font-serif text-charcoal-bark focus-visible:ring-kiln-terracotta bg-transparent"
+                        className="rounded-md border-hairline h-12 pl-10 heading-md text-ink focus-visible:ring-primary bg-transparent"
                       />
                     </div>
                   </div>
                   <div className="space-y-4">
-                    <Label className="text-[11px] uppercase tracking-[0.2em] font-bold text-warm-stone">Display Order</Label>
+                    <Label className="utility-xs text-mute">Display Order</Label>
                     <Input
                       type="number"
                       value={displayOrder}
                       onChange={e => setDisplayOrder(e.target.value)}
-                      className="rounded-xl border-kiln-border h-14 text-base text-charcoal-bark focus-visible:ring-kiln-terracotta bg-transparent"
+                      className="rounded-md border-hairline h-12 body-md text-ink focus-visible:ring-primary bg-transparent"
                     />
                   </div>
                   
                   <div className="space-y-4">
-                    <Label className="text-[11px] uppercase tracking-[0.2em] font-bold text-warm-stone">Available From</Label>
+                    <Label className="utility-xs text-mute">Available From</Label>
                     <Input
                       type="date"
                       value={validFrom}
                       onChange={e => setValidFrom(e.target.value)}
-                      className="rounded-xl border-kiln-border h-14 text-base text-charcoal-bark focus-visible:ring-kiln-terracotta bg-transparent"
+                      className="rounded-md border-hairline h-12 body-md text-ink focus-visible:ring-primary bg-transparent"
                     />
                   </div>
                   <div className="space-y-4">
-                    <Label className="text-[11px] uppercase tracking-[0.2em] font-bold text-warm-stone">Available Until</Label>
+                    <Label className="utility-xs text-mute">Available Until</Label>
                     <Input
                       type="date"
                       value={validUntil}
                       onChange={e => setValidUntil(e.target.value)}
-                      className="rounded-xl border-kiln-border h-14 text-base text-charcoal-bark focus-visible:ring-kiln-terracotta bg-transparent"
+                      className="rounded-md border-hairline h-12 body-md text-ink focus-visible:ring-primary bg-transparent"
                     />
                   </div>
 
                   <div className="space-y-4">
-                    <Label className="text-[11px] uppercase tracking-[0.2em] font-bold text-warm-stone">Redemption Limit</Label>
+                    <Label className="utility-xs text-mute">Redemption Limit</Label>
                     <Input
                       type="number"
                       value={maxRedemptions}
                       onChange={e => setMaxRedemptions(e.target.value)}
-                      className="rounded-xl border-kiln-border h-14 text-base text-charcoal-bark focus-visible:ring-kiln-terracotta bg-transparent"
+                      className="rounded-md border-hairline h-12 body-md text-ink focus-visible:ring-primary bg-transparent"
                       placeholder="Unlimited"
                     />
                   </div>
 
-                  <div className="space-y-3 flex flex-col justify-center bg-bisque-wash/30 rounded-xl p-5 border border-kiln-border/50 h-[84px] mt-auto">
+                  <div className="space-y-3 flex flex-col justify-center bg-surface-soft/30 rounded-md p-5 border border-hairline h-[72px] mt-auto">
                     <div className="flex justify-between items-center w-full">
-                      <Label className="text-[11px] uppercase tracking-[0.2em] font-bold text-charcoal-bark cursor-pointer" htmlFor="active-toggle">
+                      <Label className="utility-xs text-ink cursor-pointer" htmlFor="active-toggle">
                         Active Status
                       </Label>
                       <Switch id="active-toggle" checked={isActive} onCheckedChange={setIsActive} />
@@ -306,14 +306,14 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
                 </div>
               </div>
 
-              <div className="flex justify-end gap-4 pt-10 sticky bottom-0 bg-white/95 backdrop-blur-md pb-10 -mx-10 px-10 border-t border-kiln-border/50 z-20">
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl h-14 px-8 uppercase tracking-[0.2em] text-[11px] font-bold text-charcoal-bark border-kiln-border hover:bg-bisque-wash/50">
+              <div className="flex justify-end gap-4 pt-10 sticky bottom-0 bg-surface-card/95 backdrop-blur-md pb-10 -mx-10 px-10 border-t border-hairline z-20">
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="rounded-md h-10 px-6 utility-xs text-ink border-hairline hover:bg-surface-soft">
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitDisabled}
-                  className="rounded-xl h-14 px-12 uppercase tracking-[0.2em] text-[11px] font-bold shadow-premium bg-kiln-terracotta text-white hover:bg-kiln-terracotta-hover transition-all"
+                  className="btn-primary px-10"
                 >
                   {isSubmitting ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -327,5 +327,6 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
         </div>
       )}
     </AnimatePresence>
+
   );
 }
