@@ -1,20 +1,20 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
-import { parse, addMinutes, areIntervalsOverlapping, startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns';
+import { addMinutes, areIntervalsOverlapping, startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns';
 import { AppointmentWithDetails } from '../types/appointmentTypes';
-
-const getFullDate = (dateStr: string, timeStr: string): Date => {
-  return parse(`${dateStr} ${timeStr}`, 'yyyy-MM-dd HH:mm', new Date());
-};
+import { getFullDate, getDatePart } from '../utils/dateUtils';
+import { sendSuccess } from '../utils/apiHelpers';
 
 export const getAvailableSlots = async (req: Request, res: Response) => {
   try {
-    const { date } = req.query; // YYYY-MM-DD
+    const { date, count } = req.query; // YYYY-MM-DD
     if (!date) {
       return res.status(400).json({ success: false, message: 'Date is required' });
     }
+    const requiredCount = count ? parseInt(count as string) : 1;
     const dateStr = Array.isArray(date) ? (date[0] as string) : (date as string);
+    const dateOnly = getDatePart(dateStr);
 
     const OPERATING_HOURS = { start: 12, end: 22 }; // 12 PM to 10 PM
     const allSlots = [];
@@ -28,11 +28,12 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
     });
 
     if (technicians.length === 0) {
-      return res.status(200).json({ success: true, data: allSlots.map(s => ({ time: s, available: false })) });
+      return sendSuccess(res, allSlots.map(s => ({ time: s, available: false })));
     }
 
-    // 2. Get all appointment items for this date (using date range to handle time zones)
-    const parsedDate = parse(dateStr, 'yyyy-MM-dd', new Date());
+    // 2. Get all appointment items for this date
+    const parsedDate = new Date(dateOnly);
+
     const appointmentItems = await prisma.appointmentItem.findMany({
       where: {
         appointment: {
@@ -52,15 +53,15 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
 
     // 3. For each slot, check if ANY technician is free
     const slotsWithAvailability = allSlots.map(slotTime => {
-      const slotStart = getFullDate(dateStr, slotTime);
+      const slotStart = getFullDate(dateOnly, slotTime);
       const slotEnd = addMinutes(slotStart, 59);
 
       const availableTechnicians = technicians.filter(tech => {
         const techItems = appointmentItems.filter(item => item.staff_id === tech.id);
 
         const hasConflict = techItems.some(item => {
-          const itemStart = getFullDate(dateStr, item.start_time);
-          const itemEnd = getFullDate(dateStr, item.end_time);
+          const itemStart = getFullDate(dateOnly, item.start_time);
+          const itemEnd = getFullDate(dateOnly, item.end_time);
 
           return areIntervalsOverlapping(
             { start: slotStart, end: slotEnd },
@@ -73,14 +74,11 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
 
       return {
         time: slotTime,
-        available: availableTechnicians.length > 0
+        available: availableTechnicians.length >= requiredCount
       };
     });
 
-    return res.status(200).json({
-      success: true,
-      data: slotsWithAvailability
-    });
+    return sendSuccess(res, slotsWithAvailability);
   } catch (error: unknown) {
     console.error('Get available slots error:', error);
     const message = error instanceof Error ? error.message : 'Failed to fetch availability';

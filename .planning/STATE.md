@@ -4,8 +4,8 @@ milestone: v2.0
 milestone_name: Premium Experience & Expansion
 status: milestone_complete
 stopped_at: v2.0 milestone archived — shipped 2026-05-10
-last_updated: "2026-05-10"
-last_activity: 2026-05-10
+last_updated: "2026-05-11"
+last_activity: 2026-05-11 - Synchronized AttendanceLedger with updated database schema
 progress:
   total_phases: 7
   completed_phases: 6
@@ -64,3 +64,8 @@ Resume file: None
 | 20260507-sync-vercel-blob-token | Sync Vercel Blob Read/Write token for file storage | 2026-05-07 | local | [20260507-sync-vercel-blob-token](./quick/20260507-sync-vercel-blob-token/) |
 | 260510-npk | move remaining file of manager's dashboard @frontend/src/pages/ to his respective folder for better readability of the files and codes. | 2026-05-10 | 21936f6 | [260510-npk-move-remaining-file-of-manager-s-dashboa](./quick/260510-npk-move-remaining-file-of-manager-s-dashboa/) |
 | 20260507-commit-changes-to-testings | Commit all changes to TESTINGS branch | 2026-05-07 | 60bc401 | [20260507-commit-changes-to-testings](./quick/20260507-commit-changes-to-testings/) |
+| 260510-oef | Manager redirect to manager dashboard instead of staff dashboard | 2026-05-10 | local | [260510-oef-manager-redirect-to-manager-dashboard-in](./quick/260510-oef-manager-redirect-to-manager-dashboard-in/) |
+| 20260511-fix-typescript-errors | Fix 6 TypeScript errors (unused variables, type mismatches, useRef init) | 2026-05-11 | local | [20260511-fix-typescript-errors](./quick/20260511-fix-typescript-errors/) |
+| 20260512-booking-sync-conflict-fix | Booking Sync and Conflict Prevention (Industry Grade) | 2026-05-12 | local | [20260512-booking-sync-conflict-fix](./quick/20260512-booking-sync-conflict-fix/) |
+| 20260512-fix-ts-errors | Fix 23 TypeScript build errors across dashboard components | 2026-05-12 | local | [20260512-fix-ts-errors](./quick/20260512-fix-ts-errors/) |
+

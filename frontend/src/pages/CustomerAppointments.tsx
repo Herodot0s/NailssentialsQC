@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getAppointments, submitReview } from '../api/apiClient';
+import { getAppointments, submitReview, cancelAppointment } from '../api/apiClient';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import {
   AlertCircle, 
   Receipt, 
   Star,
+  XCircle,
 } from 'lucide-react';
 import ReceiptModal from '@/components/ReceiptModal';
 import type { AppointmentItem, Appointment, AppointmentWithServices } from '@/types/api';
@@ -23,8 +24,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-
-// Appointment type imported from @/types/api
+import { Textarea } from '@/components/ui/textarea';
 
 const CustomerAppointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -42,6 +42,11 @@ const CustomerAppointments: React.FC = () => {
     serviceName: '',
     staffName: ''
   });
+
+  // Cancellation State
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelForm, setCancelForm] = useState({ appointmentId: 0, reason: '' });
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const PRAISE_TAGS = ["Highly skilled", "Very gentle", "Great conversation", "Extremely hygienic", "Professional", "Punctual"];
 
@@ -88,6 +93,25 @@ const CustomerAppointments: React.FC = () => {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to submit review.';
       alert(message);
+    }
+  };
+
+  const handleOpenCancel = (appointmentId: number) => {
+    setCancelForm({ appointmentId, reason: '' });
+    setShowCancelModal(true);
+  };
+
+  const handleCancelAppointment = async () => {
+    try {
+      setIsCancelling(true);
+      await cancelAppointment(cancelForm.appointmentId, { reason: cancelForm.reason });
+      setShowCancelModal(false);
+      fetchAppointments();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to cancel ritual.';
+      alert(message);
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -142,7 +166,7 @@ const CustomerAppointments: React.FC = () => {
               <p className="text-muted-foreground text-sm font-light">Begin your self-care journey with us by scheduling your first ritual.</p>
               <Link to="/booking">
                 <Button variant="outline" className="h-12 px-8 rounded-none border-primary/20">
-                  Book First Visit
+                   Book First Visit
                 </Button>
               </Link>
            </div>
@@ -209,19 +233,32 @@ const CustomerAppointments: React.FC = () => {
                                   <p className="text-2xl font-serif font-light">₱{item.service.price.toLocaleString()}</p>
                                </div>
                                
-                               {apt.status === 'completed' && apt.transactions?.[0] && (
-                                 <Button
-                                   variant="ghost"
-                                   size="sm"
-                                   className="h-9 px-4 rounded-none text-[9px] uppercase tracking-widest font-bold gap-2 text-muted-foreground hover:text-primary"
-                                   onClick={() => {
-                                      setSelectedAppointment(apt);
-                                      setShowReceipt(true);
-                                   }}
-                                 >
-                                   <Receipt className="h-4 w-4" /> View Digital Receipt
-                                 </Button>
-                               )}
+                               <div className="flex flex-col gap-2 items-end">
+                                 {apt.status === 'completed' && apt.transactions?.[0] && (
+                                   <Button
+                                     variant="ghost"
+                                     size="sm"
+                                     className="h-9 px-4 rounded-none text-[9px] uppercase tracking-widest font-bold gap-2 text-muted-foreground hover:text-primary"
+                                     onClick={() => {
+                                        setSelectedAppointment(apt);
+                                        setShowReceipt(true);
+                                     }}
+                                   >
+                                     <Receipt className="h-4 w-4" /> View Digital Receipt
+                                   </Button>
+                                 )}
+
+                                 {(apt.status === 'pending' || apt.status === 'confirmed') && (
+                                   <Button
+                                     variant="ghost"
+                                     size="sm"
+                                     className="h-9 px-4 rounded-none text-[9px] uppercase tracking-widest font-bold gap-2 text-destructive/60 hover:text-destructive hover:bg-destructive/5"
+                                     onClick={() => handleOpenCancel(apt.id)}
+                                   >
+                                     <XCircle className="h-4 w-4" /> Cancel Ritual
+                                   </Button>
+                                 )}
+                               </div>
                             </div>
                          </CardContent>
                       </div>
@@ -285,6 +322,45 @@ const CustomerAppointments: React.FC = () => {
                <DialogFooter className="pt-6">
                   <Button type="button" variant="ghost" className="rounded-none" onClick={() => setShowReviewModal(false)}>Cancel</Button>
                   <Button onClick={handleSubmitReview} className="rounded-none px-12 h-14 font-bold uppercase tracking-widest text-[10px]">Publish Review</Button>
+               </DialogFooter>
+            </div>
+         </DialogContent>
+      </Dialog>
+
+      {/* Cancellation Modal */}
+      <Dialog open={showCancelModal} onOpenChange={setShowCancelModal}>
+         <DialogContent className="max-w-md border-none shadow-2xl rounded-none p-0 overflow-hidden">
+            <div className="bg-destructive p-10 text-white">
+               <DialogHeader>
+                  <DialogTitle className="font-serif text-4xl font-light italic">Cancel <span className="not-italic">Ritual</span></DialogTitle>
+                  <DialogDescription className="text-white/70 font-light mt-2">
+                     We understand plans change. Please let us know why you're cancelling so we can improve our service.
+                  </DialogDescription>
+               </DialogHeader>
+            </div>
+            <div className="p-10 space-y-8 bg-white">
+               <div className="space-y-4">
+                  <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Reason for Cancellation (Optional)</Label>
+                  <Textarea 
+                    placeholder="e.g., Scheduling conflict, personal emergency..."
+                    className="rounded-none border-primary/10 focus-visible:ring-destructive min-h-[100px]"
+                    value={cancelForm.reason}
+                    onChange={(e) => setCancelForm({...cancelForm, reason: e.target.value})}
+                  />
+                  <p className="text-[9px] text-muted-foreground uppercase tracking-widest leading-relaxed">
+                    Note: Cancellations within 24 hours of the ritual may be subject to our standard policy.
+                  </p>
+               </div>
+
+               <DialogFooter className="pt-6">
+                  <Button type="button" variant="ghost" className="rounded-none" onClick={() => setShowCancelModal(false)}>Keep Ritual</Button>
+                  <Button 
+                    onClick={handleCancelAppointment} 
+                    disabled={isCancelling}
+                    className="rounded-none px-12 h-14 font-bold uppercase tracking-widest text-[10px] bg-destructive hover:bg-destructive/90"
+                  >
+                    {isCancelling ? 'Cancelling...' : 'Confirm Cancellation'}
+                  </Button>
                </DialogFooter>
             </div>
          </DialogContent>

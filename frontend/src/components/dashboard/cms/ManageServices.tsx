@@ -38,10 +38,11 @@ import {
   Sparkles,
   AlertCircle,
   Loader2,
-  Clock,
   ImagePlus,
   X,
+  Tags,
 } from 'lucide-react';
+import { ManageCategoriesDialog } from './ManageCategoriesDialog';
 
 interface Category {
   id: number;
@@ -80,6 +81,7 @@ const ManageServices: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingCategories, setIsEditingCategories] = useState(false);
   const [currentService, setCurrentService] = useState<Partial<Service> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -90,26 +92,14 @@ const ManageServices: React.FC = () => {
   const popularCount = useMemo(() => services.filter(s => s.is_popular).length, [services]);
 
   const getCategoryColor = (id: number | string) => {
-    // Map category IDs to harmonious OKLCH colors
+    // Map category IDs to harmonious OKLCH colors aligned with the earthy palette
     const idNum = typeof id === 'string' ? parseInt(id) || 0 : id;
     const colors = [
-      'oklch(65% 0.12 35)', // Terracotta (Nails)
-      'oklch(60% 0.08 145)', // Forest (Spa)
-      'oklch(70% 0.1 65)', // Amber (Hair)
-      'oklch(60% 0.1 25)', // Brick (Waxing)
-      'oklch(65% 0.06 240)', // Slate (Eyelash)
-    ];
-    return colors[idNum % colors.length];
-  };
-
-  const getCategoryBg = (id: number | string) => {
-    const idNum = typeof id === 'string' ? parseInt(id) || 0 : id;
-    const colors = [
-      'oklch(95% 0.02 35)',
-      'oklch(95% 0.02 145)',
-      'oklch(95% 0.02 65)',
-      'oklch(95% 0.02 25)',
-      'oklch(95% 0.02 240)',
+      'oklch(60% 0.08 40)',  // Warm Terracotta
+      'oklch(55% 0.06 140)', // Muted Sage
+      'oklch(65% 0.10 70)',  // Ochre
+      'oklch(50% 0.07 30)',  // Deep Clay
+      'oklch(60% 0.05 230)', // Dusk Blue
     ];
     return colors[idNum % colors.length];
   };
@@ -132,7 +122,10 @@ const ManageServices: React.FC = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [catRes, svcRes] = await Promise.all([getCategories(), getServices()]);
+      const [catRes, svcRes] = await Promise.all([
+        getCategories({ showAll: true }),
+        getServices({ showAll: true })
+      ]);
       setCategories(catRes.data.data);
       setServices(svcRes.data.data);
     } catch {
@@ -180,7 +173,7 @@ const ManageServices: React.FC = () => {
         maxWidthOrHeight: 1920, // Max width/height
         useWebWorker: true,
       };
-      
+
       const compressedFile = await imageCompression(file, options);
       const res = await uploadFile(compressedFile);
       if (res.data?.success) {
@@ -247,12 +240,13 @@ const ManageServices: React.FC = () => {
   if (isLoading && services.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-kiln-terracotta" />
-        <p className="text-warm-stone font-medium">Loading service management...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-mute font-medium">Loading service management...</p>
       </div>
     );
   }
 
+  // Floating Manage Services
   return (
     <div className="container max-w-7xl mx-auto py-12 px-6">
       <style>{scrollbarHideStyles}</style>
@@ -260,34 +254,44 @@ const ManageServices: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-end gap-6">
           <div className="space-y-1">
           </div>
-          <Button
-            onClick={handleAddNew}
-            className="h-11 px-8 bg-gradient-to-br from-[#B8794E] to-[#9A6440] border-none shadow-premium hover:shadow-card transition-all active:scale-95 text-white font-bold"
-          >
-            <Plus className="mr-2 h-5 w-5" />
-            New Service
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setIsEditingCategories(true)}
+              variant="outline"
+              className="h-11 px-6 border-hairline text-body font-bold hover:bg-surface-soft/50"
+            >
+              <Tags className="mr-2 h-5 w-5" />
+              Manage Categories
+            </Button>
+            <Button
+              onClick={handleAddNew}
+              className="h-11 px-8 bg-primary border-none shadow-sm hover:brightness-105 transition-all active:scale-95 text-white font-bold"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              New Service
+            </Button>
+          </div>
         </div>
 
         {/* Artisan's Toolbar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-6 border-y border-kiln-border/50 bg-linen-mist/30 -mx-6 px-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-6 border-y border-hairline/20 bg-surface-soft/20 -mx-6 px-6">
           <div className="flex flex-1 items-center gap-6 w-full md:w-auto">
             <div className="relative flex-1 max-w-md group">
-              <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-4 text-clay-dust group-focus-within:text-kiln-terracotta transition-colors" />
+              <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-4 text-mute group-focus-within:text-primary transition-colors" />
               <Input
                 placeholder="Search services..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-7 border-0 border-b border-kiln-border rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-kiln-terracotta transition-all h-10 text-charcoal-bark placeholder:text-clay-dust"
+                className="pl-7 border-0 border-b border-hairline rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-primary transition-all h-10 text-ink placeholder:text-mute"
               />
             </div>
 
             <div className="hidden md:flex items-center gap-2 overflow-x-auto no-scrollbar">
               <button
                 onClick={() => setSelectedCategoryId('all')}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all ${selectedCategoryId === 'all'
-                  ? 'bg-kiln-terracotta text-white shadow-card'
-                  : 'bg-bisque-wash/50 text-warm-stone hover:bg-bisque-wash'
+                className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${selectedCategoryId === 'all'
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'bg-white/50 text-body border border-hairline/20 hover:bg-white'
                   }`}
               >
                 All
@@ -297,10 +301,11 @@ const ManageServices: React.FC = () => {
                   key={cat.id}
                   onClick={() => setSelectedCategoryId(cat.id)}
                   style={{
-                    backgroundColor: selectedCategoryId === cat.id ? getCategoryColor(cat.id) : getCategoryBg(cat.id),
+                    backgroundColor: selectedCategoryId === cat.id ? getCategoryColor(cat.id) : 'rgba(255,255,255,0.5)',
                     color: selectedCategoryId === cat.id ? 'white' : getCategoryColor(cat.id),
+                    borderColor: selectedCategoryId === cat.id ? 'transparent' : `${getCategoryColor(cat.id)}30`,
                   }}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase whitespace-nowrap transition-all shadow-sm hover:brightness-95`}
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase whitespace-nowrap border transition-all hover:brightness-95`}
                 >
                   {cat.name}
                 </button>
@@ -309,14 +314,14 @@ const ManageServices: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 w-full md:w-auto justify-end">
-            <div className="flex items-center bg-bisque-wash/30 rounded-full p-1 border border-kiln-border/30">
+            <div className="flex items-center bg-white/40 rounded-full p-1 border border-hairline/20 backdrop-blur-sm">
               {(['all', 'active', 'disabled'] as const).map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
-                  className={`px-4 py-1.5 rounded-full text-[11px] font-bold tracking-widest uppercase transition-all ${statusFilter === status
-                    ? 'bg-white text-kiln-terracotta shadow-sm'
-                    : 'text-clay-dust hover:text-warm-stone'
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${statusFilter === status
+                    ? 'bg-white text-primary shadow-sm ring-1 ring-hairline/10'
+                    : 'text-mute hover:text-body'
                     }`}
                 >
                   {status}
@@ -328,23 +333,23 @@ const ManageServices: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-4 rounded-lg flex items-center gap-3 mb-8">
+        <div className="bg-accent-red-soft border border-accent-red/20 text-accent-red text-sm p-4 rounded-2xl flex items-center gap-3 mb-8 animate-in fade-in slide-in-from-top-2">
           <AlertCircle className="h-5 w-5 shrink-0" />
-          <span>{error}</span>
+          <span className="font-medium">{error}</span>
         </div>
       )}
 
-      <Card className="border-none shadow-sm overflow-hidden">
+      <Card className="border-none shadow-premium bg-white/80 backdrop-blur-md overflow-hidden rounded-3xl">
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-muted/50">
-              <TableRow>
-                <TableHead className="pl-6 font-bold">Service Name</TableHead>
-                <TableHead className="font-bold">Category</TableHead>
-                <TableHead className="font-bold">Price</TableHead>
-                <TableHead className="font-bold">Duration</TableHead>
-                <TableHead className="font-bold">Status</TableHead>
-                <TableHead className="pr-6 text-right font-bold">Actions</TableHead>
+            <TableHeader className="bg-surface-soft/20 border-b border-hairline/10">
+              <TableRow className="hover:bg-transparent border-none">
+                <TableHead className="pl-8 h-14 text-[10px] font-bold uppercase tracking-widest text-mute">Service Name</TableHead>
+                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-mute">Category</TableHead>
+                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-mute">Price</TableHead>
+                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-mute">Duration</TableHead>
+                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-mute">Status</TableHead>
+                <TableHead className="pr-8 h-14 text-right text-[10px] font-bold uppercase tracking-widest text-mute">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -353,23 +358,19 @@ const ManageServices: React.FC = () => {
                   <motion.tr
                     key={svc.id}
                     layout
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{
-                      duration: 0.25,
-                      ease: [0.32, 0.72, 0, 1],
-                    }}
-                    className="group border-b hover:bg-linen-mist/50 transition-colors"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    className="group border-b border-hairline/10 hover:bg-surface-soft/10 transition-colors"
                   >
-                    <TableCell className="pl-6 py-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="font-semibold text-charcoal-bark group-hover:text-kiln-terracotta transition-colors">
+                    <TableCell className="pl-8 py-5">
+                      <div className="flex flex-col gap-1.5">
+                        <span className="font-serif text-lg text-ink group-hover:text-primary transition-colors leading-none">
                           {svc.name}
                         </span>
                         {svc.is_popular && (
-                          <Badge className="w-fit text-[9px] h-4 px-1.5 bg-kiln-terracotta text-white border-none font-bold uppercase tracking-widest shadow-sm">
-                            Popular
+                          <Badge className="w-fit text-[9px] h-4 px-2 bg-primary/10 text-primary border border-primary/20 font-bold uppercase tracking-widest rounded-full">
+                            Featured
                           </Badge>
                         )}
                       </div>
@@ -377,53 +378,54 @@ const ManageServices: React.FC = () => {
                     <TableCell>
                       <span
                         style={{
-                          backgroundColor: getCategoryBg(svc.category_id),
+                          backgroundColor: `${getCategoryColor(svc.category_id)}10`,
                           color: getCategoryColor(svc.category_id),
                           borderColor: `${getCategoryColor(svc.category_id)}20`,
                         }}
-                        className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-md border"
+                        className="text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full border"
                       >
                         {svc.category?.name}
                       </span>
                     </TableCell>
-                    <TableCell className="font-serif font-bold text-kiln-terracotta">
+                    <TableCell className="font-serif font-bold text-xl text-primary/90">
                       ₱{parseFloat(svc.price).toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-warm-stone text-sm">
-                      {svc.duration_minutes} min
+                    <TableCell className="text-body text-sm font-medium">
+                      {svc.duration_minutes} <span className="text-[10px] uppercase tracking-tighter opacity-60">min</span>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2.5">
                         <div
-                          className={`h-2 w-2 rounded-full shadow-[0_0_8px] ${svc.is_active ? 'bg-forest-confirm shadow-forest-confirm/50' : 'bg-clay-dust shadow-clay-dust/30'
+                          className={`h-2 w-2 rounded-full ring-4 ${svc.is_active
+                            ? 'bg-accent-green ring-accent-green/10'
+                            : 'bg-mute ring-mute/10'
                             }`}
                         />
                         <span
-                          className={`text-xs font-bold tracking-tight ${svc.is_active ? 'text-forest-confirm' : 'text-warm-stone'
+                          className={`text-[10px] font-bold tracking-widest uppercase ${svc.is_active ? 'text-accent-green' : 'text-mute'
                             }`}
                         >
-                          {svc.is_active ? 'Active' : 'Disabled'}
+                          {svc.is_active ? 'Active' : 'Hidden'}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="pr-6 text-right">
-                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <TableCell className="pr-8 text-right">
+                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => handleEdit(svc)}
-                          className="h-8 w-8 p-0 rounded-full hover:bg-kiln-terracotta/10 hover:text-kiln-terracotta"
+                          className="h-9 w-9 rounded-full bg-white border border-hairline/10 shadow-sm text-body hover:text-primary hover:border-primary/20"
                         >
                           <Edit className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
                         </Button>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => toggleStatus(svc)}
-                          className={`h-8 w-8 p-0 rounded-full ${svc.is_active
-                            ? 'hover:bg-brick-error/10 hover:text-brick-error'
-                            : 'hover:bg-forest-confirm/10 hover:text-forest-confirm'
+                          className={`h-9 w-9 rounded-full bg-white border border-hairline/10 shadow-sm ${svc.is_active
+                            ? 'text-accent-red hover:bg-accent-red-soft/20 hover:border-accent-red/20'
+                            : 'text-accent-green hover:bg-accent-green-soft/20 hover:border-accent-green/20'
                             }`}
                         >
                           {svc.is_active ? (
@@ -431,7 +433,6 @@ const ManageServices: React.FC = () => {
                           ) : (
                             <Power className="h-4 w-4" />
                           )}
-                          <span className="sr-only">{svc.is_active ? 'Disable' : 'Enable'}</span>
                         </Button>
                       </div>
                     </TableCell>
@@ -441,7 +442,7 @@ const ManageServices: React.FC = () => {
             </TableBody>
           </Table>
           {filteredServices.length === 0 && !isLoading && (
-            <div className="text-center py-20 text-warm-stone/60 font-serif italic text-lg">
+            <div className="text-center py-20 text-mute/60 font-serif italic text-lg">
               No services match your current selection.
             </div>
           )}
@@ -449,24 +450,24 @@ const ManageServices: React.FC = () => {
       </Card>
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent className="max-w-6xl sm:max-w-6xl w-[95vw] p-0 overflow-hidden bg-linen-mist gap-0 border-none shadow-2xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 h-[85vh]">
+        <DialogContent className="max-w-[500px] sm:max-w-[500px] w-full p-0 overflow-hidden bg-canvas gap-0 border-none shadow-none">
+          <div className="grid grid-cols-1 h-[85vh]">
             {/* LEFT PANE: Editor */}
-            <div className="h-full overflow-y-auto p-8 bg-white no-scrollbar flex flex-col gap-8 border-r border-kiln-border/30 relative">
-              
-              <div className="flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-md z-10 -mx-8 px-8 py-4 border-b border-kiln-border/20">
-                <DialogTitle className="font-serif text-2xl text-kiln-terracotta flex items-center gap-2">
-                  <Sparkles className="h-5 w-5" />
+            <div className="h-full overflow-y-auto p-8 bg-white no-scrollbar flex flex-col gap-8 relative">
+
+              <div className="flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-md z-10 -mx-8 px-8 py-4 border-b border-hairline">
+                <DialogTitle className="heading-md flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
                   {currentService?.id ? 'Artisan Studio' : 'Craft New Service'}
                 </DialogTitle>
                 <div className="flex gap-3">
-                  <Button type="button" variant="ghost" onClick={() => setIsEditing(false)}>
+                  <Button type="button" variant="ghost" onClick={() => setIsEditing(false)} className="rounded-md">
                     Cancel
                   </Button>
                   <Button
                     onClick={handleSubmit}
                     disabled={isLoading || isUploading}
-                    className="font-bold shadow-lg shadow-primary/20 bg-primary hover:bg-primary-hover transition-all"
+                    className="btn-primary"
                   >
                     {isLoading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
                     Save Service
@@ -477,28 +478,28 @@ const ManageServices: React.FC = () => {
               <div className="space-y-8 pb-12">
                 {/* Image Upload Area */}
                 <div className="space-y-3">
-                  <Label className="text-warm-stone font-bold uppercase tracking-wider text-xs">Hero Image</Label>
+                  <Label className="text-body font-bold uppercase tracking-wider text-xs">Hero Image</Label>
                   <div className="relative group">
                     {currentService?.image_url ? (
-                      <div className="relative h-64 w-full rounded-2xl overflow-hidden border border-kiln-border/30 shadow-inner">
-                        <img 
-                          src={currentService.image_url} 
-                          alt="Preview" 
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                      <div className="relative h-64 w-full rounded-2xl overflow-hidden border border-hairline/30 shadow-inner">
+                        <img
+                          src={currentService.image_url}
+                          alt="Preview"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
-                        <div className="absolute inset-0 bg-charcoal-bark/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                          <Button 
-                            type="button" 
-                            variant="secondary" 
+                        <div className="absolute inset-0 bg-ink/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                          <Button
+                            type="button"
+                            variant="secondary"
                             size="sm"
-                            className="bg-white/90 hover:bg-white text-charcoal-bark"
+                            className="bg-white/90 hover:bg-white text-ink"
                             onClick={() => document.getElementById('image-upload')?.click()}
                           >
                             <Edit className="h-4 w-4 mr-2" /> Change Image
                           </Button>
-                          <Button 
-                            type="button" 
-                            variant="destructive" 
+                          <Button
+                            type="button"
+                            variant="destructive"
                             size="sm"
                             onClick={() => setCurrentService(prev => ({ ...prev!, image_url: '' }))}
                           >
@@ -507,14 +508,14 @@ const ManageServices: React.FC = () => {
                         </div>
                       </div>
                     ) : (
-                      <label htmlFor="image-upload" className="flex flex-col items-center justify-center h-64 w-full rounded-2xl border-2 border-dashed border-clay-dust/50 bg-bisque-wash/20 hover:bg-bisque-wash/50 hover:border-kiln-terracotta/50 transition-colors cursor-pointer group-hover:shadow-sm">
+                      <label htmlFor="image-upload" className="flex flex-col items-center justify-center h-64 w-full rounded-2xl border-2 border-dashed border-hairline/50 bg-surface-soft/20 hover:bg-surface-soft/40 hover:border-primary/50 transition-colors cursor-pointer group-hover:shadow-sm">
                         {isUploading ? (
-                          <div className="flex flex-col items-center gap-3 text-kiln-terracotta">
+                          <div className="flex flex-col items-center gap-3 text-primary">
                             <Loader2 className="h-8 w-8 animate-spin" />
                             <span className="text-sm font-medium">Uploading...</span>
                           </div>
                         ) : (
-                          <div className="flex flex-col items-center gap-3 text-clay-dust group-hover:text-kiln-terracotta transition-colors">
+                          <div className="flex flex-col items-center gap-3 text-mute group-hover:text-primary transition-colors">
                             <div className="p-4 bg-white rounded-full shadow-sm">
                               <ImagePlus className="h-8 w-8" />
                             </div>
@@ -524,12 +525,12 @@ const ManageServices: React.FC = () => {
                         )}
                       </label>
                     )}
-                    <input 
-                      id="image-upload" 
-                      type="file" 
-                      accept="image/*" 
-                      className="hidden" 
-                      onChange={handleImageUpload} 
+                    <input
+                      id="image-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
                       disabled={isUploading}
                     />
                   </div>
@@ -537,7 +538,7 @@ const ManageServices: React.FC = () => {
 
                 {/* Core Details */}
                 <div className="space-y-4">
-                  <Label className="text-warm-stone font-bold uppercase tracking-wider text-xs border-b border-kiln-border/30 pb-2 block">Core Details</Label>
+                  <Label className="text-body font-bold uppercase tracking-wider text-xs border-b border-hairline/30 pb-2 block">Core Details</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="name">Service Name *</Label>
@@ -547,7 +548,7 @@ const ManageServices: React.FC = () => {
                         value={currentService?.name || ''}
                         onChange={(e) => setCurrentService({ ...currentService!, name: e.target.value })}
                         required
-                        className="h-12 text-lg font-serif focus-visible:ring-kiln-terracotta bg-bisque-wash/10"
+                        className="h-12 text-lg font-serif focus-visible:ring-primary bg-canvas/30"
                         placeholder="e.g. Signature Botanical Spa"
                       />
                     </div>
@@ -559,8 +560,10 @@ const ManageServices: React.FC = () => {
                           val && setCurrentService({ ...currentService!, category_id: parseInt(val) })
                         }
                       >
-                        <SelectTrigger id="category" className="h-12 focus:ring-kiln-terracotta bg-bisque-wash/10">
-                          <SelectValue placeholder="Select Category" />
+                        <SelectTrigger id="category" className="h-12 focus:ring-primary bg-canvas/30">
+                          <SelectValue placeholder="Select Category">
+                            {categories.find(c => c.id === currentService?.category_id)?.name}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((cat) => (
@@ -583,7 +586,7 @@ const ManageServices: React.FC = () => {
                           value={currentService?.price || ''}
                           onChange={(e) => setCurrentService({ ...currentService!, price: e.target.value })}
                           required
-                          className="h-12 focus-visible:ring-kiln-terracotta font-serif font-bold text-kiln-terracotta bg-bisque-wash/10"
+                          className="h-12 focus-visible:ring-primary font-serif font-bold text-primary bg-canvas/30"
                         />
                       </div>
                       <div className="space-y-2">
@@ -602,9 +605,9 @@ const ManageServices: React.FC = () => {
                               })
                             }
                             required
-                            className="h-12 pr-12 focus-visible:ring-kiln-terracotta bg-bisque-wash/10"
+                            className="h-12 pr-12 focus-visible:ring-primary bg-canvas/30"
                           />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-clay-dust">min</span>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-mute">min</span>
                         </div>
                       </div>
                     </div>
@@ -613,12 +616,12 @@ const ManageServices: React.FC = () => {
 
                 {/* Editorial Content */}
                 <div className="space-y-5">
-                  <Label className="text-warm-stone font-bold uppercase tracking-wider text-xs border-b border-kiln-border/30 pb-2 block">Editorial Storytelling</Label>
-                  
+                  <Label className="text-body font-bold uppercase tracking-wider text-xs border-b border-hairline/30 pb-2 block">Editorial Storytelling</Label>
+
                   <div className="space-y-2">
                     <Label htmlFor="description" className="flex justify-between items-center">
                       Short Description
-                      <span className="text-[10px] text-clay-dust font-normal uppercase">Used in catalogs</span>
+                      <span className="text-[10px] text-mute font-normal uppercase">Used in catalogs</span>
                     </Label>
                     <Textarea
                       id="description"
@@ -626,15 +629,15 @@ const ManageServices: React.FC = () => {
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         setCurrentService({ ...currentService!, description: e.target.value })
                       }
-                      className="min-h-[80px] resize-none focus-visible:ring-kiln-terracotta bg-bisque-wash/10"
+                      className="min-h-[80px] resize-none focus-visible:ring-primary bg-canvas/30"
                       placeholder="A brief, captivating summary of the service..."
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="experience" className="flex justify-between items-center text-kiln-terracotta">
+                    <Label htmlFor="experience" className="flex justify-between items-center text-primary">
                       The Experience
-                      <span className="text-[10px] text-clay-dust font-normal uppercase">Deep dive narrative</span>
+                      <span className="text-[10px] text-mute font-normal uppercase">Deep dive narrative</span>
                     </Label>
                     <Textarea
                       id="experience"
@@ -642,7 +645,7 @@ const ManageServices: React.FC = () => {
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         setCurrentService({ ...currentService!, experience_description: e.target.value })
                       }
-                      className="min-h-[140px] resize-y focus-visible:ring-kiln-terracotta bg-bisque-wash/10 leading-relaxed"
+                      className="min-h-[140px] resize-y focus-visible:ring-primary bg-canvas/30 leading-relaxed"
                       placeholder="Describe the sensory journey, the techniques used, and the feeling of luxury..."
                     />
                   </div>
@@ -650,7 +653,7 @@ const ManageServices: React.FC = () => {
                   <div className="space-y-2">
                     <Label htmlFor="expect" className="flex justify-between items-center">
                       What to Expect
-                      <span className="text-[10px] text-clay-dust font-normal uppercase">Step by step / Highlights</span>
+                      <span className="text-[10px] text-mute font-normal uppercase">Step by step / Highlights</span>
                     </Label>
                     <Textarea
                       id="expect"
@@ -658,15 +661,15 @@ const ManageServices: React.FC = () => {
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         setCurrentService({ ...currentService!, what_to_expect: e.target.value })
                       }
-                      className="min-h-[120px] resize-y focus-visible:ring-kiln-terracotta bg-bisque-wash/10"
+                      className="min-h-[120px] resize-y focus-visible:ring-primary bg-canvas/30"
                       placeholder="• Warm herbal soak&#10;• Precision cuticle care&#10;• Extended massage..."
                     />
                   </div>
                 </div>
 
                 {/* Toggles */}
-                <div className="space-y-4 pt-4 border-t border-kiln-border/30">
-                  <div className="flex flex-col gap-4 bg-bisque-wash/30 p-5 rounded-2xl border border-kiln-border/50">
+                <div className="space-y-4 pt-4 border-t border-hairline/30">
+                  <div className="flex flex-col gap-4 bg-canvas/20 p-5 rounded-2xl border border-hairline/30">
                     <div className="flex items-start space-x-3">
                       <Checkbox
                         id="is_active"
@@ -674,16 +677,16 @@ const ManageServices: React.FC = () => {
                         onCheckedChange={(checked) =>
                           setCurrentService({ ...currentService!, is_active: checked === true })
                         }
-                        className="mt-1"
+                        className="mt-1 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
                       <div className="space-y-1">
-                        <Label htmlFor="is_active" className="text-sm font-bold cursor-pointer text-charcoal-bark">
+                        <Label htmlFor="is_active" className="text-sm font-bold cursor-pointer text-ink">
                           Active Status
                         </Label>
-                        <p className="text-xs text-clay-dust">When active, customers can discover and book this service.</p>
+                        <p className="text-xs text-mute">When active, customers can discover and book this service.</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-start space-x-3">
                       <Checkbox
                         id="is_popular"
@@ -692,15 +695,15 @@ const ManageServices: React.FC = () => {
                         onCheckedChange={(checked) =>
                           setCurrentService({ ...currentService!, is_popular: checked === true })
                         }
-                        className="mt-1 data-[state=checked]:bg-kiln-terracotta data-[state=checked]:border-kiln-terracotta"
+                        className="mt-1 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
                       <div className="space-y-1">
-                        <Label htmlFor="is_popular" className={`text-sm font-bold cursor-pointer flex items-center gap-1.5 ${!currentService?.is_popular && popularCount >= 4 ? 'text-clay-dust' : 'text-kiln-terracotta'}`}>
+                        <Label htmlFor="is_popular" className={`text-sm font-bold cursor-pointer flex items-center gap-1.5 ${!currentService?.is_popular && popularCount >= 4 ? 'text-mute' : 'text-primary'}`}>
                           Featured / Popular <Sparkles className="h-3 w-3" />
                         </Label>
-                        <p className="text-xs text-clay-dust">
-                          {!currentService?.is_popular && popularCount >= 4 
-                            ? 'Maximum of 4 trending treatments reached. Disable another to feature this one.' 
+                        <p className="text-xs text-mute">
+                          {!currentService?.is_popular && popularCount >= 4
+                            ? 'Maximum of 4 trending treatments reached. Disable another to feature this one.'
                             : 'Highlights this service with a special badge in the public catalog (Max 4).'}
                         </p>
                       </div>
@@ -710,100 +713,16 @@ const ManageServices: React.FC = () => {
 
               </div>
             </div>
-            
-            {/* RIGHT PANE: Live Preview */}
-            <div className="h-full bg-charcoal-bark hidden lg:flex flex-col items-center justify-center relative overflow-hidden p-8">
-              {/* Background abstract element */}
-              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-kiln-terracotta/20 rounded-full blur-[100px] mix-blend-screen pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-forest-confirm/10 rounded-full blur-[80px] mix-blend-screen pointer-events-none" />
-              
-              <div className="w-full max-w-sm relative z-10 flex flex-col items-center gap-4">
-                <p className="text-white/50 text-xs font-bold uppercase tracking-widest text-center w-full mb-2">Live Customer Preview</p>
-                
-                <div className="bg-white rounded-[2rem] w-[340px] h-[640px] shadow-2xl overflow-hidden flex flex-col border-[6px] border-charcoal-bark/50 relative">
-                  {/* Notch */}
-                  <div className="absolute top-0 inset-x-0 h-6 flex justify-center z-20 pointer-events-none">
-                    <div className="w-32 h-6 bg-charcoal-bark/50 rounded-b-xl backdrop-blur-md" />
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
-                    {/* Header Image */}
-                    <div className="relative h-72 w-full bg-bisque-wash flex items-center justify-center overflow-hidden">
-                      {currentService?.image_url ? (
-                        <img src={currentService.image_url} alt="Service" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="text-clay-dust flex flex-col items-center gap-2 opacity-50">
-                          <ImagePlus className="h-10 w-10" />
-                          <span className="text-xs font-serif italic">No image provided</span>
-                        </div>
-                      )}
-                      
-                      {currentService?.is_popular && (
-                        <div className="absolute top-8 left-4">
-                          <Badge className="bg-white/90 text-kiln-terracotta border-none shadow-sm font-bold uppercase tracking-widest text-[9px] px-2 py-1 backdrop-blur-md">
-                            Popular Choice
-                          </Badge>
-                        </div>
-                      )}
-
-                      {/* Floating Category Badge */}
-                      <div className="absolute bottom-4 left-4">
-                        <Badge className="bg-charcoal-bark/80 text-white border-none backdrop-blur-md uppercase tracking-widest text-[9px]">
-                          {categories.find(c => c.id === currentService?.category_id)?.name || 'Category'}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div className="p-6 space-y-6">
-                      <div className="space-y-2">
-                        <h3 className="font-serif text-2xl text-charcoal-bark leading-tight">
-                          {currentService?.name || 'Service Name'}
-                        </h3>
-                        <div className="flex items-center gap-4 text-warm-stone text-sm font-medium">
-                          <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {currentService?.duration_minutes || 0} min</span>
-                          <span className="text-kiln-terracotta font-serif font-bold text-lg">₱{parseFloat(currentService?.price || '0').toLocaleString()}</span>
-                        </div>
-                      </div>
-
-                      {currentService?.description && (
-                        <p className="text-clay-dust text-sm leading-relaxed">
-                          {currentService.description}
-                        </p>
-                      )}
-
-                      {currentService?.experience_description && (
-                        <div className="space-y-3 pt-4 border-t border-linen-mist">
-                          <h4 className="font-serif text-lg text-kiln-terracotta">The Experience</h4>
-                          <p className="text-charcoal-bark/80 text-sm leading-relaxed whitespace-pre-wrap">
-                            {currentService.experience_description}
-                          </p>
-                        </div>
-                      )}
-
-                      {currentService?.what_to_expect && (
-                        <div className="space-y-3 pt-4 border-t border-linen-mist">
-                          <h4 className="font-serif text-lg text-charcoal-bark">What to Expect</h4>
-                          <p className="text-charcoal-bark/80 text-sm leading-relaxed whitespace-pre-wrap">
-                            {currentService.what_to_expect}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Fixed Bottom Action */}
-                  <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-white via-white to-transparent pt-12">
-                    <Button className="w-full h-12 rounded-full bg-charcoal-bark text-white shadow-lg pointer-events-none">
-                      Book Appointment
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
 
           </div>
         </DialogContent>
       </Dialog>
+      <ManageCategoriesDialog
+        open={isEditingCategories}
+        onOpenChange={setIsEditingCategories}
+        categories={categories}
+        onSuccess={fetchData}
+      />
     </div>
   );
 };

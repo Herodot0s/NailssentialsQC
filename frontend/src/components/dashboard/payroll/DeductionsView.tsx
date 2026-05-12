@@ -25,7 +25,11 @@ export const DeductionsView: React.FC<DeductionsViewProps> = ({
                    <div className="space-y-2">
                       <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Select Staff Member</Label>
                       <Select required onValueChange={(val: string | null) => onFormChange({...deductionForm, staffId: val || ''})}>
-                         <SelectTrigger className="rounded-none border-gray-200 h-12 bg-gray-50/30"><SelectValue placeholder="Choose Technician" /></SelectTrigger>
+                         <SelectTrigger className="rounded-none border-gray-200 h-12 bg-gray-50/30">
+                         <SelectValue placeholder="Choose Technician">
+                           {staffMembers.find(s => s.id.toString() === deductionForm.staffId)?.fullName}
+                         </SelectValue>
+                       </SelectTrigger>
                          <SelectContent className="rounded-none border-none shadow-2xl">
                             {staffMembers.map(s => <SelectItem key={s.id} value={s.id.toString()}>{s.fullName}</SelectItem>)}
                          </SelectContent>
@@ -35,7 +39,11 @@ export const DeductionsView: React.FC<DeductionsViewProps> = ({
                       <div className="space-y-2">
                          <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Entry Type</Label>
                          <Select defaultValue="Cash Advance" onValueChange={(val: string | null) => onFormChange({...deductionForm, type: val || 'Cash Advance'})}>
-                            <SelectTrigger className="rounded-none border-gray-200 h-12 bg-gray-50/30"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="rounded-none border-gray-200 h-12 bg-gray-50/30">
+                            <SelectValue>
+                              {deductionForm.type || 'Cash Advance'}
+                            </SelectValue>
+                          </SelectTrigger>
                             <SelectContent className="rounded-none border-none shadow-2xl">
                                <SelectItem value="Cash Advance">Cash Advance</SelectItem>
                                <SelectItem value="Uniform">Uniform</SelectItem>

@@ -55,7 +55,7 @@ export const StaffTable: React.FC<StaffTableProps> = ({ staffMembers, onStaffCli
                 <TableCell>
                   <div className="flex gap-2">
                     {staff.sssNumber ? <Badge className="rounded-md bg-forest-confirm/10 text-forest-confirm text-[11px] font-semibold uppercase border-none">SSS</Badge> : <Badge variant="outline" className="rounded-md text-[11px] font-semibold uppercase border-dashed opacity-40">SSS</Badge>}
-                    {staff.tinNumber ? <Badge className="rounded-md bg-forest-confirm/10 text-forest-confirm text-[11px] font-semibold uppercase border-none">TIN</Badge> : <Badge variant="outline" className="rounded-md text-[11px] font-semibold uppercase border-dashed opacity-40">TIN</Badge>}
+                    {staff.pagIbigNumber ? <Badge className="rounded-md bg-forest-confirm/10 text-forest-confirm text-[11px] font-semibold uppercase border-none">PAG-IBIG</Badge> : <Badge variant="outline" className="rounded-md text-[11px] font-semibold uppercase border-dashed opacity-40">PAG-IBIG</Badge>}
                   </div>
                 </TableCell>
                 <TableCell className="text-right pr-8">

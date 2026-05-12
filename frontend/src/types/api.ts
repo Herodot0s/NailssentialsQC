@@ -26,14 +26,15 @@ export interface AuthResponse {
 // Staff API types
 export interface CreateStaffRequest {
   fullName: string;
+  email?: string;
+  phone?: string;
   username: string;
-  password: string;
+  password?: string;
   specializations?: string;
   basePayPerWeek: number;
   dailyTarget: number;
   sssNumber?: string;
-  tinNumber?: string;
-  govId?: string;
+  pagIbigNumber?: string;
   profilePictureUrl?: string;
 }
 
@@ -50,9 +51,9 @@ export interface StaffMember {
   basePayPerWeek: number;
   dailyTarget: number;
   sssNumber?: string;
-  tinNumber?: string;
-  govId?: string;
+  pagIbigNumber?: string;
   profilePictureUrl?: string;
+  password?: string;
   createdAt: string;
 }
 
@@ -123,8 +124,11 @@ export interface AttendanceRecord {
   check_out: string | null;
   status: string;
   date: string;
+  scheduled_start: string | null;
+  scheduled_end: string | null;
   tardiness_minutes: number;
   deduction_amount: number;
+  notes: string | null;
   staff: { full_name: string };
 }
 
@@ -323,6 +327,8 @@ export interface SiteSettingsData {
     hours?: string;
     email?: string;
     maps_link?: string;
+    facebook?: string;
+    instagram?: string;
   };
 }
 

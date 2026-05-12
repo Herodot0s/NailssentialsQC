@@ -75,8 +75,7 @@ export const getAllStaff = async (req: Request, res: Response) => {
         basePayPerWeek: isManager ? u.staff_profile?.base_pay_per_week : undefined,
         dailyTarget: isManager ? u.staff_profile?.daily_target : undefined,
         sssNumber: isManager ? u.sss_number : undefined,
-        tinNumber: isManager ? u.tin_number : undefined,
-        govId: isManager ? u.gov_id : undefined,
+        pagIbigNumber: isManager ? u.tin_number : undefined,
         createdAt: isManager ? u.created_at : undefined,
       })),
       nextCursor,
@@ -93,7 +92,7 @@ export const getAllStaff = async (req: Request, res: Response) => {
  * Create a new staff member
  */
 export const createStaff = async (req: Request, res: Response) => {
-  const { fullName, email, phone, password, username, specializations, basePayPerWeek, dailyTarget, sssNumber, tinNumber, govId, profilePictureUrl, role } = req.body;
+  const { fullName, email, phone, password, username, specializations, basePayPerWeek, dailyTarget, sssNumber, pagIbigNumber, profilePictureUrl, role } = req.body;
 
   try {
     // Check if user already exists
@@ -121,8 +120,7 @@ export const createStaff = async (req: Request, res: Response) => {
         password_hash: hashedPassword,
         role: role || 'staff',
         sss_number: sssNumber,
-        tin_number: tinNumber,
-        gov_id: govId,
+        tin_number: pagIbigNumber,
         profile_picture_url: profilePictureUrl,
         staff_profile: {
           create: {
@@ -162,37 +160,45 @@ export const updateStaff = async (req: Request, res: Response) => {
   const { id } = req.params;
   const idStr = (Array.isArray(id) ? id[0] : id) as string;
   const idNum = parseInt(idStr);
-  const { fullName, email, phone, isActive, specializations, basePayPerWeek, dailyTarget, sssNumber, tinNumber, govId, profilePictureUrl, role } = req.body;
+  
+  // Use validatedBody from Zod middleware if available
+  const body = (req as AuthRequest).validatedBody || req.body;
+  const { fullName, email, phone, password, isActive, specializations, basePayPerWeek, dailyTarget, sssNumber, pagIbigNumber, profilePictureUrl, role } = body;
 
   try {
-    const updatedUser = await prisma.user.update({
-      where: { id: idNum },
-      data: {
-        email,
-        phone,
-        is_active: isActive,
-        role,
-        sss_number: sssNumber,
-        tin_number: tinNumber,
-        gov_id: govId,
-        profile_picture_url: profilePictureUrl,
-        staff_profile: {
-          upsert: {
-            update: {
-              full_name: fullName,
-              specializations,
-              base_pay_per_week: basePayPerWeek ? parseFloat(basePayPerWeek) : undefined,
-              daily_target: dailyTarget ? parseFloat(dailyTarget) : undefined,
-            },
-            create: {
-              full_name: fullName || 'New Staff',
-              specializations: specializations || 'General',
-              base_pay_per_week: basePayPerWeek ? parseFloat(basePayPerWeek) : 2500.00,
-              daily_target: dailyTarget ? parseFloat(dailyTarget) : 6000.00,
-            }
+    const data: Prisma.UserUpdateInput = {
+      email,
+      phone,
+      is_active: isActive,
+      role,
+      sss_number: sssNumber,
+      tin_number: pagIbigNumber,
+      profile_picture_url: profilePictureUrl,
+      staff_profile: {
+        upsert: {
+          update: {
+            full_name: fullName,
+            specializations,
+            base_pay_per_week: (basePayPerWeek !== undefined && basePayPerWeek !== null) ? parseFloat(basePayPerWeek as any) : undefined,
+            daily_target: (dailyTarget !== undefined && dailyTarget !== null) ? parseFloat(dailyTarget as any) : undefined,
           },
+          create: {
+            full_name: fullName || 'New Staff',
+            specializations: specializations || 'General',
+            base_pay_per_week: (basePayPerWeek !== undefined && basePayPerWeek !== null) ? parseFloat(basePayPerWeek as any) : 2500.00,
+            daily_target: (dailyTarget !== undefined && dailyTarget !== null) ? parseFloat(dailyTarget as any) : 6000.00,
+          }
         },
       },
+    };
+
+    if (password) {
+      data.password_hash = await bcrypt.hash(password, 10);
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: idNum },
+      data,
       include: {
         staff_profile: true,
       },
@@ -245,6 +251,15 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
 
     // Use a transaction to update all schedules for the staff
     type ScheduleItem = { day_of_week: number; start_time: string; end_time: string; is_active: boolean };
+
+    // Normalize time to HH:MM:SS format
+    const normalizeTime = (time: string) => {
+      if (time.match(/^\d{2}:\d{2}$/)) {
+        return `${time}:00`;
+      }
+      return time;
+    };
+
     await prisma.$transaction(
       (schedules as ScheduleItem[]).map((s: ScheduleItem) =>
         prisma.staffSchedule.upsert({
@@ -257,15 +272,15 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
               }
             },
           update: {
-            start_time: s.start_time,
-            end_time: s.end_time,
+            start_time: normalizeTime(s.start_time),
+            end_time: normalizeTime(s.end_time),
             is_active: s.is_active,
           },
           create: {
             staff_id: staffId,
             day_of_week: s.day_of_week,
-            start_time: s.start_time,
-            end_time: s.end_time,
+            start_time: normalizeTime(s.start_time),
+            end_time: normalizeTime(s.end_time),
             is_active: s.is_active,
           },
         })

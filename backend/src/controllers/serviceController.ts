@@ -5,9 +5,13 @@ import prisma from '../utils/prisma';
 
 export const getCategories = async (req: Request, res: Response) => {
   try {
-    const { parentId } = req.query;
+    const { parentId, showAll } = req.query;
 
-    const where: Prisma.ServiceCategoryWhereInput = { is_active: true };
+    const where: Prisma.ServiceCategoryWhereInput = {};
+    if (showAll !== 'true') {
+      where.is_active = true;
+    }
+    
     if (parentId !== undefined) {
       where.parent_id = parentId === 'null' ? null : parseInt(parentId as string);
     }
@@ -39,9 +43,14 @@ export const getCategories = async (req: Request, res: Response) => {
 
 export const getServices = async (req: Request, res: Response) => {
   try {
-    const { categoryId } = req.query;
+    const { categoryId, showAll } = req.query;
 
-    const where: Prisma.ServiceWhereInput = { is_active: true };
+    const where: Prisma.ServiceWhereInput = {};
+    if (showAll !== 'true') {
+      where.is_active = true;
+      where.category = { is_active: true };
+    }
+
     if (categoryId) {
       const parsedId = parseInt(categoryId as string);
       if (isNaN(parsedId)) {
@@ -85,11 +94,12 @@ export const getServices = async (req: Request, res: Response) => {
 
 export const createCategory = async (req: Request, res: Response) => {
   try {
-    const { name, description, parentId } = req.body;
+    const { name, description, is_active, parentId } = req.body;
     const category = await prisma.serviceCategory.create({
       data: { 
         name, 
         description, 
+        is_active: is_active !== undefined ? is_active : true,
         parent_id: parentId ? parseInt(parentId) : null 
       },
     });

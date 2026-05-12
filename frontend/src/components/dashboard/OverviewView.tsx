@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import DrillDownLineChart from '@/components/DrillDownLineChart';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { OverviewCards } from './OverviewCards';
-import { AppointmentTimeline } from './AppointmentTimeline';
+import { AppointmentTimeline } from './customers/AppointmentTimeline';
 import type { OverviewViewProps } from './types';
 
 const COLORS = ['#B8794E', '#D9A07E', '#E6B69E', '#F2CCBE', '#9A6440'];

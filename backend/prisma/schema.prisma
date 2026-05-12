@@ -188,6 +188,7 @@ model Appointment {
   appointment_date DateTime          @db.Date
   is_walk_in       Boolean           @default(false)
   notes            String?           @db.Text
+  service_photo_url String?          @db.Text
   created_at       DateTime          @default(now())
   updated_at       DateTime          @updatedAt
   deleted_at       DateTime?
@@ -234,6 +235,7 @@ model Transaction {
   status           TransactionStatus @default(pending)
   transaction_date DateTime          @default(now())
   receipt_number   String            @unique
+  gcash_reference_no String?         @db.Text
   created_at       DateTime          @default(now())
 
   appointment Appointment  @relation(fields: [appointment_id], references: [id])

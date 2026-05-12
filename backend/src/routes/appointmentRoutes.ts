@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { getAppointments, createAppointment } from '../controllers/appointmentController';
+import { getAppointments, createAppointment, cancelAppointment } from '../controllers/appointmentController';
 import { getAvailableSlots, getCommissionSummary, getStaffCommissions } from '../controllers/appointmentAvailability';
 import { completeAppointment } from '../controllers/appointmentCompletion';
 import { authenticateToken, authorizeRoles, validateZod } from '../middleware/authMiddleware';
-import { createAppointmentSchema, completeAppointmentSchema } from '../validators/appointmentSchemas';
+import { createAppointmentSchema, completeAppointmentSchema, cancelAppointmentSchema } from '../validators/appointmentSchemas';
 
 // Validate :id parameter middleware
 const idParamSchema = z.object({
@@ -37,5 +37,6 @@ router.get('/staff-commissions', authenticateToken, authorizeRoles('staff', 'man
 router.get('/', authenticateToken, getAppointments);
 router.post('/', authenticateToken, validateZod(createAppointmentSchema), createAppointment);
 router.post('/:id/complete', authenticateToken, authorizeRoles('staff', 'manager'), validateIdParam, validateZod(completeAppointmentSchema), completeAppointment);
+router.patch('/:id/cancel', authenticateToken, validateIdParam, validateZod(cancelAppointmentSchema), cancelAppointment);
 
 export default router;

@@ -10,7 +10,7 @@ export const createAppointmentSchema = z.object({
       })
     )
     .min(1, 'At least one item is required'),
-  date: z.string().datetime({ message: 'Date must be a valid ISO datetime string' }),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
   notes: z.string().optional(),
   customerId: z.number().int().positive().optional(),
   isWalkIn: z.boolean().optional(),
@@ -20,4 +20,10 @@ export const completeAppointmentSchema = z.object({
   paymentMethod: z.enum(['cash', 'gcash'], {
     message: 'Payment method must be either cash or gcash',
   }),
+  servicePhotoUrl: z.string().url('Invalid service photo URL'),
+  gcashReferenceNo: z.string().optional(),
+});
+
+export const cancelAppointmentSchema = z.object({
+  reason: z.string().max(500, 'Reason must be less than 500 characters').optional(),
 });

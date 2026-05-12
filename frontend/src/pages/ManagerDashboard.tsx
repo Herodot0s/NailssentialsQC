@@ -18,19 +18,24 @@ import {
   addDeduction,
   getStaffSchedule,
   updateStaffSchedule,
+  getAppointments,
 } from '../api/apiClient';
 
 import SalarySlipModal from '@/components/SalarySlipModal';
 import { StaffTable } from '@/components/dashboard/staff/StaffTable';
 import { PayrollTable } from '@/components/dashboard/payroll/PayrollTable';
 import { AttendanceLedger } from '@/components/dashboard/staff/AttendanceLedger';
-import { ReviewModeration } from '@/components/dashboard/ReviewModeration';
+import { ReviewModeration } from '@/components/dashboard/customers/ReviewModeration';
+import { CustomerCareView } from '@/components/dashboard/customers/CustomerCareView';
+import { AppointmentHistory } from '@/components/dashboard/customers/AppointmentHistory';
+import { StaffPerformanceView } from '@/components/dashboard/analytics/StaffPerformanceView';
 import ManageExhibits from '@/components/dashboard/cms/ManageExhibits';
 import ManageServices from '@/components/dashboard/cms/ManageServices';
 import { ContentView } from '@/components/dashboard/cms/ContentView';
 import PackagesView from '@/components/packages/PackagesView';
 import { AnalyticsDashboard } from '@/components/dashboard/analytics/AnalyticsDashboard';
 import { MessagesView } from '@/components/dashboard/MessagesView';
+import { LogWalkInDialog } from '@/components/dashboard/customers/LogWalkInDialog';
 
 import { ManagerSidebar } from '@/components/dashboard/ManagerSidebar';
 import { DeductionsView } from '@/components/dashboard/payroll/DeductionsView';
@@ -39,6 +44,7 @@ import { AddStaffDialog } from '@/components/dashboard/staff/AddStaffDialog';
 import { ShiftEditDialog } from '@/components/dashboard/staff/ShiftEditDialog';
 import { PayrollRunDialog } from '@/components/dashboard/payroll/PayrollRunDialog';
 import { DeductionEntryDialog } from '@/components/dashboard/payroll/DeductionEntryDialog';
+import { StatusModal } from '@/components/dashboard/StatusModal';
 import type { ActiveView } from '@/components/dashboard/types';
 
 import type {
@@ -62,12 +68,13 @@ const ManagerDashboard: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-
+  const [showWalkInModal, setShowWalkInModal] = useState(false);
 
   // Modals & Sheets
   const [showAddStaffModal, setShowAddStaffModal] = useState(false);
@@ -84,6 +91,19 @@ const ManagerDashboard: React.FC = () => {
   const [showSalarySlip, setShowSalarySlip] = useState(false);
   const [selectedPayroll, setSelectedPayroll] = useState<PayrollRecord | null>(null);
 
+  // Status Modal State
+  const [statusModal, setStatusModal] = useState<{
+    open: boolean;
+    type: 'success' | 'error';
+    title: string;
+    description: string;
+  }>({
+    open: false,
+    type: 'success',
+    title: '',
+    description: '',
+  });
+
   const [newStaffForm, setNewStaffForm] = useState({
     fullName: '',
     email: '',
@@ -94,8 +114,7 @@ const ManagerDashboard: React.FC = () => {
     basePayPerWeek: '2500',
     dailyTarget: '6000',
     sssNumber: '',
-    tinNumber: '',
-    govId: '',
+    pagIbigNumber: '',
     profilePictureUrl: '',
   });
 
@@ -117,10 +136,27 @@ const ManagerDashboard: React.FC = () => {
     end: new Date().toISOString().split('T')[0],
   }), []);
 
+  const performanceData = useMemo(() => {
+    return staffMembers.map(s => {
+      const safeAppointments = Array.isArray(appointments) ? appointments : [];
+      const completedApps = safeAppointments.filter(a => a.status === 'completed');
+      const staffItems = completedApps.flatMap(a => a.items || []).filter(i => i.staff_id === s.staffProfileId);
+      
+      return {
+        staffId: s.id,
+        fullName: s.fullName,
+        revenue: staffItems.reduce((sum, i) => sum + Number(i.price_at_booking), 0),
+        commission: staffItems.reduce((sum, i) => sum + (Number(i.price_at_booking) * 0.08), 0),
+        serviceCount: staffItems.length,
+        categoryBreakdown: {}
+      };
+    }).sort((a, b) => b.revenue - a.revenue);
+  }, [staffMembers, appointments]);
+
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [salesRes, payrollRes, staffRes, periodsRes, reviewsRes, attRes, catRes] = await Promise.all([
+      const [salesRes, payrollRes, staffRes, periodsRes, reviewsRes, attRes, catRes, appRes] = await Promise.all([
         getDailySales(),
         getReports({ startDate: dateRange.start, endDate: dateRange.end }),
         getAllStaff(),
@@ -128,6 +164,7 @@ const ManagerDashboard: React.FC = () => {
         getAllReviews(),
         getAllAttendance({ startDate: dateRange.start }),
         getCategories(),
+        getAppointments(),
       ]);
 
       if (salesRes.data.success) setSalesStats(salesRes.data.data);
@@ -146,6 +183,11 @@ const ManagerDashboard: React.FC = () => {
       if (reviewsRes.data.success) setReviews(reviewsRes.data.data);
       if (attRes.data.success) setAttendance(attRes.data.data);
       if (catRes.data.success) setCategories(catRes.data.data);
+      
+      if (appRes.data.success) {
+        const appData = appRes.data.data;
+        setAppointments(Array.isArray(appData) ? appData : (appData?.items || []));
+      }
 
     } catch (err: unknown) {
       console.error('Fetch error:', err instanceof Error ? err.message : err);
@@ -198,14 +240,18 @@ const ManagerDashboard: React.FC = () => {
         basePayPerWeek: '2500',
         dailyTarget: '6000',
         sssNumber: '',
-        tinNumber: '',
-        govId: '',
+        pagIbigNumber: '',
         profilePictureUrl: '',
       });
       fetchData();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to add staff member.';
-      alert(message);
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Operation Failed',
+        description: message,
+      });
     }
   };
 
@@ -217,14 +263,28 @@ const ManagerDashboard: React.FC = () => {
           basePayPerWeek: selectedStaff.basePayPerWeek,
           dailyTarget: selectedStaff.dailyTarget,
           sssNumber: selectedStaff.sssNumber,
-          tinNumber: selectedStaff.tinNumber,
-          govId: selectedStaff.govId,
-          profilePictureUrl: selectedStaff.profilePictureUrl
+          pagIbigNumber: selectedStaff.pagIbigNumber,
+          profilePictureUrl: selectedStaff.profilePictureUrl,
+          specializations: selectedStaff.specializations ?? undefined,
+          email: selectedStaff.email ?? undefined,
+          phone: selectedStaff.phone ?? undefined,
+          password: selectedStaff.password
        });
-       alert('Employee file updated successfully.');
+       setStatusModal({
+         open: true,
+         type: 'success',
+         title: 'Update Successful',
+         description: 'Employee file updated successfully.',
+       });
        fetchData();
-    } catch (err) {
-       alert('Failed to update employee file.');
+    } catch (err: any) {
+       const message = err.response?.data?.error?.message || err.response?.data?.message || err.message || 'Failed to update employee file.';
+       setStatusModal({
+         open: true,
+         type: 'error',
+         title: 'Update Failed',
+         description: message,
+       });
     }
   };
 
@@ -240,7 +300,12 @@ const ManagerDashboard: React.FC = () => {
       fetchData();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to generate payroll.';
-      alert(message);
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Generation Failed',
+        description: message,
+      });
     }
   };
 
@@ -250,7 +315,12 @@ const ManagerDashboard: React.FC = () => {
       await lockPayroll(id);
       fetchData();
     } catch (err) {
-      alert('Failed to lock payroll.');
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Operation Failed',
+        description: 'Failed to lock payroll.',
+      });
     }
   };
 
@@ -259,7 +329,12 @@ const ManagerDashboard: React.FC = () => {
       await moderateReview(id, approved);
       fetchData();
     } catch (err) {
-      alert('Failed to moderate review.');
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Operation Failed',
+        description: 'Failed to moderate review.',
+      });
     }
   };
 
@@ -276,7 +351,12 @@ const ManagerDashboard: React.FC = () => {
       setDeductionForm({ staffId: '', type: 'Cash Advance', amount: '', notes: '' });
       fetchData();
     } catch (err) {
-      alert('Failed to add deduction.');
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Operation Failed',
+        description: 'Failed to add deduction.',
+      });
     }
   };
 
@@ -293,13 +373,21 @@ const ManagerDashboard: React.FC = () => {
 
   const handleEditShift = (dayOfWeek: number) => {
      const current = staffSchedule.find(s => s.day_of_week === dayOfWeek);
-     setEditingDay(dayOfWeek);
-     setShiftForm({
-        start: current?.start_time || '12:00',
-        end: current?.end_time || '22:00',
-        isActive: current?.is_active ?? true
-     });
-     setShowShiftEditModal(true);
+     const updateState = () => {
+        setEditingDay(dayOfWeek);
+        setShiftForm({
+           start: current?.start_time || '12:00',
+           end: current?.end_time || '22:00',
+           isActive: current?.is_active ?? true
+        });
+        setShowShiftEditModal(true);
+     };
+
+     if ('startViewTransition' in document) {
+        (document as any).startViewTransition(updateState);
+     } else {
+        updateState();
+     }
   };
 
   const handleSaveShift = async (e: React.FormEvent) => {
@@ -330,7 +418,12 @@ const ManagerDashboard: React.FC = () => {
         });
         setShowShiftEditModal(false);
      } catch (err) {
-        alert('Failed to update shift.');
+        setStatusModal({
+          open: true,
+          type: 'error',
+          title: 'Update Failed',
+          description: `Failed to update shift: ${(err as any).response?.data?.message || 'Unknown error'}`,
+        });
      }
   };
 
@@ -350,7 +443,12 @@ const ManagerDashboard: React.FC = () => {
       await updateAttendance(id, data);
       fetchData();
     } catch (err) {
-      alert('Failed to update attendance.');
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Update Failed',
+        description: 'Failed to update attendance.',
+      });
     }
   };
 
@@ -389,7 +487,7 @@ const ManagerDashboard: React.FC = () => {
               <h1 className="font-serif text-4xl font-light text-foreground capitalize">{activeView.replace('-', ' ')} <span className="italic text-primary/40">Toolbox</span></h1>
            </div>
            </div>
-           
+
            <div className="flex gap-4">
               {activeView === 'staff' && (
                 <Button onClick={() => setShowAddStaffModal(true)} className="rounded-none gap-2 px-6 h-12 text-[10px] uppercase font-bold tracking-widest">
@@ -451,6 +549,18 @@ const ManagerDashboard: React.FC = () => {
           </div>
         )}
 
+        {activeView === 'performance' && (
+          <div className="animate-in fade-in duration-700">
+            <StaffPerformanceView performanceData={performanceData} />
+          </div>
+        )}
+
+        {activeView === 'service-history' && (
+          <div className="animate-in fade-in duration-700">
+            <AppointmentHistory appointments={appointments} />
+          </div>
+        )}
+
         {activeView === 'reviews' && (
           <div className="animate-in fade-in duration-700">
             <ReviewModeration
@@ -458,6 +568,17 @@ const ManagerDashboard: React.FC = () => {
               onModerateReview={handleModerateReview}
             />
           </div>
+        )}
+
+        {activeView === 'customer-care' && (
+          <CustomerCareView 
+            reviews={reviews}
+            onModerateReview={handleModerateReview}
+            appointments={appointments}
+            staffMembers={staffMembers}
+            onLogWalkIn={() => setShowWalkInModal(true)}
+            dateRange={dateRange}
+          />
         )}
         
         {activeView === 'exhibits' && (
@@ -517,6 +638,7 @@ const ManagerDashboard: React.FC = () => {
       <AddStaffDialog 
         open={showAddStaffModal} 
         onOpenChange={setShowAddStaffModal} 
+        categories={categories}
         form={newStaffForm} 
         onFormChange={setNewStaffForm} 
         onSubmit={handleAddStaff} 
@@ -524,7 +646,14 @@ const ManagerDashboard: React.FC = () => {
 
       <ShiftEditDialog 
         open={showShiftEditModal} 
-        onOpenChange={setShowShiftEditModal} 
+        onOpenChange={(open) => {
+           const update = () => setShowShiftEditModal(open);
+           if ('startViewTransition' in document) {
+              (document as any).startViewTransition(update);
+           } else {
+              update();
+           }
+        }} 
         editingDay={editingDay} 
         form={shiftForm} 
         onFormChange={setShiftForm} 
@@ -544,8 +673,22 @@ const ManagerDashboard: React.FC = () => {
         onOpenChange={setShowDeductionModal} 
         staffMembers={staffMembers} 
         form={deductionForm} 
-        onFormChange={setDeductionForm} 
-        onSubmit={handleAddDeduction} 
+        onFormChange={setDeductionForm}
+        onSubmit={handleAddDeduction}
+      />
+
+      <LogWalkInDialog
+        open={showWalkInModal}
+        onOpenChange={setShowWalkInModal}
+        onSuccess={fetchData}
+      />
+
+      <StatusModal
+        open={statusModal.open}
+        onOpenChange={(open) => setStatusModal(prev => ({ ...prev, open }))}
+        type={statusModal.type}
+        title={statusModal.title}
+        description={statusModal.description}
       />
 
     </div>

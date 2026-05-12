@@ -30,7 +30,7 @@ export interface HistoricalData {
   services: Record<string, number>;
 }
 
-export type ActiveView = 'staff' | 'attendance' | 'deductions' | 'payroll' | 'reviews' | 'exhibits' | 'content' | 'packages' | 'advanced-analytics' | 'services' | 'messages';
+export type ActiveView = 'staff' | 'attendance' | 'deductions' | 'payroll' | 'reviews' | 'exhibits' | 'content' | 'packages' | 'advanced-analytics' | 'services' | 'messages' | 'customer-care' | 'performance' | 'service-history';
 
 export interface ManagerSidebarProps {
   activeView: ActiveView;
@@ -73,11 +73,12 @@ export interface StaffDetailSheetProps {
 export interface AddStaffDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  categories: Category[];
   form: {
     fullName: string; email: string; phone: string; username: string;
     password: string; specializations: string; basePayPerWeek: string;
-    dailyTarget: string; sssNumber: string; tinNumber: string;
-    govId: string; profilePictureUrl: string;
+    dailyTarget: string; sssNumber: string; pagIbigNumber: string;
+    profilePictureUrl: string;
   };
   onFormChange: (form: AddStaffDialogProps['form']) => void;
   onSubmit: (e: React.FormEvent) => void;

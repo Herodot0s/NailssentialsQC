@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
-import { del } from '@vercel/blob';
+import { v2 as cloudinary } from 'cloudinary';
 
 /**
  * GET /api/v1/exhibits
@@ -109,13 +109,17 @@ export const deleteExhibit = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Delete from Vercel Blob if URL exists
+    // Delete from Cloudinary if URL exists
     if (exhibit.image_url) {
       try {
-        await del(exhibit.image_url, { token: process.env.BLOB_READ_WRITE_TOKEN });
-      } catch (blobError) {
-        console.error('Failed to delete blob:', blobError);
-        // Continue with record deletion even if blob deletion fails
+        // Extract public ID from Cloudinary URL
+        const urlParts = exhibit.image_url.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+        const publicId = `nailssentials/${fileName.split('.')[0]}`;
+        await cloudinary.uploader.destroy(publicId);
+      } catch (cloudError) {
+        console.error('Failed to delete Cloudinary image:', cloudError);
+        // Continue with record deletion even if cloud deletion fails
       }
     }
 

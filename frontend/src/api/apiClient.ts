@@ -86,16 +86,17 @@ export const uploadFile = (file: File) => {
 export const deleteFile = (url: string) => apiClient.delete('../upload', { data: { url } });
 
 // Catalog methods
-export const getCategories = () => apiClient.get('/services/categories');
-export const createCategory = (data: { name: string; description?: string }) =>
+export const getCategories = (params?: { showAll?: boolean; parentId?: number }) => apiClient.get('/services/categories', { params });
+export const createCategory = (data: { name: string; description?: string; is_active?: boolean }) =>
   apiClient.post('/services/categories', data);
 export const updateCategory = (
   id: number,
   data: { name: string; description?: string; is_active: boolean },
 ) => apiClient.put(`/services/categories/${id}`, data);
+export const deleteCategory = (id: number) => apiClient.delete(`/services/categories/${id}`);
 
-export const getServices = (categoryId?: number) =>
-  apiClient.get('/services', { params: { categoryId } });
+export const getServices = (params?: { categoryId?: number; showAll?: boolean }) =>
+  apiClient.get('/services', { params });
 export const createService = (data: CreateServiceRequest) => apiClient.post('/services', data);
 export const updateService = (id: number, data: UpdateServiceRequest) => apiClient.put(`/services/${id}`, data);
 
@@ -107,12 +108,15 @@ export const getStaffSchedule = (id: number) => apiClient.get(`/staff/${id}/sche
 export const updateStaffSchedule = (id: number, data: { schedules: ScheduleItem[] }) => apiClient.put(`/staff/${id}/schedule`, data);
 
 // Appointment methods
-export const getAvailability = (date: string) =>
-  apiClient.get('/appointments/availability', { params: { date } });
+export const getAvailability = (date: string, count?: number) =>
+  apiClient.get('/appointments/availability', { params: { date, count } });
 export const createAppointment = (bookingData: CreateAppointmentRequest) => apiClient.post('/appointments', bookingData);
-export const getAppointments = () => apiClient.get('/appointments');
-export const completeAppointment = (id: number, data: { paymentMethod: 'cash' | 'gcash' }) =>
+export const getAppointments = (params?: { cursor?: string; limit?: number }) =>
+  apiClient.get('/appointments', { params });
+export const completeAppointment = (id: number, data: { paymentMethod: 'cash' | 'gcash'; servicePhotoUrl: string; gcashReferenceNo?: string }) =>
   apiClient.post(`/appointments/${id}/complete`, data);
+export const cancelAppointment = (id: number, data: { reason?: string }) =>
+  apiClient.patch(`/appointments/${id}/cancel`, data);
 export const getCommissionSummary = () => apiClient.get('/appointments/commission-summary');
 export const getStaffCommissions = () => apiClient.get('/appointments/staff-commissions');
 
