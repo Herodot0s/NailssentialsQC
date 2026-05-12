@@ -30,7 +30,7 @@ export interface HistoricalData {
   services: Record<string, number>;
 }
 
-export type ActiveView = 'staff' | 'attendance' | 'deductions' | 'payroll' | 'reviews' | 'exhibits' | 'content' | 'packages' | 'advanced-analytics' | 'services' | 'messages';
+export type ActiveView = 'staff' | 'attendance' | 'deductions' | 'payroll' | 'reviews' | 'exhibits' | 'content' | 'packages' | 'advanced-analytics' | 'services' | 'messages' | 'customer-care' | 'performance' | 'service-history';
 
 export interface ManagerSidebarProps {
   activeView: ActiveView;

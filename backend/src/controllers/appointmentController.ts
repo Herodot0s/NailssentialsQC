@@ -154,6 +154,48 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
     }
 
     const appointment = await prisma.$transaction(async (tx) => {
+      // 1. Strict Availability Check (Conflict Prevention)
+      for (const item of items) {
+        const { serviceId, staffId, startTime } = item;
+        const service = await tx.service.findUnique({ where: { id: parseInt(serviceId) } });
+        if (!service) throw new Error(`Service ${serviceId} not found`);
+
+        const staffProfile = await tx.staffProfile.findFirst({
+          where: { user_id: parseInt(staffId) },
+        });
+        if (!staffProfile) throw new Error(`Staff profile for user ${staffId} not found`);
+
+        const startDateTime = getFullDate(date, startTime);
+        const endDateTime = addMinutes(startDateTime, service.duration_minutes);
+
+        // Check for overlapping appointments for this staff member
+        const existingAppointments = await tx.appointmentItem.findMany({
+          where: {
+            staff_id: staffProfile.id,
+            appointment: {
+              appointment_date: {
+                gte: new Date(date),
+                lte: new Date(date), // Strictly same day
+              },
+            },
+            status: { in: ['pending', 'confirmed', 'in_progress'] },
+          },
+        });
+
+        for (const existing of existingAppointments) {
+          const exStart = getFullDate(date, existing.start_time);
+          const exEnd = getFullDate(date, existing.end_time);
+
+          if (
+            (startDateTime >= exStart && startDateTime < exEnd) ||
+            (endDateTime > exStart && endDateTime <= exEnd) ||
+            (startDateTime <= exStart && endDateTime >= exEnd)
+          ) {
+            throw new Error(`Technician ${staffProfile.full_name || staffId} is already booked at ${startTime}. Please select another time or technician.`);
+          }
+        }
+      }
+
       const apt = await tx.appointment.create({
         data: {
           customer_id: targetCustomerId,
@@ -248,3 +290,97 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
     return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
   }
 };
+
+export const cancelAppointment = async (req: AuthRequest, res: Response) => {
+  try {
+    const currentUser = getCurrentUser(req);
+    if (!currentUser) {
+      return sendError(res, 'UNAUTHORIZED', 'User not authenticated', 401);
+    }
+    
+    const appointmentId = (req as any).validatedParams.id;
+    const { reason } = req.validatedBody || req.body;
+    
+    const appointment = await prisma.appointment.findUnique({
+      where: { id: appointmentId },
+      include: { 
+        customer: true,
+        items: {
+          include: {
+            staff: true
+          }
+        }
+      }
+    });
+
+    if (!appointment) {
+      return sendError(res, 'APPOINTMENT_NOT_FOUND', 'Appointment not found', 404);
+    }
+
+    // Check if user has permission to cancel
+    if (currentUser.role === 'customer') {
+      const customer = await prisma.customerProfile.findUnique({ where: { user_id: currentUser.userId } });
+      if (!customer || appointment.customer_id !== customer.id) {
+        return sendError(res, 'FORBIDDEN', 'You can only cancel your own appointments', 403);
+      }
+    }
+
+    // Only pending or confirmed appointments can be cancelled
+    if (appointment.status !== 'pending' && appointment.status !== 'confirmed') {
+      return sendError(res, 'INVALID_STATUS', `Cannot cancel appointment in "${appointment.status}" status`, 400);
+    }
+
+    // Perform cancellation in a transaction
+    await prisma.$transaction(async (tx) => {
+      await tx.appointment.update({
+        where: { id: appointmentId },
+        data: { 
+          status: 'cancelled',
+          notes: reason ? `${appointment.notes || ''}\nCancellation Reason: ${reason}` : appointment.notes
+        }
+      });
+
+      await tx.appointmentItem.updateMany({
+        where: { appointment_id: appointmentId },
+        data: { status: 'cancelled' }
+      });
+
+      await tx.systemLog.create({
+        data: {
+          user_id: currentUser.userId,
+          action: 'CANCEL_APPOINTMENT',
+          entity_type: 'appointment',
+          entity_id: appointmentId,
+          details: { reason, cancelledBy: currentUser.role }
+        }
+      });
+    });
+
+    // Notify staff
+    (async () => {
+      try {
+        const staffToNotify = new Set<number>();
+        appointment.items.forEach(item => {
+          if (item.staff) staffToNotify.add(item.staff.user_id);
+        });
+
+        for (const staffUserId of staffToNotify) {
+          await createNotification(
+            staffUserId,
+            'APPOINTMENT_CANCELLED',
+            'Appointment Cancelled',
+            `The appointment on ${format(new Date(appointment.appointment_date), 'MMM dd')} has been cancelled${reason ? `: ${reason}` : '.'}`
+          );
+        }
+      } catch (err) {
+        console.error('Error notifying staff about cancellation:', err);
+      }
+    })();
+
+    return sendSuccess(res, { message: 'Appointment cancelled successfully' }, 200);
+  } catch (error: unknown) {
+    console.error('Cancel appointment error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to cancel appointment';
+    return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
+  }
+};

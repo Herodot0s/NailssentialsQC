@@ -92,14 +92,14 @@ const ManageServices: React.FC = () => {
   const popularCount = useMemo(() => services.filter(s => s.is_popular).length, [services]);
 
   const getCategoryColor = (id: number | string) => {
-    // Map category IDs to harmonious OKLCH colors
+    // Map category IDs to harmonious OKLCH colors aligned with the earthy palette
     const idNum = typeof id === 'string' ? parseInt(id) || 0 : id;
     const colors = [
-      'oklch(65% 0.12 35)', // Terracotta (Nails)
-      'oklch(60% 0.08 145)', // Forest (Spa)
-      'oklch(70% 0.1 65)', // Amber (Hair)
-      'oklch(60% 0.1 25)', // Brick (Waxing)
-      'oklch(65% 0.06 240)', // Slate (Eyelash)
+      'oklch(60% 0.08 40)',  // Warm Terracotta
+      'oklch(55% 0.06 140)', // Muted Sage
+      'oklch(65% 0.10 70)',  // Ochre
+      'oklch(50% 0.07 30)',  // Deep Clay
+      'oklch(60% 0.05 230)', // Dusk Blue
     ];
     return colors[idNum % colors.length];
   };
@@ -122,7 +122,10 @@ const ManageServices: React.FC = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [catRes, svcRes] = await Promise.all([getCategories(), getServices()]);
+      const [catRes, svcRes] = await Promise.all([
+        getCategories({ showAll: true }),
+        getServices({ showAll: true })
+      ]);
       setCategories(catRes.data.data);
       setServices(svcRes.data.data);
     } catch {
@@ -170,7 +173,7 @@ const ManageServices: React.FC = () => {
         maxWidthOrHeight: 1920, // Max width/height
         useWebWorker: true,
       };
-      
+
       const compressedFile = await imageCompression(file, options);
       const res = await uploadFile(compressedFile);
       if (res.data?.success) {
@@ -237,8 +240,8 @@ const ManageServices: React.FC = () => {
   if (isLoading && services.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-kiln-terracotta" />
-        <p className="text-warm-stone font-medium">Loading service management...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-mute font-medium">Loading service management...</p>
       </div>
     );
   }
@@ -255,14 +258,14 @@ const ManageServices: React.FC = () => {
             <Button
               onClick={() => setIsEditingCategories(true)}
               variant="outline"
-              className="h-11 px-6 border-kiln-border text-warm-stone font-bold hover:bg-bisque-wash/30"
+              className="h-11 px-6 border-hairline text-body font-bold hover:bg-surface-soft/50"
             >
               <Tags className="mr-2 h-5 w-5" />
               Manage Categories
             </Button>
             <Button
               onClick={handleAddNew}
-              className="h-11 px-8 bg-gradient-to-br from-[#B8794E] to-[#9A6440] border-none shadow-premium hover:shadow-card transition-all active:scale-95 text-white font-bold"
+              className="h-11 px-8 bg-primary border-none shadow-sm hover:brightness-105 transition-all active:scale-95 text-white font-bold"
             >
               <Plus className="mr-2 h-5 w-5" />
               New Service
@@ -271,15 +274,15 @@ const ManageServices: React.FC = () => {
         </div>
 
         {/* Artisan's Toolbar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-6 border-y border-kiln-border/20 bg-bisque-wash/10 -mx-6 px-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-6 border-y border-hairline/20 bg-surface-soft/20 -mx-6 px-6">
           <div className="flex flex-1 items-center gap-6 w-full md:w-auto">
             <div className="relative flex-1 max-w-md group">
-              <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-4 text-clay-dust group-focus-within:text-kiln-terracotta transition-colors" />
+              <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-4 text-mute group-focus-within:text-primary transition-colors" />
               <Input
                 placeholder="Search services..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-7 border-0 border-b border-kiln-border/30 rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-kiln-terracotta transition-all h-10 text-charcoal-bark placeholder:text-clay-dust font-serif italic"
+                className="pl-7 border-0 border-b border-hairline rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-primary transition-all h-10 text-ink placeholder:text-mute"
               />
             </div>
 
@@ -287,8 +290,8 @@ const ManageServices: React.FC = () => {
               <button
                 onClick={() => setSelectedCategoryId('all')}
                 className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${selectedCategoryId === 'all'
-                  ? 'bg-kiln-terracotta text-white shadow-premium'
-                  : 'bg-white/50 text-warm-stone border border-kiln-border/20 hover:bg-white'
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'bg-white/50 text-body border border-hairline/20 hover:bg-white'
                   }`}
               >
                 All
@@ -311,14 +314,14 @@ const ManageServices: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 w-full md:w-auto justify-end">
-            <div className="flex items-center bg-white/40 rounded-full p-1 border border-kiln-border/20 backdrop-blur-sm">
+            <div className="flex items-center bg-white/40 rounded-full p-1 border border-hairline/20 backdrop-blur-sm">
               {(['all', 'active', 'disabled'] as const).map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
                   className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${statusFilter === status
-                    ? 'bg-white text-kiln-terracotta shadow-sm ring-1 ring-kiln-border/10'
-                    : 'text-clay-dust hover:text-warm-stone'
+                    ? 'bg-white text-primary shadow-sm ring-1 ring-hairline/10'
+                    : 'text-mute hover:text-body'
                     }`}
                 >
                   {status}
@@ -330,7 +333,7 @@ const ManageServices: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-brick-error/5 border border-brick-error/20 text-brick-error text-sm p-4 rounded-2xl flex items-center gap-3 mb-8 animate-in fade-in slide-in-from-top-2">
+        <div className="bg-accent-red-soft border border-accent-red/20 text-accent-red text-sm p-4 rounded-2xl flex items-center gap-3 mb-8 animate-in fade-in slide-in-from-top-2">
           <AlertCircle className="h-5 w-5 shrink-0" />
           <span className="font-medium">{error}</span>
         </div>
@@ -339,14 +342,14 @@ const ManageServices: React.FC = () => {
       <Card className="border-none shadow-premium bg-white/80 backdrop-blur-md overflow-hidden rounded-3xl">
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-bisque-wash/20 border-b border-kiln-border/10">
+            <TableHeader className="bg-surface-soft/20 border-b border-hairline/10">
               <TableRow className="hover:bg-transparent border-none">
-                <TableHead className="pl-8 h-14 text-[10px] font-bold uppercase tracking-widest text-clay-dust">Service Name</TableHead>
-                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-clay-dust">Category</TableHead>
-                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-clay-dust">Price</TableHead>
-                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-clay-dust">Duration</TableHead>
-                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-clay-dust">Status</TableHead>
-                <TableHead className="pr-8 h-14 text-right text-[10px] font-bold uppercase tracking-widest text-clay-dust">Actions</TableHead>
+                <TableHead className="pl-8 h-14 text-[10px] font-bold uppercase tracking-widest text-mute">Service Name</TableHead>
+                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-mute">Category</TableHead>
+                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-mute">Price</TableHead>
+                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-mute">Duration</TableHead>
+                <TableHead className="h-14 text-[10px] font-bold uppercase tracking-widest text-mute">Status</TableHead>
+                <TableHead className="pr-8 h-14 text-right text-[10px] font-bold uppercase tracking-widest text-mute">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -358,15 +361,15 @@ const ManageServices: React.FC = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0, scale: 0.98 }}
-                    className="group border-b border-kiln-border/5 hover:bg-bisque-wash/10 transition-colors"
+                    className="group border-b border-hairline/10 hover:bg-surface-soft/10 transition-colors"
                   >
                     <TableCell className="pl-8 py-5">
                       <div className="flex flex-col gap-1.5">
-                        <span className="font-serif text-lg text-charcoal-bark group-hover:text-kiln-terracotta transition-colors leading-none">
+                        <span className="font-serif text-lg text-ink group-hover:text-primary transition-colors leading-none">
                           {svc.name}
                         </span>
                         {svc.is_popular && (
-                          <Badge className="w-fit text-[9px] h-4 px-2 bg-kiln-terracotta/10 text-kiln-terracotta border border-kiln-terracotta/20 font-bold uppercase tracking-widest rounded-full">
+                          <Badge className="w-fit text-[9px] h-4 px-2 bg-primary/10 text-primary border border-primary/20 font-bold uppercase tracking-widest rounded-full">
                             Featured
                           </Badge>
                         )}
@@ -384,22 +387,22 @@ const ManageServices: React.FC = () => {
                         {svc.category?.name}
                       </span>
                     </TableCell>
-                    <TableCell className="font-serif font-bold text-xl text-kiln-terracotta/90">
+                    <TableCell className="font-serif font-bold text-xl text-primary/90">
                       ₱{parseFloat(svc.price).toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-warm-stone text-sm font-medium">
+                    <TableCell className="text-body text-sm font-medium">
                       {svc.duration_minutes} <span className="text-[10px] uppercase tracking-tighter opacity-60">min</span>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2.5">
                         <div
                           className={`h-2 w-2 rounded-full ring-4 ${svc.is_active
-                            ? 'bg-forest-confirm ring-forest-confirm/10'
-                            : 'bg-clay-dust ring-clay-dust/10'
+                            ? 'bg-accent-green ring-accent-green/10'
+                            : 'bg-mute ring-mute/10'
                             }`}
                         />
                         <span
-                          className={`text-[10px] font-bold tracking-widest uppercase ${svc.is_active ? 'text-forest-confirm' : 'text-clay-dust'
+                          className={`text-[10px] font-bold tracking-widest uppercase ${svc.is_active ? 'text-accent-green' : 'text-mute'
                             }`}
                         >
                           {svc.is_active ? 'Active' : 'Hidden'}
@@ -412,7 +415,7 @@ const ManageServices: React.FC = () => {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleEdit(svc)}
-                          className="h-9 w-9 rounded-full bg-white border border-kiln-border/10 shadow-sm text-warm-stone hover:text-kiln-terracotta hover:border-kiln-terracotta/20"
+                          className="h-9 w-9 rounded-full bg-white border border-hairline/10 shadow-sm text-body hover:text-primary hover:border-primary/20"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -420,9 +423,9 @@ const ManageServices: React.FC = () => {
                           variant="ghost"
                           size="icon"
                           onClick={() => toggleStatus(svc)}
-                          className={`h-9 w-9 rounded-full bg-white border border-kiln-border/10 shadow-sm ${svc.is_active
-                            ? 'text-brick-error hover:bg-brick-error/5 hover:border-brick-error/20'
-                            : 'text-forest-confirm hover:bg-forest-confirm/5 hover:border-forest-confirm/20'
+                          className={`h-9 w-9 rounded-full bg-white border border-hairline/10 shadow-sm ${svc.is_active
+                            ? 'text-accent-red hover:bg-accent-red-soft/20 hover:border-accent-red/20'
+                            : 'text-accent-green hover:bg-accent-green-soft/20 hover:border-accent-green/20'
                             }`}
                         >
                           {svc.is_active ? (
@@ -439,7 +442,7 @@ const ManageServices: React.FC = () => {
             </TableBody>
           </Table>
           {filteredServices.length === 0 && !isLoading && (
-            <div className="text-center py-20 text-warm-stone/60 font-serif italic text-lg">
+            <div className="text-center py-20 text-mute/60 font-serif italic text-lg">
               No services match your current selection.
             </div>
           )}
@@ -447,24 +450,24 @@ const ManageServices: React.FC = () => {
       </Card>
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent className="max-w-3xl w-[95vw] p-0 overflow-hidden bg-linen-mist gap-0 border-none shadow-2xl">
+        <DialogContent className="max-w-[500px] sm:max-w-[500px] w-full p-0 overflow-hidden bg-canvas gap-0 border-none shadow-none">
           <div className="grid grid-cols-1 h-[85vh]">
             {/* LEFT PANE: Editor */}
             <div className="h-full overflow-y-auto p-8 bg-white no-scrollbar flex flex-col gap-8 relative">
 
-              <div className="flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-md z-10 -mx-8 px-8 py-4 border-b border-kiln-border/20">
-                <DialogTitle className="font-serif text-2xl text-kiln-terracotta flex items-center gap-2">
-                  <Sparkles className="h-5 w-5" />
+              <div className="flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-md z-10 -mx-8 px-8 py-4 border-b border-hairline">
+                <DialogTitle className="heading-md flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
                   {currentService?.id ? 'Artisan Studio' : 'Craft New Service'}
                 </DialogTitle>
                 <div className="flex gap-3">
-                  <Button type="button" variant="ghost" onClick={() => setIsEditing(false)}>
+                  <Button type="button" variant="ghost" onClick={() => setIsEditing(false)} className="rounded-md">
                     Cancel
                   </Button>
                   <Button
                     onClick={handleSubmit}
                     disabled={isLoading || isUploading}
-                    className="font-bold shadow-lg shadow-primary/20 bg-primary hover:bg-primary-hover transition-all"
+                    className="btn-primary"
                   >
                     {isLoading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
                     Save Service
@@ -475,21 +478,21 @@ const ManageServices: React.FC = () => {
               <div className="space-y-8 pb-12">
                 {/* Image Upload Area */}
                 <div className="space-y-3">
-                  <Label className="text-warm-stone font-bold uppercase tracking-wider text-xs">Hero Image</Label>
+                  <Label className="text-body font-bold uppercase tracking-wider text-xs">Hero Image</Label>
                   <div className="relative group">
                     {currentService?.image_url ? (
-                      <div className="relative h-64 w-full rounded-2xl overflow-hidden border border-kiln-border/30 shadow-inner">
+                      <div className="relative h-64 w-full rounded-2xl overflow-hidden border border-hairline/30 shadow-inner">
                         <img
                           src={currentService.image_url}
                           alt="Preview"
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
-                        <div className="absolute inset-0 bg-charcoal-bark/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                        <div className="absolute inset-0 bg-ink/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                           <Button
                             type="button"
                             variant="secondary"
                             size="sm"
-                            className="bg-white/90 hover:bg-white text-charcoal-bark"
+                            className="bg-white/90 hover:bg-white text-ink"
                             onClick={() => document.getElementById('image-upload')?.click()}
                           >
                             <Edit className="h-4 w-4 mr-2" /> Change Image
@@ -505,14 +508,14 @@ const ManageServices: React.FC = () => {
                         </div>
                       </div>
                     ) : (
-                      <label htmlFor="image-upload" className="flex flex-col items-center justify-center h-64 w-full rounded-2xl border-2 border-dashed border-clay-dust/50 bg-bisque-wash/20 hover:bg-bisque-wash/50 hover:border-kiln-terracotta/50 transition-colors cursor-pointer group-hover:shadow-sm">
+                      <label htmlFor="image-upload" className="flex flex-col items-center justify-center h-64 w-full rounded-2xl border-2 border-dashed border-hairline/50 bg-surface-soft/20 hover:bg-surface-soft/40 hover:border-primary/50 transition-colors cursor-pointer group-hover:shadow-sm">
                         {isUploading ? (
-                          <div className="flex flex-col items-center gap-3 text-kiln-terracotta">
+                          <div className="flex flex-col items-center gap-3 text-primary">
                             <Loader2 className="h-8 w-8 animate-spin" />
                             <span className="text-sm font-medium">Uploading...</span>
                           </div>
                         ) : (
-                          <div className="flex flex-col items-center gap-3 text-clay-dust group-hover:text-kiln-terracotta transition-colors">
+                          <div className="flex flex-col items-center gap-3 text-mute group-hover:text-primary transition-colors">
                             <div className="p-4 bg-white rounded-full shadow-sm">
                               <ImagePlus className="h-8 w-8" />
                             </div>
@@ -535,7 +538,7 @@ const ManageServices: React.FC = () => {
 
                 {/* Core Details */}
                 <div className="space-y-4">
-                  <Label className="text-warm-stone font-bold uppercase tracking-wider text-xs border-b border-kiln-border/30 pb-2 block">Core Details</Label>
+                  <Label className="text-body font-bold uppercase tracking-wider text-xs border-b border-hairline/30 pb-2 block">Core Details</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="name">Service Name *</Label>
@@ -545,7 +548,7 @@ const ManageServices: React.FC = () => {
                         value={currentService?.name || ''}
                         onChange={(e) => setCurrentService({ ...currentService!, name: e.target.value })}
                         required
-                        className="h-12 text-lg font-serif focus-visible:ring-kiln-terracotta bg-bisque-wash/10"
+                        className="h-12 text-lg font-serif focus-visible:ring-primary bg-canvas/30"
                         placeholder="e.g. Signature Botanical Spa"
                       />
                     </div>
@@ -557,8 +560,10 @@ const ManageServices: React.FC = () => {
                           val && setCurrentService({ ...currentService!, category_id: parseInt(val) })
                         }
                       >
-                        <SelectTrigger id="category" className="h-12 focus:ring-kiln-terracotta bg-bisque-wash/10">
-                          <SelectValue placeholder="Select Category" />
+                        <SelectTrigger id="category" className="h-12 focus:ring-primary bg-canvas/30">
+                          <SelectValue placeholder="Select Category">
+                            {categories.find(c => c.id === currentService?.category_id)?.name}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((cat) => (
@@ -581,7 +586,7 @@ const ManageServices: React.FC = () => {
                           value={currentService?.price || ''}
                           onChange={(e) => setCurrentService({ ...currentService!, price: e.target.value })}
                           required
-                          className="h-12 focus-visible:ring-kiln-terracotta font-serif font-bold text-kiln-terracotta bg-bisque-wash/10"
+                          className="h-12 focus-visible:ring-primary font-serif font-bold text-primary bg-canvas/30"
                         />
                       </div>
                       <div className="space-y-2">
@@ -600,9 +605,9 @@ const ManageServices: React.FC = () => {
                               })
                             }
                             required
-                            className="h-12 pr-12 focus-visible:ring-kiln-terracotta bg-bisque-wash/10"
+                            className="h-12 pr-12 focus-visible:ring-primary bg-canvas/30"
                           />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-clay-dust">min</span>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-mute">min</span>
                         </div>
                       </div>
                     </div>
@@ -611,12 +616,12 @@ const ManageServices: React.FC = () => {
 
                 {/* Editorial Content */}
                 <div className="space-y-5">
-                  <Label className="text-warm-stone font-bold uppercase tracking-wider text-xs border-b border-kiln-border/30 pb-2 block">Editorial Storytelling</Label>
+                  <Label className="text-body font-bold uppercase tracking-wider text-xs border-b border-hairline/30 pb-2 block">Editorial Storytelling</Label>
 
                   <div className="space-y-2">
                     <Label htmlFor="description" className="flex justify-between items-center">
                       Short Description
-                      <span className="text-[10px] text-clay-dust font-normal uppercase">Used in catalogs</span>
+                      <span className="text-[10px] text-mute font-normal uppercase">Used in catalogs</span>
                     </Label>
                     <Textarea
                       id="description"
@@ -624,15 +629,15 @@ const ManageServices: React.FC = () => {
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         setCurrentService({ ...currentService!, description: e.target.value })
                       }
-                      className="min-h-[80px] resize-none focus-visible:ring-kiln-terracotta bg-bisque-wash/10"
+                      className="min-h-[80px] resize-none focus-visible:ring-primary bg-canvas/30"
                       placeholder="A brief, captivating summary of the service..."
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="experience" className="flex justify-between items-center text-kiln-terracotta">
+                    <Label htmlFor="experience" className="flex justify-between items-center text-primary">
                       The Experience
-                      <span className="text-[10px] text-clay-dust font-normal uppercase">Deep dive narrative</span>
+                      <span className="text-[10px] text-mute font-normal uppercase">Deep dive narrative</span>
                     </Label>
                     <Textarea
                       id="experience"
@@ -640,7 +645,7 @@ const ManageServices: React.FC = () => {
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         setCurrentService({ ...currentService!, experience_description: e.target.value })
                       }
-                      className="min-h-[140px] resize-y focus-visible:ring-kiln-terracotta bg-bisque-wash/10 leading-relaxed"
+                      className="min-h-[140px] resize-y focus-visible:ring-primary bg-canvas/30 leading-relaxed"
                       placeholder="Describe the sensory journey, the techniques used, and the feeling of luxury..."
                     />
                   </div>
@@ -648,7 +653,7 @@ const ManageServices: React.FC = () => {
                   <div className="space-y-2">
                     <Label htmlFor="expect" className="flex justify-between items-center">
                       What to Expect
-                      <span className="text-[10px] text-clay-dust font-normal uppercase">Step by step / Highlights</span>
+                      <span className="text-[10px] text-mute font-normal uppercase">Step by step / Highlights</span>
                     </Label>
                     <Textarea
                       id="expect"
@@ -656,15 +661,15 @@ const ManageServices: React.FC = () => {
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         setCurrentService({ ...currentService!, what_to_expect: e.target.value })
                       }
-                      className="min-h-[120px] resize-y focus-visible:ring-kiln-terracotta bg-bisque-wash/10"
+                      className="min-h-[120px] resize-y focus-visible:ring-primary bg-canvas/30"
                       placeholder="• Warm herbal soak&#10;• Precision cuticle care&#10;• Extended massage..."
                     />
                   </div>
                 </div>
 
                 {/* Toggles */}
-                <div className="space-y-4 pt-4 border-t border-kiln-border/30">
-                  <div className="flex flex-col gap-4 bg-bisque-wash/30 p-5 rounded-2xl border border-kiln-border/50">
+                <div className="space-y-4 pt-4 border-t border-hairline/30">
+                  <div className="flex flex-col gap-4 bg-canvas/20 p-5 rounded-2xl border border-hairline/30">
                     <div className="flex items-start space-x-3">
                       <Checkbox
                         id="is_active"
@@ -672,13 +677,13 @@ const ManageServices: React.FC = () => {
                         onCheckedChange={(checked) =>
                           setCurrentService({ ...currentService!, is_active: checked === true })
                         }
-                        className="mt-1"
+                        className="mt-1 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
                       <div className="space-y-1">
-                        <Label htmlFor="is_active" className="text-sm font-bold cursor-pointer text-charcoal-bark">
+                        <Label htmlFor="is_active" className="text-sm font-bold cursor-pointer text-ink">
                           Active Status
                         </Label>
-                        <p className="text-xs text-clay-dust">When active, customers can discover and book this service.</p>
+                        <p className="text-xs text-mute">When active, customers can discover and book this service.</p>
                       </div>
                     </div>
 
@@ -690,13 +695,13 @@ const ManageServices: React.FC = () => {
                         onCheckedChange={(checked) =>
                           setCurrentService({ ...currentService!, is_popular: checked === true })
                         }
-                        className="mt-1 data-[state=checked]:bg-kiln-terracotta data-[state=checked]:border-kiln-terracotta"
+                        className="mt-1 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
                       <div className="space-y-1">
-                        <Label htmlFor="is_popular" className={`text-sm font-bold cursor-pointer flex items-center gap-1.5 ${!currentService?.is_popular && popularCount >= 4 ? 'text-clay-dust' : 'text-kiln-terracotta'}`}>
+                        <Label htmlFor="is_popular" className={`text-sm font-bold cursor-pointer flex items-center gap-1.5 ${!currentService?.is_popular && popularCount >= 4 ? 'text-mute' : 'text-primary'}`}>
                           Featured / Popular <Sparkles className="h-3 w-3" />
                         </Label>
-                        <p className="text-xs text-clay-dust">
+                        <p className="text-xs text-mute">
                           {!currentService?.is_popular && popularCount >= 4
                             ? 'Maximum of 4 trending treatments reached. Disable another to feature this one.'
                             : 'Highlights this service with a special badge in the public catalog (Max 4).'}

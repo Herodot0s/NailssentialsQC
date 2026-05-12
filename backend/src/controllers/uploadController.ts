@@ -1,7 +1,13 @@
 import { Request, Response } from 'express';
 import busboy from 'busboy';
-import { put, del } from '@vercel/blob';
-import { Readable } from 'stream';
+import { v2 as cloudinary } from 'cloudinary';
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 /**
  * POST /api/upload
@@ -9,57 +15,64 @@ import { Readable } from 'stream';
  * Returns { success: true, data: { url: string } }
  */
 export const uploadFile = async (req: Request, res: Response) => {
-  try {
-    const bb = busboy({ headers: req.headers, limits: { fileSize: 4 * 1024 * 1024 } });
-    let filename = '';
-    let mimeType = '';
-    let fileStream: NodeJS.ReadableStream | null = null;
+  console.log('Upload request received');
+  
+  const bb = busboy({ 
+    headers: req.headers,
+    limits: { files: 1, fileSize: 10 * 1024 * 1024 }
+  });
 
-    bb.on('file', (_name, file, info) => {
-      filename = info.filename;
-      mimeType = info.mimeType;
-      fileStream = file;
-    });
+  let fileFound = false;
+  let responseSent = false;
 
-    bb.on('close', async () => {
-      if (!fileStream) {
-        return res.status(400).json({ success: false, message: 'No file uploaded' });
-      }
+  bb.on('file', (_name, file, info) => {
+    fileFound = true;
+    console.log('File detected:', info.filename, info.mimeType);
 
-      if (!mimeType?.startsWith('image/')) {
-        return res.status(400).json({ success: false, message: 'Only image files are allowed' });
-      }
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'nailssentials',
+        resource_type: 'auto',
+      },
+      (error, result) => {
+        if (responseSent) return;
+        responseSent = true;
 
-      const blob = await put(filename || 'upload.png', fileStream as Readable, {
-        access: 'public',
-        contentType: mimeType,
-        token: process.env.BLOB_READ_WRITE_TOKEN,
-      });
+        if (error) {
+          console.error('Cloudinary Error:', error);
+          return res.status(500).json({ success: false, message: error.message });
+        }
 
-      const allowedPattern = /^https:\/\/.*\.public\.blob\.vercel-storage\.com\/.*$/;
-      if (!allowedPattern.test(blob.url)) {
-        await del(blob.url, { token: process.env.BLOB_READ_WRITE_TOKEN });
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid profile picture URL. Only Vercel Blob URLs are allowed.',
+        console.log('Cloudinary Success:', result?.secure_url);
+        return res.json({
+          success: true,
+          data: { url: result?.secure_url },
         });
       }
+    );
 
-      return res.json({
-        success: true,
-        data: { url: blob.url },
-      });
-    });
+    file.pipe(uploadStream);
+  });
 
-    req.pipe(bb);
-  } catch (error: unknown) {
-    console.error('Upload error:', error);
-    const message = error instanceof Error ? error.message : 'Upload failed';
-    return res.status(500).json({
-      success: false,
-      message,
-    });
-  }
+  bb.on('close', () => {
+    console.log('Busboy close event');
+    setTimeout(() => {
+      if (!fileFound && !responseSent) {
+        responseSent = true;
+        res.status(400).json({ success: false, message: 'No file found in request' });
+      }
+    }, 500);
+  });
+
+  bb.on('error', (err) => {
+    console.error('Busboy error:', err);
+    if (!responseSent) {
+      responseSent = true;
+      res.status(500).json({ success: false, message: 'Upload stream error' });
+    }
+  });
+
+  req.pipe(bb);
 };
 
 /**
@@ -74,9 +87,14 @@ export const deleteFile = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: 'File URL required' });
     }
 
-    await del(url, { token: process.env.BLOB_READ_WRITE_TOKEN });
+    // Extract public ID from Cloudinary URL
+    const urlParts = url.split('/');
+    const fileName = urlParts[urlParts.length - 1];
+    const publicId = `nailssentials/${fileName.split('.')[0]}`;
+    
+    await cloudinary.uploader.destroy(publicId);
 
-    return res.json({ success: true, message: 'File deleted' });
+    return res.json({ success: true, message: 'File deleted from Cloudinary' });
   } catch (error: unknown) {
     console.error('Delete error:', error);
     const message = error instanceof Error ? error.message : 'Delete failed';

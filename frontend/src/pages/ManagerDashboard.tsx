@@ -18,20 +18,24 @@ import {
   addDeduction,
   getStaffSchedule,
   updateStaffSchedule,
+  getAppointments,
 } from '../api/apiClient';
 
 import SalarySlipModal from '@/components/SalarySlipModal';
 import { StaffTable } from '@/components/dashboard/staff/StaffTable';
 import { PayrollTable } from '@/components/dashboard/payroll/PayrollTable';
 import { AttendanceLedger } from '@/components/dashboard/staff/AttendanceLedger';
-import { ReviewModeration } from '@/components/dashboard/ReviewModeration';
+import { ReviewModeration } from '@/components/dashboard/customers/ReviewModeration';
+import { CustomerCareView } from '@/components/dashboard/customers/CustomerCareView';
+import { AppointmentHistory } from '@/components/dashboard/customers/AppointmentHistory';
+import { StaffPerformanceView } from '@/components/dashboard/analytics/StaffPerformanceView';
 import ManageExhibits from '@/components/dashboard/cms/ManageExhibits';
 import ManageServices from '@/components/dashboard/cms/ManageServices';
 import { ContentView } from '@/components/dashboard/cms/ContentView';
 import PackagesView from '@/components/packages/PackagesView';
 import { AnalyticsDashboard } from '@/components/dashboard/analytics/AnalyticsDashboard';
 import { MessagesView } from '@/components/dashboard/MessagesView';
-import { LogWalkInDialog } from '@/components/dashboard/LogWalkInDialog';
+import { LogWalkInDialog } from '@/components/dashboard/customers/LogWalkInDialog';
 
 import { ManagerSidebar } from '@/components/dashboard/ManagerSidebar';
 import { DeductionsView } from '@/components/dashboard/payroll/DeductionsView';
@@ -64,6 +68,7 @@ const ManagerDashboard: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -131,10 +136,27 @@ const ManagerDashboard: React.FC = () => {
     end: new Date().toISOString().split('T')[0],
   }), []);
 
+  const performanceData = useMemo(() => {
+    return staffMembers.map(s => {
+      const safeAppointments = Array.isArray(appointments) ? appointments : [];
+      const completedApps = safeAppointments.filter(a => a.status === 'completed');
+      const staffItems = completedApps.flatMap(a => a.items || []).filter(i => i.staff_id === s.staffProfileId);
+      
+      return {
+        staffId: s.id,
+        fullName: s.fullName,
+        revenue: staffItems.reduce((sum, i) => sum + Number(i.price_at_booking), 0),
+        commission: staffItems.reduce((sum, i) => sum + (Number(i.price_at_booking) * 0.08), 0),
+        serviceCount: staffItems.length,
+        categoryBreakdown: {}
+      };
+    }).sort((a, b) => b.revenue - a.revenue);
+  }, [staffMembers, appointments]);
+
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [salesRes, payrollRes, staffRes, periodsRes, reviewsRes, attRes, catRes] = await Promise.all([
+      const [salesRes, payrollRes, staffRes, periodsRes, reviewsRes, attRes, catRes, appRes] = await Promise.all([
         getDailySales(),
         getReports({ startDate: dateRange.start, endDate: dateRange.end }),
         getAllStaff(),
@@ -142,6 +164,7 @@ const ManagerDashboard: React.FC = () => {
         getAllReviews(),
         getAllAttendance({ startDate: dateRange.start }),
         getCategories(),
+        getAppointments(),
       ]);
 
       if (salesRes.data.success) setSalesStats(salesRes.data.data);
@@ -160,6 +183,11 @@ const ManagerDashboard: React.FC = () => {
       if (reviewsRes.data.success) setReviews(reviewsRes.data.data);
       if (attRes.data.success) setAttendance(attRes.data.data);
       if (catRes.data.success) setCategories(catRes.data.data);
+      
+      if (appRes.data.success) {
+        const appData = appRes.data.data;
+        setAppointments(Array.isArray(appData) ? appData : (appData?.items || []));
+      }
 
     } catch (err: unknown) {
       console.error('Fetch error:', err instanceof Error ? err.message : err);
@@ -461,9 +489,6 @@ const ManagerDashboard: React.FC = () => {
            </div>
 
            <div className="flex gap-4">
-              <Button onClick={() => setShowWalkInModal(true)} variant="outline" className="rounded-none gap-2 px-6 h-12 text-[10px] uppercase font-bold tracking-widest border-primary/20">
-                <Plus className="h-4 w-4" /> Log Walk-in
-              </Button>
               {activeView === 'staff' && (
                 <Button onClick={() => setShowAddStaffModal(true)} className="rounded-none gap-2 px-6 h-12 text-[10px] uppercase font-bold tracking-widest">
                   <Plus className="h-4 w-4" /> New Employee
@@ -524,6 +549,18 @@ const ManagerDashboard: React.FC = () => {
           </div>
         )}
 
+        {activeView === 'performance' && (
+          <div className="animate-in fade-in duration-700">
+            <StaffPerformanceView performanceData={performanceData} />
+          </div>
+        )}
+
+        {activeView === 'service-history' && (
+          <div className="animate-in fade-in duration-700">
+            <AppointmentHistory appointments={appointments} />
+          </div>
+        )}
+
         {activeView === 'reviews' && (
           <div className="animate-in fade-in duration-700">
             <ReviewModeration
@@ -531,6 +568,17 @@ const ManagerDashboard: React.FC = () => {
               onModerateReview={handleModerateReview}
             />
           </div>
+        )}
+
+        {activeView === 'customer-care' && (
+          <CustomerCareView 
+            reviews={reviews}
+            onModerateReview={handleModerateReview}
+            appointments={appointments}
+            staffMembers={staffMembers}
+            onLogWalkIn={() => setShowWalkInModal(true)}
+            dateRange={dateRange}
+          />
         )}
         
         {activeView === 'exhibits' && (

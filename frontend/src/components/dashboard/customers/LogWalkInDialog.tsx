@@ -23,8 +23,9 @@ export const LogWalkInDialog: React.FC<LogWalkInDialogProps> = ({
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<Array<{ serviceId: string, staffId: string, startTime: string }>>([
-    { serviceId: '', staffId: '', startTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) }
+  const [walkInTime, setWalkInTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false, hourCycle: 'h23' }));
+  const [selectedItems, setSelectedItems] = useState<Array<{ serviceId: string, staffId: string }>>([
+    { serviceId: '', staffId: '' }
   ]);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -54,8 +55,7 @@ export const LogWalkInDialog: React.FC<LogWalkInDialogProps> = ({
   const addItem = () => {
     setSelectedItems([...selectedItems, {
       serviceId: '',
-      staffId: '',
-      startTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+      staffId: ''
     }]);
   };
 
@@ -75,8 +75,8 @@ export const LogWalkInDialog: React.FC<LogWalkInDialogProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedItems.some(i => !i.serviceId || !i.staffId || !i.startTime)) {
-      setError('Please fill in all service details.');
+    if (selectedItems.some(i => !i.serviceId || !i.staffId) || !walkInTime) {
+      setError('Please fill in all service details and start time.');
       return;
     }
 
@@ -87,7 +87,7 @@ export const LogWalkInDialog: React.FC<LogWalkInDialogProps> = ({
         items: selectedItems.map(i => ({
           serviceId: parseInt(i.serviceId),
           staffId: parseInt(i.staffId),
-          startTime: i.startTime
+          startTime: walkInTime
         })),
         date: new Date().toISOString(),
         notes,
@@ -95,7 +95,7 @@ export const LogWalkInDialog: React.FC<LogWalkInDialogProps> = ({
       });
       onSuccess();
       onOpenChange(false);
-      setSelectedItems([{ serviceId: '', staffId: '', startTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) }]);
+      setSelectedItems([{ serviceId: '', staffId: '' }]);
       setNotes('');
     } catch (err: any) {
       setError(err.response?.data?.error?.message || 'Failed to log walk-in.');
@@ -106,30 +106,49 @@ export const LogWalkInDialog: React.FC<LogWalkInDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl border-none shadow-2xl rounded-none p-0 overflow-hidden bg-white">
+      <DialogContent className="max-w-2xl border border-hairline shadow-2xl rounded-md p-0 overflow-hidden bg-surface-card">
         <div className="bg-primary p-10 text-white">
           <DialogHeader>
-            <DialogTitle className="font-serif text-4xl font-light">Walk-in <span className="italic">Registration</span></DialogTitle>
-            <DialogDescription className="text-white/70 font-light mt-2 text-base">Instant service logging for on-site clients.</DialogDescription>
+            <DialogTitle className="display-lg text-white">Walk-in <span className="italic opacity-80">Registration</span></DialogTitle>
+            <DialogDescription className="text-white/70 body-md mt-2">Instant service logging for on-site clients.</DialogDescription>
           </DialogHeader>
         </div>
 
         {isLoading ? (
           <div className="p-20 flex flex-col items-center justify-center gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-[10px] tracking-widest uppercase font-bold text-muted-foreground">Loading Artisans...</p>
+            <p className="utility-xs text-mute">Loading Artisans...</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-10 space-y-8 max-h-[60vh] overflow-y-auto">
+          <form onSubmit={handleSubmit} className="p-10 space-y-8 max-h-[60vh] overflow-y-auto no-scrollbar">
             <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                <div className="space-y-2">
+                  <Label className="utility-xs text-mute">Global Start Time</Label>
+                  <div className="relative">
+                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <Input
+                      type="time"
+                      value={walkInTime}
+                      onChange={(e) => setWalkInTime(e.target.value)}
+                      className="rounded-md border-hairline h-12 pl-12 bg-white"
+                    />
+                  </div>
+                </div>
+                <div className="body-sm text-mute italic pb-3">
+                  This time will apply to all services in this wave.
+                </div>
+              </div>
+
+              <div className="space-y-4">
               {selectedItems.map((item, index) => (
-                <div key={index} className="p-6 bg-primary-ultra/10 border border-primary/5 space-y-4 relative group">
+                <div key={index} className="p-6 bg-surface-soft/50 border border-hairline-soft rounded-md space-y-4 relative group">
                   {selectedItems.length > 1 && (
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
+                      className="absolute top-2 right-2 text-mute hover:text-accent-red"
                       onClick={() => removeItem(index)}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -138,12 +157,14 @@ export const LogWalkInDialog: React.FC<LogWalkInDialogProps> = ({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Treatment</Label>
+                      <Label className="utility-xs text-mute">Treatment</Label>
                       <Select value={item.serviceId} onValueChange={(val) => updateItem(index, 'serviceId', val || '')}>
-                        <SelectTrigger className="rounded-none border-primary/10 h-12 bg-white">
-                          <SelectValue placeholder="Select Service" />
+                        <SelectTrigger className="rounded-md border-hairline h-12 bg-white">
+                          <SelectValue placeholder="Select Service">
+                            {services.find(s => s.id.toString() === item.serviceId)?.name}
+                          </SelectValue>
                         </SelectTrigger>
-                        <SelectContent className="rounded-none border-none shadow-xl">
+                        <SelectContent className="rounded-md border-hairline shadow-xl">
                           {services.map(s => (
                             <SelectItem key={s.id} value={s.id.toString()}>{s.name} - ₱{s.price}</SelectItem>
                           ))}
@@ -152,12 +173,14 @@ export const LogWalkInDialog: React.FC<LogWalkInDialogProps> = ({
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Artisan</Label>
+                      <Label className="utility-xs text-mute">Artisan</Label>
                       <Select value={item.staffId} onValueChange={(val) => updateItem(index, 'staffId', val || '')}>
-                        <SelectTrigger className="rounded-none border-primary/10 h-12 bg-white">
-                          <SelectValue placeholder="Select Technician" />
+                        <SelectTrigger className="rounded-md border-hairline h-12 bg-white">
+                          <SelectValue placeholder="Select Technician">
+                            {staffList.find(s => s.staffProfileId.toString() === item.staffId)?.fullName}
+                          </SelectValue>
                         </SelectTrigger>
-                        <SelectContent className="rounded-none border-none shadow-xl">
+                        <SelectContent className="rounded-md border-hairline shadow-xl">
                           {staffList.filter(s => s.role !== 'customer').map(s => (
                             <SelectItem key={s.id} value={s.staffProfileId.toString()}>{s.fullName}</SelectItem>
                           ))}
@@ -165,46 +188,50 @@ export const LogWalkInDialog: React.FC<LogWalkInDialogProps> = ({
                       </Select>
                     </div>
                   </div>
-
-                  <div className="w-full md:w-1/2 space-y-2">
-                    <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Start Time</Label>
-                    <div className="relative">
-                      <Clock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="time"
-                        value={item.startTime}
-                        onChange={(e) => updateItem(index, 'startTime', e.target.value)}
-                        className="rounded-none border-primary/10 h-12 pl-12 bg-white"
-                      />
-                    </div>
-                  </div>
                 </div>
               ))}
 
-              <Button type="button" variant="outline" onClick={addItem} className="w-full rounded-none border-dashed border-primary/30 h-12 gap-2 text-[10px] uppercase tracking-widest font-bold hover:bg-primary/5">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={addItem} 
+                className="w-full rounded-md border-dashed border-hairline h-12 gap-2 utility-xs text-mute hover:bg-surface-soft"
+              >
                 <Plus className="h-4 w-4" /> Add Another Service
               </Button>
             </div>
+            </div>
 
             <div className="space-y-2">
-              <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Internal Notes</Label>
+              <Label className="utility-xs text-mute">Internal Notes</Label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full min-h-[100px] rounded-none border border-primary/10 p-4 focus:outline-none focus:ring-1 focus:ring-primary/20 font-light text-sm resize-none"
+                className="w-full min-h-[100px] rounded-md border border-hairline p-4 focus:outline-none focus:ring-1 focus:ring-primary/20 body-sm text-body placeholder:text-ash resize-none"
                 placeholder="Client preferences or specific requests..."
               />
             </div>
 
             {error && (
-              <div className="p-4 bg-destructive/5 border border-destructive/10 text-destructive text-[10px] uppercase tracking-widest font-bold">
+              <div className="p-4 bg-accent-red-soft border border-accent-red/10 text-accent-red utility-xs rounded-md">
                 {error}
               </div>
             )}
 
             <DialogFooter className="pt-4 gap-4">
-              <Button type="button" variant="ghost" className="rounded-none text-[10px] uppercase tracking-widest font-bold" onClick={() => onOpenChange(false)}>Cancel</Button>
-              <Button type="submit" disabled={isSubmitting} className="rounded-none px-10 h-12 font-bold uppercase tracking-widest text-[10px]">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                className="btn-secondary px-6" 
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting} 
+                className="btn-primary px-10"
+              >
                 {isSubmitting ? (
                   <><Loader2 className="mr-2 h-3 w-3 animate-spin" /> Recording...</>
                 ) : (

@@ -59,7 +59,7 @@ export const MobileCheckIn: React.FC<MobileCheckInProps> = (props) => {
         // Fallback to parsing checkInTime (e.g. "09:00 AM" or "09:00:00")
         let h = 0, m = 0;
         const timeStr = props.checkInTime;
-        
+
         if (timeStr.includes(' ')) {
           const [baseTime, ampm] = timeStr.split(' ');
           const [hoursStr, minutesStr] = baseTime.split(':');
@@ -142,7 +142,7 @@ export const MobileCheckIn: React.FC<MobileCheckInProps> = (props) => {
                 {isCheckedIn ? (
                   <span className="flex items-center gap-2">
                     <Activity className="h-3 w-3 animate-pulse" />
-                    ARTISAN ON DUTY
+                    ON DUTY
                   </span>
                 ) : (
                   'STATUS: OFFLINE'
@@ -208,7 +208,7 @@ export const MobileCheckIn: React.FC<MobileCheckInProps> = (props) => {
                   {isCheckedIn ? (
                     <>
                       <Activity className="h-3 w-3 animate-pulse" />
-                      ARTISAN ON DUTY
+                      ON DUTY
                     </>
                   ) : (
                     'STATUS: OFFLINE'

@@ -73,54 +73,54 @@ export const MessagesView: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6c6e63]" />
           <Input 
             placeholder="Search communications..." 
-            className="pl-10 rounded-none border-primary/10 h-11 text-xs"
+            className="pl-10 rounded-md border-[#bfc1b7] bg-white h-11 text-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button onClick={() => setShowMessageModal(true)} className="rounded-none gap-2 px-8 h-11 text-[10px] uppercase font-bold tracking-widest">
+        <Button onClick={() => setShowMessageModal(true)} className="w-full md:w-auto rounded-md gap-3 px-8 h-11 text-[13px] uppercase font-bold tracking-widest bg-[#23251d] hover:bg-[#33342d] text-white">
           <Mail className="h-4 w-4" /> Compose Dispatch
         </Button>
       </div>
 
-      <Card className="rounded-none border-none shadow-sm min-h-[500px]">
-        <CardHeader className="bg-primary/5 border-b border-primary/5 flex flex-row justify-between items-center py-8">
+      <Card className="rounded-md border border-[#bfc1b7] shadow-none min-h-[400px] overflow-hidden bg-white">
+        <CardHeader className="bg-[#fcfcfa] border-b border-[#bfc1b7] flex flex-row justify-between items-center py-6 md:py-8 px-6 md:px-8">
           <div>
-            <CardTitle className="font-serif text-2xl">Internal Inbox</CardTitle>
-            <CardDescription className="text-[10px] uppercase font-bold tracking-widest mt-1">Management and Staff Correspondence</CardDescription>
+            <CardTitle className="text-xl md:text-2xl font-bold text-[#23251d]">Internal Inbox</CardTitle>
+            <CardDescription className="text-[12px] uppercase font-bold tracking-widest mt-1 text-[#6c6e63]">Management and Staff Correspondence</CardDescription>
           </div>
-          <Badge className="rounded-none bg-primary text-white text-[8px] uppercase tracking-widest font-bold px-3 py-1">
+          <Badge className="rounded-md bg-[#B8794E] text-white text-[10px] uppercase tracking-widest font-bold px-3 py-1 border-none shadow-none">
             {messages.filter(m => !m.is_read).length} Unread
           </Badge>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="divide-y divide-primary/5">
+          <div className="divide-y divide-[#bfc1b7]/30">
             {filteredMessages.map(msg => (
-              <div key={msg.id} className={`p-8 hover:bg-primary-ultra/10 transition-colors cursor-pointer group ${!msg.is_read ? 'bg-primary-ultra/30' : ''}`}>
+              <div key={msg.id} className={`p-6 md:p-8 hover:bg-[#eeefe9]/50 transition-colors cursor-pointer group ${!msg.is_read ? 'bg-[#dceaf6]/30' : ''}`}>
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-[12px] font-bold text-primary uppercase border border-primary/5">
+                    <div className="w-10 h-10 rounded-full bg-[#e5e7e0] flex items-center justify-center text-[12px] font-bold text-[#23251d] uppercase border border-[#bfc1b7]/20">
                       {msg.sender.username.charAt(0)}
                     </div>
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
-                        <p className="text-[10px] font-bold uppercase tracking-widest">{msg.sender.username}</p>
-                        <Badge variant="outline" className="text-[7px] uppercase h-4 px-1.5 border-primary/20 text-primary/60">{msg.sender.role}</Badge>
+                        <p className="text-[11px] font-bold uppercase tracking-widest text-[#B8794E]">{msg.sender.username}</p>
+                        <Badge variant="outline" className="text-[8px] uppercase h-4 px-1.5 border-[#bfc1b7] text-[#6c6e63] font-bold rounded-md">{msg.sender.role}</Badge>
                       </div>
-                      <p className="text-sm font-bold text-foreground">{msg.subject}</p>
+                      <p className="text-sm font-bold text-[#23251d]">{msg.subject}</p>
                     </div>
                   </div>
-                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">
-                    {new Date(msg.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                  <span className="text-[10px] font-bold text-[#6c6e63] uppercase tracking-tighter tabular-nums">
+                    {new Date(msg.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground font-light leading-relaxed pl-14 line-clamp-2 group-hover:line-clamp-none transition-all">
+                <p className="text-[13px] text-[#4d4f46] font-medium leading-relaxed pl-14 line-clamp-2 group-hover:line-clamp-none transition-all">
                   {msg.body}
                 </p>
               </div>
@@ -135,24 +135,26 @@ export const MessagesView: React.FC = () => {
       </Card>
 
       <Dialog open={showMessageModal} onOpenChange={setShowMessageModal}>
-        <DialogContent className="max-w-md border-none shadow-2xl rounded-none p-0 overflow-hidden">
-          <div className="bg-primary p-10 text-white">
+        <DialogContent className="max-w-md border-none shadow-2xl rounded-md p-0 overflow-hidden bg-[#eeefe9]">
+          <div className="bg-[#23251d] p-8 md:p-10 text-white">
             <DialogHeader>
-              <DialogTitle className="font-serif text-4xl font-light">Internal <span className="italic">Dispatch</span></DialogTitle>
-              <DialogDescription className="text-white/70 font-light mt-2">Send secure communication to any artisan or manager.</DialogDescription>
+              <DialogTitle className="text-3xl md:text-4xl font-extrabold tracking-tight">Internal <span className="text-[#B8794E]">Dispatch</span></DialogTitle>
+              <DialogDescription className="text-white/60 font-bold mt-2 text-[10px] uppercase tracking-[0.2em]">Secure Staff Correspondence</DialogDescription>
             </DialogHeader>
           </div>
-          <form onSubmit={handleSendMessage} className="p-10 space-y-6 bg-white">
-            <div className="space-y-5">
+          <form onSubmit={handleSendMessage} className="p-8 md:p-10 space-y-6">
+            <div className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Recipient</Label>
+                <Label className="text-[10px] uppercase tracking-widest font-bold text-[#6c6e63]">Recipient</Label>
                 <Select required onValueChange={(val: string | null) => setNewMessage({...newMessage, receiverId: val || ''})}>
-                  <SelectTrigger className="rounded-none border-primary/10 h-12 focus:ring-primary/20">
-                    <SelectValue placeholder="Select Technician / Manager" />
+                  <SelectTrigger className="rounded-md border-[#bfc1b7] h-12 bg-white">
+                    <SelectValue placeholder="Select Staff Member">
+                      {staff.find(s => s.id.toString() === newMessage.receiverId)?.fullName}
+                    </SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="rounded-none border-none shadow-2xl max-h-64">
+                  <SelectContent className="rounded-md border-none shadow-2xl max-h-64">
                     {staff.map(s => (
-                      <SelectItem key={s.id} value={s.id.toString()} className="text-xs uppercase tracking-widest font-medium py-3">
+                      <SelectItem key={s.id} value={s.id.toString()} className="text-xs font-bold py-3">
                         {s.fullName} ({s.role})
                       </SelectItem>
                     ))}
@@ -161,31 +163,31 @@ export const MessagesView: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Subject</Label>
+                <Label className="text-[10px] uppercase tracking-widest font-bold text-[#6c6e63]">Subject</Label>
                 <Input 
                   required 
                   value={newMessage.subject} 
                   onChange={e => setNewMessage({...newMessage, subject: e.target.value})} 
-                  placeholder="Dispatch Topic" 
-                  className="rounded-none border-primary/10 h-12 focus:ring-primary/20" 
+                  placeholder="Inquiry / schedule update" 
+                  className="rounded-md border-[#bfc1b7] h-12 bg-white" 
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Message Body</Label>
+                <Label className="text-[10px] uppercase tracking-widest font-bold text-[#6c6e63]">Message Body</Label>
                 <textarea 
                   required 
                   value={newMessage.body} 
                   onChange={e => setNewMessage({...newMessage, body: e.target.value})} 
-                  className="w-full min-h-[180px] rounded-none border border-primary/10 p-4 focus:outline-none focus:ring-1 focus:ring-primary/20 font-light text-sm bg-gray-50/30" 
-                  placeholder="Detail your correspondence..." 
+                  className="w-full min-h-[160px] rounded-md border border-[#bfc1b7] p-4 focus:outline-none focus:ring-2 focus:ring-[#B8794E]/10 font-medium text-sm bg-white resize-none" 
+                  placeholder="Enter message details..." 
                 />
               </div>
             </div>
-            <DialogFooter className="pt-6">
-              <Button type="button" variant="ghost" className="rounded-none text-[10px] uppercase font-bold tracking-widest" onClick={() => setShowMessageModal(false)}>Cancel</Button>
-              <Button type="submit" className="rounded-none px-10 h-12 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20">
-                <Send className="h-3.5 w-3.5" /> Dispatch Message
+            <DialogFooter className="pt-6 gap-3">
+              <Button type="button" variant="ghost" className="rounded-md text-[12px] uppercase font-bold tracking-widest text-[#6c6e63] hover:bg-[#e5e7e0]" onClick={() => setShowMessageModal(false)}>Cancel</Button>
+              <Button type="submit" className="rounded-md px-8 h-12 font-bold uppercase tracking-widest text-[12px] bg-[#23251d] hover:bg-[#33342d] text-white shadow-none">
+                <Send className="h-4 w-4 mr-2" /> Send Message
               </Button>
             </DialogFooter>
           </form>

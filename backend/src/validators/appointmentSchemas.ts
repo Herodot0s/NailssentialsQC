@@ -20,4 +20,10 @@ export const completeAppointmentSchema = z.object({
   paymentMethod: z.enum(['cash', 'gcash'], {
     message: 'Payment method must be either cash or gcash',
   }),
+  servicePhotoUrl: z.string().url('Invalid service photo URL'),
+  gcashReferenceNo: z.string().optional(),
+});
+
+export const cancelAppointmentSchema = z.object({
+  reason: z.string().max(500, 'Reason must be less than 500 characters').optional(),
 });

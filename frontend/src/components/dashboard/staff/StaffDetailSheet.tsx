@@ -77,6 +77,17 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                         <Fingerprint className="h-3 w-3" /> Identity & Access
                       </h4>
                       <div className="grid gap-4">
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="p-5 bg-white border border-[#bfc1b7] rounded-[6px] space-y-2">
+                            <Label className="text-[10px] uppercase font-bold text-[#6c6e63] tracking-wider">Full Legal Name</Label>
+                            <Input 
+                              value={staff.fullName || ''} 
+                              onChange={e => onStaffChange({...staff, fullName: e.target.value})}
+                              className="rounded-[4px] border-[#bfc1b7] bg-[#fcfcfa] text-sm focus-visible:ring-[#B8794E]" 
+                            />
+                          </div>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-4">
                           <div className="p-5 bg-white border border-[#bfc1b7] rounded-[6px] space-y-2">
                             <Label className="text-[10px] uppercase font-bold text-[#6c6e63] tracking-wider">System Username</Label>

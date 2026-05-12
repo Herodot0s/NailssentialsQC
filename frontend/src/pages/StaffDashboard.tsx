@@ -10,9 +10,12 @@ import {
   getMyPayroll,
   sendMessage,
   getAllStaff,
+  uploadFile,
 } from '../api/apiClient';
 import { MessagesView } from '@/components/dashboard/MessagesView';
-import { LogWalkInDialog } from '@/components/dashboard/LogWalkInDialog';
+import { LogWalkInDialog } from '@/components/dashboard/customers/LogWalkInDialog';
+import { AppointmentCard, PayrollCard } from '@/components/dashboard/staff/MobileCards';
+import { StaffPersonalHistory } from '@/components/dashboard/staff/StaffPersonalHistory';
 import type { PayrollRecord, StaffMember } from '@/types/api';
 import {
   Card,
@@ -74,6 +77,7 @@ interface Appointment {
   status: string;
   appointment_date: string;
   is_walk_in: boolean;
+  service_photo_url: string | null;
   items: {
     id: number;
     service: { name: string; price: number };
@@ -101,6 +105,12 @@ const StaffDashboard: React.FC = () => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [newMessage, setNewMessage] = useState({ receiverId: '', subject: '', body: '' });
   const [attendanceMessage, setAttendanceMessage] = useState<{ text: string, type: 'info' | 'warning' | 'error' | 'success' } | null>(null);
+  
+  // Completion Flow State
+  const [servicePhotoUrl, setServicePhotoUrl] = useState<string>('');
+  const [gcashReferenceNo, setGcashReferenceNo] = useState<string>('');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'cash' | 'gcash' | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const fetchDashboardData = async () => {
     try {
@@ -233,19 +243,48 @@ const StaffDashboard: React.FC = () => {
     }
   };
 
-  const handleComplete = (id: number) => setPaymentAptId(id);
+  const handleComplete = (id: number) => {
+    setPaymentAptId(id);
+    setServicePhotoUrl('');
+    setGcashReferenceNo('');
+    setSelectedPaymentMethod(null);
+  };
 
-  const processPayment = async (method: 'cash' | 'gcash') => {
-    if (!paymentAptId) return;
+  const processPayment = async () => {
+    if (!paymentAptId || !selectedPaymentMethod || !servicePhotoUrl) return;
+    if (selectedPaymentMethod === 'gcash' && !gcashReferenceNo) return;
+    
     setIsProcessingPayment(true);
     try {
-      await completeAppointment(paymentAptId, { paymentMethod: method });
+      await completeAppointment(paymentAptId, { 
+        paymentMethod: selectedPaymentMethod,
+        servicePhotoUrl,
+        gcashReferenceNo: selectedPaymentMethod === 'gcash' ? gcashReferenceNo : undefined
+      });
       setPaymentAptId(null);
       fetchDashboardData();
-    } catch {
-      console.error('Failed to finalize ritual.');
+    } catch (err: any) {
+      console.error('Failed to finalize ritual:', err.response?.data?.message || err.message);
     } finally {
       setIsProcessingPayment(false);
+    }
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingPhoto(true);
+    try {
+      const res = await uploadFile(file);
+      if (res.data.success) {
+        setServicePhotoUrl(res.data.data.url);
+      }
+    } catch (err) {
+      console.error('Photo upload failed:', err);
+      alert('Failed to upload photo.');
+    } finally {
+      setIsUploadingPhoto(false);
     }
   };
 
@@ -273,6 +312,8 @@ const StaffDashboard: React.FC = () => {
       case 'completed': return <Badge className="bg-[#d9eddf] text-[#2c8c66] border-none rounded-md text-[10px] font-bold tracking-tight uppercase">Finished</Badge>;
       case 'in_progress': return <Badge className="bg-[#B8794E] text-[#ffffff] border-none rounded-md text-[10px] font-bold tracking-tight uppercase">Active</Badge>;
       case 'pending': return <Badge className="bg-[#e5e7e0] text-[#4d4f46] border-none rounded-md text-[10px] font-bold tracking-tight uppercase">Incoming</Badge>;
+      case 'cancelled': return <Badge className="bg-[#f7d6d3] text-[#cd4239] border-none rounded-md text-[10px] font-bold tracking-tight uppercase">Cancelled</Badge>;
+      case 'no_show': return <Badge className="bg-[#fcf8e3] text-[#8a6d3b] border-none rounded-md text-[10px] font-bold tracking-tight uppercase">No-Show</Badge>;
       default: return <Badge variant="outline" className="rounded-md text-[10px] tracking-tight uppercase border-[#bfc1b7]">{status}</Badge>;
     }
   };
@@ -301,25 +342,25 @@ const StaffDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#eeefe9] text-[#4d4f46]" style={{ fontFamily: '"IBM Plex Sans Variable", sans-serif' }}>
-      <div className="container max-w-7xl mx-auto py-[80px] px-6 animate-in fade-in duration-1000">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-12 mb-[80px]">
-          <div className="space-y-3">
-            <p className="text-[12px] tracking-widest uppercase font-bold text-[#B8794E]">Staff Dashboard</p>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-[#23251d]">
+      <div className="container max-w-7xl mx-auto py-10 md:py-[80px] px-4 md:px-6 animate-in fade-in duration-1000">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 md:gap-12 mb-12 md:mb-[80px]">
+          <div className="space-y-2 md:space-y-3">
+            <p className="text-[10px] md:text-[12px] tracking-widest uppercase font-bold text-[#B8794E]">Staff Dashboard</p>
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-[#23251d] flex flex-wrap items-center gap-3">
               {user?.fullName.split(' ')[0]}'s Dashboard
               {status?.isCheckedIn && (
-                <Badge className="ml-6 rounded-full bg-[#B8794E] text-white text-[10px] font-bold py-1 px-3 border-none tracking-tight uppercase">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse mr-2 inline-block" />
+                <Badge className="rounded-full bg-[#B8794E] text-white text-[9px] md:text-[10px] font-bold py-1 px-2 md:px-3 border-none tracking-tight uppercase">
+                  <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-white animate-pulse mr-1.5 md:mr-2 inline-block" />
                   On Duty
                 </Badge>
               )}
             </h1>
           </div>
-          <div className="flex gap-4">
-            <Button variant="outline" onClick={() => setShowMessageModal(true)} className="rounded-md gap-3 border-[#bfc1b7] bg-[#e5e7e0] hover:bg-[#dcdfd2] text-[#23251d] transition-all h-10 px-6 text-[14px] font-bold">
-              <Mail className="h-4 w-4" /> Messages
+          <div className="flex gap-3 w-full md:w-auto">
+            <Button variant="outline" onClick={() => setShowMessageModal(true)} className="flex-1 md:flex-none rounded-md gap-2 md:gap-3 border-[#bfc1b7] bg-[#e5e7e0] hover:bg-[#dcdfd2] text-[#23251d] transition-all h-10 px-4 md:px-6 text-[13px] md:text-[14px] font-bold">
+              <Mail className="h-4 w-4" /> <span className="hidden xs:inline">Messages</span><span className="xs:hidden">Inbox</span>
             </Button>
-            <Button onClick={() => setShowWalkInModal(true)} className="rounded-md gap-3 bg-[#B8794E] hover:bg-[#dd9001] text-white transition-all h-10 px-6 text-[14px] font-bold shadow-none">
+            <Button onClick={() => setShowWalkInModal(true)} className="flex-1 md:flex-none rounded-md gap-2 md:gap-3 bg-[#B8794E] hover:bg-[#dd9001] text-white transition-all h-10 px-4 md:px-6 text-[13px] md:text-[14px] font-bold shadow-none">
               <Plus className="h-4 w-4" /> Log Walk-in
             </Button>
           </div>
@@ -333,17 +374,18 @@ const StaffDashboard: React.FC = () => {
           </div>
         )}
 
-        <Tabs defaultValue="appointments" className="space-y-[80px]">
-          <TabsList className="bg-transparent p-1 h-auto gap-2 border-none w-fit flex rounded-md mb-8">
+        <Tabs defaultValue="appointments" className="space-y-12 md:space-y-[80px]">
+          <TabsList className="bg-transparent p-1 h-auto gap-2 border-none w-full md:w-fit flex rounded-md mb-4 overflow-x-auto no-scrollbar">
             {[
               { label: 'Appointments', value: 'appointments' },
               { label: 'Commissions', value: 'commissions' },
+              { label: 'History', value: 'history' },
               { label: 'Messages', value: 'messages' }
             ].map(tab => (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="text-[14px] uppercase tracking-wider font-bold text-[#6c6e63] bg-transparent data-[state=active]:bg-white data-[state=active]:text-[#23251d] data-[state=active]:shadow-none border border-transparent data-[state=active]:border-[#bfc1b7] rounded-md px-6 py-2.5 transition-all"
+                className="text-[12px] md:text-[14px] uppercase tracking-wider font-bold text-[#6c6e63] bg-transparent data-[state=active]:bg-white data-[state=active]:text-[#23251d] data-[state=active]:shadow-none border border-transparent data-[state=active]:border-[#bfc1b7] rounded-md px-4 md:px-6 py-2.5 transition-all whitespace-nowrap"
               >
                 {tab.label}
               </TabsTrigger>
@@ -390,102 +432,147 @@ const StaffDashboard: React.FC = () => {
                 )}
 
                 <Card className="rounded-md border border-[#bfc1b7] shadow-none overflow-hidden bg-white">
-                  <CardHeader className="bg-[#fcfcfa] border-b border-[#bfc1b7] p-8">
-                    <CardTitle className="text-2xl font-bold text-[#23251d]">Today's Appointments</CardTitle>
-                    <CardDescription className="text-[14px] text-[#4d4f46] mt-2">
+                  <CardHeader className="bg-[#fcfcfa] border-b border-[#bfc1b7] p-6 md:p-8">
+                    <CardTitle className="text-xl md:text-2xl font-bold text-[#23251d]">Today's Appointments</CardTitle>
+                    <CardDescription className="text-[13px] md:text-[14px] text-[#4d4f46] mt-1 md:mt-2">
                       Viewing {todayAppointments.length} scheduled services for today
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <Table>
-                      <TableHeader className="bg-[#e5e7e0] border-b border-[#bfc1b7]">
-                        <TableRow className="hover:bg-transparent">
-                          <TableHead className="pl-8 h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Time</TableHead>
-                          <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Client</TableHead>
-                          <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Service</TableHead>
-                          <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Status</TableHead>
-                          <TableHead className="pr-8 h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {todayAppointments.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={5} className="text-center py-24 text-[#6c6e63] italic text-sm font-medium">
-                              No appointments scheduled for today.
-                            </TableCell>
+                    <div className="hidden md:block">
+                      <Table>
+                        <TableHeader className="bg-[#e5e7e0] border-b border-[#bfc1b7]">
+                          <TableRow className="hover:bg-transparent">
+                            <TableHead className="pl-8 h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Time</TableHead>
+                            <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Client</TableHead>
+                            <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Service</TableHead>
+                            <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Status</TableHead>
+                            <TableHead className="pr-8 h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">Actions</TableHead>
                           </TableRow>
-                        ) : todayAppointments.map((apt) => {
-                          const myItems = apt.items.filter(i => i.staff_id === user?.staffProfileId || (!user?.staffProfileId && i.staff_id === user?.id));
-                          return myItems.map(item => {
-                            const isActive = item.status === 'in_progress';
-                            const now = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-                            const isCurrentTimeSlot = now >= item.start_time && now <= item.end_time;
+                        </TableHeader>
+                        <TableBody>
+                          {todayAppointments.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={5} className="text-center py-24 text-[#6c6e63] italic text-sm font-medium">
+                                No appointments scheduled for today.
+                              </TableCell>
+                            </TableRow>
+                          ) : todayAppointments.map((apt) => {
+                            const myItems = apt.items.filter(i => i.staff_id === user?.staffProfileId || (!user?.staffProfileId && i.staff_id === user?.id));
+                            return myItems.map(item => {
+                              const isActive = item.status === 'in_progress';
+                              const now = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                              const isCurrentTimeSlot = now >= item.start_time && now <= item.end_time;
 
-                            return (
-                              <TableRow key={item.id} className={`hover:bg-[#e5e7e0]/50 border-b border-[#bfc1b7] transition-all duration-200 ${isActive ? 'bg-[#B8794E]/5' : ''} ${isCurrentTimeSlot ? 'bg-[#dceaf6]/30' : ''}`}>
-                                <TableCell className="pl-8 py-6 font-bold text-sm tabular-nums text-[#23251d]">{item.start_time} — {item.end_time}</TableCell>
-                                <TableCell className="text-lg font-bold text-[#23251d]">{apt.customer.full_name}</TableCell>
-                                <TableCell className="font-medium text-sm text-[#4d4f46]">{item.service.name}</TableCell>
-                                <TableCell>{getStatusBadge(item.status)}</TableCell>
-                                <TableCell className="pr-8 text-right">
-                                  {item.status !== 'completed' && (
-                                    <Button
-                                      onClick={() => handleComplete(apt.id)}
-                                      size="sm"
-                                      className="rounded-md h-9 text-[12px] font-bold uppercase px-6 bg-[#23251d] hover:bg-[#33342d] text-white transition-all shadow-none"
-                                    >
-                                      Complete Service
-                                    </Button>
-                                  )}
-                                </TableCell>
-                              </TableRow>
-                            );
-                          });
-                        })}
-                      </TableBody>
-                    </Table>
+                              return (
+                                <TableRow key={item.id} className={`hover:bg-[#e5e7e0]/50 border-b border-[#bfc1b7] transition-all duration-200 ${isActive ? 'bg-[#B8794E]/5' : ''} ${isCurrentTimeSlot ? 'bg-[#dceaf6]/30' : ''}`}>
+                                  <TableCell className="pl-8 py-6 font-bold text-sm tabular-nums text-[#23251d]">{item.start_time} — {item.end_time}</TableCell>
+                                  <TableCell className="text-lg font-bold text-[#23251d]">{apt.customer.full_name}</TableCell>
+                                  <TableCell className="font-medium text-sm text-[#4d4f46]">{item.service.name}</TableCell>
+                                  <TableCell>{getStatusBadge(item.status)}</TableCell>
+                                  <TableCell className="pr-8 text-right">
+                                    {item.status !== 'completed' && (
+                                      <Button
+                                        onClick={() => handleComplete(apt.id)}
+                                        size="sm"
+                                        className="rounded-md h-9 text-[12px] font-bold uppercase px-6 bg-[#23251d] hover:bg-[#33342d] text-white transition-all shadow-none"
+                                      >
+                                        Complete Service
+                                      </Button>
+                                    )}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            });
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    <div className="md:hidden p-4 space-y-4 bg-[#eeefe9]/30">
+                      {todayAppointments.length === 0 ? (
+                        <p className="text-center py-12 text-[#6c6e63] italic text-sm font-medium">No appointments scheduled for today.</p>
+                      ) : todayAppointments.flatMap(apt => {
+                        const myItems = apt.items.filter(i => i.staff_id === user?.staffProfileId || (!user?.staffProfileId && i.staff_id === user?.id));
+                        return myItems.map(item => (
+                          <AppointmentCard
+                            key={item.id}
+                            customerName={apt.customer.full_name}
+                            startTime={item.start_time}
+                            endTime={item.end_time}
+                            serviceName={item.service.name}
+                            status={item.status}
+                            statusBadge={getStatusBadge(item.status)}
+                            onComplete={item.status !== 'completed' ? () => handleComplete(apt.id) : undefined}
+                          />
+                        ));
+                      })}
+                    </div>
                   </CardContent>
                 </Card>
 
                 <Card className="rounded-md border border-[#bfc1b7] shadow-none overflow-hidden bg-white/80">
-                  <CardHeader className="bg-[#fcfcfa] border-b border-[#bfc1b7] p-8">
-                    <CardTitle className="text-2xl font-bold text-[#23251d]">Upcoming Appointments</CardTitle>
-                    <CardDescription className="text-[14px] text-[#6c6e63] mt-2">Schedule for the next 14 days</CardDescription>
+                  <CardHeader className="bg-[#fcfcfa] border-b border-[#bfc1b7] p-6 md:p-8">
+                    <CardTitle className="text-xl md:text-2xl font-bold text-[#23251d]">Upcoming Appointments</CardTitle>
+                    <CardDescription className="text-[13px] md:text-[14px] text-[#6c6e63] mt-1 md:mt-2">Schedule for the next 14 days</CardDescription>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <Table>
-                      <TableHeader className="bg-[#e5e7e0]/50 border-b border-[#bfc1b7]">
-                        <TableRow className="hover:bg-transparent">
-                          <TableHead className="pl-8 h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Date</TableHead>
-                          <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Time</TableHead>
-                          <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Client</TableHead>
-                          <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Service</TableHead>
-                          <TableHead className="pr-8 h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">Status</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {upcomingAppointments.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={5} className="text-center py-20 text-[#6c6e63] italic text-sm font-medium">
-                              No upcoming appointments found.
-                            </TableCell>
+                    <div className="hidden md:block">
+                      <Table>
+                        <TableHeader className="bg-[#e5e7e0]/50 border-b border-[#bfc1b7]">
+                          <TableRow className="hover:bg-transparent">
+                            <TableHead className="pl-8 h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Date</TableHead>
+                            <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Time</TableHead>
+                            <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Client</TableHead>
+                            <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Service</TableHead>
+                            <TableHead className="pr-8 h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">Status</TableHead>
                           </TableRow>
-                        ) : upcomingAppointments.map((apt) => {
-                          const myItems = apt.items.filter(i => i.staff_id === user?.staffProfileId || (!user?.staffProfileId && i.staff_id === user?.id));
-                          return myItems.map(item => (
-                            <TableRow key={item.id} className="hover:bg-[#e5e7e0]/50 border-b border-[#bfc1b7] transition-all duration-200 opacity-80 hover:opacity-100">
-                              <TableCell className="pl-8 py-6 font-bold text-sm text-[#B8794E] tabular-nums">
-                                {new Date(apt.appointment_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', weekday: 'short' })}
+                        </TableHeader>
+                        <TableBody>
+                          {upcomingAppointments.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={5} className="text-center py-20 text-[#6c6e63] italic text-sm font-medium">
+                                No upcoming appointments found.
                               </TableCell>
-                              <TableCell className="py-6 font-bold text-sm tabular-nums text-[#23251d]">{item.start_time} — {item.end_time}</TableCell>
-                              <TableCell className="text-lg font-bold text-[#23251d]">{apt.customer.full_name}</TableCell>
-                              <TableCell className="font-medium text-sm text-[#4d4f46]">{item.service.name}</TableCell>
-                              <TableCell className="pr-8 text-right">{getStatusBadge(item.status)}</TableCell>
                             </TableRow>
-                          ));
-                        })}
-                      </TableBody>
-                    </Table>
+                          ) : upcomingAppointments.map((apt) => {
+                            const myItems = apt.items.filter(i => i.staff_id === user?.staffProfileId || (!user?.staffProfileId && i.staff_id === user?.id));
+                            return myItems.map(item => (
+                              <TableRow key={item.id} className="hover:bg-[#e5e7e0]/50 border-b border-[#bfc1b7] transition-all duration-200 opacity-80 hover:opacity-100">
+                                <TableCell className="pl-8 py-6 font-bold text-sm text-[#B8794E] tabular-nums">
+                                  {new Date(apt.appointment_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', weekday: 'short' })}
+                                </TableCell>
+                                <TableCell className="py-6 font-bold text-sm tabular-nums text-[#23251d]">{item.start_time} — {item.end_time}</TableCell>
+                                <TableCell className="text-lg font-bold text-[#23251d]">{apt.customer.full_name}</TableCell>
+                                <TableCell className="font-medium text-sm text-[#4d4f46]">{item.service.name}</TableCell>
+                                <TableCell className="pr-8 text-right">{getStatusBadge(item.status)}</TableCell>
+                              </TableRow>
+                            ));
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    <div className="md:hidden p-4 space-y-4 bg-[#eeefe9]/20">
+                      {upcomingAppointments.length === 0 ? (
+                        <p className="text-center py-12 text-[#6c6e63] italic text-sm font-medium">No upcoming appointments found.</p>
+                      ) : upcomingAppointments.flatMap(apt => {
+                        const myItems = apt.items.filter(i => i.staff_id === user?.staffProfileId || (!user?.staffProfileId && i.staff_id === user?.id));
+                        const dateStr = new Date(apt.appointment_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', weekday: 'short' });
+                        return myItems.map(item => (
+                          <AppointmentCard
+                            key={item.id}
+                            customerName={apt.customer.full_name}
+                            startTime={item.start_time}
+                            endTime={item.end_time}
+                            serviceName={item.service.name}
+                            status={item.status}
+                            statusBadge={getStatusBadge(item.status)}
+                            date={dateStr}
+                          />
+                        ));
+                      })}
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -495,38 +582,38 @@ const StaffDashboard: React.FC = () => {
           <TabsContent value="commissions" className="mt-0 space-y-[80px]">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[40px]">
               <Card className="rounded-md border border-[#bfc1b7] shadow-none bg-white">
-                <CardHeader className="p-10 pb-0">
-                  <CardTitle className="text-[12px] font-bold text-[#B8794E] uppercase tracking-widest">Commission Revenue</CardTitle>
+                <CardHeader className="p-6 md:p-10 pb-0">
+                  <CardTitle className="text-[10px] md:text-[12px] font-bold text-[#B8794E] uppercase tracking-widest">Commission Revenue</CardTitle>
                 </CardHeader>
-                <CardContent className="p-10 space-y-8">
-                  <div className="flex justify-between items-end border-b border-[#bfc1b7] pb-8">
-                    <p className="text-[14px] font-bold uppercase text-[#4d4f46]">Today's Commission</p>
-                    <p className="text-5xl font-extrabold text-[#23251d] tracking-tight">₱{commission.today.toLocaleString()}</p>
+                <CardContent className="p-6 md:p-10 space-y-6 md:space-y-8">
+                  <div className="flex justify-between items-end border-b border-[#bfc1b7] pb-6 md:pb-8">
+                    <p className="text-[12px] md:text-[14px] font-bold uppercase text-[#4d4f46]">Today's Commission</p>
+                    <p className="text-3xl md:text-5xl font-extrabold text-[#23251d] tracking-tight">₱{commission.today.toLocaleString()}</p>
                   </div>
                   <div className="flex justify-between items-end pt-2">
-                    <p className="text-[14px] font-bold uppercase text-[#4d4f46]">Weekly Total</p>
-                    <p className="text-3xl font-bold text-[#B8794E] tracking-tight">₱{commission.thisWeek.toLocaleString()}</p>
+                    <p className="text-[12px] md:text-[14px] font-bold uppercase text-[#4d4f46]">Weekly Total</p>
+                    <p className="text-xl md:text-3xl font-bold text-[#B8794E] tracking-tight">₱{commission.thisWeek.toLocaleString()}</p>
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="rounded-md border border-[#bfc1b7] shadow-none bg-white">
-                <CardHeader className="p-10 pb-0">
-                  <CardTitle className="text-[12px] font-bold text-[#B8794E] uppercase tracking-widest">Performance Metrics</CardTitle>
+                <CardHeader className="p-6 md:p-10 pb-0">
+                  <CardTitle className="text-[10px] md:text-[12px] font-bold text-[#B8794E] uppercase tracking-widest">Performance Metrics</CardTitle>
                 </CardHeader>
-                <CardContent className="p-10 space-y-10">
-                  <div className="space-y-4">
-                    <div className="flex justify-between text-[12px] font-bold uppercase text-[#4d4f46]">
+                <CardContent className="p-6 md:p-10 space-y-8 md:space-y-10">
+                  <div className="space-y-3 md:space-y-4">
+                    <div className="flex justify-between text-[11px] md:text-[12px] font-bold uppercase text-[#4d4f46]">
                       <span>Commission Rate</span>
                       <span className="text-[#B8794E]">Active (8%)</span>
                     </div>
                     <div className="h-2 w-full bg-[#eeefe9] rounded-full overflow-hidden">
                       <div className="h-full bg-[#B8794E]" style={{ width: '80%' }} />
                     </div>
-                    <p className="text-[11px] text-[#6c6e63] italic">Rate based on monthly performance tier.</p>
+                    <p className="text-[10px] md:text-[11px] text-[#6c6e63] italic">Rate based on monthly performance tier.</p>
                   </div>
-                  <div className="space-y-4">
-                    <div className="flex justify-between text-[12px] font-bold uppercase text-[#4d4f46]">
+                  <div className="space-y-3 md:space-y-4">
+                    <div className="flex justify-between text-[11px] md:text-[12px] font-bold uppercase text-[#4d4f46]">
                       <span>Target Quota</span>
                       <span className="text-[#B8794E]">Target: ₱6,000</span>
                     </div>
@@ -539,43 +626,60 @@ const StaffDashboard: React.FC = () => {
             </div>
 
             <Card className="rounded-md border border-[#bfc1b7] shadow-none overflow-hidden bg-white">
-              <CardHeader className="bg-[#fcfcfa] border-b border-[#bfc1b7] p-8">
-                <CardTitle className="text-2xl font-bold text-[#23251d]">Payroll History</CardTitle>
-                <CardDescription className="text-[14px] text-[#4d4f46] mt-2">Historical record of finalized payouts and deductions</CardDescription>
+              <CardHeader className="bg-[#fcfcfa] border-b border-[#bfc1b7] p-6 md:p-8">
+                <CardTitle className="text-xl md:text-2xl font-bold text-[#23251d]">Payroll History</CardTitle>
+                <CardDescription className="text-[13px] md:text-[14px] text-[#4d4f46] mt-1 md:mt-2">Historical record of finalized payouts and deductions</CardDescription>
               </CardHeader>
               <CardContent className="p-0">
-                <Table>
-                  <TableHeader className="bg-[#e5e7e0] border-b border-[#bfc1b7]">
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead className="pl-8 h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Cycle</TableHead>
-                      <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Base Pay</TableHead>
-                      <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Commissions</TableHead>
-                      <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Deductions</TableHead>
-                      <TableHead className="pr-8 h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">Net Payout</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {myPayrolls.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center py-20 text-[#6c6e63] italic text-sm font-medium">
-                          No payroll records found.
-                        </TableCell>
+                <div className="hidden md:block">
+                  <Table>
+                    <TableHeader className="bg-[#e5e7e0] border-b border-[#bfc1b7]">
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="pl-8 h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Cycle</TableHead>
+                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Base Pay</TableHead>
+                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Commissions</TableHead>
+                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Deductions</TableHead>
+                        <TableHead className="pr-8 h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">Net Payout</TableHead>
                       </TableRow>
-                    ) : myPayrolls.map(p => (
-                      <TableRow key={p.id || Math.random()} className="hover:bg-[#e5e7e0]/50 border-b border-[#bfc1b7] transition-all duration-200">
-                        <TableCell className="pl-8 py-6 font-bold text-sm tabular-nums text-[#23251d]">
-                          {p.period ? `${new Date(p.period.start_date).toLocaleDateString()} — ${new Date(p.period.end_date).toLocaleDateString()}` : 'N/A'}
-                        </TableCell>
-                        <TableCell className="text-sm tabular-nums text-[#4d4f46]">₱{(p.base_pay || 0).toLocaleString()}</TableCell>
-                        <TableCell className="text-sm tabular-nums text-[#4d4f46]">₱{(p.commissions || 0).toLocaleString()}</TableCell>
-                        <TableCell className="text-sm text-[#cd4239] font-bold tabular-nums">-₱{(p.deductions || 0).toLocaleString()}</TableCell>
-                        <TableCell className="pr-8 text-right font-bold text-xl text-[#B8794E] tabular-nums">₱{(p.net_pay || 0).toLocaleString()}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {myPayrolls.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-20 text-[#6c6e63] italic text-sm font-medium">
+                            No payroll records found.
+                          </TableCell>
+                        </TableRow>
+                      ) : myPayrolls.map(p => (
+                        <TableRow key={p.id || Math.random()} className="hover:bg-[#e5e7e0]/50 border-b border-[#bfc1b7] transition-all duration-200">
+                          <TableCell className="pl-8 py-6 font-bold text-sm tabular-nums text-[#23251d]">
+                            {p.period ? `${new Date(p.period.start_date).toLocaleDateString()} — ${new Date(p.period.end_date).toLocaleDateString()}` : 'N/A'}
+                          </TableCell>
+                          <TableCell className="text-sm tabular-nums text-[#4d4f46]">₱{(p.base_pay || 0).toLocaleString()}</TableCell>
+                          <TableCell className="text-sm tabular-nums text-[#4d4f46]">₱{(p.commissions || 0).toLocaleString()}</TableCell>
+                          <TableCell className="text-sm text-[#cd4239] font-bold tabular-nums">-₱{(p.deductions || 0).toLocaleString()}</TableCell>
+                          <TableCell className="pr-8 text-right font-bold text-xl text-[#B8794E] tabular-nums">₱{(p.net_pay || 0).toLocaleString()}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                <div className="md:hidden p-4 space-y-2 bg-[#eeefe9]/20">
+                  {myPayrolls.length === 0 ? (
+                    <p className="text-center py-12 text-[#6c6e63] italic text-sm font-medium">No payroll records found.</p>
+                  ) : myPayrolls.map(p => (
+                    <PayrollCard key={p.id || Math.random()} payroll={p} />
+                  ))}
+                </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="history" className="mt-0">
+             <StaffPersonalHistory 
+               appointments={appointments} 
+               staffProfileId={user?.staffProfileId || 0} 
+             />
           </TabsContent>
 
           <TabsContent value="messages" className="mt-0">
@@ -596,7 +700,11 @@ const StaffDashboard: React.FC = () => {
                 <div className="space-y-3">
                   <Label className="text-[10px] font-bold text-[#5C544F] uppercase tracking-[0.3em]">Recipient</Label>
                   <Select required onValueChange={(val: string | null) => setNewMessage({ ...newMessage, receiverId: val || '' })}>
-                    <SelectTrigger className="rounded-xl border-primary/10 h-14 active:scale-98 transition-all hover:bg-primary/5 text-xs"><SelectValue placeholder="Select staff member" /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl border-primary/10 h-14 active:scale-98 transition-all hover:bg-primary/5 text-xs">
+                      <SelectValue placeholder="Select staff member">
+                        {sortedStaff.find(s => s.id.toString() === newMessage.receiverId)?.fullName}
+                      </SelectValue>
+                    </SelectTrigger>
                     <SelectContent className="rounded-xl border-none shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-2">
                       {sortedStaff.map(s => (
                         <SelectItem key={s.id} value={s.id.toString()} className="rounded-lg h-10 text-xs">{s.fullName} ({s.role})</SelectItem>
@@ -636,36 +744,115 @@ const StaffDashboard: React.FC = () => {
         />
 
         <Dialog open={!!paymentAptId} onOpenChange={(open) => !open && setPaymentAptId(null)}>
-          <DialogContent className="max-w-sm border-none shadow-2xl rounded-md p-8 space-y-8 bg-[#eeefe9]">
+          <DialogContent className="max-w-md border-none shadow-2xl rounded-md p-8 space-y-8 bg-[#eeefe9]">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-[#23251d]">Finalize Ritual</DialogTitle>
-              <DialogDescription className="text-[12px] uppercase tracking-widest font-bold text-[#6c6e63]">Select payment method</DialogDescription>
+              <DialogDescription className="text-[12px] uppercase tracking-widest font-bold text-[#6c6e63]">Capture completion and select payment</DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-2 gap-6">
+            
+            <div className="space-y-6">
+              {/* Step 1: Photo Upload */}
+              <div className="space-y-3">
+                <Label className="text-[10px] font-bold text-[#5C544F] uppercase tracking-[0.2em]">Service Completion Photo</Label>
+                <div className="relative group">
+                  {servicePhotoUrl ? (
+                    <div className="relative rounded-md overflow-hidden aspect-video border border-[#bfc1b7] bg-white">
+                      <img src={servicePhotoUrl} alt="Service completion" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          className="text-[10px] uppercase font-bold"
+                          onClick={() => setServicePhotoUrl('')}
+                        >
+                          Change Photo
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-[#bfc1b7] rounded-md bg-white hover:bg-[#fcfcfa] cursor-pointer transition-all">
+                      {isUploadingPhoto ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <Loader2 className="h-6 w-6 animate-spin text-[#B8794E]" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#6c6e63]">Uploading...</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2">
+                          <Plus className="h-6 w-6 text-[#bfc1b7]" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#6c6e63]">Tap to Take/Upload Photo</span>
+                        </div>
+                      )}
+                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoUpload} disabled={isUploadingPhoto} />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {/* Step 2: Payment Method */}
+              <div className="space-y-3">
+                <Label className="text-[10px] font-bold text-[#5C544F] uppercase tracking-[0.2em]">Payment Method</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    onClick={() => setSelectedPaymentMethod('cash')}
+                    variant={selectedPaymentMethod === 'cash' ? 'default' : 'outline'}
+                    className={`h-16 rounded-md flex flex-col gap-1 border-[#bfc1b7] transition-all ${
+                      selectedPaymentMethod === 'cash' 
+                      ? 'bg-[#23251d] text-white' 
+                      : 'bg-white text-[#23251d] hover:bg-[#eeefe9]'
+                    }`}
+                  >
+                    <span className="text-xl font-bold">₱</span>
+                    <span className="text-[10px] uppercase tracking-widest font-bold">Cash</span>
+                  </Button>
+                  <Button
+                    onClick={() => setSelectedPaymentMethod('gcash')}
+                    variant={selectedPaymentMethod === 'gcash' ? 'default' : 'outline'}
+                    className={`h-16 rounded-md flex flex-col gap-1 border-[#bfc1b7] transition-all ${
+                      selectedPaymentMethod === 'gcash' 
+                      ? 'bg-[#007DFE] text-white border-none' 
+                      : 'bg-white text-[#007DFE] hover:bg-[#eeefe9]'
+                    }`}
+                  >
+                    <span className="text-sm font-black italic tracking-tighter">GCash</span>
+                    <span className="text-[10px] uppercase tracking-widest font-bold">Digital</span>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Step 3: GCash Ref No */}
+              {selectedPaymentMethod === 'gcash' && (
+                <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <Label className="text-[10px] font-bold text-[#5C544F] uppercase tracking-[0.2em]">GCash Reference Number</Label>
+                  <Input 
+                    placeholder="Enter 13-digit reference number"
+                    value={gcashReferenceNo}
+                    onChange={(e) => setGcashReferenceNo(e.target.value)}
+                    className="rounded-md border-[#bfc1b7] h-12 bg-white text-sm font-bold tracking-wider placeholder:font-normal placeholder:tracking-normal"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-3 pt-4">
               <Button
-                onClick={() => processPayment('cash')}
-                disabled={isProcessingPayment}
-                className="h-28 rounded-md flex flex-col gap-3 bg-[#23251d] hover:bg-[#33342d] text-white border-none shadow-none"
+                onClick={processPayment}
+                disabled={isProcessingPayment || !servicePhotoUrl || !selectedPaymentMethod || (selectedPaymentMethod === 'gcash' && !gcashReferenceNo)}
+                className="w-full rounded-md h-12 bg-[#B8794E] hover:bg-[#dd9001] text-white text-[13px] font-bold uppercase tracking-widest shadow-none disabled:opacity-30"
               >
-                <span className="text-3xl font-bold">₱</span>
-                <span className="text-[12px] uppercase tracking-widest font-bold">Cash</span>
+                {isProcessingPayment ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Finalizing...
+                  </div>
+                ) : 'Complete Appointment'}
               </Button>
               <Button
-                onClick={() => processPayment('gcash')}
-                disabled={isProcessingPayment}
-                className="h-28 rounded-md flex flex-col gap-3 bg-[#007DFE] hover:bg-[#005bb5] text-white border-none shadow-none"
+                variant="ghost"
+                className="w-full rounded-md h-10 text-[10px] uppercase tracking-widest font-bold text-[#5C544F]"
+                onClick={() => setPaymentAptId(null)}
               >
-                <span className="text-xl font-black italic tracking-tighter">GCash</span>
-                <span className="text-[12px] uppercase tracking-widest font-bold opacity-80">Digital</span>
+                Cancel
               </Button>
             </div>
-            <Button
-              variant="ghost"
-              className="w-full rounded-xl text-[10px] uppercase tracking-widest font-bold text-[#5C544F] active:scale-95 transition-transform"
-              onClick={() => setPaymentAptId(null)}
-            >
-              Cancel
-            </Button>
           </DialogContent>
         </Dialog>
       </div>

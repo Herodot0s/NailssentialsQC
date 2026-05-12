@@ -8,10 +8,11 @@ import { sendSuccess } from '../utils/apiHelpers';
 
 export const getAvailableSlots = async (req: Request, res: Response) => {
   try {
-    const { date } = req.query; // YYYY-MM-DD
+    const { date, count } = req.query; // YYYY-MM-DD
     if (!date) {
       return res.status(400).json({ success: false, message: 'Date is required' });
     }
+    const requiredCount = count ? parseInt(count as string) : 1;
     const dateStr = Array.isArray(date) ? (date[0] as string) : (date as string);
     const dateOnly = getDatePart(dateStr);
 
@@ -73,7 +74,7 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
 
       return {
         time: slotTime,
-        available: availableTechnicians.length > 0
+        available: availableTechnicians.length >= requiredCount
       };
     });
 

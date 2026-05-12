@@ -1,7 +1,8 @@
 import React from 'react';
 import {
   DollarSign, Users, Clock, Wallet, Star, Settings,
-  Image as ImageIcon, FileText, Package, BarChart2, Mail
+  Image as ImageIcon, FileText, Package, BarChart2, Mail,
+  Heart, TrendingUp, History
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import type { ManagerSidebarProps, ActiveView } from './types';
@@ -17,7 +18,13 @@ const groups: SidebarGroup[] = [
     items: [
       { id: 'advanced-analytics', label: 'Dashboard', icon: BarChart2 },
       { id: 'messages', label: 'Internal Inbox', icon: Mail },
-      { id: 'reviews', label: 'Reviews', icon: Star },
+    ]
+  },
+  {
+    title: 'Customer Relations',
+    items: [
+      { id: 'customer-care', label: 'Client Care', icon: Heart },
+      { id: 'reviews', label: 'Public Reviews', icon: Star },
     ]
   },
   {
@@ -34,6 +41,8 @@ const groups: SidebarGroup[] = [
     items: [
       { id: 'staff', label: 'Employee Files', icon: Users },
       { id: 'attendance', label: 'Attendance', icon: Clock },
+      { id: 'performance', label: 'Success Metrics', icon: TrendingUp },
+      { id: 'service-history', label: 'Service Log', icon: History },
       { id: 'deductions', label: 'Deductions', icon: Wallet },
       { id: 'payroll', label: 'Salary Slips', icon: DollarSign },
     ]

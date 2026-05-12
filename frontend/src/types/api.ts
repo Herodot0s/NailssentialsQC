@@ -124,8 +124,11 @@ export interface AttendanceRecord {
   check_out: string | null;
   status: string;
   date: string;
+  scheduled_start: string | null;
+  scheduled_end: string | null;
   tardiness_minutes: number;
   deduction_amount: number;
+  notes: string | null;
   staff: { full_name: string };
 }
 

@@ -55,10 +55,20 @@ const checkSpecialtyQuota = async (staffId: number, tx: Prisma.TransactionClient
 export const completeAppointment = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { paymentMethod } = req.validatedBody || req.body; // 'cash' | 'gcash'
+    const { paymentMethod, servicePhotoUrl, gcashReferenceNo } = req.validatedBody || req.body; // 'cash' | 'gcash'
+
+    console.log(`Completing appointment ${id}:`, { paymentMethod, servicePhotoUrl: !!servicePhotoUrl, gcashReferenceNo });
 
     if (!paymentMethod) {
       return res.status(400).json({ success: false, message: 'Payment method is required' });
+    }
+
+    if (!servicePhotoUrl) {
+      return res.status(400).json({ success: false, message: 'Service completion photo is required' });
+    }
+
+    if (paymentMethod === 'gcash' && !gcashReferenceNo) {
+      return res.status(400).json({ success: false, message: 'GCash reference number is required' });
     }
 
     const appointment = await prisma.appointment.findUnique({
@@ -126,84 +136,97 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
         },
       },
     });
-    const receiptNumber = `REC-${monthYearStr}-${(transactionCount + 1).toString().padStart(4, '0')}`;
+    const receiptNumber = `REC-${monthYearStr}-${(transactionCount + 1).toString().padStart(4, '0')}-${id}`;
 
     // 3. Complete appointment and record transaction & commissions in a database transaction
+    console.log('Starting transaction for appointment completion');
     const result = await prisma.$transaction(async (tx) => {
-      // Update appointment status
-      await tx.appointment.update({
-        where: { id: parseInt(id as string) },
-        data: { status: 'completed' },
-      });
-
-      // Also update all items to completed
-      await tx.appointmentItem.updateMany({
-        where: { appointment_id: parseInt(id as string) },
-        data: { status: 'completed' }
-      });
-
-      // Create transaction
-      const transaction = await tx.transaction.create({
-        data: {
-          appointment_id: parseInt(id as string),
-          amount: totalAmount,
-          payment_method: paymentMethod as PaymentMethod,
-          status: 'completed',
-          receipt_number: receiptNumber,
-        },
-      });
-
-      // Calculate and create commissions
-      const baseRate = await getTieredCommissionRate(tx);
-
-      const commissionsCreated = [];
-      for (const item of appointment.items) {
-        // Specialty Quota Check (Rule 2)
-        const hasHitQuota = await checkSpecialtyQuota(item.staff_id, tx);
-        const commissionRate = hasHitQuota ? 0.20 : baseRate;
-
-        const commissionAmount = Number(item.price_at_booking) * commissionRate;
-
-        const commission = await tx.commission.create({
-          data: {
-            transaction_id: transaction.id,
-            staff_id: item.staff_id,
-            service_id: item.service_id,
-            base_amount: Number(item.price_at_booking),
-            commission_rate: commissionRate * 100,
-            commission_amount: commissionAmount,
-            commission_date: today,
-            period_week: getISOWeek(today),
-            period_month: getMonth(today) + 1,
-            period_year: getYear(today),
+      try {
+        // Update appointment status
+        console.log('Updating appointment status');
+        await tx.appointment.update({
+          where: { id: parseInt(id as string) },
+          data: { 
+            status: 'completed',
+            service_photo_url: servicePhotoUrl
           },
         });
-        commissionsCreated.push(commission);
 
-        // Create in-app notification for staff member
-        await tx.notification.create({
+        // Also update all items to completed
+        await tx.appointmentItem.updateMany({
+          where: { appointment_id: parseInt(id as string) },
+          data: { status: 'completed' }
+        });
+
+        // Create transaction
+        console.log('Creating transaction record');
+        const transaction = await tx.transaction.create({
           data: {
-            user_id: item.staff.user_id,
-            type: 'APPOINTMENT_COMPLETED',
-            title: 'Appointment Completed',
-            message: `You completed an appointment. Commission: ₱${commissionAmount.toFixed(2)}`,
+            appointment_id: parseInt(id as string),
+            amount: totalAmount,
+            payment_method: paymentMethod as PaymentMethod,
+            status: 'completed',
+            receipt_number: receiptNumber,
+            gcash_reference_no: paymentMethod === 'gcash' ? gcashReferenceNo : null,
           },
         });
+
+        // Calculate and create commissions
+        console.log('Calculating base rate');
+        const baseRate = await getTieredCommissionRate(tx);
+
+        const commissionsCreated = [];
+        for (const item of appointment.items) {
+          console.log(`Processing commission for item ${item.id}, staff ${item.staff_id}`);
+          const hasHitQuota = await checkSpecialtyQuota(item.staff_id, tx);
+          const commissionRate = hasHitQuota ? 0.20 : baseRate;
+
+          const commissionAmount = Number(item.price_at_booking) * commissionRate;
+
+          const commission = await tx.commission.create({
+            data: {
+              transaction_id: transaction.id,
+              staff_id: item.staff_id,
+              service_id: item.service_id,
+              base_amount: Number(item.price_at_booking),
+              commission_rate: commissionRate * 100,
+              commission_amount: commissionAmount,
+              commission_date: today,
+              period_week: getISOWeek(today),
+              period_month: getMonth(today) + 1,
+              period_year: getYear(today),
+            },
+          });
+          commissionsCreated.push(commission);
+
+          // Create in-app notification for staff member
+          await tx.notification.create({
+            data: {
+              user_id: item.staff.user_id,
+              type: 'APPOINTMENT_COMPLETED',
+              title: 'Appointment Completed',
+              message: `You completed an appointment. Commission: ₱${commissionAmount.toFixed(2)}`,
+            },
+          });
+        }
+
+        // Create in-app notification for customer
+        if (appointment.customer) {
+          await tx.notification.create({
+            data: {
+              user_id: appointment.customer.user_id,
+              type: 'APPOINTMENT_COMPLETED',
+              title: 'Appointment Completed',
+              message: `Your appointment on ${format(today, 'yyyy-MM-dd')} is complete. Receipt: ${receiptNumber}`,
+            },
+          });
+        }
+
+        return { transaction, commissions: commissionsCreated };
+      } catch (innerError) {
+        console.error('Error inside completion transaction:', innerError);
+        throw innerError;
       }
-
-      // Create in-app notification for customer
-      if (appointment.customer) {
-        await tx.notification.create({
-          data: {
-            user_id: appointment.customer.user_id,
-            type: 'APPOINTMENT_COMPLETED',
-            title: 'Appointment Completed',
-            message: `Your appointment on ${format(today, 'yyyy-MM-dd')} is complete. Receipt: ${receiptNumber}`,
-          },
-        });
-      }
-
-      return { transaction, commissions: commissionsCreated };
     });
 
     await logSystemAction(req as AuthRequest, 'COMMISSIONS_CREATED', 'Appointment', Number(id), { message: 'Calculated commissions for appointment' });
@@ -235,7 +258,7 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
     });
 
   } catch (error: unknown) {
-    console.error('Complete appointment error:', error);
+    console.error('Complete appointment error details:', error);
     const message = error instanceof Error ? error.message : 'Failed to complete appointment';
     return res.status(500).json({
       success: false,
