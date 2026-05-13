@@ -561,6 +561,7 @@ const Services: React.FC = () => {
                             serviceName: selectedService.name,
                             price: parseFloat(selectedService.price),
                             duration: selectedService.duration_minutes,
+                            imageUrl: selectedService.image_url || getOptimizedUrl(getCategoryConfig(selectedService.category_id).image, 600),
                           });
                         }}
                       >

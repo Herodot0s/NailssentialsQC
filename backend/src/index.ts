@@ -16,6 +16,7 @@ import uploadRoutes from './routes/uploadRoutes';
 import exhibitRoutes from './routes/exhibitRoutes';
 import cmsRoutes from './routes/cmsRoutes';
 import packageRoutes from './routes/packageRoutes';
+import addonRoutes from './routes/addonRoutes';
 
 import { clerkMiddleware } from '@clerk/express';
 
@@ -51,6 +52,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/v1/exhibits', exhibitRoutes);
 app.use('/api/v1/cms', cmsRoutes);
 app.use('/api/v1/packages', packageRoutes);
+app.use('/api/v1/addons', addonRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('NailssentialsQC Backend API is running!');

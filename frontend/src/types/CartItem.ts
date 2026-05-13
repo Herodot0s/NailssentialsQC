@@ -21,4 +21,5 @@ export interface CartItem {
   packageName?: string;
   packagePrice?: number;
   childServices?: CartChildService[];
+  imageUrl?: string;
 }

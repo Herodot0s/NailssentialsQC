@@ -139,3 +139,68 @@ export const deleteExhibit = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+
+/**
+ * PUT /api/v1/exhibits/:id
+ * Protected: Manager
+ * Updates an exhibit record
+ */
+export const updateExhibit = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { title, image_url, staff_id, service_id, is_active } = req.body;
+
+    const existingExhibit = await prisma.exhibit.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!existingExhibit) {
+      return res.status(404).json({
+        success: false,
+        message: 'Exhibit not found',
+      });
+    }
+
+    // If image_url changed, delete old image from Cloudinary
+    if (image_url && existingExhibit.image_url !== image_url) {
+      try {
+        const urlParts = existingExhibit.image_url.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+        const publicId = `nailssentials/${fileName.split('.')[0]}`;
+        await cloudinary.uploader.destroy(publicId);
+      } catch (cloudError) {
+        console.error('Failed to delete old Cloudinary image:', cloudError);
+      }
+    }
+
+    const updatedExhibit = await prisma.exhibit.update({
+      where: { id: Number(id) },
+      data: {
+        title: title ?? existingExhibit.title,
+        image_url: image_url ?? existingExhibit.image_url,
+        staff_id: staff_id ? Number(staff_id) : existingExhibit.staff_id,
+        service_id: service_id ? Number(service_id) : existingExhibit.service_id,
+        is_active: is_active !== undefined ? is_active : existingExhibit.is_active,
+      },
+      include: {
+        artist: {
+          select: { full_name: true },
+        },
+        service: {
+          select: { name: true },
+        },
+      },
+    });
+
+    return res.json({
+      success: true,
+      data: updatedExhibit,
+    });
+  } catch (error) {
+    console.error('Update exhibit error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update exhibit',
+    });
+  }
+};

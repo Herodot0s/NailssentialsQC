@@ -200,6 +200,7 @@ model Appointment {
   customer     CustomerProfile   @relation(fields: [customer_id], references: [id])
   items        AppointmentItem[]
   transactions Transaction[]
+  addons       AppointmentAddon[]
 
   @@index([customer_id])
   @@index([status, appointment_date])
@@ -601,4 +602,33 @@ model ServicePackageItem {
   @@unique([package_id, service_id])
   @@index([package_id])
   @@map("service_package_items")
+}
+
+model Addon {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?  @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  appointment_addons AppointmentAddon[]
+
+  @@map("addons")
+}
+
+model AppointmentAddon {
+  id               Int      @id @default(autoincrement())
+  appointment_id   Int
+  addon_id         Int
+  price_at_booking Decimal  @db.Decimal(10, 2)
+  quantity         Int      @default(1)
+
+  appointment      Appointment @relation(fields: [appointment_id], references: [id], onDelete: Cascade)
+  addon            Addon       @relation(fields: [addon_id], references: [id])
+
+  @@unique([appointment_id, addon_id])
+  @@index([appointment_id])
+  @@map("appointment_addons")
 }
