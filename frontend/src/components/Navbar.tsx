@@ -86,11 +86,13 @@ const Navbar: React.FC = () => {
                     }}
                   >
                     <UserButton.MenuItems>
-                      <UserButton.Action
-                        label="Cart"
-                        labelIcon={<ShoppingCart className="h-4 w-4" />}
-                        onClick={() => navigate('/booking')}
-                      />
+                      {userRole !== 'manager' && (
+                        <UserButton.Action
+                          label="Cart"
+                          labelIcon={<ShoppingCart className="h-4 w-4" />}
+                          onClick={() => navigate('/booking')}
+                        />
+                      )}
                       {userRole === 'manager' && (
                         <UserButton.Action
                           label="Manager Dashboard"
@@ -161,11 +163,20 @@ const Navbar: React.FC = () => {
                   }}
                 >
                   <UserButton.MenuItems>
-                    <UserButton.Action
-                      label="Cart"
-                      labelIcon={<ShoppingCart className="h-4 w-4" />}
-                      onClick={() => navigate('/booking')}
-                    />
+                    {userRole === 'manager' && (
+                      <UserButton.Action
+                        label="Manager Dashboard"
+                        labelIcon={<LayoutDashboard className="h-4 w-4" />}
+                        onClick={() => navigate('/manager')}
+                      />
+                    )}
+                    {userRole !== 'manager' && (
+                      <UserButton.Action
+                        label="Cart"
+                        labelIcon={<ShoppingCart className="h-4 w-4" />}
+                        onClick={() => navigate('/booking')}
+                      />
+                    )}
                     <UserButton.Action
                       label="Services"
                       labelIcon={<List className="h-4 w-4" />}
@@ -176,13 +187,6 @@ const Navbar: React.FC = () => {
                       labelIcon={<Image className="h-4 w-4" />}
                       onClick={() => navigate('/gallery')}
                     />
-                    {userRole === 'manager' && (
-                      <UserButton.Action
-                        label="Manager Dashboard"
-                        labelIcon={<LayoutDashboard className="h-4 w-4" />}
-                        onClick={() => navigate('/manager')}
-                      />
-                    )}
                     {userRole === 'staff' && (
                       <UserButton.Action
                         label="Staff Dashboard"

@@ -23,9 +23,10 @@ export function AnimatedCard({ children, className, delay, ...props }: AnimatedC
         ease: PREMIUM_EASE as any,
         delay: delay ? delay / 1000 : 0,
       }}
-      className={className}
     >
-      <Card {...props}>{children}</Card>
+      <Card className={className} {...props}>
+        {children}
+      </Card>
     </motion.div>
   );
 }
