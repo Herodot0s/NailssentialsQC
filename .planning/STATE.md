@@ -4,8 +4,8 @@ milestone: v2.0
 milestone_name: Premium Experience & Expansion
 status: milestone_complete
 stopped_at: v2.0 milestone archived — shipped 2026-05-10
-last_updated: "2026-05-11"
-last_activity: 2026-05-11 - Synchronized AttendanceLedger with updated database schema
+last_updated: "2026-05-13"
+last_activity: 2026-05-13 - Fixed TS6133 unused variable errors in GuestRoute, Navbar, and ProtectedRoute
 progress:
   total_phases: 7
   completed_phases: 6
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-05-10 after v2.0 milestone)
 Milestone: v2.0 Premium Experience & Expansion — SHIPPED 2026-05-10
 Phase: 7/7 complete (Phase 2 partial — 3 plans deferred to v2.1)
 Status: Ready for v2.1 planning
-Last activity: 2026-05-10
+Last activity: 2026-05-13
 
 Progress: [██████████] 100% — milestone shipped
 
@@ -55,7 +55,7 @@ Resume file: None
 | 20260506-categorize-manager-sidebar | Categorize Manager Sidebar & Refine Analytics | 2026-05-06 | pending | [20260506-categorize-manager-sidebar](./quick/20260506-categorize-manager-sidebar/) |
 | 20260506-add-login-shortcuts | Add login shortcut buttons for Customer, Staff, and Manager | 2026-05-06 | 4a0f944 | [20260506-add-login-shortcuts](./quick/20260506-add-login-shortcuts/) |
 | 20260506-refine-navbar | Refine Navbar: remove 'Book Now'/'My Appointments', reposition Cart | 2026-05-06 | 0138592 | [20260506-refine-navbar](./quick/20260506-refine-navbar/) |
-| 20260506-fix-services-categories-ui | Fix Services Categories UI: replace wrapping with scrollable row | 20260506 | 0138592 | [20260506-fix-services-categories-ui](./quick/20260506-fix-services-categories-ui/) |
+| 20260506-fix-services-categories-ui | Fix Services Categories UI: replace wrapping with scrollable row | 2026-05-06 | 0138592 | [20260506-fix-services-categories-ui](./quick/20260506-fix-services-categories-ui/) |
 | 20260506-update-service-categories | Update Service Categories to Nails, Spa, Hair, Waxing & Threading, Eyelash | 2026-05-06 | 0138592 | [20260506-update-service-categories](./quick/20260506-update-service-categories/) |
 | 20260506-overdrive-manage-services | Overdrive Manage Services: minimalist search, chips, and liquid transitions | 2026-05-06 | 0138592 | [20260506-overdrive-manage-services](./quick/20260506-overdrive-manage-services/) |
 | 20260506-attendance-cards | Realtime Attendance Tracking Cards and Dossier Calendar | 2026-05-06 | 0138592 | [20260506-attendance-cards](./quick/20260506-attendance-cards/) |
@@ -69,3 +69,5 @@ Resume file: None
 | 20260512-booking-sync-conflict-fix | Booking Sync and Conflict Prevention (Industry Grade) | 2026-05-12 | local | [20260512-booking-sync-conflict-fix](./quick/20260512-booking-sync-conflict-fix/) |
 | 20260512-fix-ts-errors | Fix 23 TypeScript build errors across dashboard components | 2026-05-12 | local | [20260512-fix-ts-errors](./quick/20260512-fix-ts-errors/) |
 | 20260512-frappe-payroll-integration | Frappe-style Payroll Mechanism Integration | 2026-05-12 | COMPLETED | [.planning/quick/20260512-frappe-payroll-integration/](./quick/20260512-frappe-payroll-integration/) |
+| 20260513-restore-cloudinary-keys | Restore Cloudinary API keys to backend env | 2026-05-13 | local | [.planning/quick/20260513-restore-cloudinary-keys/](./quick/20260513-restore-cloudinary-keys/) |
+| 20260513-fix-ts-unused-vars | Fix TS6133 unused variable errors in GuestRoute, Navbar, and ProtectedRoute | 2026-05-13 | local | [.planning/quick/20260513-fix-ts-unused-vars/](./quick/20260513-fix-ts-unused-vars/) |

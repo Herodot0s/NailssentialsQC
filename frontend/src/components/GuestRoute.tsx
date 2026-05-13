@@ -9,7 +9,7 @@ interface GuestRouteProps {
 }
 
 const GuestRoute: React.FC<GuestRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isLoading, user } = useAuth();
   const { isSignedIn, isLoaded: isClerkLoaded } = useUser();
 
   if (isLoading || !isClerkLoaded) {

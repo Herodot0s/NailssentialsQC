@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import { LogOut, User, Calendar, LayoutDashboard, Menu, ShoppingCart } from 'lucide-react';
+import { LogOut, Calendar, LayoutDashboard, Menu, ShoppingCart } from 'lucide-react';
 import { UserButton, SignInButton, SignUpButton, useUser } from '@clerk/clerk-react';
 
 import NotificationBell from './NotificationBell';
@@ -18,7 +18,7 @@ import { useCart } from '../context/CartContext';
 
 
 const Navbar: React.FC = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, logout } = useAuth();
   const { user: clerkUser, isSignedIn, isLoaded: isClerkLoaded } = useUser();
   const { cart } = useCart();
   const navigate = useNavigate();
