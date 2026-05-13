@@ -6,7 +6,9 @@ export const getMyProfile = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.sub as number | undefined;
     if (!userId) {
-      return res.status(401).json({ success: false, error: { code: 'TOKEN_REQUIRED', message: 'Invalid user token' } });
+      return res
+        .status(401)
+        .json({ success: false, error: { code: 'TOKEN_REQUIRED', message: 'Invalid user token' } });
     }
     const profile = await prisma.customerProfile.findUnique({
       where: { user_id: userId },
@@ -27,7 +29,9 @@ export const updateMyProfile = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.sub as number | undefined;
     if (!userId) {
-      return res.status(401).json({ success: false, error: { code: 'TOKEN_REQUIRED', message: 'Invalid user token' } });
+      return res
+        .status(401)
+        .json({ success: false, error: { code: 'TOKEN_REQUIRED', message: 'Invalid user token' } });
     }
     const { fullName, preferences, allergies, notes } = req.body;
 
@@ -66,7 +70,7 @@ export const getCustomerHistory = async (req: AuthRequest, res: Response) => {
 
     const customer = await prisma.customerProfile.findUnique({
       where: { id: idNum },
-      include: { user: { select: { email: true, phone: true } } }
+      include: { user: { select: { email: true, phone: true } } },
     });
 
     return res.status(200).json({

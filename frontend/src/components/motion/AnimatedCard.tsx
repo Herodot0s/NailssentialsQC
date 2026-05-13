@@ -1,6 +1,6 @@
-import { motion } from "framer-motion";
-import { Card } from "@/components/ui/card";
-import { PREMIUM_EASE } from "@/lib/motion";
+import { motion } from 'framer-motion';
+import { Card } from '@/components/ui/card';
+import { PREMIUM_EASE } from '@/lib/motion';
 
 interface AnimatedCardProps extends React.ComponentProps<typeof Card> {
   children: React.ReactNode;
@@ -18,10 +18,10 @@ export function AnimatedCard({ children, className, delay, ...props }: AnimatedC
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      transition={{ 
-        duration: 0.25, 
+      transition={{
+        duration: 0.25,
         ease: PREMIUM_EASE as any,
-        delay: delay ? delay / 1000 : 0
+        delay: delay ? delay / 1000 : 0,
       }}
       className={className}
     >

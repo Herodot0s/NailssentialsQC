@@ -126,9 +126,7 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
           )}
         </div>
       </div>
-      {error && (
-        <p className="text-[10px] text-destructive font-bold">{error}</p>
-      )}
+      {error && <p className="text-[10px] text-destructive font-bold">{error}</p>}
       <p className="text-[9px] text-muted-foreground italic">
         JPG or PNG, max 2MB. Recommended: 256x256px.
       </p>

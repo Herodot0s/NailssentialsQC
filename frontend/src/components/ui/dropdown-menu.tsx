@@ -58,12 +58,7 @@ function DropdownMenuGroup({ asChild, ...props }: any) {
   return <Comp data-slot="dropdown-menu-group" {...props} />;
 }
 
-function DropdownMenuLabel({
-  className,
-  inset,
-  asChild,
-  ...props
-}: any) {
+function DropdownMenuLabel({ className, inset, asChild, ...props }: any) {
   const Comp = asChild ? Slot : MenuPrimitive.GroupLabel;
   return (
     <Comp
@@ -78,13 +73,7 @@ function DropdownMenuLabel({
   );
 }
 
-function DropdownMenuItem({
-  className,
-  inset,
-  variant = 'default',
-  asChild,
-  ...props
-}: any) {
+function DropdownMenuItem({ className, inset, variant = 'default', asChild, ...props }: any) {
   const Comp = asChild ? Slot : MenuPrimitive.Item;
   return (
     <Comp
@@ -104,13 +93,7 @@ function DropdownMenuSub({ ...props }: MenuPrimitive.SubmenuRoot.Props) {
   return <MenuPrimitive.SubmenuRoot data-slot="dropdown-menu-sub" {...props} />;
 }
 
-function DropdownMenuSubTrigger({
-  className,
-  inset,
-  asChild,
-  children,
-  ...props
-}: any) {
+function DropdownMenuSubTrigger({ className, inset, asChild, children, ...props }: any) {
   const Comp = asChild ? Slot : MenuPrimitive.SubmenuTrigger;
   return (
     <Comp
@@ -159,13 +142,7 @@ function DropdownMenuSubContent({
   );
 }
 
-function DropdownMenuCheckboxItem({
-  className,
-  children,
-  checked,
-  asChild,
-  ...props
-}: any) {
+function DropdownMenuCheckboxItem({ className, children, checked, asChild, ...props }: any) {
   const Comp = asChild ? Slot : MenuPrimitive.CheckboxItem;
   return (
     <Comp
@@ -195,12 +172,7 @@ function DropdownMenuRadioGroup({ asChild, ...props }: any) {
   return <Comp data-slot="dropdown-menu-radio-group" {...props} />;
 }
 
-function DropdownMenuRadioItem({
-  className,
-  children,
-  asChild,
-  ...props
-}: any) {
+function DropdownMenuRadioItem({ className, children, asChild, ...props }: any) {
   const Comp = asChild ? Slot : MenuPrimitive.RadioItem;
   return (
     <Comp

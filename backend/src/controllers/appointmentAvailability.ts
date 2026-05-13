@@ -1,7 +1,14 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
-import { addMinutes, areIntervalsOverlapping, startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns';
+import {
+  addMinutes,
+  areIntervalsOverlapping,
+  startOfWeek,
+  endOfWeek,
+  startOfDay,
+  endOfDay,
+} from 'date-fns';
 import { AppointmentWithDetails } from '../types/appointmentTypes';
 import { getFullDate, getDatePart } from '../utils/dateUtils';
 import { sendSuccess } from '../utils/apiHelpers';
@@ -24,11 +31,14 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
 
     // 1. Get all technicians
     const technicians = await prisma.staffProfile.findMany({
-      where: { is_available: true }
+      where: { is_available: true },
     });
 
     if (technicians.length === 0) {
-      return sendSuccess(res, allSlots.map(s => ({ time: s, available: false })));
+      return sendSuccess(
+        res,
+        allSlots.map((s) => ({ time: s, available: false })),
+      );
     }
 
     // 2. Get all appointment items for this date
@@ -40,32 +50,32 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
           appointment_date: {
             gte: startOfDay(parsedDate),
             lte: endOfDay(parsedDate),
-          }
+          },
         },
-        status: { in: ['pending', 'confirmed', 'in_progress'] }
+        status: { in: ['pending', 'confirmed', 'in_progress'] },
       },
       select: {
         start_time: true,
         end_time: true,
-        staff_id: true
-      }
+        staff_id: true,
+      },
     });
 
     // 3. For each slot, check if ANY technician is free
-    const slotsWithAvailability = allSlots.map(slotTime => {
+    const slotsWithAvailability = allSlots.map((slotTime) => {
       const slotStart = getFullDate(dateOnly, slotTime);
       const slotEnd = addMinutes(slotStart, 59);
 
-      const availableTechnicians = technicians.filter(tech => {
-        const techItems = appointmentItems.filter(item => item.staff_id === tech.id);
+      const availableTechnicians = technicians.filter((tech) => {
+        const techItems = appointmentItems.filter((item) => item.staff_id === tech.id);
 
-        const hasConflict = techItems.some(item => {
+        const hasConflict = techItems.some((item) => {
           const itemStart = getFullDate(dateOnly, item.start_time);
           const itemEnd = getFullDate(dateOnly, item.end_time);
 
           return areIntervalsOverlapping(
             { start: slotStart, end: slotEnd },
-            { start: itemStart, end: itemEnd }
+            { start: itemStart, end: itemEnd },
           );
         });
 
@@ -74,7 +84,7 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
 
       return {
         time: slotTime,
-        available: availableTechnicians.length >= requiredCount
+        available: availableTechnicians.length >= requiredCount,
       };
     });
 
@@ -84,7 +94,7 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
     const message = error instanceof Error ? error.message : 'Failed to fetch availability';
     return res.status(500).json({
       success: false,
-      error: { code: 'INTERNAL_SERVER_ERROR', message }
+      error: { code: 'INTERNAL_SERVER_ERROR', message },
     });
   }
 };
@@ -148,13 +158,13 @@ export const getStaffCommissions = async (req: AuthRequest, res: Response) => {
         transaction: {
           include: {
             appointment: {
-              include: { customer: true }
-            }
-          }
-        }
+              include: { customer: true },
+            },
+          },
+        },
       },
       orderBy: { commission_date: 'desc' },
-      take: 50
+      take: 50,
     });
 
     return res.status(200).json({ success: true, data: commissions });

@@ -2,15 +2,49 @@ import React, { useState, useEffect, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay, addMonths, subMonths, subDays, isAfter, isBefore, min, max, parse } from 'date-fns';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameDay,
+  getDay,
+  addMonths,
+  subMonths,
+  subDays,
+  isAfter,
+  isBefore,
+  min,
+  max,
+  parse,
+} from 'date-fns';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend,
+} from 'recharts';
 import { getStaffSchedule, getAllAttendance } from '@/api/apiClient';
 import type { AttendanceLedgerProps } from '../types';
 import type { StaffMember, ScheduleItem, AttendanceRecord } from '@/types/api';
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 
-export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, staffMembers, onUpdateAttendance }) => {
+export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({
+  attendance,
+  staffMembers,
+  onUpdateAttendance,
+}) => {
   const [schedules, setSchedules] = useState<Record<number, ScheduleItem[]>>({});
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const format12h = (timeStr?: string | null) => {
@@ -45,8 +79,8 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
             if (res.data.success) {
               scheduleMap[staff.staffProfileId] = res.data.data;
             }
-          } catch (e) { }
-        })
+          } catch (e) {}
+        }),
       );
       setSchedules(scheduleMap);
     };
@@ -64,15 +98,15 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
           start.setMonth(start.getMonth() - 6);
           const res = await getAllAttendance({
             startDate: format(start, 'yyyy-MM-dd'),
-            endDate: format(new Date(), 'yyyy-MM-dd')
+            endDate: format(new Date(), 'yyyy-MM-dd'),
           });
           if (res.data.success) {
             // filter just for this staff
             const all = res.data.data as AttendanceRecord[];
-            setStaffAttendance(all.filter(a => a.staff_id === selectedStaff.staffProfileId));
+            setStaffAttendance(all.filter((a) => a.staff_id === selectedStaff.staffProfileId));
           }
         } catch (e) {
-          console.error("Failed to fetch history");
+          console.error('Failed to fetch history');
         } finally {
           setIsLoadingHistory(false);
         }
@@ -111,7 +145,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
     if (customRangeStart && customRangeEnd) {
       setRangeSelection({
         start: new Date(customRangeStart),
-        end: new Date(customRangeEnd)
+        end: new Date(customRangeEnd),
       });
       setSelectedDate(null);
     }
@@ -129,14 +163,22 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
   const chartData = useMemo(() => {
     if (!rangeSelection || !selectedStaff) return [];
     const interval = eachDayOfInterval(rangeSelection);
-    return interval.map(day => {
+    return interval.map((day) => {
       const dateStr = format(day, 'yyyy-MM-dd');
-      const record = staffAttendance.find(a => isSameDay(new Date(a.date), day));
+      const record = staffAttendance.find((a) => isSameDay(new Date(a.date), day));
       const dOfWeek = day.getDay() === 0 ? 7 : day.getDay();
 
       // Use record's stored schedule if available, otherwise fallback to current schedule
-      const schedStart = record?.scheduled_start || schedules[selectedStaff.staffProfileId]?.find(s => s.day_of_week === dOfWeek && s.is_active)?.start_time;
-      const schedEnd = record?.scheduled_end || schedules[selectedStaff.staffProfileId]?.find(s => s.day_of_week === dOfWeek && s.is_active)?.end_time;
+      const schedStart =
+        record?.scheduled_start ||
+        schedules[selectedStaff.staffProfileId]?.find(
+          (s) => s.day_of_week === dOfWeek && s.is_active,
+        )?.start_time;
+      const schedEnd =
+        record?.scheduled_end ||
+        schedules[selectedStaff.staffProfileId]?.find(
+          (s) => s.day_of_week === dOfWeek && s.is_active,
+        )?.end_time;
 
       let expectedVal = null;
       if (schedStart) {
@@ -155,8 +197,16 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
         expected: expectedVal,
         actual: actualVal,
         expectedStr: schedStart ? `${format12h(schedStart)} - ${format12h(schedEnd)}` : 'Off',
-        actualStr: record?.check_in ? format(new Date(record.check_in), 'h:mm aa') : (dateStr > format(new Date(), 'yyyy-MM-dd') ? 'Upcoming' : 'Absent'),
-        actualOutStr: record?.check_out ? format(new Date(record.check_out), 'h:mm aa') : (record?.check_in ? 'Active' : '-')
+        actualStr: record?.check_in
+          ? format(new Date(record.check_in), 'h:mm aa')
+          : dateStr > format(new Date(), 'yyyy-MM-dd')
+            ? 'Upcoming'
+            : 'Absent',
+        actualOutStr: record?.check_out
+          ? format(new Date(record.check_out), 'h:mm aa')
+          : record?.check_in
+            ? 'Active'
+            : '-',
       };
     });
   }, [rangeSelection, selectedStaff, staffAttendance, schedules]);
@@ -165,10 +215,21 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
     if (active && payload && payload.length) {
       return (
         <div className="bg-card border border-border p-3 shadow-premium rounded-none">
-          <p className="font-semibold text-[11px] uppercase tracking-[0.2em] mb-2 text-foreground">{label}</p>
-          <p className="text-[11px] uppercase tracking-wide"><span className="font-semibold text-warm-stone">Expected:</span> <span className="text-foreground">{payload[0]?.payload?.expectedStr}</span></p>
-          <p className="text-[11px] uppercase tracking-wide"><span className="font-semibold text-primary">In:</span> <span className="text-foreground">{payload[0]?.payload?.actualStr}</span></p>
-          <p className="text-[11px] uppercase tracking-wide"><span className="font-semibold text-primary">Out:</span> <span className="text-foreground">{payload[0]?.payload?.actualOutStr}</span></p>
+          <p className="font-semibold text-[11px] uppercase tracking-[0.2em] mb-2 text-foreground">
+            {label}
+          </p>
+          <p className="text-[11px] uppercase tracking-wide">
+            <span className="font-semibold text-warm-stone">Expected:</span>{' '}
+            <span className="text-foreground">{payload[0]?.payload?.expectedStr}</span>
+          </p>
+          <p className="text-[11px] uppercase tracking-wide">
+            <span className="font-semibold text-primary">In:</span>{' '}
+            <span className="text-foreground">{payload[0]?.payload?.actualStr}</span>
+          </p>
+          <p className="text-[11px] uppercase tracking-wide">
+            <span className="font-semibold text-primary">Out:</span>{' '}
+            <span className="text-foreground">{payload[0]?.payload?.actualOutStr}</span>
+          </p>
         </div>
       );
     }
@@ -178,7 +239,9 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       <div className="flex flex-col mb-8">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.15em] mt-2 text-warm-stone">Monitor current shift status</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.15em] mt-2 text-warm-stone">
+          Monitor current shift status
+        </p>
       </div>
 
       <div className="bg-card border border-kiln-border shadow-card rounded-3xl overflow-hidden">
@@ -189,61 +252,122 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
           <div className="col-span-3 lg:col-span-2 text-right">Action</div>
         </div>
         <div className="flex flex-col divide-y divide-border">
-          {staffMembers?.map(staff => {
-            const todayRecord = attendance.find(a => a.staff_id === staff.staffProfileId && isSameDay(new Date(a.date), new Date()));
+          {staffMembers?.map((staff) => {
+            const todayRecord = attendance.find(
+              (a) => a.staff_id === staff.staffProfileId && isSameDay(new Date(a.date), new Date()),
+            );
             const isTimedIn = todayRecord?.check_in && !todayRecord?.check_out;
-            const sched = todayRecord?.scheduled_start && todayRecord?.scheduled_end
-              ? { start_time: todayRecord.scheduled_start, end_time: todayRecord.scheduled_end }
-              : schedules[staff.staffProfileId]?.find(s => s.day_of_week === apiDayOfWeek && s.is_active);
+            const sched =
+              todayRecord?.scheduled_start && todayRecord?.scheduled_end
+                ? { start_time: todayRecord.scheduled_start, end_time: todayRecord.scheduled_end }
+                : schedules[staff.staffProfileId]?.find(
+                    (s) => s.day_of_week === apiDayOfWeek && s.is_active,
+                  );
 
             return (
-              <div key={staff.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center hover:bg-bisque-wash/20 transition-colors border-b border-kiln-border last:border-none">
+              <div
+                key={staff.id}
+                className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center hover:bg-bisque-wash/20 transition-colors border-b border-kiln-border last:border-none"
+              >
                 <div className="col-span-1 md:col-span-4 lg:col-span-5 flex items-center gap-4">
-                  <div className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${isTimedIn ? 'bg-forest-confirm animate-pulse shadow-[0_0_8px_rgba(67,83,52,0.4)]' : 'bg-brick-error/80'}`} title={isTimedIn ? 'Currently Timed In' : 'Not Timed In'} />
+                  <div
+                    className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${isTimedIn ? 'bg-forest-confirm animate-pulse shadow-[0_0_8px_rgba(67,83,52,0.4)]' : 'bg-brick-error/80'}`}
+                    title={isTimedIn ? 'Currently Timed In' : 'Not Timed In'}
+                  />
                   <div>
-                    <p className="font-serif text-lg font-medium tracking-tight">{staff.fullName}</p>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-warm-stone">{staff.role}</p>
+                    <p className="font-serif text-lg font-medium tracking-tight">
+                      {staff.fullName}
+                    </p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-warm-stone">
+                      {staff.role}
+                    </p>
                   </div>
                 </div>
 
                 <div className="col-span-1 md:col-span-3 flex items-center gap-2 md:block">
-                  <span className="md:hidden text-xs font-semibold uppercase tracking-widest text-muted-foreground w-20">Shift</span>
-                  <span className="font-mono text-sm">{sched ? `${format12h(sched.start_time)} - ${format12h(sched.end_time)}` : <span className="text-muted-foreground italic">Off Duty</span>}</span>
+                  <span className="md:hidden text-xs font-semibold uppercase tracking-widest text-muted-foreground w-20">
+                    Shift
+                  </span>
+                  <span className="font-mono text-sm">
+                    {sched ? (
+                      `${format12h(sched.start_time)} - ${format12h(sched.end_time)}`
+                    ) : (
+                      <span className="text-muted-foreground italic">Off Duty</span>
+                    )}
+                  </span>
                 </div>
 
                 <div className="col-span-1 md:col-span-2 flex items-center gap-2 md:block">
-                  <span className="md:hidden text-xs font-semibold uppercase tracking-widest text-muted-foreground w-20">Status</span>
+                  <span className="md:hidden text-xs font-semibold uppercase tracking-widest text-muted-foreground w-20">
+                    Status
+                  </span>
                   <div className="flex flex-col">
                     <span className="font-mono text-sm font-medium">
-                      {todayRecord?.check_in ? format(new Date(todayRecord.check_in), 'h:mm aa') : <span className="text-muted-foreground uppercase text-xs tracking-widest">Pending</span>}
+                      {todayRecord?.check_in ? (
+                        format(new Date(todayRecord.check_in), 'h:mm aa')
+                      ) : (
+                        <span className="text-muted-foreground uppercase text-xs tracking-widest">
+                          Pending
+                        </span>
+                      )}
                     </span>
-                    {todayRecord && (todayRecord.tardiness_minutes > 0 || todayRecord.deduction_amount > 0) && (
-                      <div className="flex gap-1 mt-1">
-                        {todayRecord.tardiness_minutes > 0 && (
-                          <Badge className="w-fit h-4 px-1.5 bg-brick-error/10 text-brick-error border-none text-[8px] uppercase tracking-tighter">
-                            {todayRecord.tardiness_minutes}m Tardy
-                          </Badge>
-                        )}
-                        {todayRecord.deduction_amount > 0 && (
-                          <Badge className="w-fit h-4 px-1.5 bg-brick-error/20 text-brick-error border-none text-[8px] uppercase tracking-tighter">
-                            ₱{todayRecord.deduction_amount}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
+                    {todayRecord &&
+                      (todayRecord.tardiness_minutes > 0 || todayRecord.deduction_amount > 0) && (
+                        <div className="flex gap-1 mt-1">
+                          {todayRecord.tardiness_minutes > 0 && (
+                            <Badge className="w-fit h-4 px-1.5 bg-brick-error/10 text-brick-error border-none text-[8px] uppercase tracking-tighter">
+                              {todayRecord.tardiness_minutes}m Tardy
+                            </Badge>
+                          )}
+                          {todayRecord.deduction_amount > 0 && (
+                            <Badge className="w-fit h-4 px-1.5 bg-brick-error/20 text-brick-error border-none text-[8px] uppercase tracking-tighter">
+                              ₱{todayRecord.deduction_amount}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                   </div>
                 </div>
 
                 <div className="col-span-1 md:col-span-3 lg:col-span-2 flex justify-start md:justify-end gap-2 mt-2 md:mt-0 pt-3 md:pt-0 border-t border-kiln-border md:border-t-0">
                   {todayRecord ? (
                     <>
-                      {!todayRecord.check_in && <Button onClick={() => onUpdateAttendance(todayRecord.id, 'Present')} variant="outline" className="rounded-xl min-h-[44px] text-[11px] font-semibold uppercase tracking-widest border-forest-confirm/20 text-forest-confirm hover:bg-forest-confirm hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-200" aria-label={`Time in ${staff.fullName}`}>Time In</Button>}
-                      {!todayRecord.check_out && todayRecord.check_in && <Button onClick={() => onUpdateAttendance(todayRecord.id, 'Absent')} variant="outline" className="rounded-xl min-h-[44px] text-[11px] font-semibold uppercase tracking-widest border-brick-error/20 text-brick-error hover:bg-brick-error hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-200" aria-label={`Time out ${staff.fullName}`}>Time Out</Button>}
+                      {!todayRecord.check_in && (
+                        <Button
+                          onClick={() => onUpdateAttendance(todayRecord.id, 'Present')}
+                          variant="outline"
+                          className="rounded-xl min-h-[44px] text-[11px] font-semibold uppercase tracking-widest border-forest-confirm/20 text-forest-confirm hover:bg-forest-confirm hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                          aria-label={`Time in ${staff.fullName}`}
+                        >
+                          Time In
+                        </Button>
+                      )}
+                      {!todayRecord.check_out && todayRecord.check_in && (
+                        <Button
+                          onClick={() => onUpdateAttendance(todayRecord.id, 'Absent')}
+                          variant="outline"
+                          className="rounded-xl min-h-[44px] text-[11px] font-semibold uppercase tracking-widest border-brick-error/20 text-brick-error hover:bg-brick-error hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                          aria-label={`Time out ${staff.fullName}`}
+                        >
+                          Time Out
+                        </Button>
+                      )}
                     </>
                   ) : (
-                    <Badge variant="outline" className="rounded-md text-[11px] font-semibold uppercase text-warm-stone tracking-widest px-3 py-1 border-kiln-border/40 bg-bisque-wash/10">No Record</Badge>
+                    <Badge
+                      variant="outline"
+                      className="rounded-md text-[11px] font-semibold uppercase text-warm-stone tracking-widest px-3 py-1 border-kiln-border/40 bg-bisque-wash/10"
+                    >
+                      No Record
+                    </Badge>
                   )}
-                  <Button onClick={() => setSelectedStaff(staff)} variant="outline" size="icon" className="rounded-xl h-11 w-11 border-kiln-border hover:bg-bisque-wash/50 hover:scale-[1.05] active:scale-[0.95] transition-all duration-200" aria-label={`View dossier for ${staff.fullName}`}>
+                  <Button
+                    onClick={() => setSelectedStaff(staff)}
+                    variant="outline"
+                    size="icon"
+                    className="rounded-xl h-11 w-11 border-kiln-border hover:bg-bisque-wash/50 hover:scale-[1.05] active:scale-[0.95] transition-all duration-200"
+                    aria-label={`View dossier for ${staff.fullName}`}
+                  >
                     <CalendarDays className="w-4 h-4 text-warm-stone" />
                   </Button>
                 </div>
@@ -275,25 +399,54 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
             {/* Left sidebar: Calendar */}
             <div className="lg:col-span-1 border-r border-border p-6 bg-card flex flex-col">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xs font-semibold uppercase tracking-widest">{format(calendarMonth, 'MMMM yyyy')}</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-widest">
+                  {format(calendarMonth, 'MMMM yyyy')}
+                </h3>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-11 w-11 rounded-xl" onClick={() => setCalendarMonth(subMonths(calendarMonth, 1))} aria-label="Previous month"><ChevronLeft className="h-5 w-5" /></Button>
-                  <Button variant="ghost" size="icon" className="h-11 w-11 rounded-xl" onClick={() => setCalendarMonth(addMonths(calendarMonth, 1))} aria-label="Next month"><ChevronRight className="h-5 w-5" /></Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-11 w-11 rounded-xl"
+                    onClick={() => setCalendarMonth(subMonths(calendarMonth, 1))}
+                    aria-label="Previous month"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-11 w-11 rounded-xl"
+                    onClick={() => setCalendarMonth(addMonths(calendarMonth, 1))}
+                    aria-label="Next month"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </Button>
                 </div>
               </div>
 
               <div className="grid grid-cols-7 gap-1 text-center mb-2">
-                {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => <div key={d} className="text-xs font-semibold uppercase text-muted-foreground">{d}</div>)}
+                {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
+                  <div key={d} className="text-xs font-semibold uppercase text-muted-foreground">
+                    {d}
+                  </div>
+                ))}
               </div>
 
               <div className="grid grid-cols-7 gap-1 mb-8">
-                {Array.from({ length: startDayPadding }).map((_, i) => <div key={`pad-${i}`} className="aspect-square" />)}
-                {daysInMonth.map(day => {
+                {Array.from({ length: startDayPadding }).map((_, i) => (
+                  <div key={`pad-${i}`} className="aspect-square" />
+                ))}
+                {daysInMonth.map((day) => {
                   const dateStr = format(day, 'yyyy-MM-dd');
-                  const record = staffAttendance.find(a => isSameDay(new Date(a.date), day));
+                  const record = staffAttendance.find((a) => isSameDay(new Date(a.date), day));
                   const isSel = selectedDate && isSameDay(day, selectedDate);
-                  const isInRange = rangeSelection && isAfter(day, rangeSelection.start) && isBefore(day, rangeSelection.end);
-                  const isRangeEdge = rangeSelection && (isSameDay(day, rangeSelection.start) || isSameDay(day, rangeSelection.end));
+                  const isInRange =
+                    rangeSelection &&
+                    isAfter(day, rangeSelection.start) &&
+                    isBefore(day, rangeSelection.end);
+                  const isRangeEdge =
+                    rangeSelection &&
+                    (isSameDay(day, rangeSelection.start) || isSameDay(day, rangeSelection.end));
                   const hasWarning = record && record.tardiness_minutes > 0;
                   const hasSuccess = record && record.check_in && record.tardiness_minutes === 0;
 
@@ -308,19 +461,44 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
                            `}
                     >
                       {format(day, 'd')}
-                      {hasWarning && <span className="absolute bottom-1 w-1 h-1 bg-destructive rounded-full" />}
-                      {hasSuccess && <span className="absolute bottom-1 w-1 h-1 bg-success-color rounded-full" />}
+                      {hasWarning && (
+                        <span className="absolute bottom-1 w-1 h-1 bg-destructive rounded-full" />
+                      )}
+                      {hasSuccess && (
+                        <span className="absolute bottom-1 w-1 h-1 bg-success-color rounded-full" />
+                      )}
                     </button>
-                  )
+                  );
                 })}
               </div>
 
               <div className="mt-auto pt-6 border-t border-kiln-border">
-                <h3 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-warm-stone mb-6">Calendar View</h3>
+                <h3 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-warm-stone mb-6">
+                  Calendar View
+                </h3>
                 <div className="flex flex-col gap-2">
-                  <input type="date" value={customRangeStart} onChange={e => setCustomRangeStart(e.target.value)} className="w-full text-xs font-mono p-3 border border-kiln-border bg-bisque-wash/20 focus:outline-none focus:border-primary transition-colors rounded-xl" aria-label="Start date for custom range" />
-                  <input type="date" value={customRangeEnd} onChange={e => setCustomRangeEnd(e.target.value)} className="w-full text-xs font-mono p-3 border border-kiln-border bg-bisque-wash/20 focus:outline-none focus:border-primary transition-colors rounded-xl" aria-label="End date for custom range" />
-                  <Button onClick={applyCustomRange} variant="outline" className="w-full rounded-xl text-[11px] font-semibold uppercase tracking-[0.15em] h-10 mt-2 border-kiln-border hover:bg-bisque-wash/30" aria-label="Apply custom date range to history">Apply Range</Button>
+                  <input
+                    type="date"
+                    value={customRangeStart}
+                    onChange={(e) => setCustomRangeStart(e.target.value)}
+                    className="w-full text-xs font-mono p-3 border border-kiln-border bg-bisque-wash/20 focus:outline-none focus:border-primary transition-colors rounded-xl"
+                    aria-label="Start date for custom range"
+                  />
+                  <input
+                    type="date"
+                    value={customRangeEnd}
+                    onChange={(e) => setCustomRangeEnd(e.target.value)}
+                    className="w-full text-xs font-mono p-3 border border-kiln-border bg-bisque-wash/20 focus:outline-none focus:border-primary transition-colors rounded-xl"
+                    aria-label="End date for custom range"
+                  />
+                  <Button
+                    onClick={applyCustomRange}
+                    variant="outline"
+                    className="w-full rounded-xl text-[11px] font-semibold uppercase tracking-[0.15em] h-10 mt-2 border-kiln-border hover:bg-bisque-wash/30"
+                    aria-label="Apply custom date range to history"
+                  >
+                    Apply Range
+                  </Button>
                 </div>
               </div>
             </div>
@@ -328,94 +506,195 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
             {/* Right Content Area */}
             <div className="lg:col-span-2 p-8 bg-bisque-wash/10 flex flex-col">
               {isLoadingHistory ? (
-                <div className="flex-1 flex items-center justify-center text-xs font-semibold uppercase tracking-widest animate-pulse text-warm-stone">Loading Records...</div>
+                <div className="flex-1 flex items-center justify-center text-xs font-semibold uppercase tracking-widest animate-pulse text-warm-stone">
+                  Loading Records...
+                </div>
               ) : rangeSelection ? (
                 <div className="flex-1 flex flex-col animate-in fade-in">
                   <h3 className="font-serif text-2xl font-normal mb-6">Timeline Analysis</h3>
                   <div className="flex items-center gap-8 border-b border-kiln-border pb-6 mb-6">
                     <div>
-                      <p className="text-xs font-semibold uppercase text-warm-stone tracking-widest mb-1">Period</p>
-                      <p className="font-mono text-lg">{format(rangeSelection.start, 'MMM dd')} - {format(rangeSelection.end, 'MMM dd')}</p>
+                      <p className="text-xs font-semibold uppercase text-warm-stone tracking-widest mb-1">
+                        Period
+                      </p>
+                      <p className="font-mono text-lg">
+                        {format(rangeSelection.start, 'MMM dd')} -{' '}
+                        {format(rangeSelection.end, 'MMM dd')}
+                      </p>
                     </div>
                     <div className="w-px h-8 bg-kiln-border"></div>
                     <div>
-                      <p className="text-xs font-semibold uppercase text-warm-stone tracking-widest mb-1">Data Points</p>
+                      <p className="text-xs font-semibold uppercase text-warm-stone tracking-widest mb-1">
+                        Data Points
+                      </p>
                       <p className="font-mono text-lg">{chartData.length} Days</p>
                     </div>
                   </div>
 
                   <div className="flex-1 min-h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--kiln-border))" />
-                        <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'var(--warm-stone)' }} dy={10} />
-                        <YAxis domain={['auto', 'auto']} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'var(--warm-stone)' }} dx={-10} tickFormatter={(v) => {
-                          const h = Math.floor(v);
-                          const m = Math.round((v - h) * 60).toString().padStart(2, '0');
-                          return `${h}:${m}`;
-                        }} />
+                      <LineChart
+                        data={chartData}
+                        margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          vertical={false}
+                          stroke="hsl(var(--kiln-border))"
+                        />
+                        <XAxis
+                          dataKey="date"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 11, fill: 'var(--warm-stone)' }}
+                          dy={10}
+                        />
+                        <YAxis
+                          domain={['auto', 'auto']}
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 11, fill: 'var(--warm-stone)' }}
+                          dx={-10}
+                          tickFormatter={(v) => {
+                            const h = Math.floor(v);
+                            const m = Math.round((v - h) * 60)
+                              .toString()
+                              .padStart(2, '0');
+                            return `${h}:${m}`;
+                          }}
+                        />
                         <Tooltip content={<CustomTooltip />} />
-                        <Legend wrapperStyle={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600 }} />
-                        <Line type="monotone" dataKey="expected" name="Scheduled" stroke="hsl(var(--kiln-border))" strokeWidth={2} dot={false} />
-                        <Line type="stepAfter" dataKey="actual" name="Actual Check-in" stroke="hsl(var(--foreground))" strokeWidth={2} dot={{ r: 3, fill: 'hsl(var(--foreground))' }} activeDot={{ r: 5 }} />
+                        <Legend
+                          wrapperStyle={{
+                            fontSize: '11px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.15em',
+                            fontWeight: 600,
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="expected"
+                          name="Scheduled"
+                          stroke="hsl(var(--kiln-border))"
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                        <Line
+                          type="stepAfter"
+                          dataKey="actual"
+                          name="Actual Check-in"
+                          stroke="hsl(var(--foreground))"
+                          strokeWidth={2}
+                          dot={{ r: 3, fill: 'hsl(var(--foreground))' }}
+                          activeDot={{ r: 5 }}
+                        />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
-                  <p className="text-xs text-warm-stone font-semibold uppercase tracking-widest mt-4 text-center">Tap two dates to select a range</p>
+                  <p className="text-xs text-warm-stone font-semibold uppercase tracking-widest mt-4 text-center">
+                    Tap two dates to select a range
+                  </p>
                 </div>
               ) : selectedDate ? (
                 <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full animate-in zoom-in-95 duration-300">
                   <div className="text-center mb-10">
-                    <p className="text-xs font-semibold uppercase text-warm-stone tracking-widest mb-2">Daily Summary</p>
-                    <h3 className="font-serif text-3xl font-medium tracking-tight">{format(selectedDate, 'EEEE, MMMM do')}</h3>
+                    <p className="text-xs font-semibold uppercase text-warm-stone tracking-widest mb-2">
+                      Daily Summary
+                    </p>
+                    <h3 className="font-serif text-3xl font-medium tracking-tight">
+                      {format(selectedDate, 'EEEE, MMMM do')}
+                    </h3>
                   </div>
 
                   {(() => {
                     const dateStr = format(selectedDate, 'yyyy-MM-dd');
-                    const record = staffAttendance.find(a => isSameDay(new Date(a.date), selectedDate));
+                    const record = staffAttendance.find((a) =>
+                      isSameDay(new Date(a.date), selectedDate),
+                    );
                     const dOfWeek = selectedDate.getDay() === 0 ? 7 : selectedDate.getDay();
 
-                    const schedStart = record?.scheduled_start || schedules[selectedStaff?.staffProfileId || 0]?.find(s => s.day_of_week === dOfWeek && s.is_active)?.start_time;
-                    const schedEnd = record?.scheduled_end || schedules[selectedStaff?.staffProfileId || 0]?.find(s => s.day_of_week === dOfWeek && s.is_active)?.end_time;
+                    const schedStart =
+                      record?.scheduled_start ||
+                      schedules[selectedStaff?.staffProfileId || 0]?.find(
+                        (s) => s.day_of_week === dOfWeek && s.is_active,
+                      )?.start_time;
+                    const schedEnd =
+                      record?.scheduled_end ||
+                      schedules[selectedStaff?.staffProfileId || 0]?.find(
+                        (s) => s.day_of_week === dOfWeek && s.is_active,
+                      )?.end_time;
 
                     return (
                       <div className="space-y-6">
                         <div className="flex justify-between items-center border-b border-kiln-border/50 pb-4">
-                          <span className="text-xs font-semibold uppercase tracking-widest text-warm-stone">Expected</span>
-                          <span className="font-mono text-lg">{schedStart ? `${format12h(schedStart)} - ${format12h(schedEnd)}` : 'Off Duty'}</span>
-                        </div>
-                        <div className="flex justify-between items-center border-b border-kiln-border/50 pb-4">
-                          <span className="text-xs font-semibold uppercase tracking-widest text-warm-stone">Check In</span>
-                          <span className={`font-mono text-lg ${record?.check_in ? (record.tardiness_minutes > 0 ? 'text-brick-error font-bold' : 'text-forest-confirm font-bold') : (dateStr > format(new Date(), 'yyyy-MM-dd') ? 'text-warm-stone' : '')}`}>
-                            {record?.check_in ? format(new Date(record.check_in), 'h:mm aa') : (dateStr > format(new Date(), 'yyyy-MM-dd') ? 'Upcoming' : 'No Record')}
+                          <span className="text-xs font-semibold uppercase tracking-widest text-warm-stone">
+                            Expected
                           </span>
-                        </div>
-                        <div className="flex justify-between items-center border-b border-kiln-border/50 pb-4">
-                          <span className="text-xs font-semibold uppercase tracking-widest text-warm-stone">Check Out</span>
                           <span className="font-mono text-lg">
-                            {record?.check_out ? format(new Date(record.check_out), 'h:mm aa') : (record?.check_in ? <span className="text-success-color animate-pulse">Active Now</span> : '-')}
+                            {schedStart
+                              ? `${format12h(schedStart)} - ${format12h(schedEnd)}`
+                              : 'Off Duty'}
                           </span>
                         </div>
                         <div className="flex justify-between items-center border-b border-kiln-border/50 pb-4">
-                          <span className="text-xs font-semibold uppercase tracking-widest text-warm-stone">Tardiness</span>
-                          <span className={`font-mono text-lg ${record && record.tardiness_minutes > 0 ? 'text-brick-error font-bold' : ''}`}>
+                          <span className="text-xs font-semibold uppercase tracking-widest text-warm-stone">
+                            Check In
+                          </span>
+                          <span
+                            className={`font-mono text-lg ${record?.check_in ? (record.tardiness_minutes > 0 ? 'text-brick-error font-bold' : 'text-forest-confirm font-bold') : dateStr > format(new Date(), 'yyyy-MM-dd') ? 'text-warm-stone' : ''}`}
+                          >
+                            {record?.check_in
+                              ? format(new Date(record.check_in), 'h:mm aa')
+                              : dateStr > format(new Date(), 'yyyy-MM-dd')
+                                ? 'Upcoming'
+                                : 'No Record'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center border-b border-kiln-border/50 pb-4">
+                          <span className="text-xs font-semibold uppercase tracking-widest text-warm-stone">
+                            Check Out
+                          </span>
+                          <span className="font-mono text-lg">
+                            {record?.check_out ? (
+                              format(new Date(record.check_out), 'h:mm aa')
+                            ) : record?.check_in ? (
+                              <span className="text-success-color animate-pulse">Active Now</span>
+                            ) : (
+                              '-'
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center border-b border-kiln-border/50 pb-4">
+                          <span className="text-xs font-semibold uppercase tracking-widest text-warm-stone">
+                            Tardiness
+                          </span>
+                          <span
+                            className={`font-mono text-lg ${record && record.tardiness_minutes > 0 ? 'text-brick-error font-bold' : ''}`}
+                          >
                             {record ? `${record.tardiness_minutes} mins` : '-'}
                           </span>
                         </div>
                         <div className="flex justify-between items-center pb-2">
-                          <span className="text-xs font-semibold uppercase tracking-widest text-warm-stone">Deduction</span>
-                          <span className={`font-mono text-lg ${record && record.deduction_amount > 0 ? 'text-brick-error font-bold' : ''}`}>
+                          <span className="text-xs font-semibold uppercase tracking-widest text-warm-stone">
+                            Deduction
+                          </span>
+                          <span
+                            className={`font-mono text-lg ${record && record.deduction_amount > 0 ? 'text-brick-error font-bold' : ''}`}
+                          >
                             {record ? `₱${record.deduction_amount}` : '-'}
                           </span>
                         </div>
                       </div>
-                    )
+                    );
                   })()}
                 </div>
               ) : (
                 <div className="flex-1 flex flex-col justify-center items-center text-muted-foreground opacity-50">
                   <CalendarDays className="h-16 w-16 mb-4 stroke-1" />
-                  <p className="text-xs font-semibold uppercase tracking-widest">Select a date or range</p>
+                  <p className="text-xs font-semibold uppercase tracking-widest">
+                    Select a date or range
+                  </p>
                 </div>
               )}
             </div>
@@ -425,4 +704,3 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({ attendance, 
     </div>
   );
 };
-

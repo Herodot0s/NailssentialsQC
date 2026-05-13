@@ -12,15 +12,15 @@ async function main() {
         username: true,
         email: true,
         role: true,
-        is_active: true
-      }
+        is_active: true,
+      },
     });
 
     let md = '# System Accounts\n\n';
     md += '| ID | Username | Role | Email | Active |\n';
     md += '|----|----------|------|-------|--------|\n';
 
-    users.forEach(u => {
+    users.forEach((u) => {
       md += `| ${u.id} | ${u.username} | ${u.role} | ${u.email || '-'} | ${u.is_active ? '✅' : '❌'} |\n`;
     });
 

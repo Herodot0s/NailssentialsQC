@@ -7,7 +7,7 @@ import {
   createPackage,
   updatePackage,
   togglePackage,
-  deletePackage
+  deletePackage,
 } from '../controllers/packageController';
 
 const router = Router();

@@ -17,17 +17,23 @@ import exhibitRoutes from './routes/exhibitRoutes';
 import cmsRoutes from './routes/cmsRoutes';
 import packageRoutes from './routes/packageRoutes';
 
+import { clerkMiddleware } from '@clerk/express';
+
 dotenv.config();
 
 // Ensure the application uses Philippines time regardless of server location
 process.env.TZ = 'Asia/Manila';
-
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(clerkMiddleware({
+  publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+  secretKey: process.env.CLERK_SECRET_KEY,
+}));
+
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
@@ -51,7 +57,10 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Only listen to the port if not in a serverless environment and not in test mode
-if (process.env.NODE_ENV !== 'test' && (process.env.NODE_ENV !== 'production' || !process.env.VERCEL)) {
+if (
+  process.env.NODE_ENV !== 'test' &&
+  (process.env.NODE_ENV !== 'production' || !process.env.VERCEL)
+) {
   app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
   });

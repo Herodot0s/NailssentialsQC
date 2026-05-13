@@ -24,23 +24,26 @@ async function main() {
         appointment_date: {
           gte: startOfDay(parsedDate),
           lte: endOfDay(parsedDate),
-        }
+        },
       },
-      status: { in: ['pending', 'confirmed', 'in_progress'] }
-    }
+      status: { in: ['pending', 'confirmed', 'in_progress'] },
+    },
   });
   console.log('Conflicts:', appointmentItems.length);
 
-  const results = allSlots.map(slotTime => {
+  const results = allSlots.map((slotTime) => {
     const slotStart = getFullDate(dateStr, slotTime);
     const slotEnd = addMinutes(slotStart, 59);
 
-    const availableTechnicians = technicians.filter(tech => {
-      const techItems = appointmentItems.filter(item => item.staff_id === tech.id);
-      const hasConflict = techItems.some(item => {
+    const availableTechnicians = technicians.filter((tech) => {
+      const techItems = appointmentItems.filter((item) => item.staff_id === tech.id);
+      const hasConflict = techItems.some((item) => {
         const itemStart = getFullDate(dateStr, item.start_time);
         const itemEnd = getFullDate(dateStr, item.end_time);
-        return areIntervalsOverlapping({ start: slotStart, end: slotEnd }, { start: itemStart, end: itemEnd });
+        return areIntervalsOverlapping(
+          { start: slotStart, end: slotEnd },
+          { start: itemStart, end: itemEnd },
+        );
       });
       return !hasConflict;
     });

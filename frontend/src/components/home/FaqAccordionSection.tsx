@@ -24,8 +24,7 @@ export const FaqAccordionSection: React.FC<FaqAccordionSectionProps> = ({ faqs }
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               className="text-[11px] tracking-[0.3em] text-primary font-bold uppercase block"
-            >
-            </motion.span>
+            ></motion.span>
             <motion.h2
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -65,24 +64,29 @@ export const FaqAccordionSection: React.FC<FaqAccordionSectionProps> = ({ faqs }
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{
-                    layout: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.5, delay: index * 0.1 }
+                    layout: { type: 'spring', stiffness: 300, damping: 30 },
+                    opacity: { duration: 0.5, delay: index * 0.1 },
                   }}
-                  className={`relative overflow-hidden transition-all duration-500 ${isExpanded
-                    ? 'bg-white rounded-[2rem] shadow-premium ring-1 ring-primary/5'
-                    : 'bg-transparent rounded-none border-b border-kiln-border/60'
-                    }`}
+                  className={`relative overflow-hidden transition-all duration-500 ${
+                    isExpanded
+                      ? 'bg-white rounded-[2rem] shadow-premium ring-1 ring-primary/5'
+                      : 'bg-transparent rounded-none border-b border-kiln-border/60'
+                  }`}
                 >
                   <button
                     onClick={() => setExpandedId(isExpanded ? null : faq.id)}
                     className="w-full text-left px-4 md:px-8 py-7 flex items-start gap-6 group"
                   >
-                    <span className={`text-[11px] tracking-widest font-bold font-sans mt-1.5 transition-colors duration-300 ${isExpanded ? 'text-primary' : 'text-clay-dust'}`}>
+                    <span
+                      className={`text-[11px] tracking-widest font-bold font-sans mt-1.5 transition-colors duration-300 ${isExpanded ? 'text-primary' : 'text-clay-dust'}`}
+                    >
                       {String(index + 1).padStart(2, '0')}
                     </span>
 
                     <div className="flex-grow">
-                      <h3 className={`font-serif text-xl md:text-2xl transition-colors duration-500 ${isExpanded ? 'text-primary' : 'text-foreground group-hover:text-primary'}`}>
+                      <h3
+                        className={`font-serif text-xl md:text-2xl transition-colors duration-500 ${isExpanded ? 'text-primary' : 'text-foreground group-hover:text-primary'}`}
+                      >
                         {faq.title}
                       </h3>
 
@@ -108,8 +112,14 @@ export const FaqAccordionSection: React.FC<FaqAccordionSectionProps> = ({ faqs }
                       </AnimatePresence>
                     </div>
 
-                    <div className={`mt-1 p-2 rounded-full transition-all duration-500 ${isExpanded ? 'bg-primary text-white rotate-180' : 'bg-primary-ultra text-primary group-hover:bg-primary-light'}`}>
-                      {isExpanded ? <ChevronDown className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    <div
+                      className={`mt-1 p-2 rounded-full transition-all duration-500 ${isExpanded ? 'bg-primary text-white rotate-180' : 'bg-primary-ultra text-primary group-hover:bg-primary-light'}`}
+                    >
+                      {isExpanded ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
                     </div>
                   </button>
 
@@ -138,12 +148,13 @@ export const FaqAccordionSection: React.FC<FaqAccordionSectionProps> = ({ faqs }
           <div className="flex items-center gap-6">
             <div className="flex -space-x-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-10 w-10 rounded-full border-2 border-white bg-bisque-wash flex items-center justify-center overflow-hidden">
-                </div>
+                <div
+                  key={i}
+                  className="h-10 w-10 rounded-full border-2 border-white bg-bisque-wash flex items-center justify-center overflow-hidden"
+                ></div>
               ))}
             </div>
-            <div className="text-left">
-            </div>
+            <div className="text-left"></div>
           </div>
         </motion.div>
       </div>

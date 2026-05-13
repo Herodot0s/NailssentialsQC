@@ -40,10 +40,11 @@ enum TransactionStatus {
 
 model User {
   id                    Int              @id @default(autoincrement())
+  clerk_id              String?          @unique
   username              String           @unique
   email                 String?          @unique
   phone                 String?          @unique
-  password_hash         String
+  password_hash         String?
   role                  Role
   is_active             Boolean          @default(true)
   created_at            DateTime         @default(now())
@@ -68,12 +69,14 @@ model User {
   sent_messages         Message[]        @relation("SentMessages")
   received_messages     Message[]        @relation("ReceivedMessages")
 
+  @@index([clerk_id])
   @@index([username])
   @@index([email])
   @@index([phone])
   @@index([role])
   @@map("users")
 }
+
 
 model CustomerProfile {
   id          Int      @id @default(autoincrement())
@@ -115,6 +118,7 @@ model StaffProfile {
   payrolls          StaffPayroll[]
   deductions        DeductionLog[]
   reviews           Review[]
+  salary_assignments SalaryStructureAssignment[]
 
   @@index([full_name])
   @@map("staff_profiles")
@@ -308,10 +312,89 @@ model StaffPayroll {
 
   staff  StaffProfile  @relation(fields: [staff_id], references: [id])
   period PayrollPeriod @relation(fields: [payroll_period_id], references: [id])
+  items  StaffPayrollItem[]
 
   @@index([staff_id])
   @@index([payroll_period_id])
   @@map("staff_payrolls")
+}
+
+model StaffPayrollItem {
+  id               Int      @id @default(autoincrement())
+  staff_payroll_id Int
+  component_name   String
+  component_type   SalaryComponentType
+  amount           Decimal  @db.Decimal(10, 2)
+  formula_used     String?
+
+  payroll StaffPayroll @relation(fields: [staff_payroll_id], references: [id], onDelete: Cascade)
+
+  @@map("staff_payroll_items")
+}
+
+enum SalaryComponentType {
+  earning
+  deduction
+}
+
+model SalaryComponent {
+  id          Int                 @id @default(autoincrement())
+  name        String              @unique
+  type        SalaryComponentType
+  description String?             @db.Text
+  is_active   Boolean             @default(true)
+  created_at  DateTime            @default(now())
+  updated_at  DateTime            @updatedAt
+
+  structures SalaryStructureComponent[]
+
+  @@map("salary_components")
+}
+
+model SalaryStructure {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?  @db.Text
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  components  SalaryStructureComponent[]
+  assignments SalaryStructureAssignment[]
+
+  @@map("salary_structures")
+}
+
+model SalaryStructureComponent {
+  id                  Int      @id @default(autoincrement())
+  salary_structure_id Int
+  salary_component_id Int
+  amount              Decimal? @db.Decimal(10, 2)
+  formula             String?  // e.g. "base * 0.1"
+  created_at          DateTime @default(now())
+
+  salary_structure SalaryStructure @relation(fields: [salary_structure_id], references: [id], onDelete: Cascade)
+  salary_component SalaryComponent @relation(fields: [salary_component_id], references: [id])
+
+  @@unique([salary_structure_id, salary_component_id])
+  @@map("salary_structure_components")
+}
+
+model SalaryStructureAssignment {
+  id                  Int      @id @default(autoincrement())
+  staff_id            Int
+  salary_structure_id Int
+  base_pay            Decimal  @db.Decimal(10, 2)
+  effective_from      DateTime @db.Date
+  is_active           Boolean  @default(true)
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  staff            StaffProfile    @relation(fields: [staff_id], references: [id])
+  salary_structure SalaryStructure @relation(fields: [salary_structure_id], references: [id])
+
+  @@index([staff_id])
+  @@map("salary_structure_assignments")
 }
 
 model DeductionLog {

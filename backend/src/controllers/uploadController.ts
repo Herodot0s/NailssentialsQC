@@ -16,10 +16,10 @@ cloudinary.config({
  */
 export const uploadFile = async (req: Request, res: Response) => {
   console.log('Upload request received');
-  
-  const bb = busboy({ 
+
+  const bb = busboy({
     headers: req.headers,
-    limits: { files: 1, fileSize: 10 * 1024 * 1024 }
+    limits: { files: 1, fileSize: 10 * 1024 * 1024 },
   });
 
   let fileFound = false;
@@ -48,7 +48,7 @@ export const uploadFile = async (req: Request, res: Response) => {
           success: true,
           data: { url: result?.secure_url },
         });
-      }
+      },
     );
 
     file.pipe(uploadStream);
@@ -91,7 +91,7 @@ export const deleteFile = async (req: Request, res: Response) => {
     const urlParts = url.split('/');
     const fileName = urlParts[urlParts.length - 1];
     const publicId = `nailssentials/${fileName.split('.')[0]}`;
-    
+
     await cloudinary.uploader.destroy(publicId);
 
     return res.json({ success: true, message: 'File deleted from Cloudinary' });

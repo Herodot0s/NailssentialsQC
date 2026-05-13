@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
-import { PAGE_VARIANTS } from "@/lib/motion";
+import { motion } from 'framer-motion';
+import { PAGE_VARIANTS } from '@/lib/motion';
 
 interface PageTransitionProps {
   children: React.ReactNode;

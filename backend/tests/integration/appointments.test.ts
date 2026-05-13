@@ -17,7 +17,7 @@ describe('Appointment Integration Tests', () => {
     const category = await prisma.serviceCategory.upsert({
       where: { name: 'Nails' },
       update: {},
-      create: { name: 'Nails', description: 'Nail services' }
+      create: { name: 'Nails', description: 'Nail services' },
     });
     categoryId = category.id;
 
@@ -45,7 +45,7 @@ describe('Appointment Integration Tests', () => {
       });
     customerToken = customerUserResponse.body.data.tokens.accessToken;
     const customerProfile = await prisma.customerProfile.findFirst({
-      where: { user: { email: email } }
+      where: { user: { email: email } },
     });
     customerId = customerProfile!.id;
   });
@@ -55,14 +55,14 @@ describe('Appointment Integration Tests', () => {
     const bcrypt = require('bcrypt');
     const password = 'Password123!';
     const hashedPassword = await bcrypt.hash(password, 12);
-    
+
     const user = await prisma.user.create({
       data: {
         username: email.split('@')[0] + Date.now(),
         password_hash: hashedPassword,
         role: role,
         email: email,
-      }
+      },
     });
 
     if (role === 'staff') {
@@ -70,25 +70,27 @@ describe('Appointment Integration Tests', () => {
         data: {
           user_id: user.id,
           full_name: name,
-        }
+        },
       });
       staffId = profile.id;
     }
 
-    const response = await request(app)
-      .post('/api/v1/auth/login')
-      .send({
-        identifier: email,
-        password: password,
-      });
-    
+    const response = await request(app).post('/api/v1/auth/login').send({
+      identifier: email,
+      password: password,
+    });
+
     return response.body.data.tokens.accessToken;
   };
 
   describe('Task 1: Appointment Creation and Availability Tests', () => {
     beforeEach(async () => {
       staffToken = await getTokensForRole('staff', `staff_${Date.now()}@example.com`, 'Test Staff');
-      managerToken = await getTokensForRole('manager', `manager_${Date.now()}@example.com`, 'Test Manager');
+      managerToken = await getTokensForRole(
+        'manager',
+        `manager_${Date.now()}@example.com`,
+        'Test Manager',
+      );
     });
 
     describe('POST /api/v1/appointments', () => {
@@ -102,7 +104,7 @@ describe('Appointment Integration Tests', () => {
               serviceId: serviceId,
               staffId: staffId,
               startTime: '14:00',
-            }
+            },
           ],
           notes: 'Looking forward to it',
         };
@@ -115,11 +117,11 @@ describe('Appointment Integration Tests', () => {
         expect(response.status).toBe(201);
         expect(response.body.success).toBe(true);
         expect(response.body.data.customer_id).toBe(customerId);
-        
+
         // Verify in DB
         const appointment = await prisma.appointment.findUnique({
           where: { id: response.body.data.id },
-          include: { items: true }
+          include: { items: true },
         });
         expect(appointment).toBeDefined();
         expect(appointment!.items.length).toBe(1);
@@ -137,7 +139,7 @@ describe('Appointment Integration Tests', () => {
               serviceId: serviceId,
               staffId: staffId,
               startTime: '10:00',
-            }
+            },
           ],
         };
 
@@ -153,7 +155,7 @@ describe('Appointment Integration Tests', () => {
 
         const appointment = await prisma.appointment.findUnique({
           where: { id: response.body.data.id },
-          include: { customer: true }
+          include: { customer: true },
         });
         expect(appointment!.customer.full_name).toBe('Walk-in Customer');
       });
@@ -166,7 +168,7 @@ describe('Appointment Integration Tests', () => {
               serviceId: serviceId.toString(),
               staffId: staffId.toString(),
               startTime: '14:00',
-            }
+            },
           ],
         };
 
@@ -183,14 +185,13 @@ describe('Appointment Integration Tests', () => {
     describe('GET /api/v1/appointments/availability', () => {
       it('should return availability slots', async () => {
         const date = format(addDays(new Date(), 2), 'yyyy-MM-dd');
-        const response = await request(app)
-          .get(`/api/v1/appointments/availability?date=${date}`);
+        const response = await request(app).get(`/api/v1/appointments/availability?date=${date}`);
 
         expect(response.status).toBe(200);
         expect(response.body.success).toBe(true);
         expect(Array.isArray(response.body.data)).toBe(true);
         expect(response.body.data.length).toBeGreaterThan(0);
-        
+
         // Verify all slots are available since no appointments booked
         const allAvailable = response.body.data.every((slot: any) => slot.available === true);
         expect(allAvailable).toBe(true);
@@ -202,7 +203,7 @@ describe('Appointment Integration Tests', () => {
 
         // 1. Find all currently available technicians
         const technicians = await prisma.staffProfile.findMany({
-          where: { is_available: true }
+          where: { is_available: true },
         });
 
         // 2. Book an appointment for EVERY technician at the same time
@@ -220,14 +221,13 @@ describe('Appointment Integration Tests', () => {
                   end_time: '14:30',
                   price_at_booking: 500,
                   status: 'confirmed',
-                }
-              }
-            }
+                },
+              },
+            },
           });
         }
 
-        const response = await request(app)
-          .get(`/api/v1/appointments/availability?date=${date}`);
+        const response = await request(app).get(`/api/v1/appointments/availability?date=${date}`);
 
         expect(response.status).toBe(200);
         const slot14 = response.body.data.find((s: any) => s.time === '14:00');
@@ -241,8 +241,16 @@ describe('Appointment Integration Tests', () => {
 
     beforeEach(async () => {
       // Re-setup with proper tokens
-      staffToken = await getTokensForRole('staff', `staff_comp_${Date.now()}@example.com`, 'Comp Staff');
-      managerToken = await getTokensForRole('manager', `manager_comp_${Date.now()}@example.com`, 'Comp Manager');
+      staffToken = await getTokensForRole(
+        'staff',
+        `staff_comp_${Date.now()}@example.com`,
+        'Comp Staff',
+      );
+      managerToken = await getTokensForRole(
+        'manager',
+        `manager_comp_${Date.now()}@example.com`,
+        'Comp Manager',
+      );
 
       // 1. Service
       const service = await prisma.service.create({
@@ -271,9 +279,9 @@ describe('Appointment Integration Tests', () => {
               end_time: '11:00',
               price_at_booking: 1000,
               status: 'confirmed',
-            }
-          }
-        }
+            },
+          },
+        },
       });
       appointmentId = appointment.id;
     });
@@ -290,14 +298,14 @@ describe('Appointment Integration Tests', () => {
       // Verify Appointment Status
       const updatedAppt = await prisma.appointment.findUnique({
         where: { id: appointmentId },
-        include: { items: true }
+        include: { items: true },
       });
       expect(updatedAppt!.status).toBe('completed');
       expect(updatedAppt!.items[0].status).toBe('completed');
 
       // Verify Transaction
       const transaction = await prisma.transaction.findFirst({
-        where: { appointment_id: appointmentId }
+        where: { appointment_id: appointmentId },
       });
       expect(transaction).toBeDefined();
       expect(transaction!.amount.toNumber()).toBe(1000);
@@ -306,7 +314,7 @@ describe('Appointment Integration Tests', () => {
 
       // Verify Commission
       const commission = await prisma.commission.findFirst({
-        where: { transaction_id: transaction!.id }
+        where: { transaction_id: transaction!.id },
       });
       expect(commission).toBeDefined();
       expect(commission!.staff_id).toBe(staffId);
@@ -319,8 +327,8 @@ describe('Appointment Integration Tests', () => {
       const systemLog = await prisma.systemLog.findFirst({
         where: {
           action: 'COMMISSIONS_CREATED',
-          entity_id: appointmentId
-        }
+          entity_id: appointmentId,
+        },
       });
       expect(systemLog).toBeDefined();
     });
@@ -334,8 +342,8 @@ describe('Appointment Integration Tests', () => {
           payment_method: 'cash',
           status: 'completed',
           receipt_number: 'DUMMY-' + Date.now(),
-          appointment_id: appointmentId // Using same appt as placeholder
-        }
+          appointment_id: appointmentId, // Using same appt as placeholder
+        },
       });
 
       await prisma.commission.create({
@@ -350,7 +358,7 @@ describe('Appointment Integration Tests', () => {
           period_week: 1,
           period_month: new Date().getMonth() + 1,
           period_year: new Date().getFullYear(),
-        }
+        },
       });
 
       const response = await request(app)
@@ -360,10 +368,10 @@ describe('Appointment Integration Tests', () => {
 
       expect(response.status).toBe(200);
       const commission = await prisma.commission.findFirst({
-        where: { 
+        where: {
           transaction_id: response.body.data.transaction.id,
-          staff_id: staffId
-        }
+          staff_id: staffId,
+        },
       });
       // Rate should be 20% (Specially Quota met)
       expect(commission!.commission_rate.toNumber()).toBe(20);
@@ -384,13 +392,13 @@ describe('Appointment Integration Tests', () => {
       // Wait, there might be other transactions if tests run in parallel,
       // but findFirst with appointment_id should be specific to this test's appt.
       const transaction = await prisma.transaction.findFirst({
-        where: { appointment_id: appointmentId }
+        where: { appointment_id: appointmentId },
       });
       expect(transaction).toBeNull();
 
       // Verify appointment is still 'confirmed'
       const appt = await prisma.appointment.findUnique({
-        where: { id: appointmentId }
+        where: { id: appointmentId },
       });
       expect(appt!.status).toBe('confirmed');
     });

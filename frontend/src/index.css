@@ -1,9 +1,9 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @import 'tw-animate-css';
 
 @theme {
   /* Brand Colors from DESIGN.md */
-  --color-primary: #B8794E;
+  --color-primary: #b8794e;
   --color-primary-foreground: #ffffff;
   --color-primary-pressed: #dd9001;
   --color-primary-active: #b17816;
@@ -11,7 +11,7 @@
   /* Global Surfaces */
   --color-background: #eeefe9; /* canvas */
   --color-foreground: #23251d; /* ink */
-  
+
   --color-canvas: #eeefe9;
   --color-ink: #23251d;
   --color-body: #4d4f46;
@@ -25,22 +25,22 @@
   /* Semantic UI Tokens (for component compatibility) */
   --color-card: #ffffff;
   --color-card-foreground: #23251d;
-  
+
   --color-popover: #ffffff;
   --color-popover-foreground: #23251d;
-  
+
   --color-secondary: #e5e7e0;
   --color-secondary-foreground: #23251d;
-  
+
   --color-muted: #e5e7e0;
   --color-muted-foreground: #6c6e63;
-  
+
   --color-accent: #e5e7e0;
   --color-accent-foreground: #23251d;
-  
+
   --color-destructive: #cd4239;
   --color-destructive-foreground: #ffffff;
-  
+
   --color-border: #bfc1b7;
   --color-input: #bfc1b7;
   --color-ring: #2c84e0;
@@ -63,9 +63,9 @@
   --radius-full: 9999px;
 
   /* Typography */
-  --font-sans: "IBM Plex Sans", -apple-system, system-ui, sans-serif;
-  --font-mono: "Source Code Pro", "ui-monospace", monospace;
-  
+  --font-sans: 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
+  --font-mono: 'Source Code Pro', 'ui-monospace', monospace;
+
   --spacing-section: 80px;
 }
 
@@ -83,7 +83,12 @@
     line-height: 1.5;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     color: var(--color-ink);
     font-weight: 700;
   }
@@ -91,20 +96,40 @@
 
 @layer components {
   /* Typography Hierarchy Classes */
-  .display-xl { @apply text-[36px] font-bold leading-[1.5]; }
-  .display-lg { @apply text-[24px] font-extrabold leading-[1.33] tracking-[-0.6px]; }
-  .heading-lg { @apply text-[21px] font-bold leading-[1.4] tracking-[-0.5px]; }
-  .heading-md { @apply text-[20px] font-bold leading-[1.4]; }
-  .heading-sm { @apply text-[18px] font-bold leading-[1.5] uppercase; }
-  .body-md { @apply text-[16px] font-normal leading-[1.5]; }
-  .body-strong { @apply text-[16px] font-semibold leading-[1.5]; }
-  .body-sm { @apply text-[15px] font-normal leading-[1.71]; }
-  .utility-xs { @apply text-[12px] font-bold leading-[1.33] uppercase; }
+  .display-xl {
+    @apply text-[36px] font-bold leading-[1.5];
+  }
+  .display-lg {
+    @apply text-[24px] font-extrabold leading-[1.33] tracking-[-0.6px];
+  }
+  .heading-lg {
+    @apply text-[21px] font-bold leading-[1.4] tracking-[-0.5px];
+  }
+  .heading-md {
+    @apply text-[20px] font-bold leading-[1.4];
+  }
+  .heading-sm {
+    @apply text-[18px] font-bold leading-[1.5] uppercase;
+  }
+  .body-md {
+    @apply text-[16px] font-normal leading-[1.5];
+  }
+  .body-strong {
+    @apply text-[16px] font-semibold leading-[1.5];
+  }
+  .body-sm {
+    @apply text-[15px] font-normal leading-[1.71];
+  }
+  .utility-xs {
+    @apply text-[12px] font-bold leading-[1.33] uppercase;
+  }
 
   /* Components */
   .btn-primary {
     @apply h-10 px-4 bg-primary text-white font-bold rounded-md transition-colors;
-    &:active { @apply bg-primary-pressed; }
+    &:active {
+      @apply bg-primary-pressed;
+    }
   }
 
   .btn-secondary {
@@ -114,7 +139,7 @@
   .card {
     @apply bg-surface-card border border-hairline p-6 rounded-md;
   }
-  
+
   /* Loading States */
   .loader {
     @apply w-10 h-10 border-4 border-hairline border-t-primary rounded-full animate-spin;
@@ -131,7 +156,9 @@
 
   /* Touch Targets */
   @media (max-width: 767px) {
-    button, [role="button"], a {
+    button,
+    [role='button'],
+    a {
       @apply min-h-[44px] min-w-[44px];
     }
   }

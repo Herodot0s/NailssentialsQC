@@ -13,8 +13,8 @@ describe('Misc Controllers Integration Tests', () => {
         email: 'testuser@nailssentialsqc.com',
         name: 'Test User',
         password_hash: '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36n4/tJ2W1N5dD9aYv6pXmG', // password123
-        role: 'CUSTOMER'
-      }
+        role: 'CUSTOMER',
+      },
     });
     authToken = generateAuthToken(testUser.id);
   });
@@ -26,8 +26,8 @@ describe('Misc Controllers Integration Tests', () => {
           user_id: testUser.id,
           type: 'INFO',
           title: 'Welcome',
-          message: 'Hello!'
-        }
+          message: 'Hello!',
+        },
       });
 
       const res = await request(app)
@@ -45,8 +45,8 @@ describe('Misc Controllers Integration Tests', () => {
           user_id: testUser.id,
           type: 'INFO',
           title: 'Mark Me',
-          message: '...'
-        }
+          message: '...',
+        },
       });
 
       const res = await request(app)
@@ -55,7 +55,7 @@ describe('Misc Controllers Integration Tests', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      
+
       const updated = await prisma.notification.findUnique({ where: { id: notification.id } });
       expect(updated?.is_read).toBe(true);
     });
@@ -63,23 +63,23 @@ describe('Misc Controllers Integration Tests', () => {
 
   describe('Uploads', () => {
     it('should upload a sample image', async () => {
-        // If the implementation strictly checks for a blob token in process.env, 
-        // we should either mock it or check if it's there.
-        // Based on the code, it uses process.env.BLOB_READ_WRITE_TOKEN.
-        
-        if (!process.env.BLOB_READ_WRITE_TOKEN) {
-            console.warn('Skipping upload integration test due to missing BLOB_READ_WRITE_TOKEN');
-            return;
-        }
+      // If the implementation strictly checks for a blob token in process.env,
+      // we should either mock it or check if it's there.
+      // Based on the code, it uses process.env.BLOB_READ_WRITE_TOKEN.
 
-        const res = await request(app)
-            .post('/api/v1/uploads')
-            .set('Authorization', `Bearer ${authToken}`)
-            .attach('file', Buffer.from('fake-image-data'), 'test.png');
+      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        console.warn('Skipping upload integration test due to missing BLOB_READ_WRITE_TOKEN');
+        return;
+      }
 
-        expect(res.status).toBe(200);
-        expect(res.body.success).toBe(true);
-        expect(res.body.data.url).toBeDefined();
+      const res = await request(app)
+        .post('/api/v1/uploads')
+        .set('Authorization', `Bearer ${authToken}`)
+        .attach('file', Buffer.from('fake-image-data'), 'test.png');
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.url).toBeDefined();
     });
   });
 });

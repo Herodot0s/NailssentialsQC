@@ -16,52 +16,42 @@ describe('Staff & Attendance Integration Tests', () => {
     await prisma.user.deleteMany({
       where: {
         email: {
-          in: [
-            'manager_staff@example.com',
-            'test_staff@example.com',
-            'new_staff@example.com',
-          ],
+          in: ['manager_staff@example.com', 'test_staff@example.com', 'new_staff@example.com'],
         },
       },
     });
 
     // 1. Create a Manager
-    const managerReg = await request(app)
-      .post('/api/v1/auth/register')
-      .send({
-        fullName: 'Manager Staff Test',
-        email: 'manager_staff@example.com',
-        password: 'Password123',
-        phone: '1111111111',
-      });
-    
-    await prisma.user.update({
-      where: { id: managerReg.body.data.user.id },
-      data: { role: 'manager' }
+    const managerReg = await request(app).post('/api/v1/auth/register').send({
+      fullName: 'Manager Staff Test',
+      email: 'manager_staff@example.com',
+      password: 'Password123',
+      phone: '1111111111',
     });
 
-    const managerLogin = await request(app)
-      .post('/api/v1/auth/login')
-      .send({
-        identifier: 'manager_staff@example.com',
-        password: 'Password123',
-      });
+    await prisma.user.update({
+      where: { id: managerReg.body.data.user.id },
+      data: { role: 'manager' },
+    });
+
+    const managerLogin = await request(app).post('/api/v1/auth/login').send({
+      identifier: 'manager_staff@example.com',
+      password: 'Password123',
+    });
     managerToken = managerLogin.body.data.tokens.accessToken;
 
     // 2. Create a Staff User for testing attendance
-    const staffReg = await request(app)
-      .post('/api/v1/auth/register')
-      .send({
-        fullName: 'Test Staff',
-        email: 'test_staff@example.com',
-        password: 'Password123',
-        phone: '2222222222',
-      });
-    
+    const staffReg = await request(app).post('/api/v1/auth/register').send({
+      fullName: 'Test Staff',
+      email: 'test_staff@example.com',
+      password: 'Password123',
+      phone: '2222222222',
+    });
+
     staffUserId = staffReg.body.data.user.id;
     await prisma.user.update({
       where: { id: staffUserId },
-      data: { role: 'staff' }
+      data: { role: 'staff' },
     });
 
     // Cleanup customer profile and create staff profile
@@ -71,18 +61,16 @@ describe('Staff & Attendance Integration Tests', () => {
         user_id: staffUserId,
         full_name: 'Test Staff',
         base_pay_per_week: 2500,
-        scheduled_start: "09:00:00",
-        scheduled_end: "18:00:00"
-      }
+        scheduled_start: '09:00:00',
+        scheduled_end: '18:00:00',
+      },
     });
     staffProfileId = profile.id;
 
-    const staffLogin = await request(app)
-      .post('/api/v1/auth/login')
-      .send({
-        identifier: 'test_staff@example.com',
-        password: 'Password123',
-      });
+    const staffLogin = await request(app).post('/api/v1/auth/login').send({
+      identifier: 'test_staff@example.com',
+      password: 'Password123',
+    });
     staffToken = staffLogin.body.data.tokens.accessToken;
   });
 
@@ -214,16 +202,16 @@ describe('Staff & Attendance Integration Tests', () => {
     });
 
     it('should fail to clock-out if not checked in (on a different day/new record)', async () => {
-        // We can't easily test "different day" without mocking Date
-        // But if we delete the record, it should fail
-        await prisma.attendance.deleteMany({ where: { staff_id: staffProfileId } });
+      // We can't easily test "different day" without mocking Date
+      // But if we delete the record, it should fail
+      await prisma.attendance.deleteMany({ where: { staff_id: staffProfileId } });
 
-        const response = await request(app)
-            .post('/api/v1/attendance/check-out')
-            .set('Authorization', `Bearer ${staffToken}`);
+      const response = await request(app)
+        .post('/api/v1/attendance/check-out')
+        .set('Authorization', `Bearer ${staffToken}`);
 
-        expect(response.status).toBe(400);
-        expect(response.body.error.code).toBe('NOT_CHECKED_IN');
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('NOT_CHECKED_IN');
     });
   });
 
@@ -237,21 +225,21 @@ describe('Staff & Attendance Integration Tests', () => {
     });
 
     it('should not allow staff to update their own attendance record directly via PUT', async () => {
-        // We need an attendance record first
-        const clockInResponse = await request(app)
-            .post('/api/v1/attendance/check-in')
-            .set('Authorization', `Bearer ${staffToken}`);
-        
-        const attendanceId = clockInResponse.body.data.id;
+      // We need an attendance record first
+      const clockInResponse = await request(app)
+        .post('/api/v1/attendance/check-in')
+        .set('Authorization', `Bearer ${staffToken}`);
 
-        const response = await request(app)
-            .put(`/api/v1/attendance/${attendanceId}`)
-            .set('Authorization', `Bearer ${staffToken}`)
-            .send({
-                tardinessMinutes: 0
-            });
+      const attendanceId = clockInResponse.body.data.id;
 
-        expect(response.status).toBe(403);
+      const response = await request(app)
+        .put(`/api/v1/attendance/${attendanceId}`)
+        .set('Authorization', `Bearer ${staffToken}`)
+        .send({
+          tardinessMinutes: 0,
+        });
+
+      expect(response.status).toBe(403);
     });
   });
 });

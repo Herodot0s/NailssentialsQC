@@ -14,27 +14,29 @@ export const getAllPackages = async (req: AuthRequest, res: Response) => {
         items: {
           include: {
             service: {
-              include: { category: { select: { name: true } } }
-            }
-          }
+              include: { category: { select: { name: true } } },
+            },
+          },
         },
-        appointment_items: { select: { id: true } }
+        appointment_items: { select: { id: true } },
       },
-      orderBy: { display_order: 'asc' }
+      orderBy: { display_order: 'asc' },
     });
 
     log(`getAllPackages found ${packages.length} packages`);
-    const data = packages.map(pkg => ({
+    const data = packages.map((pkg) => ({
       ...pkg,
-      services: pkg.items.map(item => ({
+      services: pkg.items.map((item) => ({
         id: item.service.id,
         name: item.service.name,
         price: item.service.price.toString(),
         duration_minutes: item.service.duration_minutes,
-        category: { name: item.service.category.name }
+        category: { name: item.service.category.name },
       })),
       bookings_count: pkg.appointment_items.length,
-      services_total: pkg.items.reduce((sum, item) => sum + Number(item.service.price), 0).toFixed(2)
+      services_total: pkg.items
+        .reduce((sum, item) => sum + Number(item.service.price), 0)
+        .toFixed(2),
     }));
 
     const cleanData = data.map(({ items, appointment_items, ...rest }) => rest);
@@ -53,50 +55,46 @@ export const getActivePackages = async (req: AuthRequest, res: Response) => {
     const packages = await prisma.servicePackage.findMany({
       where: {
         is_active: true,
-        OR: [
-          { valid_from: null },
-          { valid_from: { lte: now } }
-        ],
+        OR: [{ valid_from: null }, { valid_from: { lte: now } }],
         AND: [
           {
-            OR: [
-              { valid_until: null },
-              { valid_until: { gte: now } }
-            ]
-          }
-        ]
+            OR: [{ valid_until: null }, { valid_until: { gte: now } }],
+          },
+        ],
       },
       include: {
         items: {
           include: {
             service: {
-              include: { category: { select: { name: true } } }
-            }
-          }
+              include: { category: { select: { name: true } } },
+            },
+          },
         },
-        appointment_items: { select: { id: true } }
+        appointment_items: { select: { id: true } },
       },
-      orderBy: { display_order: 'asc' }
+      orderBy: { display_order: 'asc' },
     });
 
-    const validPackages = packages.filter(pkg => {
-        if (pkg.max_redemptions !== null && pkg.appointment_items.length >= pkg.max_redemptions) {
-            return false;
-        }
-        return true;
+    const validPackages = packages.filter((pkg) => {
+      if (pkg.max_redemptions !== null && pkg.appointment_items.length >= pkg.max_redemptions) {
+        return false;
+      }
+      return true;
     });
 
-    const data = validPackages.map(pkg => ({
+    const data = validPackages.map((pkg) => ({
       ...pkg,
-      services: pkg.items.map(item => ({
+      services: pkg.items.map((item) => ({
         id: item.service.id,
         name: item.service.name,
         price: item.service.price.toString(),
         duration_minutes: item.service.duration_minutes,
-        category: { name: item.service.category.name }
+        category: { name: item.service.category.name },
       })),
       bookings_count: 0,
-      services_total: pkg.items.reduce((sum, item) => sum + Number(item.service.price), 0).toFixed(2)
+      services_total: pkg.items
+        .reduce((sum, item) => sum + Number(item.service.price), 0)
+        .toFixed(2),
     }));
 
     const cleanData = data.map(({ items, appointment_items, ...rest }) => rest);
@@ -117,12 +115,12 @@ export const getPackage = async (req: AuthRequest, res: Response) => {
         items: {
           include: {
             service: {
-              include: { category: { select: { name: true } } }
-            }
-          }
+              include: { category: { select: { name: true } } },
+            },
+          },
         },
-        appointment_items: { select: { id: true } }
-      }
+        appointment_items: { select: { id: true } },
+      },
     });
 
     if (!pkg) {
@@ -131,15 +129,17 @@ export const getPackage = async (req: AuthRequest, res: Response) => {
 
     const data = {
       ...pkg,
-      services: pkg.items.map(item => ({
+      services: pkg.items.map((item) => ({
         id: item.service.id,
         name: item.service.name,
         price: item.service.price.toString(),
         duration_minutes: item.service.duration_minutes,
-        category: { name: item.service.category.name }
+        category: { name: item.service.category.name },
       })),
       bookings_count: pkg.appointment_items.length,
-      services_total: pkg.items.reduce((sum, item) => sum + Number(item.service.price), 0).toFixed(2)
+      services_total: pkg.items
+        .reduce((sum, item) => sum + Number(item.service.price), 0)
+        .toFixed(2),
     };
 
     const { items, appointment_items, ...cleanData } = data;
@@ -153,22 +153,39 @@ export const getPackage = async (req: AuthRequest, res: Response) => {
 
 export const createPackage = async (req: AuthRequest, res: Response) => {
   try {
-    const { name, description, price, image_url, display_order, valid_from, valid_until, max_redemptions, is_active, service_ids } = req.body;
+    const {
+      name,
+      description,
+      price,
+      image_url,
+      display_order,
+      valid_from,
+      valid_until,
+      max_redemptions,
+      is_active,
+      service_ids,
+    } = req.body;
 
     if (!service_ids || service_ids.length < 2) {
-      return res.status(400).json({ success: false, message: "A package must contain at least 2 services" });
+      return res
+        .status(400)
+        .json({ success: false, message: 'A package must contain at least 2 services' });
     }
 
     if (price <= 0) {
-      return res.status(400).json({ success: false, message: "Package price must be greater than zero" });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Package price must be greater than zero' });
     }
 
     const existingServices = await prisma.service.findMany({
-      where: { id: { in: service_ids }, is_active: true }
+      where: { id: { in: service_ids }, is_active: true },
     });
 
     if (existingServices.length !== service_ids.length) {
-      return res.status(400).json({ success: false, message: "One or more services are invalid or inactive" });
+      return res
+        .status(400)
+        .json({ success: false, message: 'One or more services are invalid or inactive' });
     }
 
     const newPackage = await prisma.servicePackage.create({
@@ -183,32 +200,34 @@ export const createPackage = async (req: AuthRequest, res: Response) => {
         max_redemptions,
         is_active: is_active !== undefined ? is_active : true,
         items: {
-          create: service_ids.map((id: number) => ({ service_id: id }))
-        }
+          create: service_ids.map((id: number) => ({ service_id: id })),
+        },
       },
       include: {
         items: {
           include: {
             service: {
-              include: { category: { select: { name: true } } }
-            }
-          }
+              include: { category: { select: { name: true } } },
+            },
+          },
         },
-        appointment_items: { select: { id: true } }
-      }
+        appointment_items: { select: { id: true } },
+      },
     });
 
     const data = {
       ...newPackage,
-      services: newPackage.items.map(item => ({
+      services: newPackage.items.map((item) => ({
         id: item.service.id,
         name: item.service.name,
         price: item.service.price.toString(),
         duration_minutes: item.service.duration_minutes,
-        category: { name: item.service.category.name }
+        category: { name: item.service.category.name },
       })),
       bookings_count: newPackage.appointment_items.length,
-      services_total: newPackage.items.reduce((sum, item) => sum + Number(item.service.price), 0).toFixed(2)
+      services_total: newPackage.items
+        .reduce((sum, item) => sum + Number(item.service.price), 0)
+        .toFixed(2),
     };
 
     const { items, appointment_items, ...cleanData } = data;
@@ -223,89 +242,115 @@ export const createPackage = async (req: AuthRequest, res: Response) => {
 export const updatePackage = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, description, price, image_url, display_order, valid_from, valid_until, max_redemptions, is_active, service_ids } = req.body;
+    const {
+      name,
+      description,
+      price,
+      image_url,
+      display_order,
+      valid_from,
+      valid_until,
+      max_redemptions,
+      is_active,
+      service_ids,
+    } = req.body;
 
     if (service_ids && service_ids.length < 2) {
-      return res.status(400).json({ success: false, message: "A package must contain at least 2 services" });
+      return res
+        .status(400)
+        .json({ success: false, message: 'A package must contain at least 2 services' });
     }
 
     if (price !== undefined && price <= 0) {
-      return res.status(400).json({ success: false, message: "Package price must be greater than zero" });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Package price must be greater than zero' });
     }
 
     if (service_ids) {
-        const existingServices = await prisma.service.findMany({
-            where: { id: { in: service_ids }, is_active: true }
-        });
+      const existingServices = await prisma.service.findMany({
+        where: { id: { in: service_ids }, is_active: true },
+      });
 
-        if (existingServices.length !== service_ids.length) {
-            return res.status(400).json({ success: false, message: "One or more services are invalid or inactive" });
-        }
+      if (existingServices.length !== service_ids.length) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'One or more services are invalid or inactive' });
+      }
     }
 
     let updatedPackage;
     if (service_ids) {
-        const [, pkg] = await prisma.$transaction([
-            prisma.servicePackageItem.deleteMany({ where: { package_id: Number(id) } }),
-            prisma.servicePackage.update({
-                where: { id: Number(id) },
-                data: {
-                    name,
-                    description,
-                    price,
-                    image_url,
-                    display_order,
-                    valid_from: valid_from ? new Date(valid_from) : valid_from === null ? null : undefined,
-                    valid_until: valid_until ? new Date(valid_until) : valid_until === null ? null : undefined,
-                    max_redemptions,
-                    is_active,
-                    items: { create: service_ids.map((sid: number) => ({ service_id: sid })) }
-                },
-                include: {
-                    items: { include: { service: { include: { category: { select: { name: true } } } } } },
-                    appointment_items: { select: { id: true } }
-                }
-            })
-        ]);
-        updatedPackage = pkg;
+      const [, pkg] = await prisma.$transaction([
+        prisma.servicePackageItem.deleteMany({ where: { package_id: Number(id) } }),
+        prisma.servicePackage.update({
+          where: { id: Number(id) },
+          data: {
+            name,
+            description,
+            price,
+            image_url,
+            display_order,
+            valid_from: valid_from ? new Date(valid_from) : valid_from === null ? null : undefined,
+            valid_until: valid_until
+              ? new Date(valid_until)
+              : valid_until === null
+                ? null
+                : undefined,
+            max_redemptions,
+            is_active,
+            items: { create: service_ids.map((sid: number) => ({ service_id: sid })) },
+          },
+          include: {
+            items: { include: { service: { include: { category: { select: { name: true } } } } } },
+            appointment_items: { select: { id: true } },
+          },
+        }),
+      ]);
+      updatedPackage = pkg;
     } else {
-        updatedPackage = await prisma.servicePackage.update({
-            where: { id: Number(id) },
-            data: {
-                name,
-                description,
-                price,
-                image_url,
-                display_order,
-                valid_from: valid_from ? new Date(valid_from) : valid_from === null ? null : undefined,
-                valid_until: valid_until ? new Date(valid_until) : valid_until === null ? null : undefined,
-                max_redemptions,
-                is_active
-            },
-            include: {
-                items: { include: { service: { include: { category: { select: { name: true } } } } } },
-                appointment_items: { select: { id: true } }
-            }
-        });
+      updatedPackage = await prisma.servicePackage.update({
+        where: { id: Number(id) },
+        data: {
+          name,
+          description,
+          price,
+          image_url,
+          display_order,
+          valid_from: valid_from ? new Date(valid_from) : valid_from === null ? null : undefined,
+          valid_until: valid_until
+            ? new Date(valid_until)
+            : valid_until === null
+              ? null
+              : undefined,
+          max_redemptions,
+          is_active,
+        },
+        include: {
+          items: { include: { service: { include: { category: { select: { name: true } } } } } },
+          appointment_items: { select: { id: true } },
+        },
+      });
     }
 
     const data = {
       ...updatedPackage,
-      services: updatedPackage.items.map(item => ({
+      services: updatedPackage.items.map((item) => ({
         id: item.service.id,
         name: item.service.name,
         price: item.service.price.toString(),
         duration_minutes: item.service.duration_minutes,
-        category: { name: item.service.category.name }
+        category: { name: item.service.category.name },
       })),
       bookings_count: updatedPackage.appointment_items.length,
-      services_total: updatedPackage.items.reduce((sum, item) => sum + Number(item.service.price), 0).toFixed(2)
+      services_total: updatedPackage.items
+        .reduce((sum, item) => sum + Number(item.service.price), 0)
+        .toFixed(2),
     };
 
     const { items, appointment_items, ...cleanData } = data;
 
     return res.json({ success: true, data: cleanData });
-
   } catch (error) {
     console.error('updatePackage error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error' });
@@ -322,24 +367,26 @@ export const togglePackage = async (req: AuthRequest, res: Response) => {
       data: { is_active },
       include: {
         items: { include: { service: { include: { category: { select: { name: true } } } } } },
-        appointment_items: { select: { id: true } }
-      }
+        appointment_items: { select: { id: true } },
+      },
     });
 
     const data = {
       ...pkg,
-      services: pkg.items.map(item => ({
+      services: pkg.items.map((item) => ({
         id: item.service.id,
         name: item.service.name,
         price: item.service.price.toString(),
         duration_minutes: item.service.duration_minutes,
-        category: { name: item.service.category.name }
+        category: { name: item.service.category.name },
       })),
       bookings_count: pkg.appointment_items.length,
-      services_total: pkg.items.reduce((sum, item) => sum + Number(item.service.price), 0).toFixed(2)
+      services_total: pkg.items
+        .reduce((sum, item) => sum + Number(item.service.price), 0)
+        .toFixed(2),
     };
     const { items, appointment_items, ...cleanData } = data;
-    
+
     return res.json({ success: true, data: cleanData });
   } catch (error) {
     console.error('togglePackage error:', error);
@@ -353,7 +400,12 @@ export const deletePackage = async (req: AuthRequest, res: Response) => {
 
     const bookingCount = await prisma.appointmentItem.count({ where: { package_id: Number(id) } });
     if (bookingCount > 0) {
-      return res.status(400).json({ success: false, message: "Cannot delete a package with existing bookings. Deactivate it instead." });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: 'Cannot delete a package with existing bookings. Deactivate it instead.',
+        });
     }
 
     await prisma.servicePackage.delete({ where: { id: Number(id) } });

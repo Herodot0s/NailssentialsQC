@@ -51,12 +51,14 @@ export const getAttendanceStatus = async (req: AuthRequest, res: Response) => {
         staff_day_unique: {
           staff_id: staffProfile.id,
           day_of_week: dayOfWeek,
-        }
-      }
+        },
+      },
     });
 
-    const scheduledStart = (daySchedule && daySchedule.is_active) ? daySchedule.start_time : staffProfile.scheduled_start;
-    const scheduledEnd = (daySchedule && daySchedule.is_active) ? daySchedule.end_time : staffProfile.scheduled_end;
+    const scheduledStart =
+      daySchedule && daySchedule.is_active ? daySchedule.start_time : staffProfile.scheduled_start;
+    const scheduledEnd =
+      daySchedule && daySchedule.is_active ? daySchedule.end_time : staffProfile.scheduled_end;
 
     const logs = await prisma.attendance.findMany({
       where: { staff_id: staffProfile.id },
@@ -67,8 +69,12 @@ export const getAttendanceStatus = async (req: AuthRequest, res: Response) => {
     const formattedLogs = logs.map((log) => ({
       id: log.id,
       date: log.date.toISOString().split('T')[0],
-      checkIn: log.check_in ? new Date(log.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-',
-      checkOut: log.check_out ? new Date(log.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null,
+      checkIn: log.check_in
+        ? new Date(log.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : '-',
+      checkOut: log.check_out
+        ? new Date(log.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : null,
       status: log.tardiness_minutes > 0 ? `Late (${log.tardiness_minutes}m)` : 'On Time',
     }));
 
@@ -77,9 +83,19 @@ export const getAttendanceStatus = async (req: AuthRequest, res: Response) => {
       data: {
         status: {
           isCheckedIn: !!attendance?.check_in && !attendance?.check_out,
-          checkInTime: attendance?.check_in ? new Date(attendance.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null,
+          checkInTime: attendance?.check_in
+            ? new Date(attendance.check_in).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            : null,
           checkInRaw: attendance?.check_in?.toISOString() || null,
-          checkOutTime: attendance?.check_out ? new Date(attendance.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null,
+          checkOutTime: attendance?.check_out
+            ? new Date(attendance.check_out).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            : null,
           checkOutRaw: attendance?.check_out?.toISOString() || null,
           date: today.toISOString().split('T')[0],
           scheduledStart: attendance?.scheduled_start || scheduledStart,
@@ -143,18 +159,24 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
         staff_day_unique: {
           staff_id: staffProfile.id,
           day_of_week: dayOfWeek,
-        }
-      }
+        },
+      },
     });
 
-    const scheduledStartStr = (daySchedule && daySchedule.is_active) ? daySchedule.start_time : (staffProfile.scheduled_start || "12:00:00");
-    const scheduledEndStr = (daySchedule && daySchedule.is_active) ? daySchedule.end_time : (staffProfile.scheduled_end || "22:00:00");
+    const scheduledStartStr =
+      daySchedule && daySchedule.is_active
+        ? daySchedule.start_time
+        : staffProfile.scheduled_start || '12:00:00';
+    const scheduledEndStr =
+      daySchedule && daySchedule.is_active
+        ? daySchedule.end_time
+        : staffProfile.scheduled_end || '22:00:00';
 
     // Calculate tardiness
     const scheduledParts = scheduledStartStr.split(':');
     const scheduledHours = parseInt(scheduledParts[0]);
     const scheduledMinutes = parseInt(scheduledParts[1]);
-    
+
     const scheduledStartTime = new Date(today);
     scheduledStartTime.setHours(scheduledHours, scheduledMinutes, 0, 0);
 
@@ -169,7 +191,7 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
 
     // Roadmap: Clocking in at 16 minutes late generates exactly a ₱1 deduction.
     // So deduction = tardinessMinutes - gracePeriod if tardinessMinutes > gracePeriod
-    const deductionAmount = tardinessMinutes > gracePeriod ? (tardinessMinutes - gracePeriod) : 0;
+    const deductionAmount = tardinessMinutes > gracePeriod ? tardinessMinutes - gracePeriod : 0;
 
     const attendance = await prisma.attendance.upsert({
       where: {
@@ -207,13 +229,16 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
         for (const manager of managers) {
           // D-05: Customers cannot notify other users
           if (callerRole === 'customer' && callerId !== manager.id) {
-            console.warn('[notification] Blocked cross-user notification attempt', { callerId, targetId: manager.id });
+            console.warn('[notification] Blocked cross-user notification attempt', {
+              callerId,
+              targetId: manager.id,
+            });
           } else {
             createNotification(
               manager.id,
               'STAFF_CHECK_IN',
               'Staff Checked In',
-              `${staffProfile.full_name} checked in at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. ${tardinessMinutes > 0 ? `Late by ${tardinessMinutes}m.` : ''}`
+              `${staffProfile.full_name} checked in at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. ${tardinessMinutes > 0 ? `Late by ${tardinessMinutes}m.` : ''}`,
             );
           }
         }
@@ -271,11 +296,11 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
     });
 
     // Calculate if early out
-    const scheduledEndStr = attendance.scheduled_end || staffProfile.scheduled_end || "22:00:00";
+    const scheduledEndStr = attendance.scheduled_end || staffProfile.scheduled_end || '22:00:00';
     const endParts = scheduledEndStr.split(':');
     const endHours = parseInt(endParts[0]);
     const endMinutes = parseInt(endParts[1]);
-    
+
     const scheduledEndTime = new Date(today);
     scheduledEndTime.setHours(endHours, endMinutes, 0, 0);
 
@@ -293,11 +318,14 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
         for (const manager of managers) {
           // D-05: Customers cannot notify other users
           if (callerRole === 'customer' && callerId !== manager.id) {
-            console.warn('[notification] Blocked cross-user notification attempt', { callerId, targetId: manager.id });
+            console.warn('[notification] Blocked cross-user notification attempt', {
+              callerId,
+              targetId: manager.id,
+            });
           } else {
             let title = 'Staff Checked Out';
             let message = `${staffProfile.full_name} checked out at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`;
-            
+
             if (isEarlyOut) {
               title = 'Early Shift Departure';
               const hours = Math.floor(earlyOutMinutes / 60);
@@ -309,7 +337,7 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
               manager.id,
               isEarlyOut ? 'STAFF_EARLY_OUT' : 'STAFF_CHECK_OUT',
               title,
-              message
+              message,
             );
           }
         }
@@ -325,7 +353,7 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
   } catch (error: unknown) {
     console.error('Check-out error:', error);
     if (error instanceof Error && 'code' in error && (error as PrismaError).code === 'P2025') {
-       return res.status(400).json({
+      return res.status(400).json({
         success: false,
         error: { code: 'NOT_CHECKED_IN', message: 'You must check in before checking out' },
       });

@@ -4,7 +4,7 @@ import prisma from './prisma';
 /**
  * Log a system action for audit purposes.
  * Resilient to logging failures to prevent blocking main transactions.
- * 
+ *
  * @param req - The request object containing user context and metadata
  * @param action - The action string (e.g., 'STAFF_CREATED', 'PAYROLL_LOCKED')
  * @param entityType - The type of entity being acted upon (optional)
@@ -16,7 +16,7 @@ export const logSystemAction = async (
   action: string,
   entityType?: string,
   entityId?: number,
-  details?: Record<string, any>
+  details?: Record<string, any>,
 ) => {
   try {
     const userId = req.user?.sub ? Number(req.user.sub) : null;

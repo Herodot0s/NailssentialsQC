@@ -56,7 +56,12 @@ export const markAllAsRead = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const createNotification = async (userId: number, type: string, title: string, message: string) => {
+export const createNotification = async (
+  userId: number,
+  type: string,
+  title: string,
+  message: string,
+) => {
   try {
     return await prisma.notification.create({
       data: {

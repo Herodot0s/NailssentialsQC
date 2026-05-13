@@ -32,7 +32,7 @@ export const sendError = (
   code: string,
   message: string,
   status: number = 400,
-  fieldErrors?: Record<string, string[]>
+  fieldErrors?: Record<string, string[]>,
 ) => {
   return res.status(status).json({
     success: false,
@@ -50,8 +50,15 @@ export const sendError = (
  * @param req - Express request with user context from auth middleware
  * @returns User context or null if not authenticated
  */
-export const getCurrentUser = (req: any): { userId: number; role: string; email?: string | null; fullName?: string } | null => {
+export const getCurrentUser = (
+  req: any,
+): { userId: number; role: string; email?: string | null; fullName?: string } | null => {
   const { sub, role, email, fullName } = req.user || {};
   if (!sub) return null;
-  return { userId: sub as number, role: role as string, email: email as string | undefined, fullName: fullName as string | undefined };
+  return {
+    userId: sub as number,
+    role: role as string,
+    email: email as string | undefined,
+    fullName: fullName as string | undefined,
+  };
 };

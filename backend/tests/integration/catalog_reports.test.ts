@@ -12,40 +12,34 @@ describe('Catalog and Reports Integration Tests', () => {
   beforeAll(async () => {
     // Clean up database or ensure clean state if needed
     // For now, let's just create the necessary users
-    
+
     // Create Manager
-    const managerResponse = await request(app)
-      .post('/api/v1/auth/register')
-      .send({
-        fullName: 'Test Manager',
-        email: 'manager@test.com',
-        password: 'Password123!',
-        phone: '1111111111'
-      });
-    
+    const managerResponse = await request(app).post('/api/v1/auth/register').send({
+      fullName: 'Test Manager',
+      email: 'manager@test.com',
+      password: 'Password123!',
+      phone: '1111111111',
+    });
+
     // Manually update role to manager in DB because register defaults to customer
     await prisma.user.update({
       where: { email: 'manager@test.com' },
-      data: { role: 'manager' }
+      data: { role: 'manager' },
     });
 
-    const managerLogin = await request(app)
-      .post('/api/v1/auth/login')
-      .send({
-        identifier: 'manager@test.com',
-        password: 'Password123!'
-      });
+    const managerLogin = await request(app).post('/api/v1/auth/login').send({
+      identifier: 'manager@test.com',
+      password: 'Password123!',
+    });
     managerToken = managerLogin.body.data.tokens.accessToken;
 
     // Create Customer
-    const customerResponse = await request(app)
-      .post('/api/v1/auth/register')
-      .send({
-        fullName: 'Test Customer',
-        email: 'customer@test.com',
-        password: 'Password123!',
-        phone: '2222222222'
-      });
+    const customerResponse = await request(app).post('/api/v1/auth/register').send({
+      fullName: 'Test Customer',
+      email: 'customer@test.com',
+      password: 'Password123!',
+      phone: '2222222222',
+    });
     customerToken = customerResponse.body.data.tokens.accessToken;
     customerId = customerResponse.body.data.user.id;
   });
@@ -57,7 +51,7 @@ describe('Catalog and Reports Integration Tests', () => {
         .set('Authorization', `Bearer ${managerToken}`)
         .send({
           name: 'Nails',
-          description: 'All nail services'
+          description: 'All nail services',
         });
 
       expect(response.status).toBe(201);
@@ -71,7 +65,7 @@ describe('Catalog and Reports Integration Tests', () => {
         .post('/api/v1/services/categories')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
-          name: 'Unauthorized Category'
+          name: 'Unauthorized Category',
         });
 
       expect(response.status).toBe(403);
@@ -83,7 +77,7 @@ describe('Catalog and Reports Integration Tests', () => {
         .set('Authorization', `Bearer ${managerToken}`)
         .send({
           name: 'Nails Updated',
-          description: 'Updated description'
+          description: 'Updated description',
         });
 
       expect(response.status).toBe(200);
@@ -107,8 +101,8 @@ describe('Catalog and Reports Integration Tests', () => {
           name: 'Manicure',
           description: 'Basic manicure',
           duration_minutes: 30,
-          price: 500.00,
-          category_id: categoryId
+          price: 500.0,
+          category_id: categoryId,
         });
 
       expect(response.status).toBe(201);
@@ -124,8 +118,8 @@ describe('Catalog and Reports Integration Tests', () => {
           name: 'Free Nails',
           description: 'Negative price',
           duration_minutes: 30,
-          price: -100.00,
-          category_id: categoryId
+          price: -100.0,
+          category_id: categoryId,
         });
 
       expect(response.status).toBe(400);
@@ -136,8 +130,8 @@ describe('Catalog and Reports Integration Tests', () => {
         .put(`/api/v1/services/${serviceId}`)
         .set('Authorization', `Bearer ${managerToken}`)
         .send({
-          price: 600.00,
-          is_popular: true
+          price: 600.0,
+          is_popular: true,
         });
 
       expect(response.status).toBe(200);
@@ -170,7 +164,7 @@ describe('Catalog and Reports Integration Tests', () => {
         .send({
           fullName: 'Test Customer Updated',
           preferences: { color: 'pink' },
-          allergies: 'None'
+          allergies: 'None',
         });
 
       expect(response.status).toBe(200);

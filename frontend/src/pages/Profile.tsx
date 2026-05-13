@@ -116,25 +116,28 @@ const Profile: React.FC = () => {
   };
 
   // Artisanal Input Classes
-  const artisanalInput = "border-0 border-b-2 border-kiln-border rounded-none bg-transparent px-0 h-11 focus-visible:ring-0 focus-visible:border-primary transition-colors font-medium placeholder:text-clay-dust";
-  const artisanalTextarea = "border-0 border-b-2 border-kiln-border rounded-none bg-transparent px-0 focus-visible:ring-0 focus-visible:border-primary transition-colors font-medium placeholder:text-clay-dust resize-none";
+  const artisanalInput =
+    'border-0 border-b-2 border-kiln-border rounded-none bg-transparent px-0 h-11 focus-visible:ring-0 focus-visible:border-primary transition-colors font-medium placeholder:text-clay-dust';
+  const artisanalTextarea =
+    'border-0 border-b-2 border-kiln-border rounded-none bg-transparent px-0 focus-visible:ring-0 focus-visible:border-primary transition-colors font-medium placeholder:text-clay-dust resize-none';
 
   return (
     <div className="min-h-screen bg-warm-canvas selection:bg-bisque-wash">
-      <motion.div 
+      <motion.div
         className="max-w-7xl mx-auto py-16 px-6 lg:px-12"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
-          
           {/* ASYMMETRIC LEAD: Editorial Column */}
           <motion.div className="lg:col-span-5 space-y-10" variants={itemVariants}>
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 text-primary">
                 <Sparkles className="h-5 w-5" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Member Profile</span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em]">
+                  Member Profile
+                </span>
               </div>
               <h1 className="font-serif text-5xl lg:text-6xl font-light leading-[1.1] text-charcoal-bark">
                 Your <br />
@@ -142,7 +145,8 @@ const Profile: React.FC = () => {
                 Retreat
               </h1>
               <p className="text-warm-stone text-lg max-w-md leading-relaxed">
-                Refine your personal preferences and requirements to ensure every visit to Nailssentials is perfectly tailored to you.
+                Refine your personal preferences and requirements to ensure every visit to
+                Nailssentials is perfectly tailored to you.
               </p>
             </div>
 
@@ -152,7 +156,9 @@ const Profile: React.FC = () => {
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Member Since</p>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">
+                    Member Since
+                  </p>
                   <p className="font-medium font-serif italic text-lg">May 2026</p>
                 </div>
               </div>
@@ -161,7 +167,9 @@ const Profile: React.FC = () => {
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Account Status</p>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">
+                    Account Status
+                  </p>
                   <p className="font-medium font-serif italic text-lg">Verified Artisan</p>
                 </div>
               </div>
@@ -171,7 +179,6 @@ const Profile: React.FC = () => {
           {/* FUNCTIONAL COLUMN: The Form */}
           <div className="lg:col-span-7">
             <form onSubmit={handleUpdate} className="space-y-12">
-              
               {message && (
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
@@ -198,10 +205,15 @@ const Profile: React.FC = () => {
                       <User2 className="h-5 w-5 text-primary" />
                       <h2 className="font-serif text-2xl text-charcoal-bark">Basic Identity</h2>
                     </div>
-                    
+
                     <div className="space-y-8">
                       <div className="space-y-2">
-                        <Label htmlFor="fullName" className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Full Name</Label>
+                        <Label
+                          htmlFor="fullName"
+                          className="text-[11px] font-bold uppercase tracking-widest text-clay-dust"
+                        >
+                          Full Name
+                        </Label>
                         <Input
                           id="fullName"
                           type="text"
@@ -215,17 +227,31 @@ const Profile: React.FC = () => {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
                         <div className="space-y-2 opacity-60">
-                          <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Email Address</Label>
+                          <Label
+                            htmlFor="email"
+                            className="text-[11px] font-bold uppercase tracking-widest text-clay-dust"
+                          >
+                            Email Address
+                          </Label>
                           <div className="flex items-center gap-2 border-b-2 border-kiln-border h-11">
                             <Mail className="h-4 w-4 text-clay-dust" />
-                            <span className="font-medium text-charcoal-bark">{profile.email || '—'}</span>
+                            <span className="font-medium text-charcoal-bark">
+                              {profile.email || '—'}
+                            </span>
                           </div>
                         </div>
                         <div className="space-y-2 opacity-60">
-                          <Label htmlFor="phone" className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Phone Number</Label>
+                          <Label
+                            htmlFor="phone"
+                            className="text-[11px] font-bold uppercase tracking-widest text-clay-dust"
+                          >
+                            Phone Number
+                          </Label>
                           <div className="flex items-center gap-2 border-b-2 border-kiln-border h-11">
                             <Phone className="h-4 w-4 text-clay-dust" />
-                            <span className="font-medium text-charcoal-bark">{profile.phone || '—'}</span>
+                            <span className="font-medium text-charcoal-bark">
+                              {profile.phone || '—'}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -239,12 +265,19 @@ const Profile: React.FC = () => {
                   <CardContent className="p-10 space-y-10">
                     <div className="flex items-center gap-3 pb-4 border-b border-kiln-border/50">
                       <AlertTriangle className="h-5 w-5 text-primary" />
-                      <h2 className="font-serif text-2xl text-charcoal-bark">Special Requirements</h2>
+                      <h2 className="font-serif text-2xl text-charcoal-bark">
+                        Special Requirements
+                      </h2>
                     </div>
 
                     <div className="space-y-10">
                       <div className="space-y-2">
-                        <Label htmlFor="allergies" className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Known Allergies</Label>
+                        <Label
+                          htmlFor="allergies"
+                          className="text-[11px] font-bold uppercase tracking-widest text-clay-dust"
+                        >
+                          Known Allergies
+                        </Label>
                         <Textarea
                           id="allergies"
                           value={profile.allergies}
@@ -258,7 +291,12 @@ const Profile: React.FC = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="notes" className="text-[11px] font-bold uppercase tracking-widest text-clay-dust">Signature Preferences</Label>
+                        <Label
+                          htmlFor="notes"
+                          className="text-[11px] font-bold uppercase tracking-widest text-clay-dust"
+                        >
+                          Signature Preferences
+                        </Label>
                         <Textarea
                           id="notes"
                           value={profile.notes}
@@ -276,10 +314,7 @@ const Profile: React.FC = () => {
               </motion.div>
 
               <motion.div variants={itemVariants} className="flex justify-end pt-4">
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     type="submit"
                     disabled={isSaving}

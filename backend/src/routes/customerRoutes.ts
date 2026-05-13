@@ -1,5 +1,10 @@
 import { Router } from 'express';
-import { getMyProfile, updateMyProfile, getCustomerHistory, searchCustomers } from '../controllers/customerController';
+import {
+  getMyProfile,
+  updateMyProfile,
+  getCustomerHistory,
+  searchCustomers,
+} from '../controllers/customerController';
 import { authenticateToken, authorizeRoles } from '../middleware/authMiddleware';
 
 const router = Router();
@@ -10,6 +15,11 @@ router.put('/profile', authenticateToken, authorizeRoles('customer'), updateMyPr
 
 // Staff/Manager access routes for CRM
 router.get('/search', authenticateToken, authorizeRoles('staff', 'manager'), searchCustomers);
-router.get('/:id/history', authenticateToken, authorizeRoles('staff', 'manager'), getCustomerHistory);
+router.get(
+  '/:id/history',
+  authenticateToken,
+  authorizeRoles('staff', 'manager'),
+  getCustomerHistory,
+);
 
 export default router;

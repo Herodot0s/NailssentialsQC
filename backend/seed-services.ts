@@ -104,7 +104,6 @@ async function seedServices() {
     console.log('  Manager:  manager1 / manager123');
     console.log('  Staff:    janedoe / staff123');
     console.log('  Customer: testcustomer / customer123');
-
   } catch (error) {
     console.error('Seed error:', error);
   } finally {

@@ -1,10 +1,22 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { getAppointments, createAppointment, cancelAppointment } from '../controllers/appointmentController';
-import { getAvailableSlots, getCommissionSummary, getStaffCommissions } from '../controllers/appointmentAvailability';
+import {
+  getAppointments,
+  createAppointment,
+  cancelAppointment,
+} from '../controllers/appointmentController';
+import {
+  getAvailableSlots,
+  getCommissionSummary,
+  getStaffCommissions,
+} from '../controllers/appointmentAvailability';
 import { completeAppointment } from '../controllers/appointmentCompletion';
 import { authenticateToken, authorizeRoles, validateZod } from '../middleware/authMiddleware';
-import { createAppointmentSchema, completeAppointmentSchema, cancelAppointmentSchema } from '../validators/appointmentSchemas';
+import {
+  createAppointmentSchema,
+  completeAppointmentSchema,
+  cancelAppointmentSchema,
+} from '../validators/appointmentSchemas';
 
 // Validate :id parameter middleware
 const idParamSchema = z.object({
@@ -16,7 +28,7 @@ const validateIdParam = (req: any, res: any, next: any) => {
   if (!result.success) {
     return res.status(400).json({
       success: false,
-      error: { code: 'INVALID_PARAMETER', message: 'Invalid ID parameter' }
+      error: { code: 'INVALID_PARAMETER', message: 'Invalid ID parameter' },
     });
   }
   req.validatedParams = result.data;
@@ -26,8 +38,18 @@ const validateIdParam = (req: any, res: any, next: any) => {
 const router = Router();
 
 router.get('/availability', getAvailableSlots);
-router.get('/commission-summary', authenticateToken, authorizeRoles('staff', 'manager'), getCommissionSummary);
-router.get('/staff-commissions', authenticateToken, authorizeRoles('staff', 'manager'), getStaffCommissions);
+router.get(
+  '/commission-summary',
+  authenticateToken,
+  authorizeRoles('staff', 'manager'),
+  getCommissionSummary,
+);
+router.get(
+  '/staff-commissions',
+  authenticateToken,
+  authorizeRoles('staff', 'manager'),
+  getStaffCommissions,
+);
 /**
  * GET /api/appointments
  * @query {string} [cursor] - Cursor ID for pagination (last ID from previous page, D-09)
@@ -36,7 +58,20 @@ router.get('/staff-commissions', authenticateToken, authorizeRoles('staff', 'man
  */
 router.get('/', authenticateToken, getAppointments);
 router.post('/', authenticateToken, validateZod(createAppointmentSchema), createAppointment);
-router.post('/:id/complete', authenticateToken, authorizeRoles('staff', 'manager'), validateIdParam, validateZod(completeAppointmentSchema), completeAppointment);
-router.patch('/:id/cancel', authenticateToken, validateIdParam, validateZod(cancelAppointmentSchema), cancelAppointment);
+router.post(
+  '/:id/complete',
+  authenticateToken,
+  authorizeRoles('staff', 'manager'),
+  validateIdParam,
+  validateZod(completeAppointmentSchema),
+  completeAppointment,
+);
+router.patch(
+  '/:id/cancel',
+  authenticateToken,
+  validateIdParam,
+  validateZod(cancelAppointmentSchema),
+  cancelAppointment,
+);
 
 export default router;

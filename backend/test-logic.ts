@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function runTests() {
   console.log('--- STARTING LOGIC VERIFICATION ---');
-  
+
   try {
     // 1. TEST TARDINESS CALCULATION (₱1/min after 15m grace)
     console.log('\n[TEST 1] Testing Attendance Deduction Logic...');
@@ -25,7 +25,7 @@ async function runTests() {
     console.log(`- Scheduled: ${scheduledStart}`);
     console.log(`- Check-in:  ${format(checkInTime, 'HH:mm:ss')} (20 mins late)`);
     console.log(`- Expected:  tardiness=20m, deduction=₱20.00`);
-    
+
     // Simulate what the controller does
     let tardinessMinutes = diffMinutes > 15 ? diffMinutes : 0;
     let deductionAmount = tardinessMinutes * 1;
@@ -33,13 +33,15 @@ async function runTests() {
     if (tardinessMinutes === 20 && deductionAmount === 20) {
       console.log('✅ TEST 1 PASSED: Tardiness & Deduction logic correct.');
     } else {
-      console.error(`❌ TEST 1 FAILED: Got tardiness=${tardinessMinutes}, deduction=${deductionAmount}`);
+      console.error(
+        `❌ TEST 1 FAILED: Got tardiness=${tardinessMinutes}, deduction=${deductionAmount}`,
+      );
     }
 
     // 2. TEST COMMISSION CALCULATION (10% flat rate)
     console.log('\n[TEST 2] Testing Commission Logic...');
-    const servicePrice = 500.00;
-    const commissionRate = 0.10;
+    const servicePrice = 500.0;
+    const commissionRate = 0.1;
     const expectedCommission = servicePrice * commissionRate;
 
     console.log(`- Service Price: ₱${servicePrice}`);
@@ -50,7 +52,6 @@ async function runTests() {
     } else {
       console.error(`❌ TEST 2 FAILED: Got ₱${expectedCommission}`);
     }
-
   } catch (error) {
     console.error('Test failed with error:', error);
   } finally {

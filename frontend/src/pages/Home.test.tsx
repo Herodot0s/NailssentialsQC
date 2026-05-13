@@ -8,7 +8,7 @@ describe('Home Page Smoke Test', () => {
     render(
       <MemoryRouter>
         <Home />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.getByTestId('home-page')).toBeInTheDocument();
   });

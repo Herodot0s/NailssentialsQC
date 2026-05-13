@@ -22,13 +22,13 @@ export const CustomerCareView: React.FC<CustomerCareViewProps> = ({
   appointments,
   staffMembers,
   onLogWalkIn,
-  dateRange
+  dateRange,
 }) => {
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       <div className="flex justify-between items-center">
-        <Button 
-          onClick={onLogWalkIn} 
+        <Button
+          onClick={onLogWalkIn}
           className="btn-primary gap-2 px-8 shadow-lg shadow-primary/20"
         >
           <UserPlus className="h-4 w-4" /> New Walk-in
@@ -37,20 +37,20 @@ export const CustomerCareView: React.FC<CustomerCareViewProps> = ({
 
       <Tabs defaultValue="activity" className="w-full">
         <TabsList className="bg-transparent border-b border-hairline w-full justify-start h-auto p-0 mb-8 rounded-none gap-8">
-          <TabsTrigger 
-            value="activity" 
+          <TabsTrigger
+            value="activity"
             className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 pb-4 utility-xs text-mute data-[state=active]:text-ink"
           >
             <Activity className="h-3.5 w-3.5 mr-2" /> Daily Activity
           </TabsTrigger>
-          <TabsTrigger 
-            value="feedback" 
+          <TabsTrigger
+            value="feedback"
             className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 pb-4 utility-xs text-mute data-[state=active]:text-ink"
           >
             <Star className="h-3.5 w-3.5 mr-2" /> Public Feedback
           </TabsTrigger>
-          <TabsTrigger 
-            value="retention" 
+          <TabsTrigger
+            value="retention"
             className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 pb-4 utility-xs text-mute data-[state=active]:text-ink"
           >
             <BarChart2 className="h-3.5 w-3.5 mr-2" /> Retention Insights
@@ -77,7 +77,9 @@ export const CustomerCareView: React.FC<CustomerCareViewProps> = ({
               <h2 className="display-lg text-ink">Loyalty Analytics</h2>
               <p className="utility-xs text-mute">Rolling 30-Day Period</p>
             </div>
-            <RetentionTab dateRange={{ preset: 'custom', startDate: dateRange.start, endDate: dateRange.end }} />
+            <RetentionTab
+              dateRange={{ preset: 'custom', startDate: dateRange.start, endDate: dateRange.end }}
+            />
           </div>
         </TabsContent>
       </Tabs>

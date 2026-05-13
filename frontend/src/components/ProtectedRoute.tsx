@@ -4,16 +4,19 @@ import { useAuth } from '../context/AuthContext';
 
 import { Loader2 } from 'lucide-react';
 
+import { useUser } from '@clerk/clerk-react';
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
   allowedRoles?: string[];
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isLoading, user } = useAuth();
+  const { user: clerkUser, isLoaded: isClerkLoaded, isSignedIn } = useUser();
   const location = useLocation();
 
-  if (isLoading) {
+  if (isLoading || !isClerkLoaded) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -22,12 +25,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
     );
   }
 
-  if (!isAuthenticated) {
-    // Redirect to login but save the current location to redirect back after login
+  // If not signed in to Clerk, definitely not authenticated
+  if (!isSignedIn) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+  // Determine role (local DB first, then Clerk metadata)
+  const userRole = user?.role || (clerkUser?.publicMetadata?.role as string);
+
+  if (allowedRoles && !allowedRoles.includes(userRole)) {
     // Role not authorized, redirect to home
     return <Navigate to="/" replace />;
   }

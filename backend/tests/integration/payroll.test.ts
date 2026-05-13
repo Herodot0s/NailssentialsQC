@@ -9,48 +9,42 @@ describe('Payroll Integration Tests', () => {
 
   beforeEach(async () => {
     // 1. Create a Manager
-    const managerResponse = await request(app)
-      .post('/api/v1/auth/register')
-      .send({
-        fullName: 'Manager User',
-        email: 'manager@example.com',
-        password: 'Password123',
-        phone: '1234567890',
-      });
-    
+    const managerResponse = await request(app).post('/api/v1/auth/register').send({
+      fullName: 'Manager User',
+      email: 'manager@example.com',
+      password: 'Password123',
+      phone: '1234567890',
+    });
+
     // Manually promote to manager in DB
     await prisma.user.update({
       where: { id: managerResponse.body.data.user.id },
-      data: { role: 'manager' }
+      data: { role: 'manager' },
     });
 
-    const loginResponse = await request(app)
-      .post('/api/v1/auth/login')
-      .send({
-        identifier: 'manager@example.com',
-        password: 'Password123',
-      });
+    const loginResponse = await request(app).post('/api/v1/auth/login').send({
+      identifier: 'manager@example.com',
+      password: 'Password123',
+    });
     managerToken = loginResponse.body.data.tokens.accessToken;
 
     // 2. Create a Staff Profile
-    const staffResponse = await request(app)
-      .post('/api/v1/auth/register')
-      .send({
-        fullName: 'Staff User',
-        email: 'staff@example.com',
-        password: 'Password123',
-        phone: '0987654321',
-      });
-    
+    const staffResponse = await request(app).post('/api/v1/auth/register').send({
+      fullName: 'Staff User',
+      email: 'staff@example.com',
+      password: 'Password123',
+      phone: '0987654321',
+    });
+
     const staffUserId = staffResponse.body.data.user.id;
     await prisma.user.update({
       where: { id: staffUserId },
-      data: { role: 'staff' }
+      data: { role: 'staff' },
     });
 
     // We need to move the profile from customer to staff
     await prisma.customerProfile.delete({
-      where: { user_id: staffUserId }
+      where: { user_id: staffUserId },
     });
 
     const staffProfile = await prisma.staffProfile.create({
@@ -59,7 +53,7 @@ describe('Payroll Integration Tests', () => {
         full_name: 'Staff User',
         base_pay_per_week: 1000,
         is_available: true,
-      }
+      },
     });
     staffId = staffProfile.id;
   });
@@ -69,7 +63,7 @@ describe('Payroll Integration Tests', () => {
       // 1. Setup previous month commissions
       // To create a commission, we need a service and a transaction
       const category = await prisma.serviceCategory.create({
-        data: { name: 'Test Category' }
+        data: { name: 'Test Category' },
       });
 
       const service = await prisma.service.create({
@@ -78,14 +72,14 @@ describe('Payroll Integration Tests', () => {
           category_id: category.id,
           duration_minutes: 30,
           price: 1000,
-        }
+        },
       });
 
       const customer = await prisma.customerProfile.create({
         data: {
           user_id: (await prisma.user.findFirst({ where: { role: 'manager' } }))!.id, // Reuse manager user for simplicity
           full_name: 'Test Customer',
-        }
+        },
       });
 
       const appointment = await prisma.appointment.create({
@@ -93,7 +87,7 @@ describe('Payroll Integration Tests', () => {
           customer_id: customer.id,
           appointment_date: new Date(),
           status: 'completed',
-        }
+        },
       });
 
       const transaction = await prisma.transaction.create({
@@ -103,7 +97,7 @@ describe('Payroll Integration Tests', () => {
           payment_method: 'cash',
           status: 'completed',
           receipt_number: 'REC-001',
-        }
+        },
       });
 
       const today = new Date();
@@ -123,7 +117,7 @@ describe('Payroll Integration Tests', () => {
           period_month: prevMonthStart.getMonth() + 1,
           period_year: prevMonthStart.getFullYear(),
           is_paid: false,
-        }
+        },
       });
 
       // 2. Setup a deduction
@@ -133,7 +127,7 @@ describe('Payroll Integration Tests', () => {
           type: 'Advance',
           amount: 50,
           notes: 'Advance payment',
-        }
+        },
       });
 
       // 3. Generate payroll for a 1-week period
@@ -155,7 +149,7 @@ describe('Payroll Integration Tests', () => {
 
       // 4. Verify staff payroll entry
       const staffPayroll = await prisma.staffPayroll.findFirst({
-        where: { payroll_period_id: payrollPeriodId, staff_id: staffId }
+        where: { payroll_period_id: payrollPeriodId, staff_id: staffId },
       });
 
       expect(staffPayroll).toBeDefined();
@@ -163,7 +157,7 @@ describe('Payroll Integration Tests', () => {
       // commissions = 400 / 4 = 100
       // deductions = 50
       // net_pay = 1000 + 100 - 50 = 1050
-      
+
       expect(Number(staffPayroll?.base_pay)).toBe(1000);
       expect(Number(staffPayroll?.commissions)).toBe(100);
       expect(Number(staffPayroll?.deductions)).toBe(50);
@@ -171,13 +165,13 @@ describe('Payroll Integration Tests', () => {
 
       // 5. Verify Audit Log
       const auditLog = await prisma.systemLog.findFirst({
-        where: { action: 'PAYROLL_GENERATED' }
+        where: { action: 'PAYROLL_GENERATED' },
       });
       expect(auditLog).toBeDefined();
 
       // 6. Verify Commissions marked as paid
       const commission = await prisma.commission.findFirst({
-        where: { staff_id: staffId }
+        where: { staff_id: staffId },
       });
       expect(commission?.is_paid).toBe(true);
     });
@@ -221,7 +215,7 @@ describe('Payroll Integration Tests', () => {
           start_date: startDate.toISOString(),
           end_date: endDate.toISOString(),
         });
-      
+
       periodId = response.body.data.id;
     });
 
@@ -229,13 +223,13 @@ describe('Payroll Integration Tests', () => {
       const response = await request(app)
         .patch(`/api/v1/payroll/periods/${periodId}/lock`)
         .set('Authorization', `Bearer ${managerToken}`);
-      
+
       expect(response.status).toBe(200);
       expect(response.body.data.is_locked).toBe(true);
 
       // Verify audit log
       const auditLog = await prisma.systemLog.findFirst({
-        where: { action: 'PAYROLL_LOCKED', target_id: periodId }
+        where: { action: 'PAYROLL_LOCKED', target_id: periodId },
       });
       expect(auditLog).toBeDefined();
     });
@@ -244,11 +238,11 @@ describe('Payroll Integration Tests', () => {
       await request(app)
         .patch(`/api/v1/payroll/periods/${periodId}/lock`)
         .set('Authorization', `Bearer ${managerToken}`);
-      
+
       const response = await request(app)
         .patch(`/api/v1/payroll/periods/${periodId}/lock`)
         .set('Authorization', `Bearer ${managerToken}`);
-      
+
       expect(response.status).toBe(400);
       expect(response.body.message).toContain('already locked');
     });
@@ -257,9 +251,11 @@ describe('Payroll Integration Tests', () => {
       const response = await request(app)
         .get(`/api/v1/payroll/export/${periodId}`)
         .set('Authorization', `Bearer ${managerToken}`);
-      
+
       expect(response.status).toBe(200);
-      expect(response.header['content-type']).toBe('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      expect(response.header['content-type']).toBe(
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
       expect(response.body).toBeDefined();
     });
   });

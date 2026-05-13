@@ -43,10 +43,7 @@ export const getMyMessages = async (req: AuthRequest, res: Response) => {
     const userId = Number(req.user?.sub);
     const messages = await prisma.message.findMany({
       where: {
-        OR: [
-          { sender_id: userId },
-          { receiver_id: userId },
-        ],
+        OR: [{ sender_id: userId }, { receiver_id: userId }],
       },
       include: {
         sender: { select: { id: true, username: true, role: true } },

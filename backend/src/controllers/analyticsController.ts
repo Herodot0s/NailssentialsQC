@@ -2,8 +2,13 @@ import { Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
 import {
-  startOfDay, endOfDay, startOfMonth, endOfMonth,
-  eachMonthOfInterval, format, differenceInDays
+  startOfDay,
+  endOfDay,
+  startOfMonth,
+  endOfMonth,
+  eachMonthOfInterval,
+  format,
+  differenceInDays,
 } from 'date-fns';
 
 // ─── Staff Performance ─────────────────────────────────────────────────────
@@ -13,7 +18,9 @@ export const getStaffPerformance = async (req: AuthRequest, res: Response) => {
     const { startDate, endDate } = req.query;
 
     if (!startDate || !endDate) {
-      return res.status(400).json({ success: false, message: 'Start date and end date are required' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Start date and end date are required' });
     }
 
     const start = startOfDay(new Date(startDate as string));
@@ -31,7 +38,7 @@ export const getStaffPerformance = async (req: AuthRequest, res: Response) => {
 
     // Get staff names
     const staffProfiles = await prisma.staffProfile.findMany();
-    const staffMap = new Map(staffProfiles.map(s => [s.id, s.full_name]));
+    const staffMap = new Map(staffProfiles.map((s) => [s.id, s.full_name]));
 
     // Category breakdown per staff
     const commissions = await prisma.commission.findMany({
@@ -40,15 +47,16 @@ export const getStaffPerformance = async (req: AuthRequest, res: Response) => {
     });
 
     const categoryBreakdownMap: Record<number, Record<string, number>> = {};
-    commissions.forEach(c => {
+    commissions.forEach((c) => {
       if (!categoryBreakdownMap[c.staff_id]) categoryBreakdownMap[c.staff_id] = {};
       const catName = c.service.category.name;
       const amount = Number(c.base_amount);
-      categoryBreakdownMap[c.staff_id][catName] = (categoryBreakdownMap[c.staff_id][catName] || 0) + amount;
+      categoryBreakdownMap[c.staff_id][catName] =
+        (categoryBreakdownMap[c.staff_id][catName] || 0) + amount;
     });
 
     const data = commissionAgg
-      .map(agg => ({
+      .map((agg) => ({
         staffId: agg.staff_id,
         fullName: staffMap.get(agg.staff_id) || 'Unknown',
         revenue: Number(agg._sum.base_amount || 0),
@@ -73,7 +81,9 @@ export const getRetentionAnalytics = async (req: AuthRequest, res: Response) => 
     const { startDate, endDate } = req.query;
 
     if (!startDate || !endDate) {
-      return res.status(400).json({ success: false, message: 'Start date and end date are required' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Start date and end date are required' });
     }
 
     const start = startOfDay(new Date(startDate as string));
@@ -90,7 +100,7 @@ export const getRetentionAnalytics = async (req: AuthRequest, res: Response) => 
 
     // Unique customers in the range
     const customerLastVisit: Record<number, Date> = {};
-    appointmentsInRange.forEach(a => {
+    appointmentsInRange.forEach((a) => {
       const existing = customerLastVisit[a.customer_id];
       if (!existing || a.appointment_date > existing) {
         customerLastVisit[a.customer_id] = a.appointment_date;
@@ -116,13 +126,12 @@ export const getRetentionAnalytics = async (req: AuthRequest, res: Response) => 
         select: { customer_id: true },
       });
 
-      const returnedCustomers = new Set(followUpAppointments.map(a => a.customer_id));
+      const returnedCustomers = new Set(followUpAppointments.map((a) => a.customer_id));
       returningCount = returnedCustomers.size;
     }
 
-    const retentionRate = totalCustomers > 0
-      ? Math.round((returningCount / totalCustomers) * 100)
-      : 0;
+    const retentionRate =
+      totalCustomers > 0 ? Math.round((returningCount / totalCustomers) * 100) : 0;
 
     // New vs Returning — first-ever visit per customer
     const firstVisits = await prisma.appointment.groupBy({
@@ -132,12 +141,12 @@ export const getRetentionAnalytics = async (req: AuthRequest, res: Response) => 
     });
 
     const firstVisitMap = new Map(
-      firstVisits.map(fv => [fv.customer_id, fv._min.appointment_date])
+      firstVisits.map((fv) => [fv.customer_id, fv._min.appointment_date]),
     );
 
     let newCustomers = 0;
     let returningCustomers = 0;
-    uniqueCustomerIds.forEach(cid => {
+    uniqueCustomerIds.forEach((cid) => {
       const firstVisit = firstVisitMap.get(cid);
       if (firstVisit && firstVisit >= start && firstVisit <= end) {
         newCustomers++;
@@ -153,19 +162,19 @@ export const getRetentionAnalytics = async (req: AuthRequest, res: Response) => 
       for (const monthStart of months) {
         const monthEnd = endOfMonth(monthStart);
         const monthAppts = appointmentsInRange.filter(
-          a => a.appointment_date >= monthStart && a.appointment_date <= monthEnd
+          (a) => a.appointment_date >= monthStart && a.appointment_date <= monthEnd,
         );
-        const monthCustomers = new Set(monthAppts.map(a => a.customer_id));
+        const monthCustomers = new Set(monthAppts.map((a) => a.customer_id));
         const monthTotal = monthCustomers.size;
 
         // Simplified trend: ratio of returning customers within that month
         let monthRate = 0;
         if (monthTotal > 0) {
           const customerVisitCounts: Record<number, number> = {};
-          monthAppts.forEach(a => {
+          monthAppts.forEach((a) => {
             customerVisitCounts[a.customer_id] = (customerVisitCounts[a.customer_id] || 0) + 1;
           });
-          const repeaters = Object.values(customerVisitCounts).filter(c => c > 1).length;
+          const repeaters = Object.values(customerVisitCounts).filter((c) => c > 1).length;
           monthRate = Math.round((repeaters / monthTotal) * 100);
         }
 
@@ -177,7 +186,7 @@ export const getRetentionAnalytics = async (req: AuthRequest, res: Response) => 
 
     // Top customers — most visits in range
     const customerVisitCounts: Record<number, number> = {};
-    appointmentsInRange.forEach(a => {
+    appointmentsInRange.forEach((a) => {
       customerVisitCounts[a.customer_id] = (customerVisitCounts[a.customer_id] || 0) + 1;
     });
 
@@ -189,14 +198,12 @@ export const getRetentionAnalytics = async (req: AuthRequest, res: Response) => 
     const customerProfiles = await prisma.customerProfile.findMany({
       where: { id: { in: topCustomerIds } },
     });
-    const customerNameMap = new Map(customerProfiles.map(c => [c.id, c.full_name]));
+    const customerNameMap = new Map(customerProfiles.map((c) => [c.id, c.full_name]));
 
-    const topCustomers = topCustomerIds.map(cid => ({
+    const topCustomers = topCustomerIds.map((cid) => ({
       name: customerNameMap.get(cid) || 'Unknown',
       visitCount: customerVisitCounts[cid],
-      lastVisit: customerLastVisit[cid]
-        ? format(customerLastVisit[cid], 'yyyy-MM-dd')
-        : '',
+      lastVisit: customerLastVisit[cid] ? format(customerLastVisit[cid], 'yyyy-MM-dd') : '',
     }));
 
     return res.status(200).json({
@@ -224,7 +231,9 @@ export const getKpiSummary = async (req: AuthRequest, res: Response) => {
     const { startDate, endDate } = req.query;
 
     if (!startDate || !endDate) {
-      return res.status(400).json({ success: false, message: 'Start date and end date are required' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Start date and end date are required' });
     }
 
     const start = startOfDay(new Date(startDate as string));

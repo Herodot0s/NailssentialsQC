@@ -37,14 +37,14 @@ const DrillDownLineChart: React.FC<DrillDownLineChartProps> = ({
   const chartData = useMemo(() => {
     if (!historicalData.length) return [];
 
-    return historicalData.map(d => {
+    return historicalData.map((d) => {
       const entry: Record<string, string | number> = { date: d.date };
       if (!selectedCategory) {
-        Object.keys(d.categories || {}).forEach(cat => {
+        Object.keys(d.categories || {}).forEach((cat) => {
           entry[cat] = d.categories?.[cat] ?? 0;
         });
       } else {
-        Object.keys(d.services || {}).forEach(svc => {
+        Object.keys(d.services || {}).forEach((svc) => {
           entry[svc] = d.services?.[svc] ?? 0;
         });
       }
@@ -54,11 +54,11 @@ const DrillDownLineChart: React.FC<DrillDownLineChartProps> = ({
 
   const allSeriesNames = useMemo(() => {
     const names = new Set<string>();
-    historicalData.forEach(d => {
+    historicalData.forEach((d) => {
       if (!selectedCategory) {
-        Object.keys(d.categories || {}).forEach(n => names.add(n));
+        Object.keys(d.categories || {}).forEach((n) => names.add(n));
       } else {
-        Object.keys(d.services || {}).forEach(n => names.add(n));
+        Object.keys(d.services || {}).forEach((n) => names.add(n));
       }
     });
     return Array.from(names);
@@ -83,7 +83,9 @@ const DrillDownLineChart: React.FC<DrillDownLineChartProps> = ({
         <div>
           <CardTitle className="font-serif text-2xl font-light">Performance Analytics</CardTitle>
           <CardDescription className="text-[9px] uppercase tracking-widest font-bold">
-            {selectedCategory ? `Viewing services in ${selectedCategory}` : 'Revenue trends by category'}
+            {selectedCategory
+              ? `Viewing services in ${selectedCategory}`
+              : 'Revenue trends by category'}
           </CardDescription>
         </div>
         {selectedCategory && (
@@ -101,9 +103,20 @@ const DrillDownLineChart: React.FC<DrillDownLineChartProps> = ({
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} onClick={handleChartClick}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 600 }} />
+            <XAxis
+              dataKey="date"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 9, fontWeight: 600 }}
+            />
             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9 }} />
-            <Tooltip contentStyle={{ borderRadius: '0', border: 'none', boxShadow: '0 20px 40px rgba(0,0,0,0.05)' }} />
+            <Tooltip
+              contentStyle={{
+                borderRadius: '0',
+                border: 'none',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
+              }}
+            />
             <Legend
               iconType="circle"
               wrapperStyle={{ fontSize: 10, paddingTop: 20 }}

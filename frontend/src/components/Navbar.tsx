@@ -5,41 +5,42 @@ import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { LogOut, User, Calendar, LayoutDashboard, Menu, ShoppingCart } from 'lucide-react';
+
+import { LogOut, Calendar, LayoutDashboard, Menu, ShoppingCart } from 'lucide-react';
+import { UserButton, SignInButton, SignUpButton, useUser } from '@clerk/clerk-react';
+
 import NotificationBell from './NotificationBell';
 import { useCart } from '../context/CartContext';
 
+
 const Navbar: React.FC = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, logout } = useAuth();
+  const { user: clerkUser, isSignedIn, isLoaded: isClerkLoaded } = useUser();
   const { cart } = useCart();
   const navigate = useNavigate();
+
+  // Get role from either local DB or Clerk metadata (for immediate sync)
+  const userRole = user?.role || (clerkUser?.publicMetadata?.role as string);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase();
-  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md">
       <div className="container mx-auto px-6 lg:px-12">
         <div className="flex h-20 items-center justify-between">
           <div className="flex items-center">
-            <Link to="/" className="font-serif text-2xl font-bold text-primary tracking-tight hover:text-primary-dark transition-colors">
+            <Link
+              to="/"
+              className="font-serif text-2xl font-bold text-primary tracking-tight hover:text-primary-dark transition-colors"
+            >
               NailssentialsQC
             </Link>
           </div>
@@ -57,9 +58,9 @@ const Navbar: React.FC = () => {
             >
               Exhibit
             </Link>
-            {isAuthenticated ? (
+            {isClerkLoaded && isSignedIn ? (
               <>
-                {user?.role === 'customer' && (
+                {userRole === 'customer' && (
                   <Link
                     to="/booking"
                     className="relative text-muted-foreground hover:text-foreground transition-all p-2 mr-2"
@@ -72,7 +73,7 @@ const Navbar: React.FC = () => {
                     )}
                   </Link>
                 )}
-                {user?.role === 'staff' && (
+                {userRole === 'staff' && (
                   <Link
                     to="/dashboard"
                     className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all"
@@ -81,94 +82,61 @@ const Navbar: React.FC = () => {
                   </Link>
                 )}
 
-                {(user?.role === 'staff' || user?.role === 'manager') && <NotificationBell />}
+                {(userRole === 'staff' || userRole === 'manager') && <NotificationBell />}
 
-                <DropdownMenu>
-                  {/* FIX APPLIED HERE: Removed asChild and merged button classes */}
-                  <DropdownMenuTrigger className="relative inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-primary/5 transition-colors outline-none border-none">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-primary-ultra text-primary font-serif font-bold text-sm border-[0.5px] border-primary/20">
-                        {user?.fullName ? (
-                          getInitials(user.fullName)
-                        ) : (
-                          <User className="h-4 w-4 stroke-[1.5]" />
-                        )}
-                      </AvatarFallback>
-                    </Avatar>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 mt-4 border-none shadow-xl rounded-none p-2 z-[100]" align="end">
-                    <DropdownMenuGroup>
-                      <DropdownMenuLabel className="font-normal px-4 py-3">
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-serif font-bold leading-none text-foreground">{user?.fullName}</p>
-                          <p className="text-[10px] tracking-[0.1em] uppercase leading-none text-muted-foreground mt-1">
-                            {user?.role}
-                          </p>
-                        </div>
-                      </DropdownMenuLabel>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator className="bg-primary/5" />
-                    <DropdownMenuItem
-                      onClick={() => navigate('/profile')}
-                      className="rounded-none px-4 py-3 cursor-pointer"
-                    >
-                      <User className="mr-3 h-4 w-4 stroke-[1.5]" />
-                      <span className="text-xs font-medium">Profile Settings</span>
-                    </DropdownMenuItem>
-                    {user?.role === 'customer' && (
-                      <DropdownMenuItem
-                        onClick={() => navigate('/appointments')}
-                        className="rounded-none px-4 py-3 cursor-pointer"
-                      >
-                        <Calendar className="mr-3 h-4 w-4 stroke-[1.5]" />
-                        <span className="text-xs font-medium">My Appointments</span>
-                      </DropdownMenuItem>
-                    )}
-                    {user?.role === 'manager' && (
-                      <DropdownMenuItem
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      userButtonPopoverCard: "border border-hairline rounded-[6px] shadow-xl bg-white",
+                      userButtonPopoverActionButton: "text-ink hover:bg-surface-soft transition-colors",
+                      userButtonPopoverActionButtonText: "font-medium",
+                      userButtonAvatarBox: "h-9 w-9 border border-hairline",
+                    }
+                  }}
+                >
+                  <UserButton.MenuItems>
+                    {userRole === 'manager' && (
+                      <UserButton.Action
+                        label="Manager Dashboard"
+                        labelIcon={<LayoutDashboard className="h-4 w-4" />}
                         onClick={() => navigate('/manager')}
-                        className="rounded-none px-4 py-3 cursor-pointer"
-                      >
-                        <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
-                        <span className="text-xs font-medium">Manager Dashboard</span>
-                      </DropdownMenuItem>
+                      />
                     )}
-                    {user?.role === 'staff' && (
-                      <DropdownMenuItem
+                    {userRole === 'staff' && (
+                      <UserButton.Action
+                        label="Staff Dashboard"
+                        labelIcon={<Calendar className="h-4 w-4" />}
                         onClick={() => navigate('/dashboard')}
-                        className="rounded-none px-4 py-3 cursor-pointer"
-                      >
-                        <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
-                        <span className="text-xs font-medium">Staff Portal</span>
-                      </DropdownMenuItem>
+                      />
                     )}
-                    <DropdownMenuSeparator className="bg-primary/5" />
-                    <DropdownMenuItem
-                      onClick={handleLogout}
-                      className="rounded-none px-4 py-3 text-destructive focus:bg-destructive/5"
-                    >
-                      <LogOut className="mr-3 h-4 w-4 stroke-[1.5]" />
-                      <span className="text-xs font-medium">Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    {userRole === 'customer' && (
+                      <UserButton.Action
+                        label="My Appointments"
+                        labelIcon={<Calendar className="h-4 w-4" />}
+                        onClick={() => navigate('/appointments')}
+                      />
+                    )}
+                  </UserButton.MenuItems>
+                </UserButton>
+
               </>
             ) : (
               <div className="flex items-center gap-8">
-                <Link
-                  to="/login"
-                  className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all"
-                >
-                  Login
-                </Link>
-                <Button
-                  variant="outline"
-                  className="h-10 px-8 rounded-none border-primary/40 text-primary hover:bg-primary hover:text-white transition-all duration-500 uppercase tracking-[0.2em] text-[10px] font-bold"
-                  onClick={() => navigate('/register')}
-                >
-                  Sign Up
-                </Button>
+                <SignInButton mode="modal">
+                  <button className="text-[10px] tracking-[0.2em] uppercase font-semibold text-muted-foreground hover:text-foreground transition-all">
+                    Login
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button
+                    variant="outline"
+                    className="h-10 px-8 rounded-none border-primary/40 text-primary hover:bg-primary hover:text-white transition-all duration-500 uppercase tracking-[0.2em] text-[10px] font-bold"
+                  >
+                    Sign Up
+                  </Button>
+                </SignUpButton>
               </div>
+
             )}
           </nav>
 
@@ -179,7 +147,10 @@ const Navbar: React.FC = () => {
               <DropdownMenuTrigger className="inline-flex items-center justify-center h-10 w-10 hover:bg-primary/5 transition-colors outline-none border-none">
                 <Menu className="h-6 w-6 stroke-[1.5]" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 mt-4 border-none shadow-xl rounded-none p-4 space-y-2">
+              <DropdownMenuContent
+                align="end"
+                className="w-64 mt-4 border-none shadow-xl rounded-none p-4 space-y-2"
+              >
                 <DropdownMenuItem
                   onClick={() => navigate('/gallery')}
                   className="rounded-none px-4 py-3 cursor-pointer"
@@ -192,7 +163,7 @@ const Navbar: React.FC = () => {
                 >
                   Services
                 </DropdownMenuItem>
-                {!isAuthenticated ? (
+                {!isClerkLoaded || !isSignedIn ? (
                   <>
                     <DropdownMenuItem
                       onClick={() => navigate('/login')}

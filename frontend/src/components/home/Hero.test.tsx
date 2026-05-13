@@ -8,7 +8,7 @@ describe('Hero Component', () => {
     render(
       <MemoryRouter>
         <Hero />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.getByTestId('hero-section')).toBeInTheDocument();
   });
@@ -17,7 +17,7 @@ describe('Hero Component', () => {
     render(
       <MemoryRouter>
         <Hero />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     const cta = screen.getByRole('button', { name: /Book Your Sanctuary/i });
     expect(cta).toHaveClass('bg-[#FF385C]');

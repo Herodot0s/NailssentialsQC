@@ -10,7 +10,11 @@ interface ServiceChipSelectorProps {
   packagePrice?: number;
 }
 
-export default function ServiceChipSelector({ selectedServiceIds, onSelectionChange, packagePrice }: ServiceChipSelectorProps) {
+export default function ServiceChipSelector({
+  selectedServiceIds,
+  onSelectionChange,
+  packagePrice,
+}: ServiceChipSelectorProps) {
   const [services, setServices] = useState<Service[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,10 +22,7 @@ export default function ServiceChipSelector({ selectedServiceIds, onSelectionCha
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [servicesRes, categoriesRes] = await Promise.all([
-          getServices(),
-          getCategories()
-        ]);
+        const [servicesRes, categoriesRes] = await Promise.all([getServices(), getCategories()]);
         setServices(servicesRes.data.data || []);
         setCategories(categoriesRes.data.data || []);
       } catch (error) {
@@ -39,32 +40,32 @@ export default function ServiceChipSelector({ selectedServiceIds, onSelectionCha
 
   const handleToggle = (serviceId: number) => {
     if (selectedServiceIds.includes(serviceId)) {
-      onSelectionChange(selectedServiceIds.filter(id => id !== serviceId));
+      onSelectionChange(selectedServiceIds.filter((id) => id !== serviceId));
     } else {
       onSelectionChange([...selectedServiceIds, serviceId]);
     }
   };
 
-  const selectedServices = services.filter(s => selectedServiceIds.includes(s.id));
+  const selectedServices = services.filter((s) => selectedServiceIds.includes(s.id));
   const sum = selectedServices.reduce((acc, curr) => acc + Number(curr.price), 0);
 
   // Group by category
-  const servicesByCategory = categories.map(category => {
-    return {
-      category,
-      services: services.filter(s => s.category_id === category.id && s.is_active)
-    };
-  }).filter(group => group.services.length > 0);
+  const servicesByCategory = categories
+    .map((category) => {
+      return {
+        category,
+        services: services.filter((s) => s.category_id === category.id && s.is_active),
+      };
+    })
+    .filter((group) => group.services.length > 0);
 
   return (
     <div className="space-y-6">
-      {servicesByCategory.map(group => (
+      {servicesByCategory.map((group) => (
         <div key={group.category.id} className="space-y-3">
-          <h4 className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
-            {group.category.name}
-          </h4>
+          <h4 className="utility-xs text-mute">{group.category.name}</h4>
           <div className="flex flex-wrap gap-2">
-            {group.services.map(service => {
+            {group.services.map((service) => {
               const isSelected = selectedServiceIds.includes(service.id);
               return (
                 <button
@@ -72,14 +73,16 @@ export default function ServiceChipSelector({ selectedServiceIds, onSelectionCha
                   type="button"
                   onClick={() => handleToggle(service.id)}
                   className={cn(
-                    "flex items-center text-xs px-3 py-2 transition-colors rounded-none",
-                    isSelected 
-                      ? "border border-primary bg-primary/5 text-primary ring-1 ring-primary/20" 
-                      : "border border-primary/10 bg-[#fafaf9] text-foreground hover:border-primary/30"
+                    'flex items-center body-xs px-4 py-2 transition-colors rounded-full border',
+                    isSelected
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-hairline-soft bg-white text-body hover:border-hairline',
                   )}
                 >
                   {isSelected && <Check className="w-3 h-3 mr-1.5" />}
-                  <span>{service.name} ₱{Number(service.price).toFixed(2)}</span>
+                  <span>
+                    {service.name} ₱{Number(service.price).toLocaleString()}
+                  </span>
                 </button>
               );
             })}
@@ -87,16 +90,16 @@ export default function ServiceChipSelector({ selectedServiceIds, onSelectionCha
         </div>
       ))}
 
-      <div className="pt-4 border-t border-border flex flex-col gap-1">
-        <div className="text-sm font-medium">
-          Selected: {selectedServiceIds.length} services • Total: ₱{sum.toFixed(2)}
+      <div className="pt-6 border-t border-hairline flex flex-col gap-2">
+        <div className="body-strong text-ink">
+          Selected: {selectedServiceIds.length} services • Total: ₱{sum.toLocaleString()}
         </div>
         {selectedServiceIds.length < 2 && (
-          <div className="text-xs text-destructive">Select at least 2 services</div>
+          <div className="utility-xs text-accent-red font-bold">Select at least 2 rituals</div>
         )}
         {packagePrice !== undefined && packagePrice > 0 && packagePrice < sum && (
-          <div className="text-xs text-success-color font-bold text-green-600">
-            Customer saves ₱{(sum - packagePrice).toFixed(2)}
+          <div className="body-sm font-bold text-accent-green">
+            Customer saves ₱{(sum - packagePrice).toLocaleString()}
           </div>
         )}
       </div>
