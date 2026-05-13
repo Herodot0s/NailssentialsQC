@@ -86,7 +86,10 @@ const CardContent = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>
     <div
       ref={ref}
       data-slot="card-content"
-      className={cn('p-6 pt-0 group-data-[size=sm]/card:p-4 group-data-[size=sm]/card:pt-0', className)}
+      className={cn(
+        'p-6 pt-0 group-data-[size=sm]/card:p-4 group-data-[size=sm]/card:pt-0',
+        className,
+      )}
       {...props}
     />
   ),
@@ -98,7 +101,10 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>
     <div
       ref={ref}
       data-slot="card-footer"
-      className={cn('flex items-center p-6 pt-0 group-data-[size=sm]/card:p-4 group-data-[size=sm]/card:pt-0', className)}
+      className={cn(
+        'flex items-center p-6 pt-0 group-data-[size=sm]/card:p-4 group-data-[size=sm]/card:pt-0',
+        className,
+      )}
       {...props}
     />
   ),

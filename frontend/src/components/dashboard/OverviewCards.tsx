@@ -12,7 +12,7 @@ interface OverviewCardsProps {
 export const OverviewCards: React.FC<OverviewCardsProps> = ({
   salesStats,
   activeStaffCount,
-  pendingReviewCount
+  pendingReviewCount,
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -59,9 +59,7 @@ export const OverviewCards: React.FC<OverviewCardsProps> = ({
           <CardDescription className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
             Active Staff
           </CardDescription>
-          <CardTitle className="text-4xl font-serif font-light">
-            {activeStaffCount}
-          </CardTitle>
+          <CardTitle className="text-4xl font-serif font-light">{activeStaffCount}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
@@ -77,9 +75,7 @@ export const OverviewCards: React.FC<OverviewCardsProps> = ({
           <CardDescription className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
             Pending Reviews
           </CardDescription>
-          <CardTitle className="text-4xl font-serif font-light">
-            {pendingReviewCount}
-          </CardTitle>
+          <CardTitle className="text-4xl font-serif font-light">{pendingReviewCount}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">

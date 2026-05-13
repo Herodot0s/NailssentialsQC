@@ -39,6 +39,7 @@ import { LogWalkInDialog } from '@/components/dashboard/customers/LogWalkInDialo
 
 import { ManagerSidebar } from '@/components/dashboard/ManagerSidebar';
 import { DeductionsView } from '@/components/dashboard/payroll/DeductionsView';
+import PayrollSetupView from '@/components/dashboard/payroll/PayrollSetupView';
 import { StaffDetailSheet } from '@/components/dashboard/staff/StaffDetailSheet';
 import { AddStaffDialog } from '@/components/dashboard/staff/AddStaffDialog';
 import { ShiftEditDialog } from '@/components/dashboard/staff/ShiftEditDialog';
@@ -131,64 +132,71 @@ const ManagerDashboard: React.FC = () => {
     notes: '',
   });
 
-  const dateRange = useMemo(() => ({
-    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    end: new Date().toISOString().split('T')[0],
-  }), []);
+  const dateRange = useMemo(
+    () => ({
+      start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      end: new Date().toISOString().split('T')[0],
+    }),
+    [],
+  );
 
   const performanceData = useMemo(() => {
-    return staffMembers.map(s => {
-      const safeAppointments = Array.isArray(appointments) ? appointments : [];
-      const completedApps = safeAppointments.filter(a => a.status === 'completed');
-      const staffItems = completedApps.flatMap(a => a.items || []).filter(i => i.staff_id === s.staffProfileId);
-      
-      return {
-        staffId: s.id,
-        fullName: s.fullName,
-        revenue: staffItems.reduce((sum, i) => sum + Number(i.price_at_booking), 0),
-        commission: staffItems.reduce((sum, i) => sum + (Number(i.price_at_booking) * 0.08), 0),
-        serviceCount: staffItems.length,
-        categoryBreakdown: {}
-      };
-    }).sort((a, b) => b.revenue - a.revenue);
+    return staffMembers
+      .map((s) => {
+        const safeAppointments = Array.isArray(appointments) ? appointments : [];
+        const completedApps = safeAppointments.filter((a) => a.status === 'completed');
+        const staffItems = completedApps
+          .flatMap((a) => a.items || [])
+          .filter((i) => i.staff_id === s.staffProfileId);
+
+        return {
+          staffId: s.id,
+          fullName: s.fullName,
+          revenue: staffItems.reduce((sum, i) => sum + Number(i.price_at_booking), 0),
+          commission: staffItems.reduce((sum, i) => sum + Number(i.price_at_booking) * 0.08, 0),
+          serviceCount: staffItems.length,
+          categoryBreakdown: {},
+        };
+      })
+      .sort((a, b) => b.revenue - a.revenue);
   }, [staffMembers, appointments]);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [salesRes, payrollRes, staffRes, periodsRes, reviewsRes, attRes, catRes, appRes] = await Promise.all([
-        getDailySales(),
-        getReports({ startDate: dateRange.start, endDate: dateRange.end }),
-        getAllStaff(),
-        getPayrollPeriods(),
-        getAllReviews(),
-        getAllAttendance({ startDate: dateRange.start }),
-        getCategories(),
-        getAppointments(),
-      ]);
+      const [salesRes, payrollRes, staffRes, periodsRes, reviewsRes, attRes, catRes, appRes] =
+        await Promise.all([
+          getDailySales(),
+          getReports({ startDate: dateRange.start, endDate: dateRange.end }),
+          getAllStaff(),
+          getPayrollPeriods(),
+          getAllReviews(),
+          getAllAttendance({ startDate: dateRange.start }),
+          getCategories(),
+          getAppointments(),
+        ]);
 
       if (salesRes.data.success) setSalesStats(salesRes.data.data);
       if (payrollRes.data.success) setPayrollReport(payrollRes.data.data.report);
-      
+
       if (staffRes.data.success) {
         const staffData = staffRes.data.data;
-        setStaffMembers(Array.isArray(staffData) ? staffData : (staffData?.items || []));
+        setStaffMembers(Array.isArray(staffData) ? staffData : staffData?.items || []);
       }
-      
+
       if (periodsRes.data.success) {
         const periodsData = periodsRes.data.data;
-        setPayrollPeriods(Array.isArray(periodsData) ? periodsData : (periodsData?.items || []));
+        setPayrollPeriods(Array.isArray(periodsData) ? periodsData : periodsData?.items || []);
       }
-      
+
       if (reviewsRes.data.success) setReviews(reviewsRes.data.data);
       if (attRes.data.success) setAttendance(attRes.data.data);
       if (catRes.data.success) setCategories(catRes.data.data);
-      
+
       if (appRes.data.success) {
         const appData = appRes.data.data;
-        setAppointments(Array.isArray(appData) ? appData : (appData?.items || []));
+        setAppointments(Array.isArray(appData) ? appData : appData?.items || []);
       }
-
     } catch (err: unknown) {
       console.error('Fetch error:', err instanceof Error ? err.message : err);
     } finally {
@@ -204,7 +212,7 @@ const ManagerDashboard: React.FC = () => {
     let interval: ReturnType<typeof setInterval>;
     if (activeView === 'attendance') {
       interval = setInterval(() => {
-        getAllAttendance({ startDate: dateRange.start }).then(res => {
+        getAllAttendance({ startDate: dateRange.start }).then((res) => {
           if (res.data.success) setAttendance(res.data.data);
         });
       }, 30000); // Poll every 30 seconds
@@ -258,33 +266,37 @@ const ManagerDashboard: React.FC = () => {
   const handleUpdateStaffBaseline = async () => {
     if (!selectedStaff) return;
     try {
-       await updateStaff(selectedStaff.id, {
-          fullName: selectedStaff.fullName,
-          basePayPerWeek: selectedStaff.basePayPerWeek,
-          dailyTarget: selectedStaff.dailyTarget,
-          sssNumber: selectedStaff.sssNumber,
-          pagIbigNumber: selectedStaff.pagIbigNumber,
-          profilePictureUrl: selectedStaff.profilePictureUrl,
-          specializations: selectedStaff.specializations ?? undefined,
-          email: selectedStaff.email ?? undefined,
-          phone: selectedStaff.phone ?? undefined,
-          password: selectedStaff.password
-       });
-       setStatusModal({
-         open: true,
-         type: 'success',
-         title: 'Update Successful',
-         description: 'Employee file updated successfully.',
-       });
-       fetchData();
+      await updateStaff(selectedStaff.id, {
+        fullName: selectedStaff.fullName,
+        basePayPerWeek: selectedStaff.basePayPerWeek,
+        dailyTarget: selectedStaff.dailyTarget,
+        sssNumber: selectedStaff.sssNumber,
+        pagIbigNumber: selectedStaff.pagIbigNumber,
+        profilePictureUrl: selectedStaff.profilePictureUrl,
+        specializations: selectedStaff.specializations ?? undefined,
+        email: selectedStaff.email ?? undefined,
+        phone: selectedStaff.phone ?? undefined,
+        password: selectedStaff.password,
+      });
+      setStatusModal({
+        open: true,
+        type: 'success',
+        title: 'Update Successful',
+        description: 'Employee file updated successfully.',
+      });
+      fetchData();
     } catch (err: any) {
-       const message = err.response?.data?.error?.message || err.response?.data?.message || err.message || 'Failed to update employee file.';
-       setStatusModal({
-         open: true,
-         type: 'error',
-         title: 'Update Failed',
-         description: message,
-       });
+      const message =
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
+        err.message ||
+        'Failed to update employee file.';
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Update Failed',
+        description: message,
+      });
     }
   };
 
@@ -294,7 +306,7 @@ const ManagerDashboard: React.FC = () => {
       await generatePayroll({
         startDate: payrollForm.startDate,
         endDate: payrollForm.endDate,
-        totalSalonSales: parseFloat(payrollForm.totalSalonSales)
+        totalSalonSales: parseFloat(payrollForm.totalSalonSales),
       });
       setShowPayrollModal(false);
       fetchData();
@@ -310,7 +322,12 @@ const ManagerDashboard: React.FC = () => {
   };
 
   const handleLockPayroll = async (id: number) => {
-    if (!window.confirm('Are you sure you want to finalize this payroll? This action cannot be undone.')) return;
+    if (
+      !window.confirm(
+        'Are you sure you want to finalize this payroll? This action cannot be undone.',
+      )
+    )
+      return;
     try {
       await lockPayroll(id);
       fetchData();
@@ -345,7 +362,7 @@ const ManagerDashboard: React.FC = () => {
         staffId: parseInt(deductionForm.staffId),
         type: deductionForm.type,
         amount: parseFloat(deductionForm.amount),
-        notes: deductionForm.notes
+        notes: deductionForm.notes,
       });
       setShowDeductionModal(false);
       setDeductionForm({ staffId: '', type: 'Cash Advance', amount: '', notes: '' });
@@ -372,59 +389,59 @@ const ManagerDashboard: React.FC = () => {
   };
 
   const handleEditShift = (dayOfWeek: number) => {
-     const current = staffSchedule.find(s => s.day_of_week === dayOfWeek);
-     const updateState = () => {
-        setEditingDay(dayOfWeek);
-        setShiftForm({
-           start: current?.start_time || '12:00',
-           end: current?.end_time || '22:00',
-           isActive: current?.is_active ?? true
-        });
-        setShowShiftEditModal(true);
-     };
+    const current = staffSchedule.find((s) => s.day_of_week === dayOfWeek);
+    const updateState = () => {
+      setEditingDay(dayOfWeek);
+      setShiftForm({
+        start: current?.start_time || '12:00',
+        end: current?.end_time || '22:00',
+        isActive: current?.is_active ?? true,
+      });
+      setShowShiftEditModal(true);
+    };
 
-     if ('startViewTransition' in document) {
-        (document as any).startViewTransition(updateState);
-     } else {
-        updateState();
-     }
+    if ('startViewTransition' in document) {
+      (document as any).startViewTransition(updateState);
+    } else {
+      updateState();
+    }
   };
 
   const handleSaveShift = async (e: React.FormEvent) => {
-     e.preventDefault();
-     if (!selectedStaff || editingDay === null) return;
-     
-     try {
-        const updatedSchedules = [...staffSchedule];
-        const index = updatedSchedules.findIndex(s => s.day_of_week === editingDay);
-        
-        const newSched: ScheduleItem = {
-           day_of_week: editingDay,
-           start_time: shiftForm.start,
-           end_time: shiftForm.end,
-           is_active: shiftForm.isActive,
-           id: index !== -1 ? updatedSchedules[index].id : undefined
-        };
+    e.preventDefault();
+    if (!selectedStaff || editingDay === null) return;
 
-        await updateStaffSchedule(selectedStaff.staffProfileId, { schedules: [newSched] });
-        setStaffSchedule(prev => {
-           const idx = prev.findIndex(s => s.day_of_week === editingDay);
-           if (idx !== -1) {
-              const copy = [...prev];
-              copy[idx] = newSched;
-              return copy;
-           }
-           return [...prev, newSched];
-        });
-        setShowShiftEditModal(false);
-     } catch (err) {
-        setStatusModal({
-          open: true,
-          type: 'error',
-          title: 'Update Failed',
-          description: `Failed to update shift: ${(err as any).response?.data?.message || 'Unknown error'}`,
-        });
-     }
+    try {
+      const updatedSchedules = [...staffSchedule];
+      const index = updatedSchedules.findIndex((s) => s.day_of_week === editingDay);
+
+      const newSched: ScheduleItem = {
+        day_of_week: editingDay,
+        start_time: shiftForm.start,
+        end_time: shiftForm.end,
+        is_active: shiftForm.isActive,
+        id: index !== -1 ? updatedSchedules[index].id : undefined,
+      };
+
+      await updateStaffSchedule(selectedStaff.staffProfileId, { schedules: [newSched] });
+      setStaffSchedule((prev) => {
+        const idx = prev.findIndex((s) => s.day_of_week === editingDay);
+        if (idx !== -1) {
+          const copy = [...prev];
+          copy[idx] = newSched;
+          return copy;
+        }
+        return [...prev, newSched];
+      });
+      setShowShiftEditModal(false);
+    } catch (err) {
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Update Failed',
+        description: `Failed to update shift: ${(err as any).response?.data?.message || 'Unknown error'}`,
+      });
+    }
   };
 
   const handleUpdateAttendance = async (id: number, status: string) => {
@@ -461,16 +478,18 @@ const ManagerDashboard: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-white">
         <Loader2 className="h-10 w-10 animate-spin text-primary stroke-[1.5]" />
-        <p className="text-[10px] tracking-[0.3em] uppercase font-bold text-muted-foreground animate-pulse">Initializing HRMS Engine...</p>
+        <p className="text-[10px] tracking-[0.3em] uppercase font-bold text-muted-foreground animate-pulse">
+          Initializing HRMS Engine...
+        </p>
       </div>
     );
   }
 
   return (
     <div className="flex min-h-screen bg-gray-50/50">
-      <ManagerSidebar 
-        activeView={activeView} 
-        onViewChange={setActiveView} 
+      <ManagerSidebar
+        activeView={activeView}
+        onViewChange={setActiveView}
         collapsed={sidebarCollapsed}
         mobileOpen={mobileSidebarOpen}
         onMobileToggle={() => setMobileSidebarOpen(!mobileSidebarOpen)}
@@ -478,42 +497,52 @@ const ManagerDashboard: React.FC = () => {
 
       <main className="flex-1 p-4 md:p-6 lg:p-10 overflow-y-auto">
         <header className="flex justify-between items-center mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
-           <div className="flex items-center gap-4">
-              <button onClick={() => setMobileSidebarOpen(true)} className="md:hidden">
-                <Menu className="h-6 w-6" />
-              </button>
-              <div>
-              <p className="text-[10px] tracking-[0.4em] uppercase font-bold text-primary mb-1">Manager Overview</p>
-              <h1 className="font-serif text-4xl font-light text-foreground capitalize">{activeView.replace('-', ' ')} <span className="italic text-primary/40">Toolbox</span></h1>
-           </div>
-           </div>
+          <div className="flex items-center gap-4">
+            <button onClick={() => setMobileSidebarOpen(true)} className="md:hidden">
+              <Menu className="h-6 w-6" />
+            </button>
+            <div>
+              <p className="text-[10px] tracking-[0.4em] uppercase font-bold text-primary mb-1">
+                Manager Overview
+              </p>
+              <h1 className="font-serif text-4xl font-light text-foreground capitalize">
+                {activeView.replace('-', ' ')}{' '}
+                <span className="italic text-primary/40">Toolbox</span>
+              </h1>
+            </div>
+          </div>
 
-           <div className="flex gap-4">
-              {activeView === 'staff' && (
-                <Button onClick={() => setShowAddStaffModal(true)} className="rounded-none gap-2 px-6 h-12 text-[10px] uppercase font-bold tracking-widest">
-                  <Plus className="h-4 w-4" /> New Employee
-                </Button>
-              )}
-              {activeView === 'deductions' && (
-                <Button onClick={() => setShowDeductionModal(true)} className="rounded-none gap-2 px-6 h-12 text-[10px] uppercase font-bold tracking-widest bg-primary">
-                  <Plus className="h-4 w-4" /> Log Entry
-                </Button>
-              )}
-              {activeView === 'payroll' && (
-                <Button onClick={() => setShowPayrollModal(true)} className="rounded-none gap-2 px-6 h-12 text-[10px] uppercase font-bold tracking-widest">
-                  <DollarSign className="h-4 w-4" /> Run Weekly Payroll
-                </Button>
-              )}
-           </div>
+          <div className="flex gap-4">
+            {activeView === 'staff' && (
+              <Button
+                onClick={() => setShowAddStaffModal(true)}
+                className="rounded-none gap-2 px-6 h-12 text-[10px] uppercase font-bold tracking-widest"
+              >
+                <Plus className="h-4 w-4" /> New Employee
+              </Button>
+            )}
+            {activeView === 'deductions' && (
+              <Button
+                onClick={() => setShowDeductionModal(true)}
+                className="rounded-none gap-2 px-6 h-12 text-[10px] uppercase font-bold tracking-widest bg-primary"
+              >
+                <Plus className="h-4 w-4" /> Log Entry
+              </Button>
+            )}
+            {activeView === 'payroll' && (
+              <Button
+                onClick={() => setShowPayrollModal(true)}
+                className="rounded-none gap-2 px-6 h-12 text-[10px] uppercase font-bold tracking-widest"
+              >
+                <DollarSign className="h-4 w-4" /> Run Weekly Payroll
+              </Button>
+            )}
+          </div>
         </header>
-
 
         {activeView === 'staff' && (
           <div className="animate-in fade-in duration-700">
-            <StaffTable
-              staffMembers={staffMembers}
-              onStaffClick={handleStaffClick}
-            />
+            <StaffTable staffMembers={staffMembers} onStaffClick={handleStaffClick} />
           </div>
         )}
 
@@ -529,11 +558,11 @@ const ManagerDashboard: React.FC = () => {
 
         {activeView === 'deductions' && (
           <div className="animate-in fade-in duration-700">
-            <DeductionsView 
-              staffMembers={staffMembers} 
-              deductionForm={deductionForm} 
-              onFormChange={setDeductionForm} 
-              onSubmit={handleAddDeduction} 
+            <DeductionsView
+              staffMembers={staffMembers}
+              deductionForm={deductionForm}
+              onFormChange={setDeductionForm}
+              onSubmit={handleAddDeduction}
             />
           </div>
         )}
@@ -546,6 +575,12 @@ const ManagerDashboard: React.FC = () => {
               payrollPeriods={payrollPeriods}
               onLockPayroll={handleLockPayroll}
             />
+          </div>
+        )}
+
+        {activeView === 'payroll-setup' && (
+          <div className="animate-in fade-in duration-700">
+            <PayrollSetupView />
           </div>
         )}
 
@@ -563,15 +598,12 @@ const ManagerDashboard: React.FC = () => {
 
         {activeView === 'reviews' && (
           <div className="animate-in fade-in duration-700">
-            <ReviewModeration
-              reviews={reviews}
-              onModerateReview={handleModerateReview}
-            />
+            <ReviewModeration reviews={reviews} onModerateReview={handleModerateReview} />
           </div>
         )}
 
         {activeView === 'customer-care' && (
-          <CustomerCareView 
+          <CustomerCareView
             reviews={reviews}
             onModerateReview={handleModerateReview}
             appointments={appointments}
@@ -580,10 +612,10 @@ const ManagerDashboard: React.FC = () => {
             dateRange={dateRange}
           />
         )}
-        
+
         {activeView === 'exhibits' && (
           <div className="animate-in fade-in duration-700">
-             <ManageExhibits />
+            <ManageExhibits />
           </div>
         )}
 
@@ -618,15 +650,15 @@ const ManagerDashboard: React.FC = () => {
         )}
       </main>
 
-      <StaffDetailSheet 
-        open={showStaffSheet} 
-        onOpenChange={setShowStaffSheet} 
-        staff={selectedStaff} 
-        onStaffChange={(staff) => setSelectedStaff(staff)} 
-        schedule={staffSchedule} 
-        categories={categories} 
-        onEditShift={handleEditShift} 
-        onUpdateBaseline={handleUpdateStaffBaseline} 
+      <StaffDetailSheet
+        open={showStaffSheet}
+        onOpenChange={setShowStaffSheet}
+        staff={selectedStaff}
+        onStaffChange={(staff) => setSelectedStaff(staff)}
+        schedule={staffSchedule}
+        categories={categories}
+        onEditShift={handleEditShift}
+        onUpdateBaseline={handleUpdateStaffBaseline}
       />
 
       <SalarySlipModal
@@ -635,44 +667,44 @@ const ManagerDashboard: React.FC = () => {
         payroll={selectedPayroll}
       />
 
-      <AddStaffDialog 
-        open={showAddStaffModal} 
-        onOpenChange={setShowAddStaffModal} 
+      <AddStaffDialog
+        open={showAddStaffModal}
+        onOpenChange={setShowAddStaffModal}
         categories={categories}
-        form={newStaffForm} 
-        onFormChange={setNewStaffForm} 
-        onSubmit={handleAddStaff} 
+        form={newStaffForm}
+        onFormChange={setNewStaffForm}
+        onSubmit={handleAddStaff}
       />
 
-      <ShiftEditDialog 
-        open={showShiftEditModal} 
+      <ShiftEditDialog
+        open={showShiftEditModal}
         onOpenChange={(open) => {
-           const update = () => setShowShiftEditModal(open);
-           if ('startViewTransition' in document) {
-              (document as any).startViewTransition(update);
-           } else {
-              update();
-           }
-        }} 
-        editingDay={editingDay} 
-        form={shiftForm} 
-        onFormChange={setShiftForm} 
-        onSubmit={handleSaveShift} 
+          const update = () => setShowShiftEditModal(open);
+          if ('startViewTransition' in document) {
+            (document as any).startViewTransition(update);
+          } else {
+            update();
+          }
+        }}
+        editingDay={editingDay}
+        form={shiftForm}
+        onFormChange={setShiftForm}
+        onSubmit={handleSaveShift}
       />
 
-      <PayrollRunDialog 
-        open={showPayrollModal} 
-        onOpenChange={setShowPayrollModal} 
-        form={payrollForm} 
-        onFormChange={setPayrollForm} 
-        onSubmit={handleGeneratePayroll} 
+      <PayrollRunDialog
+        open={showPayrollModal}
+        onOpenChange={setShowPayrollModal}
+        form={payrollForm}
+        onFormChange={setPayrollForm}
+        onSubmit={handleGeneratePayroll}
       />
 
-      <DeductionEntryDialog 
-        open={showDeductionModal} 
-        onOpenChange={setShowDeductionModal} 
-        staffMembers={staffMembers} 
-        form={deductionForm} 
+      <DeductionEntryDialog
+        open={showDeductionModal}
+        onOpenChange={setShowDeductionModal}
+        staffMembers={staffMembers}
+        form={deductionForm}
         onFormChange={setDeductionForm}
         onSubmit={handleAddDeduction}
       />
@@ -685,12 +717,11 @@ const ManagerDashboard: React.FC = () => {
 
       <StatusModal
         open={statusModal.open}
-        onOpenChange={(open) => setStatusModal(prev => ({ ...prev, open }))}
+        onOpenChange={(open) => setStatusModal((prev) => ({ ...prev, open }))}
         type={statusModal.type}
         title={statusModal.title}
         description={statusModal.description}
       />
-
     </div>
   );
 };

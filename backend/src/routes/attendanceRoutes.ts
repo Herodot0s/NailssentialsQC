@@ -10,7 +10,7 @@ import {
 import { authenticateToken, authorizeRoles } from '../middleware/authMiddleware';
 
 const idParamSchema = z.object({
-  id: z.string().regex(/^\d+$/, 'ID must be a number').transform(Number)
+  id: z.string().regex(/^\d+$/, 'ID must be a number').transform(Number),
 });
 
 const validateIdParam = (req: any, res: any, next: any) => {
@@ -18,7 +18,7 @@ const validateIdParam = (req: any, res: any, next: any) => {
   if (!result.success) {
     return res.status(400).json({
       success: false,
-      error: { code: 'INVALID_PARAMETER', message: 'Invalid ID parameter' }
+      error: { code: 'INVALID_PARAMETER', message: 'Invalid ID parameter' },
     });
   }
   req.validatedParams = result.data;

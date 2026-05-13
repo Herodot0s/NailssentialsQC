@@ -19,7 +19,7 @@ interface ProofGalleryProps {
 
 export const ProofGallery: React.FC<ProofGalleryProps> = ({ appointments }) => {
   const safeAppointments = Array.isArray(appointments) ? appointments : [];
-  const proofs = safeAppointments.filter(app => app.service_photo_url);
+  const proofs = safeAppointments.filter((app) => app.service_photo_url);
 
   return (
     <Card className="rounded-md border border-hairline shadow-none bg-surface-card overflow-hidden">
@@ -37,17 +37,18 @@ export const ProofGallery: React.FC<ProofGalleryProps> = ({ appointments }) => {
       <CardContent className="p-8">
         {proofs.length === 0 ? (
           <div className="py-20 text-center border-2 border-dashed border-hairline-soft rounded-md">
-            <p className="body-md text-mute italic">
-              No visual records found for this period.
-            </p>
+            <p className="body-md text-mute italic">No visual records found for this period.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {proofs.map((app) => (
-              <div key={app.id} className="group relative bg-surface-card border border-hairline rounded-md overflow-hidden hover:border-primary/20 transition-all duration-500">
+              <div
+                key={app.id}
+                className="group relative bg-surface-card border border-hairline rounded-md overflow-hidden hover:border-primary/20 transition-all duration-500"
+              >
                 <div className="aspect-[4/5] relative overflow-hidden bg-surface-soft">
-                  <img 
-                    src={app.service_photo_url!} 
+                  <img
+                    src={app.service_photo_url!}
                     alt={`Proof for appointment ${app.id}`}
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
                   />
@@ -60,23 +61,24 @@ export const ProofGallery: React.FC<ProofGalleryProps> = ({ appointments }) => {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="p-5 space-y-3">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <p className="body-strong text-ink">
-                        {app.customer.full_name}
-                      </p>
+                      <p className="body-strong text-ink">{app.customer.full_name}</p>
                       <div className="flex items-center gap-2 caption-xs text-mute uppercase">
                         <Calendar className="h-3 w-3" />
                         {format(new Date(app.appointment_date), 'MMM dd, yyyy')}
                       </div>
                     </div>
-                    <Badge variant="outline" className="rounded-full caption-xs py-0 px-2 h-5 border-hairline text-mute">
+                    <Badge
+                      variant="outline"
+                      className="rounded-full caption-xs py-0 px-2 h-5 border-hairline text-mute"
+                    >
                       #{app.id}
                     </Badge>
                   </div>
-                  
+
                   <button className="w-full h-10 border border-hairline rounded-sm utility-xs text-mute hover:bg-primary hover:text-white hover:border-primary transition-all duration-300 flex items-center justify-center gap-2">
                     <ExternalLink className="h-3 w-3" /> View Ritual Details
                   </button>

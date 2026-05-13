@@ -15,7 +15,9 @@ export const getPayrollReport = async (req: AuthRequest, res: Response) => {
     const { startDate, endDate } = req.query; // YYYY-MM-DD
 
     if (!startDate || !endDate) {
-      return res.status(400).json({ success: false, message: 'Start date and end date are required' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Start date and end date are required' });
     }
 
     const start = startOfDay(new Date(startDate as string));
@@ -23,7 +25,7 @@ export const getPayrollReport = async (req: AuthRequest, res: Response) => {
 
     // 1. Get all staff profiles
     const staffProfiles = await prisma.staffProfile.findMany({
-      orderBy: { full_name: 'asc' }
+      orderBy: { full_name: 'asc' },
     });
 
     const report = [];
@@ -39,7 +41,7 @@ export const getPayrollReport = async (req: AuthRequest, res: Response) => {
           },
         },
         _sum: { commission_amount: true },
-        _count: { id: true }
+        _count: { id: true },
       });
 
       // 3. Aggregate attendance deductions
@@ -52,7 +54,7 @@ export const getPayrollReport = async (req: AuthRequest, res: Response) => {
           },
         },
         _sum: { deduction_amount: true },
-        _count: { id: true }
+        _count: { id: true },
       });
 
       const totalCommission = Number(commissionData._sum.commission_amount || 0);
@@ -66,7 +68,7 @@ export const getPayrollReport = async (req: AuthRequest, res: Response) => {
         totalCommission,
         attendanceCount: attendanceData._count.id,
         totalDeduction,
-        netPay
+        netPay,
       });
     }
 
@@ -75,10 +77,9 @@ export const getPayrollReport = async (req: AuthRequest, res: Response) => {
       data: {
         startDate,
         endDate,
-        report
-      }
+        report,
+      },
     });
-
   } catch (error: unknown) {
     console.error('Get payroll report error:', error);
     const message = error instanceof Error ? error.message : 'Failed to generate payroll report';
@@ -96,10 +97,10 @@ export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
     const salesData = await prisma.transaction.aggregate({
       where: {
         transaction_date: { gte: start, lte: end },
-        status: 'completed'
+        status: 'completed',
       },
       _sum: { amount: true },
-      _count: { id: true }
+      _count: { id: true },
     });
 
     // Appointment counts by source
@@ -107,26 +108,26 @@ export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
       where: {
         appointment_date: start,
         is_walk_in: false,
-        status: 'completed'
-      }
+        status: 'completed',
+      },
     });
 
     const walkInAppointments = await prisma.appointment.count({
       where: {
         appointment_date: start,
         is_walk_in: true,
-        status: 'completed'
-      }
+        status: 'completed',
+      },
     });
 
     // Sales by Category
     const serviceStats = await prisma.commission.groupBy({
       by: ['service_id'],
       where: {
-        commission_date: { gte: start, lte: end }
+        commission_date: { gte: start, lte: end },
       },
       _sum: { base_amount: true },
-      _count: { id: true }
+      _count: { id: true },
     });
 
     // Fetch service names for the stats (batch fetch to avoid N+1)
@@ -138,17 +139,17 @@ export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
     const statsWithNames = serviceStats.map((stat) => ({
       name: serviceMap.get(stat.service_id)?.name || 'Unknown',
       amount: Number(stat._sum.base_amount || 0),
-      count: stat._count.id
+      count: stat._count.id,
     }));
 
     // D-08, D-09 fallback logic for the sales target
-    let dynamicTarget = 8000.00; // Default fallback
+    let dynamicTarget = 8000.0; // Default fallback
 
     try {
       // 1. Query the currently active PayrollPeriod
       const activePeriod = await prisma.payrollPeriod.findFirst({
         where: { is_locked: false },
-        orderBy: { start_date: 'desc' }
+        orderBy: { start_date: 'desc' },
       });
 
       if (activePeriod && (activePeriod as any).sales_target !== null) {
@@ -156,7 +157,7 @@ export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
       } else {
         // 2. Query SystemSettings
         const systemSetting = await (prisma as any).systemSettings.findUnique({
-          where: { key: 'global_sales_target' }
+          where: { key: 'global_sales_target' },
         });
         if (systemSetting) {
           dynamicTarget = parseFloat(systemSetting.value);
@@ -174,10 +175,9 @@ export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
         onlineCount: onlineAppointments,
         walkInCount: walkInAppointments,
         serviceBreakdown: statsWithNames,
-        target: dynamicTarget
-      }
+        target: dynamicTarget,
+      },
     });
-
   } catch (error: unknown) {
     console.error('Get daily sales stats error:', error);
     const message = error instanceof Error ? error.message : 'Failed to fetch sales stats';
@@ -197,24 +197,29 @@ export const getHistoricalAnalytics = async (req: AuthRequest, res: Response) =>
 
     const commissions = await prisma.commission.findMany({
       where: {
-        commission_date: { gte: start, lte: end }
+        commission_date: { gte: start, lte: end },
       },
       include: {
         service: {
-          include: { category: true }
-        }
-      }
+          include: { category: true },
+        },
+      },
     });
 
     // Create a map of date -> category -> total
     const dailyData: Record<string, DailyData> = {};
     const interval = eachDayOfInterval({ start, end });
-    
-    interval.forEach(day => {
-      dailyData[format(day, 'yyyy-MM-dd')] = { date: format(day, 'MMM dd'), total: 0, categories: {}, services: {} };
+
+    interval.forEach((day) => {
+      dailyData[format(day, 'yyyy-MM-dd')] = {
+        date: format(day, 'MMM dd'),
+        total: 0,
+        categories: {},
+        services: {},
+      };
     });
 
-    commissions.forEach(comm => {
+    commissions.forEach((comm) => {
       const dateKey = format(comm.commission_date, 'yyyy-MM-dd');
       if (dailyData[dateKey]) {
         const catName = comm.service.category.name;
@@ -222,7 +227,7 @@ export const getHistoricalAnalytics = async (req: AuthRequest, res: Response) =>
         const amount = Number(comm.base_amount);
 
         dailyData[dateKey].total += amount;
-        
+
         if (!dailyData[dateKey].categories[catName]) dailyData[dateKey].categories[catName] = 0;
         dailyData[dateKey].categories[catName] += amount;
 
@@ -233,7 +238,7 @@ export const getHistoricalAnalytics = async (req: AuthRequest, res: Response) =>
 
     return res.status(200).json({
       success: true,
-      data: Object.values(dailyData)
+      data: Object.values(dailyData),
     });
   } catch (error: unknown) {
     console.error('Get historical analytics error:', error);

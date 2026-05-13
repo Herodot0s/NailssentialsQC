@@ -1,7 +1,17 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
-import { format, getISOWeek, getMonth, getYear, startOfDay, endOfDay, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import {
+  format,
+  getISOWeek,
+  getMonth,
+  getYear,
+  startOfDay,
+  endOfDay,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+} from 'date-fns';
 import { sendAppointmentCompletion } from '../utils/email';
 import { createNotification } from './notificationController';
 import { AppointmentWithDetails } from '../types/appointmentTypes';
@@ -28,7 +38,7 @@ const getTieredCommissionRate = async (tx: Prisma.TransactionClient) => {
 
   const salesAmount = Number(totalSales._sum.amount || 0);
 
-  if (salesAmount >= 55000) return 0.10;
+  if (salesAmount >= 55000) return 0.1;
   if (salesAmount >= 51000) return 0.08;
   return 0.05;
 };
@@ -45,7 +55,7 @@ const checkSpecialtyQuota = async (staffId: number, tx: Prisma.TransactionClient
       staff_id: staffId,
       commission_date: { gte: startOfCurrMonth },
     },
-    _sum: { base_amount: true }
+    _sum: { base_amount: true },
   });
 
   const totalSales = Number(staffSales._sum.base_amount || 0);
@@ -57,18 +67,26 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const { paymentMethod, servicePhotoUrl, gcashReferenceNo } = req.validatedBody || req.body; // 'cash' | 'gcash'
 
-    console.log(`Completing appointment ${id}:`, { paymentMethod, servicePhotoUrl: !!servicePhotoUrl, gcashReferenceNo });
+    console.log(`Completing appointment ${id}:`, {
+      paymentMethod,
+      servicePhotoUrl: !!servicePhotoUrl,
+      gcashReferenceNo,
+    });
 
     if (!paymentMethod) {
       return res.status(400).json({ success: false, message: 'Payment method is required' });
     }
 
     if (!servicePhotoUrl) {
-      return res.status(400).json({ success: false, message: 'Service completion photo is required' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Service completion photo is required' });
     }
 
     if (paymentMethod === 'gcash' && !gcashReferenceNo) {
-      return res.status(400).json({ success: false, message: 'GCash reference number is required' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'GCash reference number is required' });
     }
 
     const appointment = await prisma.appointment.findUnique({
@@ -76,11 +94,11 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
       include: {
         customer: true,
         items: {
-          include: { 
+          include: {
             service: true,
-            staff: true
-          }
-        }
+            staff: true,
+          },
+        },
       },
     });
 
@@ -146,16 +164,16 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
         console.log('Updating appointment status');
         await tx.appointment.update({
           where: { id: parseInt(id as string) },
-          data: { 
+          data: {
             status: 'completed',
-            service_photo_url: servicePhotoUrl
+            service_photo_url: servicePhotoUrl,
           },
         });
 
         // Also update all items to completed
         await tx.appointmentItem.updateMany({
           where: { appointment_id: parseInt(id as string) },
-          data: { status: 'completed' }
+          data: { status: 'completed' },
         });
 
         // Create transaction
@@ -179,7 +197,7 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
         for (const item of appointment.items) {
           console.log(`Processing commission for item ${item.id}, staff ${item.staff_id}`);
           const hasHitQuota = await checkSpecialtyQuota(item.staff_id, tx);
-          const commissionRate = hasHitQuota ? 0.20 : baseRate;
+          const commissionRate = hasHitQuota ? 0.2 : baseRate;
 
           const commissionAmount = Number(item.price_at_booking) * commissionRate;
 
@@ -229,21 +247,23 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
       }
     });
 
-    await logSystemAction(req as AuthRequest, 'COMMISSIONS_CREATED', 'Appointment', Number(id), { message: 'Calculated commissions for appointment' });
+    await logSystemAction(req as AuthRequest, 'COMMISSIONS_CREATED', 'Appointment', Number(id), {
+      message: 'Calculated commissions for appointment',
+    });
 
     // 4. Send Completion Notification (Async)
     (async () => {
       try {
         const customer = await prisma.customerProfile.findUnique({
           where: { id: appointment.customer_id },
-          include: { user: true }
+          include: { user: true },
         });
 
         if (customer?.user.email && !appointment.is_walk_in) {
           sendAppointmentCompletion(customer.user.email, {
             customerName: customer.full_name,
             receiptNumber: receiptNumber,
-            totalAmount: totalAmount.toFixed(2)
+            totalAmount: totalAmount.toFixed(2),
           });
         }
       } catch (err: unknown) {
@@ -256,13 +276,12 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
       data: result,
       message: 'Appointment completed and commissions calculated!',
     });
-
   } catch (error: unknown) {
     console.error('Complete appointment error details:', error);
     const message = error instanceof Error ? error.message : 'Failed to complete appointment';
     return res.status(500).json({
       success: false,
-      error: { code: 'INTERNAL_SERVER_ERROR', message }
+      error: { code: 'INTERNAL_SERVER_ERROR', message },
     });
   }
 };

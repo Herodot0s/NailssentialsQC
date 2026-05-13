@@ -1,4 +1,13 @@
-import type { SalesStats, StaffMember, PayrollRecord, PayrollPeriod, AttendanceRecord, Category, Review, ScheduleItem } from '@/types/api';
+import type {
+  SalesStats,
+  StaffMember,
+  PayrollRecord,
+  PayrollPeriod,
+  AttendanceRecord,
+  Category,
+  Review,
+  ScheduleItem,
+} from '@/types/api';
 
 export interface StaffTableProps {
   staffMembers: StaffMember[];
@@ -30,7 +39,22 @@ export interface HistoricalData {
   services: Record<string, number>;
 }
 
-export type ActiveView = 'staff' | 'attendance' | 'deductions' | 'payroll' | 'reviews' | 'exhibits' | 'content' | 'packages' | 'advanced-analytics' | 'services' | 'messages' | 'customer-care' | 'performance' | 'service-history';
+export type ActiveView =
+  | 'staff'
+  | 'attendance'
+  | 'deductions'
+  | 'payroll'
+  | 'payroll-setup'
+  | 'reviews'
+  | 'exhibits'
+  | 'content'
+  | 'packages'
+  | 'advanced-analytics'
+  | 'services'
+  | 'messages'
+  | 'customer-care'
+  | 'performance'
+  | 'service-history';
 
 export interface ManagerSidebarProps {
   activeView: ActiveView;
@@ -75,9 +99,16 @@ export interface AddStaffDialogProps {
   onOpenChange: (open: boolean) => void;
   categories: Category[];
   form: {
-    fullName: string; email: string; phone: string; username: string;
-    password: string; specializations: string; basePayPerWeek: string;
-    dailyTarget: string; sssNumber: string; pagIbigNumber: string;
+    fullName: string;
+    email: string;
+    phone: string;
+    username: string;
+    password: string;
+    specializations: string;
+    basePayPerWeek: string;
+    dailyTarget: string;
+    sssNumber: string;
+    pagIbigNumber: string;
     profilePictureUrl: string;
   };
   onFormChange: (form: AddStaffDialogProps['form']) => void;

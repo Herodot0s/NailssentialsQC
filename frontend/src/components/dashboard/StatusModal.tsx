@@ -36,17 +36,16 @@ export function StatusModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm overflow-hidden p-0 border-none">
-        <div className={cn(
-          "h-2 w-full",
-          isSuccess ? "bg-green-500" : "bg-destructive"
-        )} />
+        <div className={cn('h-2 w-full', isSuccess ? 'bg-green-500' : 'bg-destructive')} />
 
         <div className="p-8">
           <DialogHeader className="items-center text-center gap-4">
-            <div className={cn(
-              "p-3 rounded-full",
-              isSuccess ? "bg-green-50 text-green-600" : "bg-destructive/10 text-destructive"
-            )}>
+            <div
+              className={cn(
+                'p-3 rounded-full',
+                isSuccess ? 'bg-green-50 text-green-600' : 'bg-destructive/10 text-destructive',
+              )}
+            >
               {isSuccess ? (
                 <CheckCircle className="h-8 w-8 stroke-[1.5]" />
               ) : (
@@ -71,8 +70,10 @@ export function StatusModal({
                 onOpenChange(false);
               }}
               className={cn(
-                "w-full rounded-none h-12 text-[10px] uppercase font-bold tracking-[0.2em]",
-                isSuccess ? "bg-foreground hover:bg-foreground/90" : "bg-destructive hover:bg-destructive/90"
+                'w-full rounded-none h-12 text-[10px] uppercase font-bold tracking-[0.2em]',
+                isSuccess
+                  ? 'bg-foreground hover:bg-foreground/90'
+                  : 'bg-destructive hover:bg-destructive/90',
               )}
             >
               {actionLabel}

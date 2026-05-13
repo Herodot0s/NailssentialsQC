@@ -11,7 +11,7 @@ async function runE2ETest() {
     const customerData = {
       fullName: `Test Customer ${timestamp}`,
       email: `test_${timestamp}@example.com`,
-      password: 'Password123'
+      password: 'Password123',
     };
 
     console.log('--- Step 1: Registering Customer ---');
@@ -23,7 +23,7 @@ async function runE2ETest() {
     console.log('--- Step 2: Logging in ---');
     const loginRes = await axios.post(`${API_URL}/auth/login`, {
       identifier: customerData.email,
-      password: customerData.password
+      password: customerData.password,
     });
     console.log('✅ Login successful');
 
@@ -37,19 +37,23 @@ async function runE2ETest() {
     const today = new Date().toISOString().split('T')[0];
     console.log(`--- Step 4: Checking Availability for ${today} ---`);
     const availRes = await axios.get(`${API_URL}/appointments/availability?date=${today}`);
-    const availableSlot = availRes.data.data.find(s => s.available);
+    const availableSlot = availRes.data.data.find((s) => s.available);
     if (!availableSlot) throw new Error('No available slots found');
     console.log(`✅ Found slot: ${availableSlot.time}`);
 
     // 5. Book Appointment
     console.log('--- Step 5: Booking Appointment ---');
-    const bookRes = await axios.post(`${API_URL}/appointments`, {
-      serviceId: service.id,
-      date: today,
-      time: availableSlot.time
-    }, {
-      headers: { Authorization: `Bearer ${customerToken}` }
-    });
+    const bookRes = await axios.post(
+      `${API_URL}/appointments`,
+      {
+        serviceId: service.id,
+        date: today,
+        time: availableSlot.time,
+      },
+      {
+        headers: { Authorization: `Bearer ${customerToken}` },
+      },
+    );
     const appointmentId = bookRes.data.data.id;
     console.log(`✅ Appointment booked (ID: ${appointmentId})`);
 
@@ -60,14 +64,14 @@ async function runE2ETest() {
     try {
       const adminLoginRes = await axios.post(`${API_URL}/auth/login`, {
         identifier: 'test_manager',
-        password: 'password123'
+        password: 'password123',
       });
       adminToken = adminLoginRes.data.data.tokens.accessToken;
     } catch (e) {
       console.log('--- Retrying with legacy admin credentials ---');
       const adminLoginRes = await axios.post(`${API_URL}/auth/login`, {
         identifier: 'admin',
-        password: 'admin123'
+        password: 'admin123',
       });
       adminToken = adminLoginRes.data.data.tokens.accessToken;
     }
@@ -75,28 +79,31 @@ async function runE2ETest() {
 
     // 7. Complete Appointment
     console.log('--- Step 7: Completing Appointment ---');
-    const completeRes = await axios.post(`${API_URL}/appointments/${appointmentId}/complete`, {
-      paymentMethod: 'cash'
-    }, {
-      headers: { Authorization: `Bearer ${adminToken}` }
-    });
+    const completeRes = await axios.post(
+      `${API_URL}/appointments/${appointmentId}/complete`,
+      {
+        paymentMethod: 'cash',
+      },
+      {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      },
+    );
     console.log('✅ Appointment completed');
     console.log(`📄 Receipt Number: ${completeRes.data.data.transaction.receipt_number}`);
 
     // 8. Verify Commission
     console.log('--- Step 8: Verifying Commissions ---');
     const commRes = await axios.get(`${API_URL}/appointments/staff-commissions`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
     const lastComm = commRes.data.data[0];
     if (lastComm.transaction_id === completeRes.data.data.transaction.id) {
-       console.log(`✅ Commission verified: ₱${lastComm.commission_amount}`);
+      console.log(`✅ Commission verified: ₱${lastComm.commission_amount}`);
     } else {
-       console.log('⚠️ Warning: Last commission does not match current transaction');
+      console.log('⚠️ Warning: Last commission does not match current transaction');
     }
 
     console.log('\n✨ E2E Happy Path Test Passed Successfully!');
-
   } catch (error) {
     console.error('\n❌ E2E Test Failed:');
     if (error.response) {

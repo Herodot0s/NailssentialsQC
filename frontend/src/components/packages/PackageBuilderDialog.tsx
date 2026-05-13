@@ -21,7 +21,12 @@ interface PackageBuilderDialogProps {
   onSuccess: () => void;
 }
 
-export default function PackageBuilderDialog({ open, onOpenChange, editPackage, onSuccess }: PackageBuilderDialogProps) {
+export default function PackageBuilderDialog({
+  open,
+  onOpenChange,
+  editPackage,
+  onSuccess,
+}: PackageBuilderDialogProps) {
   const queryClient = useQueryClient();
 
   const [name, setName] = useState('');
@@ -33,7 +38,7 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
   const [maxRedemptions, setMaxRedemptions] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [selectedServiceIds, setSelectedServiceIds] = useState<number[]>([]);
-  
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -45,11 +50,19 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
         setDescription(editPackage.description || '');
         setPrice(editPackage.price.toString());
         setDisplayOrder(editPackage.display_order.toString());
-        setValidFrom(editPackage.valid_from ? new Date(editPackage.valid_from).toISOString().split('T')[0] : '');
-        setValidUntil(editPackage.valid_until ? new Date(editPackage.valid_until).toISOString().split('T')[0] : '');
+        setValidFrom(
+          editPackage.valid_from
+            ? new Date(editPackage.valid_from).toISOString().split('T')[0]
+            : '',
+        );
+        setValidUntil(
+          editPackage.valid_until
+            ? new Date(editPackage.valid_until).toISOString().split('T')[0]
+            : '',
+        );
         setMaxRedemptions(editPackage.max_redemptions?.toString() || '');
         setIsActive(editPackage.is_active);
-        setSelectedServiceIds(editPackage.services.map(s => s.id));
+        setSelectedServiceIds(editPackage.services.map((s) => s.id));
         setPreviewUrl(editPackage.image_url);
       } else {
         setName('');
@@ -118,8 +131,10 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
     },
     onError: (err: any) => {
       console.error('Submit package error:', err);
-      setError(err.response?.data?.message || err.message || 'Failed to save package. Please try again.');
-    }
+      setError(
+        err.response?.data?.message || err.message || 'Failed to save package. Please try again.',
+      );
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -130,7 +145,8 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
   };
 
   const isSubmitting = mutation.isPending;
-  const isSubmitDisabled = isSubmitting || selectedServiceIds.length < 2 || !name || !price || Number(price) <= 0;
+  const isSubmitDisabled =
+    isSubmitting || selectedServiceIds.length < 2 || !name || !price || Number(price) <= 0;
 
   const layoutId = editPackage ? `package-bg-${editPackage.id}` : 'package-bg-new';
   const imgLayoutId = editPackage ? `package-img-${editPackage.id}` : 'package-img-new';
@@ -148,24 +164,36 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
             className="fixed inset-0 bg-canvas/80 backdrop-blur-sm pointer-events-auto"
             onClick={() => onOpenChange(false)}
           />
-          
+
           <motion.div
             layoutId={layoutId}
             transition={morphTransition}
             className="bg-surface-card w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg border border-hairline relative z-10 pointer-events-auto flex flex-col"
           >
             <div className="sticky top-0 z-20 flex justify-between items-center bg-surface-card/95 backdrop-blur-md px-10 py-6 border-b border-hairline">
-              <motion.h2 layoutId={titleLayoutId} className="display-lg text-ink" transition={morphTransition}>
+              <motion.h2
+                layoutId={titleLayoutId}
+                className="display-lg text-ink"
+                transition={morphTransition}
+              >
                 {editPackage ? 'Edit Package' : 'New Package'}
               </motion.h2>
-              <button type="button" onClick={() => onOpenChange(false)} className="w-8 h-8 rounded-md bg-surface-soft flex items-center justify-center text-ink hover:bg-hairline-soft transition-colors">
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="w-8 h-8 rounded-md bg-surface-soft flex items-center justify-center text-ink hover:bg-hairline-soft transition-colors"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-10 space-y-10">
               {error && (
-                <motion.div initial={{opacity: 0, height: 0}} animate={{opacity: 1, height: 'auto'}} className="p-4 bg-accent-red-soft text-ink utility-xs font-bold rounded-md border border-accent-red/20">
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="p-4 bg-accent-red-soft text-ink utility-xs font-bold rounded-md border border-accent-red/20"
+                >
                   {error}
                 </motion.div>
               )}
@@ -175,14 +203,25 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
                 {/* Featured Image */}
                 <div className="space-y-4">
                   <Label className="utility-xs text-mute">Featured Image</Label>
-                  <motion.div layoutId={imgLayoutId} transition={morphTransition} className="relative aspect-square w-full rounded-md border border-hairline overflow-hidden bg-surface-soft/30 group hover:border-primary/40 transition-colors">
+                  <motion.div
+                    layoutId={imgLayoutId}
+                    transition={morphTransition}
+                    className="relative aspect-square w-full rounded-md border border-hairline overflow-hidden bg-surface-soft/30 group hover:border-primary/40 transition-colors"
+                  >
                     {previewUrl ? (
                       <>
-                        <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                        <img
+                          src={previewUrl}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
                         <div className="absolute inset-0 bg-ink/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <button
                             type="button"
-                            onClick={() => { setImageFile(null); setPreviewUrl(null); }}
+                            onClick={() => {
+                              setImageFile(null);
+                              setPreviewUrl(null);
+                            }}
                             className="p-3 bg-white/20 backdrop-blur-md rounded-md text-white hover:bg-accent-red transition-colors"
                           >
                             <X className="h-5 w-5" />
@@ -194,7 +233,12 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
                         <Upload className="h-10 w-10 text-primary/40 stroke-[1.5] mb-4" />
                         <span className="utility-xs text-primary mb-1">Upload File</span>
                         <span className="body-xs text-mute">or drag and drop</span>
-                        <input type="file" className="sr-only" accept="image/*" onChange={handleFileChange} />
+                        <input
+                          type="file"
+                          className="sr-only"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                        />
                       </label>
                     )}
                   </motion.div>
@@ -206,7 +250,7 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
                     <Label className="utility-xs text-mute">Package Name *</Label>
                     <Input
                       value={name}
-                      onChange={e => setName(e.target.value)}
+                      onChange={(e) => setName(e.target.value)}
                       required
                       className="rounded-md border-hairline h-12 heading-md text-ink focus-visible:ring-primary bg-transparent"
                     />
@@ -215,7 +259,7 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
                     <Label className="utility-xs text-mute">Description</Label>
                     <Textarea
                       value={description}
-                      onChange={e => setDescription(e.target.value)}
+                      onChange={(e) => setDescription(e.target.value)}
                       rows={5}
                       className="rounded-md border-hairline body-md text-body focus-visible:ring-primary resize-none bg-transparent"
                     />
@@ -247,9 +291,11 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
                     <div className="relative">
                       <span className="absolute left-4 top-3 text-primary heading-md">₱</span>
                       <Input
-                        type="number" min="1" step="0.01"
+                        type="number"
+                        min="1"
+                        step="0.01"
                         value={price}
-                        onChange={e => setPrice(e.target.value)}
+                        onChange={(e) => setPrice(e.target.value)}
                         required
                         className="rounded-md border-hairline h-12 pl-10 heading-md text-ink focus-visible:ring-primary bg-transparent"
                       />
@@ -260,17 +306,17 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
                     <Input
                       type="number"
                       value={displayOrder}
-                      onChange={e => setDisplayOrder(e.target.value)}
+                      onChange={(e) => setDisplayOrder(e.target.value)}
                       className="rounded-md border-hairline h-12 body-md text-ink focus-visible:ring-primary bg-transparent"
                     />
                   </div>
-                  
+
                   <div className="space-y-4">
                     <Label className="utility-xs text-mute">Available From</Label>
                     <Input
                       type="date"
                       value={validFrom}
-                      onChange={e => setValidFrom(e.target.value)}
+                      onChange={(e) => setValidFrom(e.target.value)}
                       className="rounded-md border-hairline h-12 body-md text-ink focus-visible:ring-primary bg-transparent"
                     />
                   </div>
@@ -279,7 +325,7 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
                     <Input
                       type="date"
                       value={validUntil}
-                      onChange={e => setValidUntil(e.target.value)}
+                      onChange={(e) => setValidUntil(e.target.value)}
                       className="rounded-md border-hairline h-12 body-md text-ink focus-visible:ring-primary bg-transparent"
                     />
                   </div>
@@ -289,7 +335,7 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
                     <Input
                       type="number"
                       value={maxRedemptions}
-                      onChange={e => setMaxRedemptions(e.target.value)}
+                      onChange={(e) => setMaxRedemptions(e.target.value)}
                       className="rounded-md border-hairline h-12 body-md text-ink focus-visible:ring-primary bg-transparent"
                       placeholder="Unlimited"
                     />
@@ -307,18 +353,21 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
               </div>
 
               <div className="flex justify-end gap-4 pt-10 sticky bottom-0 bg-surface-card/95 backdrop-blur-md pb-10 -mx-10 px-10 border-t border-hairline z-20">
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="rounded-md h-10 px-6 utility-xs text-ink border-hairline hover:bg-surface-soft">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  className="rounded-md h-10 px-6 utility-xs text-ink border-hairline hover:bg-surface-soft"
+                >
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitDisabled}
-                  className="btn-primary px-10"
-                >
+                <Button type="submit" disabled={isSubmitDisabled} className="btn-primary px-10">
                   {isSubmitting ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : editPackage ? (
+                    'Save Package'
                   ) : (
-                    editPackage ? 'Save Package' : 'Create Package'
+                    'Create Package'
                   )}
                 </Button>
               </div>
@@ -327,6 +376,5 @@ export default function PackageBuilderDialog({ open, onOpenChange, editPackage, 
         </div>
       )}
     </AnimatePresence>
-
   );
 }

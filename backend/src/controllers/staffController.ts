@@ -92,22 +92,36 @@ export const getAllStaff = async (req: Request, res: Response) => {
  * Create a new staff member
  */
 export const createStaff = async (req: Request, res: Response) => {
-  const { fullName, email, phone, password, username, specializations, basePayPerWeek, dailyTarget, sssNumber, pagIbigNumber, profilePictureUrl, role } = req.body;
+  const {
+    fullName,
+    email,
+    phone,
+    password,
+    username,
+    specializations,
+    basePayPerWeek,
+    dailyTarget,
+    sssNumber,
+    pagIbigNumber,
+    profilePictureUrl,
+    role,
+  } = req.body;
 
   try {
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          { username },
-          { email: email || undefined },
-          { phone: phone || undefined },
-        ],
+        OR: [{ username }, { email: email || undefined }, { phone: phone || undefined }],
       },
     });
 
     if (existingUser) {
-      return sendError(res, 'USER_ALREADY_EXISTS', 'A user with this username, email, or phone already exists.', 400);
+      return sendError(
+        res,
+        'USER_ALREADY_EXISTS',
+        'A user with this username, email, or phone already exists.',
+        400,
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password || 'password123', 10);
@@ -126,8 +140,8 @@ export const createStaff = async (req: Request, res: Response) => {
           create: {
             full_name: fullName,
             specializations,
-            base_pay_per_week: basePayPerWeek ? parseFloat(basePayPerWeek) : 2500.00,
-            daily_target: dailyTarget ? parseFloat(dailyTarget) : 6000.00,
+            base_pay_per_week: basePayPerWeek ? parseFloat(basePayPerWeek) : 2500.0,
+            daily_target: dailyTarget ? parseFloat(dailyTarget) : 6000.0,
           },
         },
       },
@@ -136,16 +150,22 @@ export const createStaff = async (req: Request, res: Response) => {
       },
     });
 
-    await logSystemAction(req as AuthRequest, 'STAFF_CREATED', 'Staff', newUser.id, { message: 'Created staff profile' });
+    await logSystemAction(req as AuthRequest, 'STAFF_CREATED', 'Staff', newUser.id, {
+      message: 'Created staff profile',
+    });
 
-    return sendSuccess(res, {
-      message: 'Staff member created successfully',
-      data: {
-        id: newUser.id,
-        fullName: newUser.staff_profile?.full_name,
-        email: newUser.email,
+    return sendSuccess(
+      res,
+      {
+        message: 'Staff member created successfully',
+        data: {
+          id: newUser.id,
+          fullName: newUser.staff_profile?.full_name,
+          email: newUser.email,
+        },
       },
-    }, 201);
+      201,
+    );
   } catch (error: unknown) {
     console.error('Create staff error:', error);
     const message = error instanceof Error ? error.message : 'Failed to create staff member';
@@ -160,10 +180,23 @@ export const updateStaff = async (req: Request, res: Response) => {
   const { id } = req.params;
   const idStr = (Array.isArray(id) ? id[0] : id) as string;
   const idNum = parseInt(idStr);
-  
+
   // Use validatedBody from Zod middleware if available
   const body = (req as AuthRequest).validatedBody || req.body;
-  const { fullName, email, phone, password, isActive, specializations, basePayPerWeek, dailyTarget, sssNumber, pagIbigNumber, profilePictureUrl, role } = body;
+  const {
+    fullName,
+    email,
+    phone,
+    password,
+    isActive,
+    specializations,
+    basePayPerWeek,
+    dailyTarget,
+    sssNumber,
+    pagIbigNumber,
+    profilePictureUrl,
+    role,
+  } = body;
 
   try {
     const data: Prisma.UserUpdateInput = {
@@ -179,15 +212,27 @@ export const updateStaff = async (req: Request, res: Response) => {
           update: {
             full_name: fullName,
             specializations,
-            base_pay_per_week: (basePayPerWeek !== undefined && basePayPerWeek !== null) ? parseFloat(basePayPerWeek as any) : undefined,
-            daily_target: (dailyTarget !== undefined && dailyTarget !== null) ? parseFloat(dailyTarget as any) : undefined,
+            base_pay_per_week:
+              basePayPerWeek !== undefined && basePayPerWeek !== null
+                ? parseFloat(basePayPerWeek as any)
+                : undefined,
+            daily_target:
+              dailyTarget !== undefined && dailyTarget !== null
+                ? parseFloat(dailyTarget as any)
+                : undefined,
           },
           create: {
             full_name: fullName || 'New Staff',
             specializations: specializations || 'General',
-            base_pay_per_week: (basePayPerWeek !== undefined && basePayPerWeek !== null) ? parseFloat(basePayPerWeek as any) : 2500.00,
-            daily_target: (dailyTarget !== undefined && dailyTarget !== null) ? parseFloat(dailyTarget as any) : 6000.00,
-          }
+            base_pay_per_week:
+              basePayPerWeek !== undefined && basePayPerWeek !== null
+                ? parseFloat(basePayPerWeek as any)
+                : 2500.0,
+            daily_target:
+              dailyTarget !== undefined && dailyTarget !== null
+                ? parseFloat(dailyTarget as any)
+                : 6000.0,
+          },
         },
       },
     };
@@ -204,7 +249,9 @@ export const updateStaff = async (req: Request, res: Response) => {
       },
     });
 
-    await logSystemAction(req as AuthRequest, 'STAFF_UPDATED', 'Staff', idNum, { message: 'Updated staff profile' });
+    await logSystemAction(req as AuthRequest, 'STAFF_UPDATED', 'Staff', idNum, {
+      message: 'Updated staff profile',
+    });
 
     res.json({
       success: true,
@@ -246,11 +293,17 @@ export const getStaffSchedule = async (req: Request, res: Response) => {
 export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
   try {
     const staffIdParam = req.validatedParams?.id ?? req.params.id;
-    const staffId = typeof staffIdParam === 'number' ? staffIdParam : parseInt(String(staffIdParam), 10);
+    const staffId =
+      typeof staffIdParam === 'number' ? staffIdParam : parseInt(String(staffIdParam), 10);
     const { schedules } = req.validatedBody ?? req.body;
 
     // Use a transaction to update all schedules for the staff
-    type ScheduleItem = { day_of_week: number; start_time: string; end_time: string; is_active: boolean };
+    type ScheduleItem = {
+      day_of_week: number;
+      start_time: string;
+      end_time: string;
+      is_active: boolean;
+    };
 
     // Normalize time to HH:MM:SS format
     const normalizeTime = (time: string) => {
@@ -264,13 +317,13 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
       (schedules as ScheduleItem[]).map((s: ScheduleItem) =>
         prisma.staffSchedule.upsert({
           // NOTE: staff_day_unique key requires prisma generate after migration
-            // Temporary workaround pending prisma generate
-            where: {
-              staff_day_unique: {
-                staff_id: staffId,
-                day_of_week: s.day_of_week,
-              }
+          // Temporary workaround pending prisma generate
+          where: {
+            staff_day_unique: {
+              staff_id: staffId,
+              day_of_week: s.day_of_week,
             },
+          },
           update: {
             start_time: normalizeTime(s.start_time),
             end_time: normalizeTime(s.end_time),
@@ -283,11 +336,13 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
             end_time: normalizeTime(s.end_time),
             is_active: s.is_active,
           },
-        })
-      )
+        }),
+      ),
     );
 
-    await logSystemAction(req as AuthRequest, 'SCHEDULE_UPDATED', 'Staff', staffId, { message: 'Updated staff schedule' });
+    await logSystemAction(req as AuthRequest, 'SCHEDULE_UPDATED', 'Staff', staffId, {
+      message: 'Updated staff schedule',
+    });
 
     res.json({ success: true, message: 'Schedule updated successfully' });
   } catch (error: unknown) {

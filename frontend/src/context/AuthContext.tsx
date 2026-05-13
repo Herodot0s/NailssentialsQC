@@ -1,12 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import apiClient from '../api/apiClient';
+import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
+import apiClient, { setTokenProvider } from '../api/apiClient';
 import type { User } from '@/types/User';
+
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (userData: User, tokens: { accessToken: string; refreshToken: string }) => void;
+  login: (userData: User) => void;
+
   logout: () => void;
   updateUser: (userData: User) => void;
 }
@@ -14,69 +17,67 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isLoaded: isClerkLoaded, isSignedIn } = useUser();
+  const { getToken, signOut } = useClerkAuth();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const verifySession = async () => {
-      const accessToken = localStorage.getItem('accessToken');
-      if (!accessToken) {
+    setTokenProvider(() => getToken());
+  }, [getToken]);
+
+  useEffect(() => {
+    const syncUser = async () => {
+      if (!isClerkLoaded) return;
+
+      if (!isSignedIn) {
+        setUser(null);
         setIsLoading(false);
         return;
       }
 
       try {
+        // Give the interceptor a moment to get the token provider
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Fetch/Sync user with local DB
         const response = await apiClient.get('/auth/me');
         if (response.data.success) {
           setUser(response.data.data.user);
-          localStorage.setItem('user', JSON.stringify(response.data.data.user));
         }
-      } catch (error: unknown) {
-        console.error('Session verification failed:', error);
-        if (error instanceof Error) {
-          console.error('Error details:', error.message);
-        }
-        // Error interceptor in apiClient will handle 401s and refresh
+      } catch (error) {
+        console.error('Failed to sync user with local DB:', error);
+        // If it's a 404/500, we might want to sign out or show an error
       } finally {
         setIsLoading(false);
       }
     };
 
-    verifySession();
-  }, []);
+    syncUser();
+  }, [isClerkLoaded, isSignedIn]);
 
-  const login = (userData: User, tokens: { accessToken: string; refreshToken: string }) => {
+
+  const login = (userData: User) => {
+    // This will be handled by Clerk components now, but we keep the signature for compatibility
     setUser(userData);
-
-    // For MVP, we'll stick to localStorage as per simplified PRD "Remember Me"
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('accessToken', tokens.accessToken);
-    localStorage.setItem('refreshToken', tokens.refreshToken);
   };
 
-  const logout = () => {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (refreshToken) {
-      apiClient.post('/auth/logout', { refreshToken }).catch(console.error);
-    }
 
+  const logout = async () => {
+    await signOut();
     setUser(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
   };
 
   const updateUser = (userData: User) => {
     setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
-        isLoading,
+        isAuthenticated: !!isSignedIn && !!user,
+        isLoading: !isClerkLoaded || isLoading,
         login,
         logout,
         updateUser,
@@ -87,6 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -94,3 +96,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

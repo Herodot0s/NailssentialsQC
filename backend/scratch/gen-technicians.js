@@ -11,7 +11,7 @@ async function main() {
     { name: 'Sarah Miller', spec: 'Nails, Eyelashes', username: 'sarah_tech' },
     { name: 'Michael Chen', spec: 'Hair Styling, Color', username: 'michael_hair' },
     { name: 'Liza Ramos', spec: 'Waxing, Nails', username: 'liza_wax' },
-    { name: 'Angela Cruz', spec: 'Nails, Spa', username: 'angela_nails' }
+    { name: 'Angela Cruz', spec: 'Nails, Spa', username: 'angela_nails' },
   ];
 
   for (const s of staffData) {
@@ -28,26 +28,28 @@ async function main() {
             full_name: s.name,
             specializations: s.spec,
             base_pay_per_week: 2500,
-            daily_target: 6000
-          }
-        }
+            daily_target: 6000,
+          },
+        },
       },
-      include: { staff_profile: true }
+      include: { staff_profile: true },
     });
     console.log(`Created/Ensured technician: ${s.name} (${s.username})`);
   }
 
   // Also check if existing staff from ACCOUNTS.md have profiles
-  const existingStaff = await prisma.user.findMany({ where: { role: Role.staff, staff_profile: null } });
+  const existingStaff = await prisma.user.findMany({
+    where: { role: Role.staff, staff_profile: null },
+  });
   for (const u of existingStaff) {
     await prisma.staffProfile.create({
       data: {
         user_id: u.id,
-        full_name: u.username.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        full_name: u.username.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
         specializations: 'General Tech',
         base_pay_per_week: 2500,
-        daily_target: 6000
-      }
+        daily_target: 6000,
+      },
     });
     console.log(`Added missing profile for existing staff: ${u.username}`);
   }
@@ -56,5 +58,5 @@ async function main() {
 }
 
 main()
-  .catch(e => console.error(e))
+  .catch((e) => console.error(e))
   .finally(() => prisma.$disconnect());

@@ -16,9 +16,7 @@ describe('Auth Integration Tests', () => {
   describe('POST /api/v1/auth/register', () => {
     it('should register a new user successfully', async () => {
       const payload = getUniquePayload();
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(payload);
+      const response = await request(app).post('/api/v1/auth/register').send(payload);
 
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
@@ -44,9 +42,7 @@ describe('Auth Integration Tests', () => {
     it('should fail with duplicate email', async () => {
       const payload = getUniquePayload();
       // Register first user
-      await request(app)
-        .post('/api/v1/auth/register')
-        .send(payload);
+      await request(app).post('/api/v1/auth/register').send(payload);
 
       // Try registering again with same email
       const response = await request(app)
@@ -65,18 +61,14 @@ describe('Auth Integration Tests', () => {
     let userPayload: any;
     beforeEach(async () => {
       userPayload = getUniquePayload();
-      await request(app)
-        .post('/api/v1/auth/register')
-        .send(userPayload);
+      await request(app).post('/api/v1/auth/register').send(userPayload);
     });
 
     it('should login successfully with valid credentials', async () => {
-      const response = await request(app)
-        .post('/api/v1/auth/login')
-        .send({
-          identifier: userPayload.email,
-          password: userPayload.password,
-        });
+      const response = await request(app).post('/api/v1/auth/login').send({
+        identifier: userPayload.email,
+        password: userPayload.password,
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -85,12 +77,10 @@ describe('Auth Integration Tests', () => {
     });
 
     it('should fail login with wrong password', async () => {
-      const response = await request(app)
-        .post('/api/v1/auth/login')
-        .send({
-          identifier: userPayload.email,
-          password: 'WrongPassword123',
-        });
+      const response = await request(app).post('/api/v1/auth/login').send({
+        identifier: userPayload.email,
+        password: 'WrongPassword123',
+      });
 
       expect(response.status).toBe(401);
       expect(response.body.error.code).toBe('INVALID_CREDENTIALS');
@@ -101,9 +91,7 @@ describe('Auth Integration Tests', () => {
     let tokens: { accessToken: string; refreshToken: string };
 
     beforeEach(async () => {
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(getUniquePayload());
+      const response = await request(app).post('/api/v1/auth/register').send(getUniquePayload());
       tokens = response.body.data.tokens;
     });
 
@@ -116,7 +104,7 @@ describe('Auth Integration Tests', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.tokens.accessToken).toBeDefined();
       expect(response.body.data.tokens.refreshToken).toBeDefined();
-      
+
       const newRefreshToken = response.body.data.tokens.refreshToken;
       expect(newRefreshToken).not.toBe(tokens.refreshToken);
 
@@ -124,7 +112,7 @@ describe('Auth Integration Tests', () => {
       const reuseResponse = await request(app)
         .post('/api/v1/auth/refresh')
         .send({ refreshToken: tokens.refreshToken });
-      
+
       expect(reuseResponse.status).toBe(403);
       expect(reuseResponse.body.error.code).toBe('INVALID_TOKEN');
     });
@@ -140,7 +128,7 @@ describe('Auth Integration Tests', () => {
       const refreshResponse = await request(app)
         .post('/api/v1/auth/refresh')
         .send({ refreshToken: tokens.refreshToken });
-      
+
       expect(refreshResponse.status).toBe(403);
     });
 

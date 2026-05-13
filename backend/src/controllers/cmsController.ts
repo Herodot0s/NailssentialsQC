@@ -34,17 +34,23 @@ export const saveSettings = async (req: AuthRequest, res: Response) => {
     const { settings } = req.body;
 
     if (!Array.isArray(settings) || settings.length === 0) {
-      return res.status(400).json({ success: false, message: 'settings must be a non-empty array' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'settings must be a non-empty array' });
     }
 
     if (settings.length > 50) {
-      return res.status(400).json({ success: false, message: 'Too many settings in one request (max 50)' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Too many settings in one request (max 50)' });
     }
 
     // Validate each item
     for (const s of settings) {
       if (!s.section || !s.key || s.value === undefined) {
-        return res.status(400).json({ success: false, message: 'Each setting must have section, key, and value' });
+        return res
+          .status(400)
+          .json({ success: false, message: 'Each setting must have section, key, and value' });
       }
     }
 
@@ -54,7 +60,7 @@ export const saveSettings = async (req: AuthRequest, res: Response) => {
         where: { section_key_unique: { section: s.section, key: s.key } },
         update: { value: s.value },
         create: { section: s.section, key: s.key, value: s.value },
-      })
+      }),
     );
 
     await prisma.$transaction(ops);
@@ -108,7 +114,9 @@ export const createContent = async (req: AuthRequest, res: Response) => {
     const { type, title, body, sort_order, is_active } = req.body;
 
     if (!type || !title || !body) {
-      return res.status(400).json({ success: false, message: 'type, title, and body are required' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'type, title, and body are required' });
     }
 
     if (type !== 'faq' && type !== 'policy') {

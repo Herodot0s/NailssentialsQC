@@ -12,7 +12,11 @@ interface CartContextType {
     packagePrice: number;
     services: Array<{ id: number; name: string; price: number; duration: number }>;
   }) => void;
-  updateChildService: (packageId: number, childServiceId: number, updates: Partial<CartChildService>) => void;
+  updateChildService: (
+    packageId: number,
+    childServiceId: number,
+    updates: Partial<CartChildService>,
+  ) => void;
   isPackageInCart: (packageId: number) => boolean;
   clearCart: () => void;
   totalPrice: number;
@@ -48,9 +52,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateCartItem = (serviceId: number, updates: Partial<CartItem>) => {
-    setCart((prev) =>
-      prev.map((i) => (i.serviceId === serviceId ? { ...i, ...updates } : i)),
-    );
+    setCart((prev) => prev.map((i) => (i.serviceId === serviceId ? { ...i, ...updates } : i)));
   };
 
   const addPackageToCart = (pkg: {
@@ -60,7 +62,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     services: Array<{ id: number; name: string; price: number; duration: number }>;
   }) => {
     setCart((prev) => {
-      const exists = prev.some(item => item.type === 'package' && item.packageId === pkg.packageId);
+      const exists = prev.some(
+        (item) => item.type === 'package' && item.packageId === pkg.packageId,
+      );
       if (exists) return prev;
 
       const newItem: CartItem = {
@@ -72,7 +76,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         packageId: pkg.packageId,
         packageName: pkg.packageName,
         packagePrice: pkg.packagePrice,
-        childServices: pkg.services.map(s => ({
+        childServices: pkg.services.map((s) => ({
           serviceId: s.id,
           serviceName: s.name,
           price: s.price,
@@ -83,22 +87,28 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const updateChildService = (packageId: number, childServiceId: number, updates: Partial<CartChildService>) => {
-    setCart((prev) => prev.map(item => {
-      if (item.type === 'package' && item.packageId === packageId) {
-        return {
-          ...item,
-          childServices: item.childServices?.map(child =>
-            child.serviceId === childServiceId ? { ...child, ...updates } : child
-          ),
-        };
-      }
-      return item;
-    }));
+  const updateChildService = (
+    packageId: number,
+    childServiceId: number,
+    updates: Partial<CartChildService>,
+  ) => {
+    setCart((prev) =>
+      prev.map((item) => {
+        if (item.type === 'package' && item.packageId === packageId) {
+          return {
+            ...item,
+            childServices: item.childServices?.map((child) =>
+              child.serviceId === childServiceId ? { ...child, ...updates } : child,
+            ),
+          };
+        }
+        return item;
+      }),
+    );
   };
 
   const isPackageInCart = (packageId: number) => {
-    return cart.some(item => item.type === 'package' && item.packageId === packageId);
+    return cart.some((item) => item.type === 'package' && item.packageId === packageId);
   };
 
   const clearCart = () => setCart([]);
@@ -109,7 +119,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     return sum + item.price;
   }, 0);
-  
+
   const totalDuration = cart.reduce((sum, item) => sum + item.duration, 0);
 
   return (

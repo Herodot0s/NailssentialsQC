@@ -56,9 +56,7 @@ export const DateFilterBar: React.FC<DateFilterBarProps> = ({
         value={dateRange.preset === 'custom' ? dateRange.endDate : ''}
         onChange={(e) => onCustomRange(dateRange.startDate, e.target.value)}
         className={`border px-3 py-2 text-sm rounded-none min-h-[44px] focus:outline-none focus:ring-1 focus:ring-primary ${
-          !isValid && dateRange.preset === 'custom'
-            ? 'border-red-400'
-            : 'border-gray-200'
+          !isValid && dateRange.preset === 'custom' ? 'border-red-400' : 'border-gray-200'
         }`}
         placeholder="End date"
       />

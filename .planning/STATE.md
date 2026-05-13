@@ -68,4 +68,4 @@ Resume file: None
 | 20260511-fix-typescript-errors | Fix 6 TypeScript errors (unused variables, type mismatches, useRef init) | 2026-05-11 | local | [20260511-fix-typescript-errors](./quick/20260511-fix-typescript-errors/) |
 | 20260512-booking-sync-conflict-fix | Booking Sync and Conflict Prevention (Industry Grade) | 2026-05-12 | local | [20260512-booking-sync-conflict-fix](./quick/20260512-booking-sync-conflict-fix/) |
 | 20260512-fix-ts-errors | Fix 23 TypeScript build errors across dashboard components | 2026-05-12 | local | [20260512-fix-ts-errors](./quick/20260512-fix-ts-errors/) |
-
+| 20260512-frappe-payroll-integration | Frappe-style Payroll Mechanism Integration | 2026-05-12 | COMPLETED | [.planning/quick/20260512-frappe-payroll-integration/](./quick/20260512-frappe-payroll-integration/) |

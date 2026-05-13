@@ -71,13 +71,11 @@ describe('Exhibit Controller', () => {
     });
 
     it('should return 401 without token', async () => {
-      const response = await request(app)
-        .post('/api/v1/exhibits')
-        .send({
-          title: 'Unauthorized',
-          image_url: 'https://example.com/unauthorized.png',
-          staff_id: staffId,
-        });
+      const response = await request(app).post('/api/v1/exhibits').send({
+        title: 'Unauthorized',
+        image_url: 'https://example.com/unauthorized.png',
+        staff_id: staffId,
+      });
 
       expect(response.status).toBe(401);
     });

@@ -31,5 +31,5 @@ This document tracks all system revisions requested after manual and manager's t
 - In Employee Files, the Compliance should be Pag-ibig number and SSS for Staff. Remove TIN number.
 - In deductions, that should be weekly deductions. Research on how the manager will add deductions to the staff weekly. Research -> plan -> implement.
 - Research how weekly payout for staff should be edited and made by the manager. Research -> plan -> implement.
-- Research modules of https://github.com/frappe/hrms that are relevant to our system (like the payroll) to improve overall operations.
+- Research payroll logic requirements based on staff interviews to improve overall operations.
 - Research other open-source modules that are relevant to our system.

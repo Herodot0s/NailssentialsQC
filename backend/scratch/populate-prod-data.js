@@ -8,40 +8,55 @@ async function main() {
   const siteSettings = [
     { section: 'contact', key: 'business_name', value: 'NailssentialsQC' },
     { section: 'contact', key: 'phone', value: '09625036220' },
-    { section: 'contact', key: 'address', value: '133 Bukidnon St. corner Nueva Ecija Bago Bantay Quezon City.' },
+    {
+      section: 'contact',
+      key: 'address',
+      value: '133 Bukidnon St. corner Nueva Ecija Bago Bantay Quezon City.',
+    },
     { section: 'contact', key: 'facebook', value: '@nailssentialqc' },
     { section: 'contact', key: 'instagram', value: '@nailssentialqc' },
     { section: 'hero', key: 'headline', value: 'Elevate Your Natural Beauty' },
-    { section: 'hero', key: 'subheadline', value: 'Professional Nail, Hair, and Spa services in the heart of Quezon City.' }
+    {
+      section: 'hero',
+      key: 'subheadline',
+      value: 'Professional Nail, Hair, and Spa services in the heart of Quezon City.',
+    },
   ];
 
   for (const s of siteSettings) {
     await prisma.siteSettings.upsert({
       where: { section_key_unique: { section: s.section, key: s.key } },
       update: { value: s.value },
-      create: s
+      create: s,
     });
   }
 
   // 2. Categories
-  const categories = ['Nail Care', 'Spa Treatments', 'Hair Services', 'Waxing & Threading', 'Eyelash Services'];
+  const categories = [
+    'Nail Care',
+    'Spa Treatments',
+    'Hair Services',
+    'Waxing & Threading',
+    'Eyelash Services',
+  ];
   const catMap = {};
   for (const name of categories) {
     const dbCat = await prisma.serviceCategory.upsert({
       where: { name },
       update: {},
-      create: { name }
+      create: { name },
     });
     catMap[name] = dbCat.id;
   }
 
   // 3. Helper for Services
   async function addSvc(catName, name, price, duration = 60) {
-    const priceNum = typeof price === 'string' ? parseFloat(price.replace('Php ', '').replace(',', '')) : price;
+    const priceNum =
+      typeof price === 'string' ? parseFloat(price.replace('Php ', '').replace(',', '')) : price;
     return prisma.service.upsert({
       where: { name_category_id: { name, category_id: catMap[catName] } },
       update: { price: priceNum, duration_minutes: duration, is_active: true },
-      create: { name, price: priceNum, duration_minutes: duration, category_id: catMap[catName] }
+      create: { name, price: priceNum, duration_minutes: duration, category_id: catMap[catName] },
     });
   }
 
@@ -95,7 +110,7 @@ async function main() {
     { name: 'Eyebrow Waxing', f: 250, m: 300 },
     { name: 'Under Arm Waxing', f: 250, m: 300 },
     { name: 'Full Legs Wax', f: 700, m: 750 },
-    { name: 'Brazillian Wax', f: 800, m: 950 }
+    { name: 'Brazillian Wax', f: 800, m: 950 },
   ];
   for (const w of waxData) {
     await addSvc('Waxing & Threading', `${w.name} (Female)`, w.f, 30);
@@ -112,12 +127,36 @@ async function main() {
 
   // --- PACKAGES ---
   const packageData = [
-    { name: 'Package A: Foot spa + Mani + Pedi', price: 700, items: ['Classic Foot Spa', 'Classic Manicure', 'Classic Pedicure'] },
-    { name: 'Package B: Foot spa + Manigel + Pedi', price: 1000, items: ['Classic Foot Spa', 'Gel Manicure', 'Classic Pedicure'] },
-    { name: 'Package C: Foot spa + Mani + Pedigel', price: 1050, items: ['Classic Foot Spa', 'Classic Manicure', 'Gel Pedicure'] },
-    { name: 'Package D: Foot spa + Manigel + Pedigel', price: 1350, items: ['Classic Foot Spa', 'Gel Manicure', 'Gel Pedicure'] },
-    { name: 'Package I: Softgel Nail Extension + Pedigel', price: 1900, items: ['Nail Extension (Any Length)', 'Gel Pedicure'] },
-    { name: 'Package J: Softgel Ext + Foot Spa + Pedigel', price: 2250, items: ['Nail Extension (Any Length)', 'Classic Foot Spa', 'Gel Pedicure'] }
+    {
+      name: 'Package A: Foot spa + Mani + Pedi',
+      price: 700,
+      items: ['Classic Foot Spa', 'Classic Manicure', 'Classic Pedicure'],
+    },
+    {
+      name: 'Package B: Foot spa + Manigel + Pedi',
+      price: 1000,
+      items: ['Classic Foot Spa', 'Gel Manicure', 'Classic Pedicure'],
+    },
+    {
+      name: 'Package C: Foot spa + Mani + Pedigel',
+      price: 1050,
+      items: ['Classic Foot Spa', 'Classic Manicure', 'Gel Pedicure'],
+    },
+    {
+      name: 'Package D: Foot spa + Manigel + Pedigel',
+      price: 1350,
+      items: ['Classic Foot Spa', 'Gel Manicure', 'Gel Pedicure'],
+    },
+    {
+      name: 'Package I: Softgel Nail Extension + Pedigel',
+      price: 1900,
+      items: ['Nail Extension (Any Length)', 'Gel Pedicure'],
+    },
+    {
+      name: 'Package J: Softgel Ext + Foot Spa + Pedigel',
+      price: 2250,
+      items: ['Nail Extension (Any Length)', 'Classic Foot Spa', 'Gel Pedicure'],
+    },
   ];
 
   for (const pkg of packageData) {
@@ -132,17 +171,17 @@ async function main() {
       if (dbPkg) {
         dbPkg = await prisma.servicePackage.update({
           where: { id: dbPkg.id },
-          data: { price: pkg.price, is_active: true }
+          data: { price: pkg.price, is_active: true },
         });
       } else {
         dbPkg = await prisma.servicePackage.create({
-          data: { name: pkg.name, price: pkg.price, is_active: true }
+          data: { name: pkg.name, price: pkg.price, is_active: true },
         });
       }
-      
+
       await prisma.servicePackageItem.deleteMany({ where: { package_id: dbPkg.id } });
       await prisma.servicePackageItem.createMany({
-        data: serviceIds.map(sid => ({ package_id: dbPkg.id, service_id: sid }))
+        data: serviceIds.map((sid) => ({ package_id: dbPkg.id, service_id: sid })),
       });
     }
   }
@@ -151,5 +190,5 @@ async function main() {
 }
 
 main()
-  .catch(e => console.error(e))
+  .catch((e) => console.error(e))
   .finally(() => prisma.$disconnect());

@@ -1,8 +1,20 @@
 import React from 'react';
 import {
-  DollarSign, Users, Clock, Wallet, Star, Settings,
-  Image as ImageIcon, FileText, Package, BarChart2, Mail,
-  Heart, TrendingUp, History
+  DollarSign,
+  Users,
+  Clock,
+  Wallet,
+  Star,
+  Settings,
+  Image as ImageIcon,
+  FileText,
+  Package,
+  BarChart2,
+  Mail,
+  Heart,
+  TrendingUp,
+  History,
+  Wrench,
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import type { ManagerSidebarProps, ActiveView } from './types';
@@ -18,14 +30,14 @@ const groups: SidebarGroup[] = [
     items: [
       { id: 'advanced-analytics', label: 'Dashboard', icon: BarChart2 },
       { id: 'messages', label: 'Internal Inbox', icon: Mail },
-    ]
+    ],
   },
   {
     title: 'Customer Relations',
     items: [
       { id: 'customer-care', label: 'Client Care', icon: Heart },
       { id: 'reviews', label: 'Public Reviews', icon: Star },
-    ]
+    ],
   },
   {
     title: 'Operations',
@@ -34,7 +46,7 @@ const groups: SidebarGroup[] = [
       { id: 'packages', label: 'Packages', icon: Package },
       { id: 'exhibits', label: 'Exhibit Gallery', icon: ImageIcon },
       { id: 'content', label: 'Website CMS', icon: FileText },
-    ]
+    ],
   },
   {
     title: 'Personnel',
@@ -45,23 +57,34 @@ const groups: SidebarGroup[] = [
       { id: 'service-history', label: 'Service Log', icon: History },
       { id: 'deductions', label: 'Deductions', icon: Wallet },
       { id: 'payroll', label: 'Salary Slips', icon: DollarSign },
-    ]
-  }
+      { id: 'payroll-setup', label: 'Payroll Config', icon: Wrench },
+    ],
+  },
 ];
 
-export const ManagerSidebar: React.FC<ManagerSidebarProps> = ({ 
-  activeView, 
+export const ManagerSidebar: React.FC<ManagerSidebarProps> = ({
+  activeView,
   onViewChange,
   collapsed = false,
   mobileOpen = false,
-  onMobileToggle
+  onMobileToggle,
 }) => {
   const SidebarContent = (
-    <aside className={`bg-white border-r border-gray-100 flex flex-col h-full transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
+    <aside
+      className={`bg-white border-r border-gray-100 flex flex-col h-full transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}
+    >
       {/* Brand block */}
-      <div className={`border-b border-gray-50 transition-all ${collapsed ? 'p-4 text-center' : 'p-8'}`}>
+      <div
+        className={`border-b border-gray-50 transition-all ${collapsed ? 'p-4 text-center' : 'p-8'}`}
+      >
         <h2 className="font-serif text-xl font-bold text-primary tracking-tight">
-          {collapsed ? 'N' : <>Nailssentials<span className="italic font-light">QC</span></>}
+          {collapsed ? (
+            'N'
+          ) : (
+            <>
+              Nailssentials<span className="italic font-light">QC</span>
+            </>
+          )}
         </h2>
         {!collapsed && (
           <p className="text-[8px] uppercase tracking-[0.3em] font-bold text-muted-foreground mt-1 opacity-60">
@@ -80,7 +103,7 @@ export const ManagerSidebar: React.FC<ManagerSidebarProps> = ({
               </h3>
             )}
             <div className="space-y-1">
-              {group.items.map(item => (
+              {group.items.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => {
@@ -96,9 +119,11 @@ export const ManagerSidebar: React.FC<ManagerSidebarProps> = ({
                   }`}
                   title={collapsed ? item.label : undefined}
                 >
-                  <item.icon className={`h-4 w-4 shrink-0 stroke-[1.5] ${
-                    activeView === item.id ? 'text-white' : 'group-hover:text-primary'
-                  }`} />
+                  <item.icon
+                    className={`h-4 w-4 shrink-0 stroke-[1.5] ${
+                      activeView === item.id ? 'text-white' : 'group-hover:text-primary'
+                    }`}
+                  />
                   {!collapsed && <span>{item.label}</span>}
                 </button>
               ))}
@@ -108,7 +133,9 @@ export const ManagerSidebar: React.FC<ManagerSidebarProps> = ({
       </nav>
 
       {/* System status footer */}
-      <div className={`border-t border-gray-50 space-y-4 transition-all ${collapsed ? 'p-4' : 'p-6'}`}>
+      <div
+        className={`border-t border-gray-50 space-y-4 transition-all ${collapsed ? 'p-4' : 'p-6'}`}
+      >
         <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3 px-2'}`}>
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
             <Settings className="h-4 w-4 text-primary animate-spin-slow" />
@@ -130,9 +157,7 @@ export const ManagerSidebar: React.FC<ManagerSidebarProps> = ({
   return (
     <>
       {/* Desktop & Tablet View */}
-      <div className="hidden md:block sticky top-0 h-screen shrink-0">
-        {SidebarContent}
-      </div>
+      <div className="hidden md:block sticky top-0 h-screen shrink-0">{SidebarContent}</div>
 
       {/* Mobile View */}
       <Sheet open={mobileOpen} onOpenChange={onMobileToggle}>

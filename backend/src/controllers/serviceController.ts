@@ -11,7 +11,7 @@ export const getCategories = async (req: Request, res: Response) => {
     if (showAll !== 'true') {
       where.is_active = true;
     }
-    
+
     if (parentId !== undefined) {
       where.parent_id = parentId === 'null' ? null : parseInt(parentId as string);
     }
@@ -30,7 +30,8 @@ export const getCategories = async (req: Request, res: Response) => {
     });
   } catch (error: unknown) {
     console.error('Get categories error:', error);
-    const message = error instanceof Error ? error.message : 'Something went wrong while fetching categories';
+    const message =
+      error instanceof Error ? error.message : 'Something went wrong while fetching categories';
     return res.status(500).json({
       success: false,
       error: {
@@ -69,7 +70,7 @@ export const getServices = async (req: Request, res: Response) => {
       where,
       include: {
         category: {
-          include: { parent: true }
+          include: { parent: true },
         },
       },
       orderBy: { name: 'asc' },
@@ -81,7 +82,8 @@ export const getServices = async (req: Request, res: Response) => {
     });
   } catch (error: unknown) {
     console.error('Get services error:', error);
-    const message = error instanceof Error ? error.message : 'Something went wrong while fetching services';
+    const message =
+      error instanceof Error ? error.message : 'Something went wrong while fetching services';
     return res.status(500).json({
       success: false,
       error: {
@@ -96,11 +98,11 @@ export const createCategory = async (req: Request, res: Response) => {
   try {
     const { name, description, is_active, parentId } = req.body;
     const category = await prisma.serviceCategory.create({
-      data: { 
-        name, 
-        description, 
+      data: {
+        name,
+        description,
         is_active: is_active !== undefined ? is_active : true,
-        parent_id: parentId ? parseInt(parentId) : null 
+        parent_id: parentId ? parseInt(parentId) : null,
       },
     });
     return res.status(201).json({ success: true, data: category });
@@ -117,11 +119,11 @@ export const updateCategory = async (req: AuthRequest, res: Response) => {
     const { name, description, is_active, parentId } = req.body;
     const category = await prisma.serviceCategory.update({
       where: { id },
-      data: { 
-        name, 
-        description, 
+      data: {
+        name,
+        description,
         is_active,
-        parent_id: parentId !== undefined ? (parentId ? parseInt(parentId) : null) : undefined
+        parent_id: parentId !== undefined ? (parentId ? parseInt(parentId) : null) : undefined,
       },
     });
     return res.status(200).json({ success: true, data: category });
@@ -134,7 +136,17 @@ export const updateCategory = async (req: AuthRequest, res: Response) => {
 
 export const createService = async (req: Request, res: Response) => {
   try {
-    const { name, description, duration_minutes, price, category_id, is_popular, image_url, experience_description, what_to_expect } = req.body;
+    const {
+      name,
+      description,
+      duration_minutes,
+      price,
+      category_id,
+      is_popular,
+      image_url,
+      experience_description,
+      what_to_expect,
+    } = req.body;
 
     const parsedPrice = parseFloat(price);
     const parsedDuration = parseInt(duration_minutes);
@@ -160,7 +172,7 @@ export const createService = async (req: Request, res: Response) => {
         duration_minutes: parsedDuration,
         price: parsedPrice,
         category: {
-          connect: { id: parseInt(category_id) }
+          connect: { id: parseInt(category_id) },
         },
         is_popular: is_popular || false,
         image_url,
@@ -178,7 +190,18 @@ export const createService = async (req: Request, res: Response) => {
 export const updateService = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.validatedParams ?? {};
-    const { name, description, duration_minutes, price, category_id, is_popular, is_active, image_url, experience_description, what_to_expect } = req.body;
+    const {
+      name,
+      description,
+      duration_minutes,
+      price,
+      category_id,
+      is_popular,
+      is_active,
+      image_url,
+      experience_description,
+      what_to_expect,
+    } = req.body;
 
     const parsedPrice = price !== undefined ? parseFloat(price) : undefined;
     const parsedDuration = duration_minutes !== undefined ? parseInt(duration_minutes) : undefined;
@@ -204,9 +227,11 @@ export const updateService = async (req: AuthRequest, res: Response) => {
         description,
         duration_minutes: parsedDuration,
         price: parsedPrice,
-        category: category_id ? {
-          connect: { id: parseInt(category_id) }
-        } : undefined,
+        category: category_id
+          ? {
+              connect: { id: parseInt(category_id) },
+            }
+          : undefined,
         is_popular,
         is_active,
         image_url,

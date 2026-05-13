@@ -7,7 +7,12 @@ interface KpiCardsProps {
 }
 
 const formatCurrency = (v: number) =>
-  new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(v);
+  new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(v);
 
 interface CardConfig {
   label: string;

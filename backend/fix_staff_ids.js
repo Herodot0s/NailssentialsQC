@@ -4,7 +4,7 @@ async function main() {
   // Fix: appointments where staff_id is User.id instead of StaffProfile.id
   const items = await prisma.appointmentItem.findMany({
     include: { staff: true, appointment: true },
-    where: { staff_id: { gt: 0 } }
+    where: { staff_id: { gt: 0 } },
   });
 
   let fixed = 0;
@@ -15,7 +15,9 @@ async function main() {
     // Actually let me re-check: the seed has staff_id=2 for appointments, and StaffProfile id=2 belongs to Test Manager user_id=3
     // So staff_id=2 means StaffProfile.id=2, which is correct
     // The problem is when a customer books with User.id passed as staffId
-    console.log(`Item ${item.id}: staff_id=${item.staff_id}, staff.user_id=${item.staff?.user_id}, staff.id=${item.staff?.id}`);
+    console.log(
+      `Item ${item.id}: staff_id=${item.staff_id}, staff.user_id=${item.staff?.user_id}, staff.id=${item.staff?.id}`,
+    );
   }
 
   // Now let's check the User.id vs StaffProfile.id mapping
@@ -30,14 +32,18 @@ async function main() {
   for (const item of items) {
     // If staff.user_id == item.staff_id, then the appointmentItem stores User.id, needs fix
     if (item.staff && item.staff.user_id === item.staff_id) {
-      console.log(`Fixing appointmentItem ${item.id}: staff_id ${item.staff_id} (User.id) -> ${item.staff.id} (StaffProfile.id)`);
+      console.log(
+        `Fixing appointmentItem ${item.id}: staff_id ${item.staff_id} (User.id) -> ${item.staff.id} (StaffProfile.id)`,
+      );
       await prisma.appointmentItem.update({
         where: { id: item.id },
-        data: { staff_id: item.staff.id }
+        data: { staff_id: item.staff.id },
       });
       fixed++;
     }
   }
   console.log(`\nFixed ${fixed} appointmentItems`);
 }
-main().catch(console.error).finally(() => process.exit(0));
+main()
+  .catch(console.error)
+  .finally(() => process.exit(0));

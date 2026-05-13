@@ -36,7 +36,9 @@ export const submitReview = async (req: AuthRequest, res: Response) => {
     });
 
     if (!item) {
-      return res.status(400).json({ success: false, message: 'Invalid appointment item or item not completed' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid appointment item or item not completed' });
     }
 
     const review = await prisma.review.create({
@@ -54,7 +56,9 @@ export const submitReview = async (req: AuthRequest, res: Response) => {
   } catch (error: unknown) {
     console.error('Submit review error:', error);
     if (error instanceof Error && 'code' in error && (error as PrismaError).code === 'P2002') {
-       return res.status(400).json({ success: false, message: 'You have already reviewed this item' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'You have already reviewed this item' });
     }
     return res.status(500).json({ success: false, message: 'Failed to submit review' });
   }

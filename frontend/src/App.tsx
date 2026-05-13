@@ -17,6 +17,7 @@ import StaffDashboard from './pages/StaffDashboard';
 import CustomerAppointments from './pages/CustomerAppointments';
 import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
+import GuestRoute from './components/GuestRoute';
 import Navbar from './components/Navbar';
 import './App.css';
 
@@ -38,20 +39,75 @@ function AppRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* Public Routes */}
-        <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
-        <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
-        <Route path="/services" element={<PageTransition><Services /></PageTransition>} />
-        <Route path="/gallery" element={<PageTransition><Gallery /></PageTransition>} />
-        <Route path="/policies" element={<PageTransition><PoliciesPage /></PageTransition>} />
-        <Route path="/booking" element={<PageTransition><Booking /></PageTransition>} />
+        <Route
+          path="/register"
+          element={
+            <GuestRoute>
+              <PageTransition>
+                <Register />
+              </PageTransition>
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <GuestRoute>
+              <PageTransition>
+                <Login />
+              </PageTransition>
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/services"
+          element={
+            <PageTransition>
+              <Services />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/gallery"
+          element={
+            <PageTransition>
+              <Gallery />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/policies"
+          element={
+            <PageTransition>
+              <PoliciesPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/booking"
+          element={
+            <PageTransition>
+              <Booking />
+            </PageTransition>
+          }
+        />
 
         {/* Protected Routes */}
-        <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+        <Route
+          path="/"
+          element={
+            <PageTransition>
+              <Home />
+            </PageTransition>
+          }
+        />
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute allowedRoles={['staff', 'manager']}>
-              <PageTransition><StaffDashboard /></PageTransition>
+              <PageTransition>
+                <StaffDashboard />
+              </PageTransition>
             </ProtectedRoute>
           }
         />
@@ -59,7 +115,9 @@ function AppRoutes() {
           path="/appointments"
           element={
             <ProtectedRoute allowedRoles={['customer']}>
-              <PageTransition><CustomerAppointments /></PageTransition>
+              <PageTransition>
+                <CustomerAppointments />
+              </PageTransition>
             </ProtectedRoute>
           }
         />
@@ -67,7 +125,9 @@ function AppRoutes() {
           path="/profile"
           element={
             <ProtectedRoute allowedRoles={['customer']}>
-              <PageTransition><Profile /></PageTransition>
+              <PageTransition>
+                <Profile />
+              </PageTransition>
             </ProtectedRoute>
           }
         />
@@ -75,7 +135,9 @@ function AppRoutes() {
           path="/manage-services"
           element={
             <ProtectedRoute allowedRoles={['manager']}>
-              <PageTransition><ManageServices /></PageTransition>
+              <PageTransition>
+                <ManageServices />
+              </PageTransition>
             </ProtectedRoute>
           }
         />
@@ -83,7 +145,9 @@ function AppRoutes() {
           path="/manager"
           element={
             <ProtectedRoute allowedRoles={['manager']}>
-              <PageTransition><ManagerDashboard /></PageTransition>
+              <PageTransition>
+                <ManagerDashboard />
+              </PageTransition>
             </ProtectedRoute>
           }
         />
@@ -91,7 +155,9 @@ function AppRoutes() {
           path="/manage-exhibits"
           element={
             <ProtectedRoute allowedRoles={['manager']}>
-              <PageTransition><ManageExhibits /></PageTransition>
+              <PageTransition>
+                <ManageExhibits />
+              </PageTransition>
             </ProtectedRoute>
           }
         />
@@ -103,19 +169,30 @@ function AppRoutes() {
   );
 }
 
+import { ClerkProvider } from '@clerk/clerk-react';
+
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY');
+}
+
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <CartProvider>
-          <Router>
-            <Navbar />
-            <AppRoutes />
-          </Router>
-        </CartProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <CartProvider>
+            <Router>
+              <Navbar />
+              <AppRoutes />
+            </Router>
+          </CartProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ClerkProvider>
   );
 }
 
 export default App;
+

@@ -32,7 +32,7 @@ export default defineConfig([
       'react-hooks/set-state-in-effect': 'off',
       'react-hooks/purity': 'off',
       '@typescript-eslint/no-unused-vars': 'warn',
-      'react-hooks/exhaustive-deps': 'warn'
+      'react-hooks/exhaustive-deps': 'warn',
     },
   },
 ]);

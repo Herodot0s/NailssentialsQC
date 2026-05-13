@@ -93,13 +93,31 @@ async function seedAll() {
 
     // 5. Create Services
     const svcGelNails = await prisma.service.create({
-      data: { name: 'Gel Nail Art', price: 800, duration_minutes: 90, category_id: catNails.id, is_popular: true },
+      data: {
+        name: 'Gel Nail Art',
+        price: 800,
+        duration_minutes: 90,
+        category_id: catNails.id,
+        is_popular: true,
+      },
     });
     const svcFrenchTips = await prisma.service.create({
-      data: { name: 'French Tips', price: 500, duration_minutes: 60, category_id: catManicure.id, is_popular: true },
+      data: {
+        name: 'French Tips',
+        price: 500,
+        duration_minutes: 60,
+        category_id: catManicure.id,
+        is_popular: true,
+      },
     });
     const svcClassicMani = await prisma.service.create({
-      data: { name: 'Classic Manicure', price: 350, duration_minutes: 45, category_id: catManicure.id, is_popular: true },
+      data: {
+        name: 'Classic Manicure',
+        price: 350,
+        duration_minutes: 45,
+        category_id: catManicure.id,
+        is_popular: true,
+      },
     });
     const svcSpaPedi = await prisma.service.create({
       data: { name: 'Spa Pedicure', price: 600, duration_minutes: 75, category_id: catPedicure.id },
@@ -110,37 +128,43 @@ async function seedAll() {
     const exhibits = [
       {
         title: 'Midnight Bloom Collection',
-        image_url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&q=80&w=1200',
+        image_url:
+          'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&q=80&w=1200',
         staff_id: staff1Profile.id,
         service_id: svcGelNails.id,
       },
       {
         title: 'French Elegance Reimagined',
-        image_url: 'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&q=80&w=1200',
+        image_url:
+          'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&q=80&w=1200',
         staff_id: staff2Profile.id,
         service_id: svcFrenchTips.id,
       },
       {
         title: 'Golden Hour Ombré',
-        image_url: 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&q=80&w=1200',
+        image_url:
+          'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&q=80&w=1200',
         staff_id: staff1Profile.id,
         service_id: svcGelNails.id,
       },
       {
         title: 'Crystal Lattice Design',
-        image_url: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=1200',
+        image_url:
+          'https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=1200',
         staff_id: managerProfile.id,
         service_id: svcClassicMani.id,
       },
       {
         title: 'Cherry Blossom Spring Set',
-        image_url: 'https://images.unsplash.com/photo-1604902396830-aca29e19b067?auto=format&fit=crop&q=80&w=1200',
+        image_url:
+          'https://images.unsplash.com/photo-1604902396830-aca29e19b067?auto=format&fit=crop&q=80&w=1200',
         staff_id: staff2Profile.id,
         service_id: svcSpaPedi.id,
       },
       {
         title: 'Minimalist Geometry',
-        image_url: 'https://images.unsplash.com/photo-1610992015732-2449b76344bc?auto=format&fit=crop&q=80&w=1200',
+        image_url:
+          'https://images.unsplash.com/photo-1610992015732-2449b76344bc?auto=format&fit=crop&q=80&w=1200',
         staff_id: staff1Profile.id,
         service_id: svcFrenchTips.id,
       },
@@ -160,7 +184,6 @@ async function seedAll() {
     console.log('  Staff 2:  anareyes / staff123');
     console.log('  Customer: testcustomer / customer123');
     console.log(`\n  6 exhibits seeded across 4 services.`);
-
   } catch (error) {
     console.error('Seed error:', error);
   } finally {

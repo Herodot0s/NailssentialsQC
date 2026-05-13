@@ -75,11 +75,47 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
     }
     const userId = currentUser.userId;
     const role = currentUser.role;
-    const { items, date, notes, customerId, isWalkIn } = req.validatedBody || req.body;
+    const { items, date, notes, customerId, isWalkIn, phone } = req.validatedBody || req.body;
 
     if (!userId) {
       return sendError(res, 'UNAUTHORIZED', 'User not authenticated', 401);
     }
+
+    // MANDATORY: Check if user is verified and has a phone number
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { customer_profile: true },
+    });
+
+    if (!user) {
+      return sendError(res, 'USER_NOT_FOUND', 'User not found', 404);
+    }
+
+    // 1. Verification check (Every user must be verified)
+    // We assume 'is_active' or similar field tracks verification status if synced from Clerk
+    // Or we check if clerk_id is present and they are authenticated.
+    // For now, let's assume if they have a clerk_id and are active, they are verified.
+    if (!user.is_active) {
+      return sendError(res, 'USER_NOT_VERIFIED', 'Your account must be verified before booking.', 403);
+    }
+
+    // 2. Mandatory phone number check (SET ASIDE FOR NOW per user request)
+    /*
+    const userPhone = user.phone || phone;
+    if (!userPhone) {
+      return sendError(res, 'PHONE_REQUIRED', 'A phone number is required to make an appointment.', 400);
+    }
+
+    // If phone was provided in request but not in DB, update DB
+    if (phone && !user.phone) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { phone },
+      });
+    }
+    */
+
+
 
     if (!items || !Array.isArray(items) || items.length === 0 || !date) {
       return sendError(res, 'MISSING_FIELDS', 'Missing required fields (items, date)', 400);
@@ -112,21 +148,30 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
         }
         targetCustomerId = walkInCustomer.id;
       } else {
-        return sendError(res, 'CUSTOMER_ID_REQUIRED', 'Customer ID is required for staff bookings', 400);
+        return sendError(
+          res,
+          'CUSTOMER_ID_REQUIRED',
+          'Customer ID is required for staff bookings',
+          400,
+        );
       }
     } else {
-      const customerProfile = await prisma.customerProfile.findUnique({ where: { user_id: userId } });
+      const customerProfile = await prisma.customerProfile.findUnique({
+        where: { user_id: userId },
+      });
       if (!customerProfile) {
         return sendError(res, 'CUSTOMER_PROFILE_NOT_FOUND', 'Customer profile not found', 404);
       }
       targetCustomerId = customerProfile.id;
     }
 
-    const packageIds = [...new Set(items.filter((i: any) => i.packageId).map((i: any) => i.packageId))];
+    const packageIds = [
+      ...new Set(items.filter((i: any) => i.packageId).map((i: any) => i.packageId)),
+    ];
     for (const pkgId of packageIds as number[]) {
       const pkg = await prisma.servicePackage.findUnique({
         where: { id: pkgId },
-        include: { appointment_items: { select: { id: true } } }
+        include: { appointment_items: { select: { id: true } } },
       });
 
       if (!pkg) {
@@ -148,7 +193,12 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
         const currentBookings = pkg.appointment_items.length;
         const newBookingsForThisPkg = items.filter((i: any) => i.packageId === pkgId).length;
         if (currentBookings + newBookingsForThisPkg > pkg.max_redemptions) {
-          return sendError(res, 'BAD_REQUEST', `Package "${pkg.name}" has reached its booking limit`, 400);
+          return sendError(
+            res,
+            'BAD_REQUEST',
+            `Package "${pkg.name}" has reached its booking limit`,
+            400,
+          );
         }
       }
     }
@@ -191,7 +241,9 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
             (endDateTime > exStart && endDateTime <= exEnd) ||
             (startDateTime <= exStart && endDateTime >= exEnd)
           ) {
-            throw new Error(`Technician ${staffProfile.full_name || staffId} is already booked at ${startTime}. Please select another time or technician.`);
+            throw new Error(
+              `Technician ${staffProfile.full_name || staffId} is already booked at ${startTime}. Please select another time or technician.`,
+            );
           }
         }
       }
@@ -267,13 +319,16 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
           if (staff) {
             // D-05: Customers cannot notify other users
             if (callerRole === 'customer' && callerId !== staff.user_id) {
-              console.warn('[notification] Blocked cross-user notification attempt', { callerId, targetId: staff.user_id });
+              console.warn('[notification] Blocked cross-user notification attempt', {
+                callerId,
+                targetId: staff.user_id,
+              });
             } else {
               createNotification(
                 staff.user_id,
                 'NEW_BOOKING',
                 'New Appointment Assigned',
-                `You have a new booking on ${format(new Date(date), 'MMM dd')} at ${item.startTime}.`
+                `You have a new booking on ${format(new Date(date), 'MMM dd')} at ${item.startTime}.`,
               );
             }
           }
@@ -297,20 +352,20 @@ export const cancelAppointment = async (req: AuthRequest, res: Response) => {
     if (!currentUser) {
       return sendError(res, 'UNAUTHORIZED', 'User not authenticated', 401);
     }
-    
+
     const appointmentId = (req as any).validatedParams.id;
     const { reason } = req.validatedBody || req.body;
-    
+
     const appointment = await prisma.appointment.findUnique({
       where: { id: appointmentId },
-      include: { 
+      include: {
         customer: true,
         items: {
           include: {
-            staff: true
-          }
-        }
-      }
+            staff: true,
+          },
+        },
+      },
     });
 
     if (!appointment) {
@@ -319,7 +374,9 @@ export const cancelAppointment = async (req: AuthRequest, res: Response) => {
 
     // Check if user has permission to cancel
     if (currentUser.role === 'customer') {
-      const customer = await prisma.customerProfile.findUnique({ where: { user_id: currentUser.userId } });
+      const customer = await prisma.customerProfile.findUnique({
+        where: { user_id: currentUser.userId },
+      });
       if (!customer || appointment.customer_id !== customer.id) {
         return sendError(res, 'FORBIDDEN', 'You can only cancel your own appointments', 403);
       }
@@ -327,22 +384,29 @@ export const cancelAppointment = async (req: AuthRequest, res: Response) => {
 
     // Only pending or confirmed appointments can be cancelled
     if (appointment.status !== 'pending' && appointment.status !== 'confirmed') {
-      return sendError(res, 'INVALID_STATUS', `Cannot cancel appointment in "${appointment.status}" status`, 400);
+      return sendError(
+        res,
+        'INVALID_STATUS',
+        `Cannot cancel appointment in "${appointment.status}" status`,
+        400,
+      );
     }
 
     // Perform cancellation in a transaction
     await prisma.$transaction(async (tx) => {
       await tx.appointment.update({
         where: { id: appointmentId },
-        data: { 
+        data: {
           status: 'cancelled',
-          notes: reason ? `${appointment.notes || ''}\nCancellation Reason: ${reason}` : appointment.notes
-        }
+          notes: reason
+            ? `${appointment.notes || ''}\nCancellation Reason: ${reason}`
+            : appointment.notes,
+        },
       });
 
       await tx.appointmentItem.updateMany({
         where: { appointment_id: appointmentId },
-        data: { status: 'cancelled' }
+        data: { status: 'cancelled' },
       });
 
       await tx.systemLog.create({
@@ -351,8 +415,8 @@ export const cancelAppointment = async (req: AuthRequest, res: Response) => {
           action: 'CANCEL_APPOINTMENT',
           entity_type: 'appointment',
           entity_id: appointmentId,
-          details: { reason, cancelledBy: currentUser.role }
-        }
+          details: { reason, cancelledBy: currentUser.role },
+        },
       });
     });
 
@@ -360,7 +424,7 @@ export const cancelAppointment = async (req: AuthRequest, res: Response) => {
     (async () => {
       try {
         const staffToNotify = new Set<number>();
-        appointment.items.forEach(item => {
+        appointment.items.forEach((item) => {
           if (item.staff) staffToNotify.add(item.staff.user_id);
         });
 
@@ -369,7 +433,7 @@ export const cancelAppointment = async (req: AuthRequest, res: Response) => {
             staffUserId,
             'APPOINTMENT_CANCELLED',
             'Appointment Cancelled',
-            `The appointment on ${format(new Date(appointment.appointment_date), 'MMM dd')} has been cancelled${reason ? `: ${reason}` : '.'}`
+            `The appointment on ${format(new Date(appointment.appointment_date), 'MMM dd')} has been cancelled${reason ? `: ${reason}` : '.'}`,
           );
         }
       } catch (err) {
@@ -383,4 +447,4 @@ export const cancelAppointment = async (req: AuthRequest, res: Response) => {
     const message = error instanceof Error ? error.message : 'Failed to cancel appointment';
     return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
   }
-};
+};

@@ -1,5 +1,11 @@
 import { Router } from 'express';
-import { submitReview, getStaffReviews, getAllReviews, moderateReview, getPublicReviews } from '../controllers/reviewController';
+import {
+  submitReview,
+  getStaffReviews,
+  getAllReviews,
+  moderateReview,
+  getPublicReviews,
+} from '../controllers/reviewController';
 import { authenticateToken, authorizeRoles } from '../middleware/authMiddleware';
 
 const router = Router();

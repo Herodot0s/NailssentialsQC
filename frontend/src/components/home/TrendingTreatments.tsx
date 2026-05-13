@@ -31,9 +31,7 @@ const TrendingTreatments = ({ services: initialServices }: { services?: Service[
         const response = await getServices();
         if (response.data.success) {
           const services: Service[] = response.data.data;
-          const filtered = services
-            .filter(s => s.is_popular)
-            .slice(0, 4); // Limit to 4 per user request
+          const filtered = services.filter((s) => s.is_popular).slice(0, 4); // Limit to 4 per user request
           setPopularServices(filtered);
         }
       } catch (error) {
@@ -91,7 +89,8 @@ const TrendingTreatments = ({ services: initialServices }: { services?: Service[
             className="max-w-md"
           >
             <p className="text-warm-stone text-lg font-light leading-relaxed">
-              An immersive preview of our most coveted experiences, designed to transition you from the everyday into the extraordinary.
+              An immersive preview of our most coveted experiences, designed to transition you from
+              the everyday into the extraordinary.
             </p>
           </motion.div>
         </div>
@@ -113,8 +112,8 @@ const TrendingTreatments = ({ services: initialServices }: { services?: Service[
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{
-                layout: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { delay: index * 0.1 }
+                layout: { type: 'spring', stiffness: 300, damping: 30 },
+                opacity: { delay: index * 0.1 },
               }}
               className={`relative cursor-pointer group rounded-[2.5rem] overflow-hidden flex-shrink-0 md:flex-shrink
                 ${hoveredIndex === index ? 'md:flex-[3]' : 'md:flex-1'} 
@@ -127,13 +126,18 @@ const TrendingTreatments = ({ services: initialServices }: { services?: Service[
                 transition={{ duration: 0.8, ease: PREMIUM_EASE }}
               >
                 <img
-                  src={service.image_url || `https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&q=80&w=1200&index=${index}`}
+                  src={
+                    service.image_url ||
+                    `https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&q=80&w=1200&index=${index}`
+                  }
                   alt={service.name}
                   className="object-cover w-full h-full grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
                 />
                 {/* Refined Overlays */}
                 <div className="absolute inset-0 bg-gradient-to-t from-charcoal-bark/80 via-charcoal-bark/20 to-transparent" />
-                <div className={`absolute inset-0 bg-kiln-terracotta/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
+                <div
+                  className={`absolute inset-0 bg-kiln-terracotta/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700`}
+                />
               </motion.div>
 
               {/* Content Overlay */}
@@ -177,9 +181,7 @@ const TrendingTreatments = ({ services: initialServices }: { services?: Service[
                           {service.description}
                         </p>
                         <Link to={`/services?id=${service.id}`}>
-                          <Button
-                            className="bg-white text-charcoal-bark hover:bg-bisque-wash rounded-full px-8 py-6 h-auto text-xs font-bold tracking-widest uppercase group/btn"
-                          >
+                          <Button className="bg-white text-charcoal-bark hover:bg-bisque-wash rounded-full px-8 py-6 h-auto text-xs font-bold tracking-widest uppercase group/btn">
                             Details
                             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                           </Button>
@@ -214,8 +216,9 @@ const TrendingTreatments = ({ services: initialServices }: { services?: Service[
         </Link>
       </div>
 
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         .no-scrollbar::-webkit-scrollbar {
           display: none;
         }
@@ -223,7 +226,9 @@ const TrendingTreatments = ({ services: initialServices }: { services?: Service[
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
-      `}} />
+      `,
+        }}
+      />
     </section>
   );
 };

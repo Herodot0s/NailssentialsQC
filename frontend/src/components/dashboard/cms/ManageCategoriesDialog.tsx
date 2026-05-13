@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -111,13 +107,16 @@ export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     onClick={() => setCurrentCategory(cat)}
-                    className={`group relative flex items-center justify-between p-3 px-3.5 rounded-md border transition-all cursor-pointer ${currentCategory?.id === cat.id
-                      ? 'bg-surface-card border-hairline shadow-[0_2px_4px_rgba(0,0,0,0.02)]'
-                      : 'bg-transparent border-transparent hover:bg-surface-soft/40'
-                      }`}
+                    className={`group relative flex items-center justify-between p-3 px-3.5 rounded-md border transition-all cursor-pointer ${
+                      currentCategory?.id === cat.id
+                        ? 'bg-surface-card border-hairline shadow-[0_2px_4px_rgba(0,0,0,0.02)]'
+                        : 'bg-transparent border-transparent hover:bg-surface-soft/40'
+                    }`}
                   >
                     <div className="flex flex-col gap-0.5 overflow-hidden">
-                      <span className={`body-sm truncate ${currentCategory?.id === cat.id ? 'font-semibold text-ink' : 'text-body'}`}>
+                      <span
+                        className={`body-sm truncate ${currentCategory?.id === cat.id ? 'font-semibold text-ink' : 'text-body'}`}
+                      >
                         {cat.name}
                       </span>
                       {!cat.is_active && (
@@ -156,7 +155,11 @@ export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
             {/* Contextual Header */}
             <div className="p-6 pb-4 flex items-center justify-between border-b border-hairline/10">
               <DialogTitle className="heading-sm-mixed text-mute">
-                {currentCategory ? (currentCategory.id ? 'Editing Details' : 'New Creation') : 'Studio Settings'}
+                {currentCategory
+                  ? currentCategory.id
+                    ? 'Editing Details'
+                    : 'New Creation'
+                  : 'Studio Settings'}
               </DialogTitle>
               <Button
                 variant="ghost"
@@ -176,7 +179,7 @@ export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
                     className="max-w-[420px] mx-auto space-y-8"
                   >
                     <div className="space-y-2.5">
@@ -184,25 +187,32 @@ export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
                         {currentCategory.id ? 'Refine Category' : 'Craft Category'}
                       </h3>
                       <p className="body-sm text-body leading-relaxed">
-                        Define how services are organized in your artisan studio. This name will be visible to customers.
+                        Define how services are organized in your artisan studio. This name will be
+                        visible to customers.
                       </p>
                     </div>
 
                     {localError && (
                       <div className="p-4 rounded-md bg-accent-red-soft border border-accent-red/20 flex items-start gap-3">
                         <AlertCircle className="h-4 w-4 text-accent-red shrink-0 mt-0.5" />
-                        <p className="body-sm text-accent-red font-medium leading-tight">{localError}</p>
+                        <p className="body-sm text-accent-red font-medium leading-tight">
+                          {localError}
+                        </p>
                       </div>
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="space-y-5">
                         <div className="space-y-2">
-                          <Label htmlFor="cat_name" className="utility-xs text-mute ml-0.5">Category Name</Label>
+                          <Label htmlFor="cat_name" className="utility-xs text-mute ml-0.5">
+                            Category Name
+                          </Label>
                           <Input
                             id="cat_name"
                             value={currentCategory.name || ''}
-                            onChange={(e) => setCurrentCategory({ ...currentCategory!, name: e.target.value })}
+                            onChange={(e) =>
+                              setCurrentCategory({ ...currentCategory!, name: e.target.value })
+                            }
                             required
                             placeholder="e.g. Signature Spa"
                             className="h-11 bg-canvas/20 border-hairline focus-visible:ring-primary focus-visible:border-primary rounded-md shadow-none body-md transition-all"
@@ -211,13 +221,25 @@ export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
 
                         <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-hairline shadow-sm">
                           <div className="flex flex-col">
-                            <Label htmlFor="cat_active" className="body-strong cursor-pointer text-ink">Booking Visibility</Label>
-                            <span className="caption-sm text-mute">Enable for customer discovery</span>
+                            <Label
+                              htmlFor="cat_active"
+                              className="body-strong cursor-pointer text-ink"
+                            >
+                              Booking Visibility
+                            </Label>
+                            <span className="caption-sm text-mute">
+                              Enable for customer discovery
+                            </span>
                           </div>
                           <Checkbox
                             id="cat_active"
                             checked={currentCategory.is_active}
-                            onCheckedChange={(checked) => setCurrentCategory({ ...currentCategory!, is_active: checked === true })}
+                            onCheckedChange={(checked) =>
+                              setCurrentCategory({
+                                ...currentCategory!,
+                                is_active: checked === true,
+                              })
+                            }
                             className="h-5 w-5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                           />
                         </div>
@@ -231,8 +253,10 @@ export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
                         >
                           {isLoading ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : currentCategory.id ? (
+                            'Save Changes'
                           ) : (
-                            currentCategory.id ? 'Save Changes' : 'Create Category'
+                            'Create Category'
                           )}
                         </Button>
                         <Button
@@ -256,7 +280,8 @@ export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
                     <div className="space-y-2 max-w-[340px]">
                       <h4 className="heading-md text-ink">Artisan Organization</h4>
                       <p className="body-sm text-body leading-relaxed">
-                        Select a category to refine its details, or craft a new one to better organize your studio services.
+                        Select a category to refine its details, or craft a new one to better
+                        organize your studio services.
                       </p>
                     </div>
                     <Button
@@ -272,7 +297,6 @@ export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
             </div>
           </div>
         </div>
-
       </DialogContent>
     </Dialog>
   );

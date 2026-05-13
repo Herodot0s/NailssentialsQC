@@ -21,21 +21,21 @@ export default function PackagesView() {
     queryFn: async () => {
       const response = await getPackages();
       return response.data.data;
-    }
+    },
   });
 
   const toggleMutation = useMutation({
     mutationFn: (args: { id: number; isActive: boolean }) => togglePackage(args.id, args.isActive),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['packages'] });
-    }
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deletePackage(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['packages'] });
-    }
+    },
   });
 
   const handleCreate = () => {
@@ -55,7 +55,11 @@ export default function PackagesView() {
   };
 
   const handleDelete = (pkg: ServicePackage) => {
-    if (window.confirm(`Permanently delete '${pkg.name}'? This cannot be undone. Existing bookings are not affected.`)) {
+    if (
+      window.confirm(
+        `Permanently delete '${pkg.name}'? This cannot be undone. Existing bookings are not affected.`,
+      )
+    ) {
       deleteMutation.mutate(pkg.id);
     }
   };
@@ -67,8 +71,11 @@ export default function PackagesView() {
           <div className="h-8 w-48 bg-surface-soft animate-pulse rounded-md"></div>
           <div className="h-10 w-32 bg-surface-soft animate-pulse rounded-md"></div>
         </div>
-        {[1, 2, 3].map(i => (
-          <div key={i} className="h-24 bg-surface-card border border-hairline animate-pulse rounded-md"></div>
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="h-24 bg-surface-card border border-hairline animate-pulse rounded-md"
+          ></div>
         ))}
       </div>
     );
@@ -122,7 +129,10 @@ export default function PackagesView() {
               className="group flex items-center bg-surface-card border border-hairline p-5 hover:border-body transition-all rounded-md cursor-pointer relative overflow-hidden"
               onClick={() => handleEdit(pkg)}
             >
-              <motion.div layoutId={`package-img-${pkg.id}`} className="h-20 w-20 bg-surface-soft flex items-center justify-center overflow-hidden shrink-0 rounded-md border border-hairline-soft">
+              <motion.div
+                layoutId={`package-img-${pkg.id}`}
+                className="h-20 w-20 bg-surface-soft flex items-center justify-center overflow-hidden shrink-0 rounded-md border border-hairline-soft"
+              >
                 {pkg.image_url ? (
                   <img src={pkg.image_url} alt={pkg.name} className="h-full w-full object-cover" />
                 ) : (
@@ -132,11 +142,20 @@ export default function PackagesView() {
 
               <div className="ml-6 flex-1">
                 <div className="flex items-center gap-3 mb-1.5">
-                  <motion.h3 layoutId={`package-title-${pkg.id}`} className="heading-md text-ink group-hover:text-primary transition-colors">{pkg.name}</motion.h3>
-                  <Badge className={cn(
-                    "rounded-full text-[10px] uppercase tracking-wider py-0.5 px-3 border-none",
-                    pkg.is_active ? "bg-accent-green-soft text-accent-green" : "bg-surface-soft text-mute"
-                  )}>
+                  <motion.h3
+                    layoutId={`package-title-${pkg.id}`}
+                    className="heading-md text-ink group-hover:text-primary transition-colors"
+                  >
+                    {pkg.name}
+                  </motion.h3>
+                  <Badge
+                    className={cn(
+                      'rounded-full text-[10px] uppercase tracking-wider py-0.5 px-3 border-none',
+                      pkg.is_active
+                        ? 'bg-accent-green-soft text-accent-green'
+                        : 'bg-surface-soft text-mute',
+                    )}
+                  >
                     {pkg.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
@@ -144,26 +163,50 @@ export default function PackagesView() {
                   <span className="utility-xs text-mute lowercase">
                     {pkg.services.length} services
                   </span>
-                  <span className="body-xs text-mute">
-                    {pkg.bookings_count} bookings
-                  </span>
+                  <span className="body-xs text-mute">{pkg.bookings_count} bookings</span>
                   <span className="body-xs text-mute/80">
-                    Valid: {pkg.valid_from ? new Date(pkg.valid_from).toLocaleDateString() : 'Now'} – {pkg.valid_until ? new Date(pkg.valid_until).toLocaleDateString() : 'Forever'}
+                    Valid: {pkg.valid_from ? new Date(pkg.valid_from).toLocaleDateString() : 'Now'}{' '}
+                    – {pkg.valid_until ? new Date(pkg.valid_until).toLocaleDateString() : 'Forever'}
                   </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-8 ml-4 pr-4">
                 <div className="text-right">
-                  <div className="heading-lg text-primary">₱{Number(pkg.price).toLocaleString()}</div>
-                  <div className="body-xs text-mute line-through">₱{Number(pkg.services_total).toLocaleString()} value</div>
+                  <div className="heading-lg text-primary">
+                    ₱{Number(pkg.price).toLocaleString()}
+                  </div>
+                  <div className="body-xs text-mute line-through">
+                    ₱{Number(pkg.services_total).toLocaleString()} value
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleEdit(pkg); }} title="Edit Package" className="rounded-md hover:bg-surface-soft text-mute">
+                <div
+                  className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(pkg);
+                    }}
+                    title="Edit Package"
+                    className="rounded-md hover:bg-surface-soft text-mute"
+                  >
                     <Pencil className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleToggle(pkg); }} title={pkg.is_active ? "Deactivate" : "Activate"} className="rounded-md hover:bg-surface-soft">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggle(pkg);
+                    }}
+                    title={pkg.is_active ? 'Deactivate' : 'Activate'}
+                    className="rounded-md hover:bg-surface-soft"
+                  >
                     {pkg.is_active ? (
                       <ToggleRight className="w-5 h-5 text-primary" />
                     ) : (
@@ -171,7 +214,16 @@ export default function PackagesView() {
                     )}
                   </Button>
                   {pkg.bookings_count === 0 && (
-                    <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleDelete(pkg); }} title="Delete Package" className="rounded-md hover:bg-accent-red-soft hover:text-accent-red text-mute">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(pkg);
+                      }}
+                      title="Delete Package"
+                      className="rounded-md hover:bg-accent-red-soft hover:text-accent-red text-mute"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   )}

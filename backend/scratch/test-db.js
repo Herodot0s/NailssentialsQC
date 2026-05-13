@@ -9,17 +9,17 @@ async function main() {
         items: {
           include: {
             service: {
-              include: { category: { select: { name: true } } }
-            }
-          }
+              include: { category: { select: { name: true } } },
+            },
+          },
         },
-        appointment_items: { select: { id: true } }
-      }
+        appointment_items: { select: { id: true } },
+      },
     });
     console.log('Success! Count:', packages.length);
     if (packages.length > 0) {
-        console.log('Sample Name:', packages[0].name);
-        console.log('Items Count:', packages[0].items.length);
+      console.log('Sample Name:', packages[0].name);
+      console.log('Items Count:', packages[0].items.length);
     }
   } catch (err) {
     console.error('Error details:', err);

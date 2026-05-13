@@ -49,8 +49,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ open, onOpenChange, appoint
   if (!appointment || !transaction) return null;
 
   const totalAmount = appointment.services.reduce(
-    (acc: number, s) =>
-      acc + Number(s.price_at_booking || s.service?.price || 0),
+    (acc: number, s) => acc + Number(s.price_at_booking || s.service?.price || 0),
     0,
   );
 

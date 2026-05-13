@@ -4,13 +4,7 @@ import { cn } from '@/lib/utils';
 import { getAvailability, createAppointment, getAllStaff } from '../api/apiClient';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,15 +15,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Calendar,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  Trash2,
-} from 'lucide-react';
+} from '@/components/ui/select';
+import { Calendar, Clock, CheckCircle2, AlertCircle, Loader2, Trash2 } from 'lucide-react';
 import type { Staff } from '@/types/api';
 import CartPackageItem from '@/components/packages/CartPackageItem';
 
@@ -46,10 +33,11 @@ const formatTime = (time24: string) => {
   return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
 };
 
-
 const Booking: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+
+
   const { cart, removeFromCart, updateCartItem, clearCart, totalPrice } = useCart();
 
   const [staffList, setStaffList] = useState<Staff[]>([]);
@@ -61,6 +49,8 @@ const Booking: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [notes, setNotes] = useState('');
+
+
 
   useEffect(() => {
     if (authLoading) return;
@@ -82,10 +72,10 @@ const Booking: React.FC = () => {
 
         const [staffRes, availRes] = await Promise.all([
           getAllStaff(),
-          getAvailability(selectedDate, itemCount)
+          getAvailability(selectedDate, itemCount),
         ]);
         const staffData = staffRes.data.data;
-        const staffItems = Array.isArray(staffData) ? staffData : (staffData?.items || []);
+        const staffItems = Array.isArray(staffData) ? staffData : staffData?.items || [];
         setStaffList(staffItems.filter((s: Staff) => s.role === 'staff' || s.role === 'manager'));
         setSlots(availRes.data.data);
       } catch (err) {
@@ -103,9 +93,9 @@ const Booking: React.FC = () => {
   };
 
   const handleBooking = async () => {
-    const invalidItems = cart.filter(item => {
+    const invalidItems = cart.filter((item) => {
       if (item.type === 'package' && item.childServices) {
-        return item.childServices.some(child => !child.staffId);
+        return item.childServices.some((child) => !child.staffId);
       }
       return !item.staffId;
     });
@@ -115,23 +105,27 @@ const Booking: React.FC = () => {
       return;
     }
 
+
+
     setIsSubmitting(true);
     setError(null);
     try {
-      const itemsToBook = cart.flatMap(item => {
+      const itemsToBook = cart.flatMap((item) => {
         if (item.type === 'package' && item.childServices) {
-          return item.childServices.map(child => ({
+          return item.childServices.map((child) => ({
             serviceId: child.serviceId,
             staffId: child.staffId!,
             startTime: selectedTime,
-            packageId: item.packageId
+            packageId: item.packageId,
           }));
         }
-        return [{
-          serviceId: item.serviceId,
-          staffId: item.staffId!,
-          startTime: selectedTime,
-        }];
+        return [
+          {
+            serviceId: item.serviceId,
+            staffId: item.staffId!,
+            startTime: selectedTime,
+          },
+        ];
       });
 
       await createAppointment({
@@ -139,6 +133,8 @@ const Booking: React.FC = () => {
         date: selectedDate,
         notes,
       });
+
+
       setSuccess(true);
       clearCart();
       setTimeout(() => navigate('/appointments'), 3000);
@@ -173,17 +169,13 @@ const Booking: React.FC = () => {
             <div className="mx-auto w-24 h-24 rounded-full bg-accent-green-soft flex items-center justify-center text-accent-green mb-6">
               <CheckCircle2 className="h-12 w-12" />
             </div>
-            <h2 className="display-lg text-ink">
-              Reserved
-            </h2>
+            <h2 className="display-lg text-ink">Reserved</h2>
           </div>
           <CardContent className="space-y-6">
             <p className="body-md text-body px-8">
               Your appointment has been successfully configured and logged.
             </p>
-            <p className="utility-xs text-primary animate-pulse">
-              Redirecting to logbook...
-            </p>
+            <p className="utility-xs text-primary animate-pulse">Redirecting to logbook...</p>
           </CardContent>
         </Card>
       </div>
@@ -214,7 +206,9 @@ const Booking: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
           <div className="flex-1 space-y-10 md:space-y-12">
             <div className="space-y-4">
-              <h1 className="text-3xl md:text-4xl lg:text-[36px] font-bold text-ink tracking-tight">Service Cart</h1>
+              <h1 className="text-3xl md:text-4xl lg:text-[36px] font-bold text-ink tracking-tight">
+                Service Cart
+              </h1>
             </div>
 
             <div className="space-y-8 md:space-y-10">
@@ -240,17 +234,14 @@ const Booking: React.FC = () => {
                     <Clock className="h-3.5 w-3.5 text-body/40" />
                     Preferred Time
                   </Label>
-                  <Select
-                    value={selectedTime}
-                    onValueChange={(val) => setSelectedTime(val || '')}
-                  >
+                  <Select value={selectedTime} onValueChange={(val) => setSelectedTime(val || '')}>
                     <SelectTrigger className="h-9 rounded-md border-hairline focus:ring-2 focus:ring-accent-blue focus:border-accent-blue body-md bg-surface-card">
                       <SelectValue placeholder="Select Time">
                         {selectedTime ? formatTime(selectedTime) : undefined}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-md border-hairline shadow-none bg-surface-card max-h-64">
-                      {slots.map(slot => (
+                      {slots.map((slot) => (
                         <SelectItem
                           key={slot.time}
                           value={slot.time}
@@ -279,7 +270,14 @@ const Booking: React.FC = () => {
                 <div className="space-y-4">
                   {cart.map((item) => {
                     if (item.type === 'package') {
-                      return <CartPackageItem key={item.serviceId} item={item} staffList={staffList} slots={slots} />;
+                      return (
+                        <CartPackageItem
+                          key={item.serviceId}
+                          item={item}
+                          staffList={staffList}
+                          slots={slots}
+                        />
+                      );
                     }
 
                     const isConfigured = !!item.staffId;
@@ -287,8 +285,10 @@ const Booking: React.FC = () => {
                       <Card
                         key={item.serviceId}
                         className={cn(
-                          "rounded-md border-hairline shadow-none overflow-hidden transition-colors duration-300",
-                          isConfigured ? "bg-surface-card" : "bg-accent-red-soft/10 border-accent-red/20"
+                          'rounded-md border-hairline shadow-none overflow-hidden transition-colors duration-300',
+                          isConfigured
+                            ? 'bg-surface-card'
+                            : 'bg-accent-red-soft/10 border-accent-red/20',
                         )}
                       >
                         <CardContent className="p-0">
@@ -316,10 +316,14 @@ const Booking: React.FC = () => {
                                   <Label className="utility-xs text-body/60">Technician</Label>
                                   <Select
                                     value={item.staffId?.toString()}
-                                    onValueChange={(val) => updateCartItem(item.serviceId, {
-                                      staffId: val ? parseInt(val) : undefined,
-                                      staffName: val ? staffList.find(s => s.id === parseInt(val))?.fullName : undefined
-                                    })}
+                                    onValueChange={(val) =>
+                                      updateCartItem(item.serviceId, {
+                                        staffId: val ? parseInt(val) : undefined,
+                                        staffName: val
+                                          ? staffList.find((s) => s.id === parseInt(val))?.fullName
+                                          : undefined,
+                                      })
+                                    }
                                   >
                                     <SelectTrigger className="rounded-md border-hairline h-11 md:h-9 focus:ring-2 focus:ring-accent-blue bg-surface-card">
                                       <SelectValue placeholder="Select Technician">
@@ -327,8 +331,12 @@ const Booking: React.FC = () => {
                                       </SelectValue>
                                     </SelectTrigger>
                                     <SelectContent className="rounded-md border-hairline shadow-none bg-surface-card">
-                                      {staffList.map(staff => (
-                                        <SelectItem key={staff.id} value={staff.id.toString()} className="py-2">
+                                      {staffList.map((staff) => (
+                                        <SelectItem
+                                          key={staff.id}
+                                          value={staff.id.toString()}
+                                          className="py-2"
+                                        >
                                           <div className="flex flex-col">
                                             <span className="body-md font-semibold">
                                               {staff.fullName}
@@ -346,23 +354,29 @@ const Booking: React.FC = () => {
                                 </div>
                               </div>
                             </div>
-                            <div className={cn(
-                              "p-6 flex items-center justify-between sm:justify-center sm:flex-col min-w-0 sm:min-w-[120px] transition-colors border-t sm:border-t-0 sm:border-l border-hairline",
-                              isConfigured ? "bg-accent-green-soft/30" : "bg-surface-soft/30"
-                            )}>
+                            <div
+                              className={cn(
+                                'p-6 flex items-center justify-between sm:justify-center sm:flex-col min-w-0 sm:min-w-[120px] transition-colors border-t sm:border-t-0 sm:border-l border-hairline',
+                                isConfigured ? 'bg-accent-green-soft/30' : 'bg-surface-soft/30',
+                              )}
+                            >
                               <p className="sm:hidden utility-xs text-body/50">Subtotal</p>
-                              <p className="text-xl font-bold text-ink">₱{item.price.toLocaleString()}</p>
+                              <p className="text-xl font-bold text-ink">
+                                ₱{item.price.toLocaleString()}
+                              </p>
                             </div>
                           </div>
                         </CardContent>
                       </Card>
-                    )
+                    );
                   })}
                 </div>
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="notes" className="utility-xs text-body">Notes & Specifications</Label>
+                <Label htmlFor="notes" className="utility-xs text-body">
+                  Notes & Specifications
+                </Label>
                 <Textarea
                   id="notes"
                   className="min-h-[100px] rounded-md border-hairline focus:ring-2 focus:ring-accent-blue body-md resize-none p-4 bg-surface-card"
@@ -371,6 +385,8 @@ const Booking: React.FC = () => {
                   onChange={(e) => setNotes(e.target.value)}
                 />
               </div>
+
+
             </div>
           </div>
 
@@ -385,19 +401,26 @@ const Booking: React.FC = () => {
                 </CardHeader>
                 <CardContent className="pt-6 space-y-6">
                   <div className="space-y-4">
-                    {cart.map(item => {
+                    {cart.map((item) => {
                       if (item.type === 'package') {
                         return (
                           <div key={item.serviceId} className="space-y-2">
                             <div className="flex justify-between items-baseline">
                               <p className="body-strong text-ink">{item.packageName}</p>
-                              <p className="body-strong text-ink">₱{item.packagePrice?.toLocaleString()}</p>
+                              <p className="body-strong text-ink">
+                                ₱{item.packagePrice?.toLocaleString()}
+                              </p>
                             </div>
                             <div className="pl-3 space-y-1 border-l border-hairline">
-                              {item.childServices?.map(child => (
-                                <div key={child.serviceId} className="flex justify-between items-baseline">
+                              {item.childServices?.map((child) => (
+                                <div
+                                  key={child.serviceId}
+                                  className="flex justify-between items-baseline"
+                                >
                                   <p className="body-sm text-body">{child.serviceName}</p>
-                                  <p className="utility-xs text-body/50">{child.startTime || '--:--'}</p>
+                                  <p className="utility-xs text-body/50">
+                                    {child.startTime || '--:--'}
+                                  </p>
                                 </div>
                               ))}
                             </div>
@@ -409,7 +432,9 @@ const Booking: React.FC = () => {
                         <div key={item.serviceId} className="flex justify-between items-baseline">
                           <div className="space-y-0.5">
                             <p className="body-strong text-ink">{item.serviceName}</p>
-                            <p className="utility-xs text-body/50">{item.staffName || 'Unassigned'} • {item.startTime || '--:--'}</p>
+                            <p className="utility-xs text-body/50">
+                              {item.staffName || 'Unassigned'} • {item.startTime || '--:--'}
+                            </p>
                           </div>
                           <p className="body-strong text-ink">₱{item.price.toLocaleString()}</p>
                         </div>
@@ -424,10 +449,14 @@ const Booking: React.FC = () => {
                     </div>
                     <div className="flex justify-between items-center">
                       <div className="utility-xs text-body/60">Base Time</div>
-                      <div className="body-md font-semibold text-ink">{selectedTime ? formatTime(selectedTime) : 'Not set'}</div>
+                      <div className="body-md font-semibold text-ink">
+                        {selectedTime ? formatTime(selectedTime) : 'Not set'}
+                      </div>
                     </div>
                     <div className="flex justify-between items-center pt-2">
-                      <div className="utility-xs text-accent-blue uppercase tracking-wider">Total</div>
+                      <div className="utility-xs text-accent-blue uppercase tracking-wider">
+                        Total
+                      </div>
                       <div className="text-3xl font-bold text-primary tabular-nums">
                         ₱{totalPrice.toLocaleString()}
                       </div>
@@ -462,7 +491,9 @@ const Booking: React.FC = () => {
               <div className="p-6 bg-surface-soft/20 rounded-md border border-hairline-soft">
                 <p className="body-sm text-body/70 italic">
                   "Precision is the foundation of elegance."
-                  <span className="block mt-1 text-[10px] uppercase font-bold not-italic">— NailssentialsQC</span>
+                  <span className="block mt-1 text-[10px] uppercase font-bold not-italic">
+                    — NailssentialsQC
+                  </span>
                 </p>
               </div>
             </div>

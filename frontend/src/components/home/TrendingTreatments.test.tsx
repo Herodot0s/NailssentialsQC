@@ -13,7 +13,7 @@ describe('TrendingTreatments Component', () => {
     render(
       <MemoryRouter>
         <TrendingTreatments services={mockServices} />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.getByTestId('trending-treatments')).toBeInTheDocument();
     expect(screen.getAllByTestId('service-card')).toHaveLength(2);

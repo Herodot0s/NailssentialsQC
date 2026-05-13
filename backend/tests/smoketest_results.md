@@ -5,42 +5,42 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
 (node:16228) Warning: Failed to load the ES module: C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\jest.config.ts. Make sure to set "type": "module" in the nearest package.json file or use the .mjs extension.
 (Use `node --trace-warnings ...` to show where the warning was created)
-  console.log
-    ◇ injected env (1) from ..\.env.test // tip: ⌘ suppress logs { quiet: true }
+console.log
+◇ injected env (1) from ..\.env.test // tip: ⌘ suppress logs { quiet: true }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env.test // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+console.log
+◇ injected env (0) from .env.test // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+console.log
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+console.log
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
- FAIL  tests/integration/appointments.test.ts (20.274 s)
-  Appointment Integration Tests
-    Task 1: Appointment Creation and Availability Tests
-      POST /api/v1/appointments
-        × should successfully create an appointment as a customer (5667 ms)
-        × should successfully create a walk-in appointment as a manager (3011 ms)
-        × should fail validation for invalid dates (1586 ms)
-      GET /api/v1/appointments/availability
-        × should return availability slots (1611 ms)
-        × should mark slot as unavailable when staff is booked (1638 ms)
-    Task 2: Appointment Completion and Commission Tests
-      × should successfully complete an appointment and create transaction/commissions (1641 ms)
-      × should calculate higher commission rate when specialty quota is met (1678 ms)
-      × should rollback transaction if completion fails (e.g. invalid data) (1659 ms)
+FAIL tests/integration/appointments.test.ts (20.274 s)
+Appointment Integration Tests
+Task 1: Appointment Creation and Availability Tests
+POST /api/v1/appointments
+× should successfully create an appointment as a customer (5667 ms)
+× should successfully create a walk-in appointment as a manager (3011 ms)
+× should fail validation for invalid dates (1586 ms)
+GET /api/v1/appointments/availability
+× should return availability slots (1611 ms)
+× should mark slot as unavailable when staff is booked (1638 ms)
+Task 2: Appointment Completion and Commission Tests
+× should successfully complete an appointment and create transaction/commissions (1641 ms)
+× should calculate higher commission rate when specialty quota is met (1678 ms)
+× should rollback transaction if completion fails (e.g. invalid data) (1659 ms)
 
-  ● Appointment Integration Tests › Task 1: Appointment Creation and Availability Tests › POST /api/v1/appointments › should successfully create an appointment as a customer
+● Appointment Integration Tests › Task 1: Appointment Creation and Availability Tests › POST /api/v1/appointments › should successfully create an appointment as a customer
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -53,16 +53,16 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
           |                                 ^
       115 |         expect(response.body.success).toBe(true);
       116 |         expect(response.body.data.customer_id).toBe(customerId);
-      117 |         
+      117 |
 
       at Object.<anonymous> (tests/integration/appointments.test.ts:114:33)
 
-  ● Appointment Integration Tests › Task 1: Appointment Creation and Availability Tests › POST /api/v1/appointments › should successfully create a walk-in appointment as a manager
+● Appointment Integration Tests › Task 1: Appointment Creation and Availability Tests › POST /api/v1/appointments › should successfully create a walk-in appointment as a manager
 
     TypeError: Cannot read properties of undefined (reading 'tokens')
 
       83 |       });
-      84 |     
+      84 |
     > 85 |     return response.body.data.tokens.accessToken;
          |                               ^
       86 |   };
@@ -72,7 +72,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
       at getTokensForRole (tests/integration/appointments.test.ts:85:31)
       at async Object.<anonymous> (tests/integration/appointments.test.ts:91:22)
 
-  ● Appointment Integration Tests › Task 1: Appointment Creation and Availability Tests › POST /api/v1/appointments › should fail validation for invalid dates
+● Appointment Integration Tests › Task 1: Appointment Creation and Availability Tests › POST /api/v1/appointments › should fail validation for invalid dates
 
     TypeError: Cannot read properties of undefined (reading 'tokens')
 
@@ -86,7 +86,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/appointments.test.ts:46:52)
 
-  ● Appointment Integration Tests › Task 1: Appointment Creation and Availability Tests › GET /api/v1/appointments/availability › should return availability slots
+● Appointment Integration Tests › Task 1: Appointment Creation and Availability Tests › GET /api/v1/appointments/availability › should return availability slots
 
     TypeError: Cannot read properties of undefined (reading 'tokens')
 
@@ -100,7 +100,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/appointments.test.ts:46:52)
 
-  ● Appointment Integration Tests › Task 1: Appointment Creation and Availability Tests › GET /api/v1/appointments/availability › should mark slot as unavailable when staff is booked
+● Appointment Integration Tests › Task 1: Appointment Creation and Availability Tests › GET /api/v1/appointments/availability › should mark slot as unavailable when staff is booked
 
     TypeError: Cannot read properties of undefined (reading 'tokens')
 
@@ -114,7 +114,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/appointments.test.ts:46:52)
 
-  ● Appointment Integration Tests › Task 2: Appointment Completion and Commission Tests › should successfully complete an appointment and create transaction/commissions
+● Appointment Integration Tests › Task 2: Appointment Completion and Commission Tests › should successfully complete an appointment and create transaction/commissions
 
     TypeError: Cannot read properties of undefined (reading 'tokens')
 
@@ -128,7 +128,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/appointments.test.ts:46:52)
 
-  ● Appointment Integration Tests › Task 2: Appointment Completion and Commission Tests › should calculate higher commission rate when specialty quota is met
+● Appointment Integration Tests › Task 2: Appointment Completion and Commission Tests › should calculate higher commission rate when specialty quota is met
 
     TypeError: Cannot read properties of undefined (reading 'tokens')
 
@@ -142,7 +142,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/appointments.test.ts:46:52)
 
-  ● Appointment Integration Tests › Task 2: Appointment Completion and Commission Tests › should rollback transaction if completion fails (e.g. invalid data)
+● Appointment Integration Tests › Task 2: Appointment Completion and Commission Tests › should rollback transaction if completion fails (e.g. invalid data)
 
     TypeError: Cannot read properties of undefined (reading 'tokens')
 
@@ -156,58 +156,58 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/appointments.test.ts:46:52)
 
-  console.log
-    ◇ injected env (1) from ..\.env.test // tip: ◈ secrets for agents [www.dotenvx.com]
+console.log
+◇ injected env (1) from ..\.env.test // tip: ◈ secrets for agents [www.dotenvx.com]
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env.test // tip: ◈ secrets for agents [www.dotenvx.com]
+console.log
+◇ injected env (0) from .env.test // tip: ◈ secrets for agents [www.dotenvx.com]
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+console.log
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+console.log
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    prisma:error 
-    Invalid `prisma.customerProfile.create()` invocation in
-    C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\tests\integration\payroll.test.ts:84:53
-    
+console.log
+prisma:error
+Invalid `prisma.customerProfile.create()` invocation in
+C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\tests\integration\payroll.test.ts:84:53
+
       81   }
       82 });
-      83 
+      83
     → 84 const customer = await prisma.customerProfile.create(
     Unique constraint failed on the fields: (`user_id`)
 
       at Object.Lc (node_modules/@prisma/client/runtime/library.js:21:432)
 
- FAIL  tests/integration/payroll.test.ts (10.944 s)
-  Payroll Integration Tests
-    POST /api/v1/payroll/generate
-      × should generate payroll with correct calculations (4766 ms)
-      × should reject overlapping payroll periods (1976 ms)
-    Payroll Locking and Export
-      × should lock a payroll period (1303 ms)
-      × should fail to lock an already locked period (1293 ms)
-      × should export payroll to Excel (1310 ms)
+FAIL tests/integration/payroll.test.ts (10.944 s)
+Payroll Integration Tests
+POST /api/v1/payroll/generate
+× should generate payroll with correct calculations (4766 ms)
+× should reject overlapping payroll periods (1976 ms)
+Payroll Locking and Export
+× should lock a payroll period (1303 ms)
+× should fail to lock an already locked period (1293 ms)
+× should export payroll to Excel (1310 ms)
 
-  ● Payroll Integration Tests › POST /api/v1/payroll/generate › should generate payroll with correct calculations
+● Payroll Integration Tests › POST /api/v1/payroll/generate › should generate payroll with correct calculations
 
-    PrismaClientKnownRequestError: 
+    PrismaClientKnownRequestError:
     Invalid `prisma.customerProfile.create()` invocation in
     C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\tests\integration\payroll.test.ts:84:53
 
       81   }
       82 });
-      83 
+      83
     → 84 const customer = await prisma.customerProfile.create(
     Unique constraint failed on the fields: (`user_id`)
 
@@ -225,12 +225,12 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
       at async l (node_modules/@prisma/client/runtime/library.js:130:9644)
       at async Object.<anonymous> (tests/integration/payroll.test.ts:84:24)
 
-  ● Payroll Integration Tests › POST /api/v1/payroll/generate › should reject overlapping payroll periods
+● Payroll Integration Tests › POST /api/v1/payroll/generate › should reject overlapping payroll periods
 
     TypeError: Cannot read properties of undefined (reading 'user')
 
       43 |       });
-      44 |     
+      44 |
     > 45 |     const staffUserId = staffResponse.body.data.user.id;
          |                                                 ^
       46 |     await prisma.user.update({
@@ -239,7 +239,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/payroll.test.ts:45:49)
 
-  ● Payroll Integration Tests › Payroll Locking and Export › should lock a payroll period
+● Payroll Integration Tests › Payroll Locking and Export › should lock a payroll period
 
     TypeError: Cannot read properties of undefined (reading 'user')
 
@@ -253,7 +253,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/payroll.test.ts:23:46)
 
-  ● Payroll Integration Tests › Payroll Locking and Export › should fail to lock an already locked period
+● Payroll Integration Tests › Payroll Locking and Export › should fail to lock an already locked period
 
     TypeError: Cannot read properties of undefined (reading 'user')
 
@@ -267,7 +267,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/payroll.test.ts:23:46)
 
-  ● Payroll Integration Tests › Payroll Locking and Export › should export payroll to Excel
+● Payroll Integration Tests › Payroll Locking and Export › should export payroll to Excel
 
     TypeError: Cannot read properties of undefined (reading 'user')
 
@@ -281,47 +281,47 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/payroll.test.ts:23:46)
 
-  console.log
-    ◇ injected env (1) from ..\.env.test // tip: ◈ secrets for agents [www.dotenvx.com]
+console.log
+◇ injected env (1) from ..\.env.test // tip: ◈ secrets for agents [www.dotenvx.com]
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env.test // tip: ◈ encrypted .env [www.dotenvx.com]
+console.log
+◇ injected env (0) from .env.test // tip: ◈ encrypted .env [www.dotenvx.com]
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+console.log
+◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+console.log
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    prisma:error 
-    Invalid `prisma.systemLog.create()` invocation in
-    C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\src\utils\systemLog.ts:26:28
-    
+console.log
+prisma:error
+Invalid `prisma.systemLog.create()` invocation in
+C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\src\utils\systemLog.ts:26:28
+
       23 const ipAddress = (req.ip || req.socket.remoteAddress) as string | null;
       24 const userAgent = req.headers['user-agent'] as string | null;
-      25 
+      25
     → 26 await prisma.systemLog.create(
     Foreign key constraint violated: `system_logs_user_id_fkey (index)`
 
       at Object.Lc (node_modules/@prisma/client/runtime/library.js:21:432)
 
-  console.error
-    [systemLog] Failed to record audit log for action: STAFF_CREATED PrismaClientKnownRequestError: 
-    Invalid `prisma.systemLog.create()` invocation in
-    C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\src\utils\systemLog.ts:26:28
-    
+console.error
+[systemLog] Failed to record audit log for action: STAFF_CREATED PrismaClientKnownRequestError:
+Invalid `prisma.systemLog.create()` invocation in
+C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\src\utils\systemLog.ts:26:28
+
       23 const ipAddress = (req.ip || req.socket.remoteAddress) as string | null;
       24 const userAgent = req.headers['user-agent'] as string | null;
-      25 
+      25
     → 26 await prisma.systemLog.create(
     Foreign key constraint violated: `system_logs_user_id_fkey (index)`
         at Un.handleRequestError (C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\node_modules\@prisma\client\runtime\library.js:121:7447)
@@ -349,25 +349,25 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
       at logSystemAction (src/utils/systemLog.ts:39:13)
       at async createStaff (src/controllers/staffController.ts:136:5)
 
- FAIL  tests/integration/staff_attendance.test.ts (20.561 s)
-  Staff & Attendance Integration Tests
-    Staff Management
-      × should create a new staff member (Manager only) (2902 ms)
-      × should list all staff (1382 ms)
-      × should update staff information (1260 ms)
-      √ should enforce RBAC: staff cannot create other staff (1276 ms)
-      √ should get staff schedule (1334 ms)
-    Attendance Tracking
-      × should clock-in successfully (1374 ms)
-      × should prevent double clock-in if already checked out (1399 ms)
-      × should get attendance status (1304 ms)
-      × should list all attendance records (Manager only) (1433 ms)
-      × should fail to clock-out if not checked in (on a different day/new record) (1413 ms)
-    Security & Edge Cases
-      √ should not allow staff to view all attendance (1271 ms)
-      × should not allow staff to update their own attendance record directly via PUT (1348 ms)
+FAIL tests/integration/staff_attendance.test.ts (20.561 s)
+Staff & Attendance Integration Tests
+Staff Management
+× should create a new staff member (Manager only) (2902 ms)
+× should list all staff (1382 ms)
+× should update staff information (1260 ms)
+√ should enforce RBAC: staff cannot create other staff (1276 ms)
+√ should get staff schedule (1334 ms)
+Attendance Tracking
+× should clock-in successfully (1374 ms)
+× should prevent double clock-in if already checked out (1399 ms)
+× should get attendance status (1304 ms)
+× should list all attendance records (Manager only) (1433 ms)
+× should fail to clock-out if not checked in (on a different day/new record) (1413 ms)
+Security & Edge Cases
+√ should not allow staff to view all attendance (1271 ms)
+× should not allow staff to update their own attendance record directly via PUT (1348 ms)
 
-  ● Staff & Attendance Integration Tests › Staff Management › should create a new staff member (Manager only)
+● Staff & Attendance Integration Tests › Staff Management › should create a new staff member (Manager only)
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -384,7 +384,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/staff_attendance.test.ts:113:43)
 
-  ● Staff & Attendance Integration Tests › Staff Management › should list all staff
+● Staff & Attendance Integration Tests › Staff Management › should list all staff
 
     expect(received).toBeGreaterThan(expected)
 
@@ -401,7 +401,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/staff_attendance.test.ts:125:47)
 
-  ● Staff & Attendance Integration Tests › Staff Management › should update staff information
+● Staff & Attendance Integration Tests › Staff Management › should update staff information
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -418,7 +418,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/staff_attendance.test.ts:137:31)
 
-  ● Staff & Attendance Integration Tests › Attendance Tracking › should clock-in successfully
+● Staff & Attendance Integration Tests › Attendance Tracking › should clock-in successfully
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -435,7 +435,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/staff_attendance.test.ts:172:31)
 
-  ● Staff & Attendance Integration Tests › Attendance Tracking › should prevent double clock-in if already checked out
+● Staff & Attendance Integration Tests › Attendance Tracking › should prevent double clock-in if already checked out
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -452,7 +452,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/staff_attendance.test.ts:188:31)
 
-  ● Staff & Attendance Integration Tests › Attendance Tracking › should get attendance status
+● Staff & Attendance Integration Tests › Attendance Tracking › should get attendance status
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -469,7 +469,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/staff_attendance.test.ts:197:31)
 
-  ● Staff & Attendance Integration Tests › Attendance Tracking › should list all attendance records (Manager only)
+● Staff & Attendance Integration Tests › Attendance Tracking › should list all attendance records (Manager only)
 
     expect(received).toBeGreaterThan(expected)
 
@@ -486,7 +486,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/staff_attendance.test.ts:213:41)
 
-  ● Staff & Attendance Integration Tests › Attendance Tracking › should fail to clock-out if not checked in (on a different day/new record)
+● Staff & Attendance Integration Tests › Attendance Tracking › should fail to clock-out if not checked in (on a different day/new record)
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -503,12 +503,12 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/staff_attendance.test.ts:225:33)
 
-  ● Staff & Attendance Integration Tests › Security & Edge Cases › should not allow staff to update their own attendance record directly via PUT
+● Staff & Attendance Integration Tests › Security & Edge Cases › should not allow staff to update their own attendance record directly via PUT
 
     TypeError: Cannot read properties of undefined (reading 'id')
 
       243 |             .set('Authorization', `Bearer ${staffToken}`);
-      244 |         
+      244 |
     > 245 |         const attendanceId = clockInResponse.body.data.id;
           |                                                        ^
       246 |
@@ -517,41 +517,41 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/staff_attendance.test.ts:245:56)
 
-  console.log
-    ◇ injected env (1) from ..\.env.test // tip: ◈ secrets for agents [www.dotenvx.com]
+console.log
+◇ injected env (1) from ..\.env.test // tip: ◈ secrets for agents [www.dotenvx.com]
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env.test // tip: ⌘ suppress logs { quiet: true }
+console.log
+◇ injected env (0) from .env.test // tip: ⌘ suppress logs { quiet: true }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+console.log
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+console.log
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
- FAIL  tests/integration/auth.test.ts (13.491 s)
-  Auth Integration Tests
-    POST /api/v1/auth/register
-      √ should register a new user successfully (3233 ms)
-      √ should fail registration with weak password (1310 ms)
-      √ should fail with duplicate email (1721 ms)
-    POST /api/v1/auth/login
-      × should login successfully with valid credentials (1682 ms)
-      × should fail login with wrong password (1292 ms)
-    Advanced Auth & Security
-      × should refresh tokens and rotate refresh token (1307 ms)
-      × should invalidate refresh token on logout (1311 ms)
-      × should enforce RBAC: customer cannot access manager routes (1318 ms)
+FAIL tests/integration/auth.test.ts (13.491 s)
+Auth Integration Tests
+POST /api/v1/auth/register
+√ should register a new user successfully (3233 ms)
+√ should fail registration with weak password (1310 ms)
+√ should fail with duplicate email (1721 ms)
+POST /api/v1/auth/login
+× should login successfully with valid credentials (1682 ms)
+× should fail login with wrong password (1292 ms)
+Advanced Auth & Security
+× should refresh tokens and rotate refresh token (1307 ms)
+× should invalidate refresh token on logout (1311 ms)
+× should enforce RBAC: customer cannot access manager routes (1318 ms)
 
-  ● Auth Integration Tests › POST /api/v1/auth/login › should login successfully with valid credentials
+● Auth Integration Tests › POST /api/v1/auth/login › should login successfully with valid credentials
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -568,7 +568,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/auth.test.ts:77:31)
 
-  ● Auth Integration Tests › POST /api/v1/auth/login › should fail login with wrong password
+● Auth Integration Tests › POST /api/v1/auth/login › should fail login with wrong password
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -585,7 +585,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/auth.test.ts:91:31)
 
-  ● Auth Integration Tests › Advanced Auth & Security › should refresh tokens and rotate refresh token
+● Auth Integration Tests › Advanced Auth & Security › should refresh tokens and rotate refresh token
 
     TypeError: Cannot read properties of undefined (reading 'tokens')
 
@@ -599,7 +599,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/auth.test.ts:103:35)
 
-  ● Auth Integration Tests › Advanced Auth & Security › should invalidate refresh token on logout
+● Auth Integration Tests › Advanced Auth & Security › should invalidate refresh token on logout
 
     TypeError: Cannot read properties of undefined (reading 'tokens')
 
@@ -613,7 +613,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/auth.test.ts:103:35)
 
-  ● Auth Integration Tests › Advanced Auth & Security › should enforce RBAC: customer cannot access manager routes
+● Auth Integration Tests › Advanced Auth & Security › should enforce RBAC: customer cannot access manager routes
 
     TypeError: Cannot read properties of undefined (reading 'tokens')
 
@@ -627,31 +627,31 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/auth.test.ts:103:35)
 
-  console.log
-    ◇ injected env (1) from ..\.env.test // tip: ◈ secrets for agents [www.dotenvx.com]
+console.log
+◇ injected env (1) from ..\.env.test // tip: ◈ secrets for agents [www.dotenvx.com]
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env.test // tip: ⌘ enable debugging { debug: true }
+console.log
+◇ injected env (0) from .env.test // tip: ⌘ enable debugging { debug: true }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+console.log
+◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+console.log
+◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    prisma:error 
-    Invalid `prisma.serviceCategory.update()` invocation in
-    C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\src\controllers\serviceController.ts:108:51
-    
+console.log
+prisma:error
+Invalid `prisma.serviceCategory.update()` invocation in
+C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\src\controllers\serviceController.ts:108:51
+
       105 try {
       106   const { id } = req.validatedParams ?? {};
       107   const { name, description, is_active, parentId } = req.body;
@@ -660,11 +660,11 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.Lc (node_modules/@prisma/client/runtime/library.js:21:432)
 
-  console.error
-    Update category error: PrismaClientKnownRequestError: 
-    Invalid `prisma.serviceCategory.update()` invocation in
-    C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\src\controllers\serviceController.ts:108:51
-    
+console.error
+Update category error: PrismaClientKnownRequestError:
+Invalid `prisma.serviceCategory.update()` invocation in
+C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\src\controllers\serviceController.ts:108:51
+
       105 try {
       106   const { id } = req.validatedParams ?? {};
       107   const { name, description, is_active, parentId } = req.body;
@@ -693,54 +693,54 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at updateCategory (src/controllers/serviceController.ts:119:13)
 
-  console.log
-    prisma:error 
-    Invalid `prisma.service.create()` invocation in
-    C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\src\controllers\serviceController.ts:139:42
-    
+console.log
+prisma:error
+Invalid `prisma.service.create()` invocation in
+C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\src\controllers\serviceController.ts:139:42
+
       136   return res.status(400).json({ success: false, message: 'Duration must be greater than 0' });
       137 }
-      138 
+      138
     → 139 const service = await prisma.service.create(
     Foreign key constraint violated: `services_category_id_fkey (index)`
 
       at Object.Lc (node_modules/@prisma/client/runtime/library.js:21:432)
 
-  console.log
-    prisma:error 
-    Invalid `prisma.customerProfile.update()` invocation in
-    C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\src\controllers\customerController.ts:34:50
-    
+console.log
+prisma:error
+Invalid `prisma.customerProfile.update()` invocation in
+C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\src\controllers\customerController.ts:34:50
+
       31 }
       32 const { fullName, preferences, allergies, notes } = req.body;
-      33 
+      33
     → 34 const profile = await prisma.customerProfile.update(
     An operation failed because it depends on one or more records that were required but not found. Record to update not found.
 
       at Object.Lc (node_modules/@prisma/client/runtime/library.js:21:432)
 
- FAIL  tests/integration/catalog_reports.test.ts (23.407 s)
-  Catalog and Reports Integration Tests
-    Service Category Management
-      √ should create a new category (Manager only) (2403 ms)
-      √ should fail to create category for non-manager (1322 ms)
-      × should update a category (1436 ms)
-      × should get all categories (Public) (1421 ms)
-    Service Management
-      × should create a new service (1457 ms)
-      √ should fail to create service with negative price (1360 ms)
-      × should update a service (1323 ms)
-      × should get all services (Public) (1450 ms)
-    Customer Profile Management
-      × should get own profile (1433 ms)
-      × should update own profile (1497 ms)
-      × should allow staff to search customers (1413 ms)
-    Reporting and Analytics
-      √ should fail to access reports for customer (1353 ms)
-      √ should get daily sales stats (Manager only) (1992 ms)
-      √ should get historical analytics (1421 ms)
+FAIL tests/integration/catalog_reports.test.ts (23.407 s)
+Catalog and Reports Integration Tests
+Service Category Management
+√ should create a new category (Manager only) (2403 ms)
+√ should fail to create category for non-manager (1322 ms)
+× should update a category (1436 ms)
+× should get all categories (Public) (1421 ms)
+Service Management
+× should create a new service (1457 ms)
+√ should fail to create service with negative price (1360 ms)
+× should update a service (1323 ms)
+× should get all services (Public) (1450 ms)
+Customer Profile Management
+× should get own profile (1433 ms)
+× should update own profile (1497 ms)
+× should allow staff to search customers (1413 ms)
+Reporting and Analytics
+√ should fail to access reports for customer (1353 ms)
+√ should get daily sales stats (Manager only) (1992 ms)
+√ should get historical analytics (1421 ms)
 
-  ● Catalog and Reports Integration Tests › Service Category Management › should update a category
+● Catalog and Reports Integration Tests › Service Category Management › should update a category
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -757,7 +757,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/catalog_reports.test.ts:89:31)
 
-  ● Catalog and Reports Integration Tests › Service Category Management › should get all categories (Public)
+● Catalog and Reports Integration Tests › Service Category Management › should get all categories (Public)
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -774,7 +774,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/catalog_reports.test.ts:97:72)
 
-  ● Catalog and Reports Integration Tests › Service Management › should create a new service
+● Catalog and Reports Integration Tests › Service Management › should create a new service
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -791,7 +791,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/catalog_reports.test.ts:114:31)
 
-  ● Catalog and Reports Integration Tests › Service Management › should update a service
+● Catalog and Reports Integration Tests › Service Management › should update a service
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -808,7 +808,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/catalog_reports.test.ts:143:31)
 
-  ● Catalog and Reports Integration Tests › Service Management › should get all services (Public)
+● Catalog and Reports Integration Tests › Service Management › should get all services (Public)
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -825,7 +825,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/catalog_reports.test.ts:152:71)
 
-  ● Catalog and Reports Integration Tests › Customer Profile Management › should get own profile
+● Catalog and Reports Integration Tests › Customer Profile Management › should get own profile
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -842,7 +842,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/catalog_reports.test.ts:162:31)
 
-  ● Catalog and Reports Integration Tests › Customer Profile Management › should update own profile
+● Catalog and Reports Integration Tests › Customer Profile Management › should update own profile
 
     expect(received).toBe(expected) // Object.is equality
 
@@ -859,7 +859,7 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/catalog_reports.test.ts:176:31)
 
-  ● Catalog and Reports Integration Tests › Customer Profile Management › should allow staff to search customers
+● Catalog and Reports Integration Tests › Customer Profile Management › should allow staff to search customers
 
     expect(received).toBeGreaterThan(expected)
 
@@ -876,18 +876,18 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
 
       at Object.<anonymous> (tests/integration/catalog_reports.test.ts:188:41)
 
-  console.log
-    ◇ injected env (1) from ..\.env.test // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+console.log
+◇ injected env (1) from ..\.env.test // tip: ⌘ custom filepath { path: '/custom/path/.env' }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env.test // tip: ⌘ override existing { override: true }
+console.log
+◇ injected env (0) from .env.test // tip: ⌘ override existing { override: true }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
- FAIL  tests/integration/misc_controllers.test.ts
-  ● Test suite failed to run
+FAIL tests/integration/misc_controllers.test.ts
+● Test suite failed to run
 
     tests/integration/misc_controllers.test.ts:4:35 - error TS2307: Cannot find module '../helpers/auth' or its corresponding type declarations.
 
@@ -903,86 +903,86 @@ PS C:\Users\Administrator\Desktop\nailssentialsqc-system\backend> npm test
                   ~~~~
         The expected type comes from property 'role' which is declared here on type '(Without<UserCreateInput, UserUncheckedCreateInput> & UserUncheckedCreateInput) | (Without<...> & UserCreateInput)'
 
-  console.log
-    ◇ injected env (1) from ..\.env.test // tip: ⌘ suppress logs { quiet: true }
+console.log
+◇ injected env (1) from ..\.env.test // tip: ⌘ suppress logs { quiet: true }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env.test // tip: ⌘ enable debugging { debug: true }
+console.log
+◇ injected env (0) from .env.test // tip: ⌘ enable debugging { debug: true }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
- PASS  tests/smoke.test.ts
-  Smoke Test
-    √ should pass (2280 ms)
+PASS tests/smoke.test.ts
+Smoke Test
+√ should pass (2280 ms)
 
-  console.log
-    ◇ injected env (1) from ..\.env.test // tip: ⌘ enable debugging { debug: true }
-
-      at _log (node_modules/dotenv/lib/main.js:131:11)
-
-  console.log
-    ◇ injected env (0) from .env.test // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+console.log
+◇ injected env (1) from ..\.env.test // tip: ⌘ enable debugging { debug: true }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
- PASS  tests/systemLog.test.ts
-  System Log
-    ✎ todo should log administrative actions
-    ✎ todo should log security-sensitive events
-    ✎ todo should allow querying logs with filters
-
-  console.log
-    ◇ injected env (1) from ..\.env.test // tip: ⌘ enable debugging { debug: true }
+console.log
+◇ injected env (0) from .env.test // tip: ⌘ custom filepath { path: '/custom/path/.env' }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env.test // tip: ◈ encrypted .env [www.dotenvx.com]
+PASS tests/systemLog.test.ts
+System Log
+✎ todo should log administrative actions
+✎ todo should log security-sensitive events
+✎ todo should allow querying logs with filters
+
+console.log
+◇ injected env (1) from ..\.env.test // tip: ⌘ enable debugging { debug: true }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
- PASS  tests/staffController.test.ts
-  Staff Controller
-    ✎ todo should manage staff schedules
-    ✎ todo should track staff attendance
-    ✎ todo should handle staff leave requests
-
-  console.log
-    ◇ injected env (1) from ..\.env.test // tip: ⌘ suppress logs { quiet: true }
+console.log
+◇ injected env (0) from .env.test // tip: ◈ encrypted .env [www.dotenvx.com]
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env.test // tip: ⌁ auth for agents [www.vestauth.com]
+PASS tests/staffController.test.ts
+Staff Controller
+✎ todo should manage staff schedules
+✎ todo should track staff attendance
+✎ todo should handle staff leave requests
+
+console.log
+◇ injected env (1) from ..\.env.test // tip: ⌘ suppress logs { quiet: true }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
- PASS  tests/payrollController.test.ts
-  Payroll Controller
-    ✎ todo should calculate commissions accurately
-    ✎ todo should process monthly payroll
-    ✎ todo should generate pay stubs
-
-  console.log
-    ◇ injected env (1) from ..\.env.test // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+console.log
+◇ injected env (0) from .env.test // tip: ⌁ auth for agents [www.vestauth.com]
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
-  console.log
-    ◇ injected env (0) from .env.test // tip: ◈ secrets for agents [www.dotenvx.com]
+PASS tests/payrollController.test.ts
+Payroll Controller
+✎ todo should calculate commissions accurately
+✎ todo should process monthly payroll
+✎ todo should generate pay stubs
+
+console.log
+◇ injected env (1) from ..\.env.test // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
 
       at _log (node_modules/dotenv/lib/main.js:131:11)
 
- PASS  tests/reportController.test.ts
-  Report Controller
-    ✎ todo should generate daily sales reports
-    ✎ todo should generate staff performance reports
-    ✎ todo should generate inventory usage reports
+console.log
+◇ injected env (0) from .env.test // tip: ◈ secrets for agents [www.dotenvx.com]
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+PASS tests/reportController.test.ts
+Report Controller
+✎ todo should generate daily sales reports
+✎ todo should generate staff performance reports
+✎ todo should generate inventory usage reports
 
 Test Suites: 6 failed, 5 passed, 11 total
-Tests:       35 failed, 12 todo, 13 passed, 60 total
-Snapshots:   0 total
-Time:        92.305 s, estimated 151 s
+Tests: 35 failed, 12 todo, 13 passed, 60 total
+Snapshots: 0 total
+Time: 92.305 s, estimated 151 s
 Ran all test suites.
