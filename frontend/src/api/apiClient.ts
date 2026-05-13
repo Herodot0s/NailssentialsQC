@@ -206,6 +206,16 @@ export const createExhibit = (data: {
   staff_id: number;
   service_id?: number;
 }) => apiClient.post('/exhibits', data);
+export const updateExhibit = (
+  id: number,
+  data: {
+    title?: string;
+    image_url?: string;
+    staff_id?: number;
+    service_id?: number;
+    is_active?: boolean;
+  },
+) => apiClient.put(`/exhibits/${id}`, data);
 export const deleteExhibit = (id: number) => apiClient.delete(`/exhibits/${id}`);
 
 // CMS methods
@@ -263,5 +273,15 @@ export const togglePackage = (id: number, isActive: boolean) =>
 
 export const deletePackage = (id: number) =>
   apiClient.delete<{ success: boolean; message: string }>(`/packages/${id}`);
+
+// Addon endpoints
+export const getAddons = (params?: { showAll?: boolean }) =>
+  apiClient.get('/addons', { params });
+export const createAddon = (data: { name: string; description?: string; price: number; is_active?: boolean }) =>
+  apiClient.post('/addons', data);
+export const updateAddon = (id: number, data: { name?: string; description?: string; price?: number; is_active?: boolean }) =>
+  apiClient.put(`/addons/${id}`, data);
+export const deleteAddon = (id: number) =>
+  apiClient.delete(`/addons/${id}`);
 
 export default apiClient;

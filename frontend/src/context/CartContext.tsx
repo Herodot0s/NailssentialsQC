@@ -28,39 +28,53 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoaded } = useUser();
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem('bookingCart');
-    const parsed = saved ? JSON.parse(saved) : [];
-    return parsed.map((item: any) => ({ ...item, type: item.type || 'service' }));
-  });
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const cartLoadedForUser = React.useRef<string | null | undefined>(undefined);
 
+  // Load cart on mount or user change
   useEffect(() => {
     if (!isLoaded) return;
 
-    const storedUserId = localStorage.getItem('lastUserId');
     const currentUserId = user?.id || null;
 
-    // Clear cart if switching accounts or signing out from an account
-    if (storedUserId && storedUserId !== currentUserId) {
-      setCart([]);
-      localStorage.removeItem('bookingCart');
-    }
+    if (cartLoadedForUser.current !== currentUserId) {
+      // User changed or initial load
+      const storageKey = currentUserId ? `bookingCart_${currentUserId}` : 'bookingCart';
+      const saved = localStorage.getItem(storageKey);
+      let newCart = saved ? JSON.parse(saved) : [];
+      newCart = newCart.map((item: any) => ({ ...item, type: item.type || 'service' }));
 
-    // Update the last known user ID
-    if (currentUserId) {
-      localStorage.setItem('lastUserId', currentUserId);
-    } else {
-      localStorage.removeItem('lastUserId');
-    }
-  }, [user?.id, isLoaded]);
+      // Migration/Merge: If logging in from guest, merge guest items into user cart
+      if (cartLoadedForUser.current === null && currentUserId) {
+        const guestCart = [...cart];
+        guestCart.forEach(guestItem => {
+          if (!newCart.find((i: CartItem) => i.serviceId === guestItem.serviceId)) {
+            newCart.push(guestItem);
+          }
+        });
+        // Clear guest storage after migration
+        localStorage.removeItem('bookingCart');
+      }
 
+      setCart(newCart);
+      cartLoadedForUser.current = currentUserId;
+    }
+  }, [isLoaded, user?.id, cart]); // Include cart for merge logic
+
+  // Persist cart on changes
   useEffect(() => {
-    // Only persist to localStorage if Clerk is loaded to avoid overwriting 
-    // the cart during the sign-out/sync transition.
-    if (isLoaded) {
-      localStorage.setItem('bookingCart', JSON.stringify(cart));
-    }
-  }, [cart, isLoaded]);
+    // Only persist if Clerk is loaded and we have loaded the cart for the current user
+    if (!isLoaded || cartLoadedForUser.current === undefined) return;
+    
+    const currentUserId = user?.id || null;
+    
+    // Safety check: Don't save if the cart state doesn't match the current user 
+    // (prevents overwriting User B's cart with User A's state during transition)
+    if (currentUserId !== cartLoadedForUser.current) return;
+
+    const storageKey = currentUserId ? `bookingCart_${currentUserId}` : 'bookingCart';
+    localStorage.setItem(storageKey, JSON.stringify(cart));
+  }, [cart, isLoaded, user?.id]);
 
   const addToCart = (item: CartItem) => {
     setCart((prev) => {

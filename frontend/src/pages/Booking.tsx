@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { getAvailability, createAppointment, getAllStaff } from '../api/apiClient';
+import { getAvailability, createAppointment, getAllStaff, getAddons } from '../api/apiClient';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
@@ -24,6 +24,20 @@ import CartPackageItem from '@/components/packages/CartPackageItem';
 interface Slot {
   time: string;
   available: boolean;
+}
+
+interface Addon {
+  id: number;
+  name: string;
+  description: string | null;
+  price: string;
+}
+
+interface SelectedAddon {
+  addonId: number;
+  quantity: number;
+  price: number;
+  name: string;
 }
 
 const formatTime = (time24: string) => {
@@ -53,6 +67,8 @@ const Booking: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [notes, setNotes] = useState('');
   const [isCustomTime, setIsCustomTime] = useState(false);
+  const [availableAddons, setAvailableAddons] = useState<Addon[]>([]);
+  const [selectedAddons, setSelectedAddons] = useState<SelectedAddon[]>([]);
 
 
 
@@ -69,14 +85,16 @@ const Booking: React.FC = () => {
           return acc + 1;
         }, 0);
 
-        const [staffRes, availRes] = await Promise.all([
+        const [staffRes, availRes, addonsRes] = await Promise.all([
           getAllStaff(),
           getAvailability(selectedDate, itemCount),
+          getAddons(),
         ]);
         const staffData = staffRes.data.data;
         const staffItems = Array.isArray(staffData) ? staffData : staffData?.items || [];
         setStaffList(staffItems.filter((s: Staff) => s.role === 'staff' || s.role === 'manager'));
         setSlots(availRes.data.data);
+        setAvailableAddons(addonsRes.data.data || []);
       } catch (err) {
         setError('Failed to load booking details.');
       } finally {
@@ -89,6 +107,24 @@ const Booking: React.FC = () => {
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(e.target.value);
+  };
+
+  const updateAddonQuantity = (addon: Addon, delta: number) => {
+    setSelectedAddons((prev) => {
+      const existing = prev.find((a) => a.addonId === addon.id);
+      if (existing) {
+        const newQty = existing.quantity + delta;
+        if (newQty <= 0) return prev.filter((a) => a.addonId !== addon.id);
+        return prev.map((a) => (a.addonId === addon.id ? { ...a, quantity: newQty } : a));
+      }
+      if (delta > 0) {
+        return [
+          ...prev,
+          { addonId: addon.id, quantity: 1, price: parseFloat(addon.price), name: addon.name },
+        ];
+      }
+      return prev;
+    });
   };
 
   const handleBooking = async () => {
@@ -136,6 +172,7 @@ const Booking: React.FC = () => {
         items: itemsToBook,
         date: selectedDate,
         notes,
+        addons: selectedAddons.map((a) => ({ addonId: a.addonId, quantity: a.quantity })),
       });
 
 
@@ -155,6 +192,10 @@ const Booking: React.FC = () => {
     () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     [],
   );
+
+  const finalTotalPrice = useMemo(() => {
+    return totalPrice + selectedAddons.reduce((sum, a) => sum + a.price * a.quantity, 0);
+  }, [totalPrice, selectedAddons]);
 
   if (isLoading) {
     return (
@@ -320,6 +361,15 @@ const Booking: React.FC = () => {
                       >
                         <CardContent className="p-0">
                           <div className="flex flex-col sm:flex-row">
+                            {item.imageUrl && (
+                              <div className="w-full sm:w-32 lg:w-40 h-48 sm:h-auto shrink-0 border-b sm:border-b-0 sm:border-r border-hairline overflow-hidden bg-surface-soft">
+                                <img
+                                  src={item.imageUrl}
+                                  alt={item.serviceName}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
                             <div className="p-6 flex-1 space-y-6 border-r border-hairline">
                               <div className="flex justify-between items-start">
                                 <div className="space-y-1">
@@ -400,6 +450,51 @@ const Booking: React.FC = () => {
                 </div>
               </div>
 
+              {availableAddons.length > 0 && (
+                <div className="space-y-4">
+                  <Label className="utility-xs text-body">Enhancements</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {availableAddons.map((addon) => {
+                      const selected = selectedAddons.find((a) => a.addonId === addon.id);
+                      const qty = selected?.quantity || 0;
+                      return (
+                        <div
+                          key={addon.id}
+                          className="p-4 rounded-md border border-hairline bg-surface-card flex justify-between items-center transition-colors hover:border-primary/30"
+                        >
+                          <div>
+                            <h4 className="body-strong text-ink">{addon.name}</h4>
+                            <p className="utility-xs text-body/60">
+                              +₱{parseFloat(addon.price).toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-7 w-7 rounded-full border-hairline"
+                              onClick={() => updateAddonQuantity(addon, -1)}
+                              disabled={qty === 0}
+                            >
+                              -
+                            </Button>
+                            <span className="body-md font-bold w-4 text-center">{qty}</span>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-7 w-7 rounded-full border-hairline"
+                              onClick={() => updateAddonQuantity(addon, 1)}
+                            >
+                              +
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-3">
                 <Label htmlFor="notes" className="utility-xs text-body">
                   Notes & Specifications
@@ -469,6 +564,24 @@ const Booking: React.FC = () => {
                     })}
                   </div>
 
+                  {selectedAddons.length > 0 && (
+                    <div className="space-y-2 pt-4 border-t border-accent-blue/10">
+                      <p className="utility-xs text-body/60 uppercase tracking-wider">
+                        Enhancements
+                      </p>
+                      {selectedAddons.map((addon) => (
+                        <div key={addon.addonId} className="flex justify-between items-baseline">
+                          <p className="body-sm text-ink">
+                            {addon.quantity}x {addon.name}
+                          </p>
+                          <p className="body-sm text-ink">
+                            ₱{(addon.price * addon.quantity).toLocaleString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="pt-6 space-y-4 border-t border-accent-blue/10">
                     <div className="flex justify-between items-center">
                       <div className="utility-xs text-body/60">Target Date</div>
@@ -485,7 +598,7 @@ const Booking: React.FC = () => {
                         Total
                       </div>
                       <div className="text-3xl font-bold text-primary tabular-nums">
-                        ₱{totalPrice.toLocaleString()}
+                        ₱{finalTotalPrice.toLocaleString()}
                       </div>
                     </div>
                   </div>

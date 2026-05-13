@@ -77,6 +77,7 @@ export interface CreateAppointmentRequest {
   notes?: string;
   customerId?: number;
   isWalkIn?: boolean;
+  addons?: { addonId: number; quantity: number }[];
 }
 
 export interface CompleteAppointmentRequest {

@@ -74,3 +74,5 @@ Resume file: None
 | 20260514-move-nav-items-to-avatar | Move 'Exhibit', 'Services', and 'My Appointments' to avatar; hide hamburger when signed in | 2026-05-14 | local | [.planning/quick/20260514-move-nav-items-to-avatar/](./quick/20260514-move-nav-items-to-avatar/) |
 | 20260514-fix-missing-sections | Fix missing ContactInfoSection and FaqAccordionSection on landing page | 2026-05-14 | local | [.planning/quick/20260514-fix-missing-sections/](./quick/20260514-fix-missing-sections/) |
 | 20260514-update-manager-dropdown | Update manager dropdown: remove Cart, ensure Dashboard/Services/Exhibit order | 2026-05-14 | local | [.planning/quick/20260514-update-manager-dropdown/](./quick/20260514-update-manager-dropdown/) |
+| 20260514-clerk-auto-role | Auto-assign 'customer' role to Clerk metadata on user creation | 2026-05-14 | local | [.planning/quick/20260514-clerk-auto-role/](./quick/20260514-clerk-auto-role/) |
+| 20260514-addons-booking | Implement addons CRUD in Manager Dashboard and Addons selection in Booking cart | 2026-05-14 | local | [.planning/quick/20260514-addons-booking/](./quick/20260514-addons-booking/) |

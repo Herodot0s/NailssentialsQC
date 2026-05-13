@@ -7,6 +7,7 @@ import {
   createService,
   updateService,
   uploadFile,
+  getAddons,
 } from '@/api/apiClient';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,15 @@ import {
   Tags,
 } from 'lucide-react';
 import { ManageCategoriesDialog } from './ManageCategoriesDialog';
+import { ManageAddonsDialog } from './ManageAddonsDialog';
+
+interface Addon {
+  id: number;
+  name: string;
+  description: string | null;
+  price: string;
+  is_active: boolean;
+}
 
 interface Category {
   id: number;
@@ -84,6 +94,8 @@ const ManageServices: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingCategories, setIsEditingCategories] = useState(false);
+  const [isEditingAddons, setIsEditingAddons] = useState(false);
+  const [addons, setAddons] = useState<Addon[]>([]);
   const [currentService, setCurrentService] = useState<Partial<Service> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -124,12 +136,14 @@ const ManageServices: React.FC = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [catRes, svcRes] = await Promise.all([
+      const [catRes, svcRes, addonsRes] = await Promise.all([
         getCategories({ showAll: true }),
         getServices({ showAll: true }),
+        getAddons({ showAll: true }),
       ]);
       setCategories(catRes.data.data);
       setServices(svcRes.data.data);
+      setAddons(addonsRes.data.data || []);
     } catch {
       setError('Failed to load data');
     } finally {
@@ -263,6 +277,14 @@ const ManageServices: React.FC = () => {
             >
               <Tags className="mr-2 h-5 w-5" />
               Manage Categories
+            </Button>
+            <Button
+              onClick={() => setIsEditingAddons(true)}
+              variant="outline"
+              className="h-11 px-6 border-hairline text-body font-bold hover:bg-surface-soft/50"
+            >
+              <Sparkles className="mr-2 h-5 w-5" />
+              Manage Addons
             </Button>
             <Button
               onClick={handleAddNew}
@@ -791,6 +813,12 @@ const ManageServices: React.FC = () => {
         open={isEditingCategories}
         onOpenChange={setIsEditingCategories}
         categories={categories}
+        onSuccess={fetchData}
+      />
+      <ManageAddonsDialog
+        open={isEditingAddons}
+        onOpenChange={setIsEditingAddons}
+        addons={addons}
         onSuccess={fetchData}
       />
     </div>

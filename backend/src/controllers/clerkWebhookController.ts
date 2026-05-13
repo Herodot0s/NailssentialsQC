@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Webhook } from 'svix';
+import { clerkClient } from '@clerk/express';
 import prisma from '../utils/prisma';
 import { sendSuccess, sendError } from '../utils/apiHelpers';
 
@@ -61,7 +62,23 @@ export const handleClerkWebhook = async (req: Request, res: Response) => {
       if (!email) return res.status(200).json({ success: true, message: 'No email, skipping' });
 
       const fullName = `${first_name || ''} ${last_name || ''}`.trim() || 'User';
-      const role = (public_metadata?.role as any) || 'customer';
+      let role = (public_metadata?.role as string) || 'customer';
+
+      // If user was just created and doesn't have a role in Clerk yet, set it to 'customer'
+      if (eventType === 'user.created' && !public_metadata?.role) {
+        console.log(`Setting default role 'customer' for user ${id} in Clerk metadata`);
+        try {
+          await clerkClient.users.updateUserMetadata(id, {
+            publicMetadata: {
+              role: 'customer'
+            }
+          });
+          role = 'customer';
+        } catch (clerkError) {
+          console.error(`Failed to update Clerk metadata for user ${id}:`, clerkError);
+          // Continue with local sync even if Clerk update fails
+        }
+      }
 
       await prisma.$transaction(async (tx) => {
         // Upsert user

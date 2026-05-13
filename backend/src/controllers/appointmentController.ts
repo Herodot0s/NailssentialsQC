@@ -51,6 +51,7 @@ export const getAppointments = async (req: AuthRequest, res: Response) => {
         customer: true,
         items: { include: { service: true, staff: true } },
         transactions: true,
+        addons: { include: { addon: true } },
       },
     });
 
@@ -75,7 +76,7 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
     }
     const userId = currentUser.userId;
     const role = currentUser.role;
-    const { items, date, notes, customerId, isWalkIn, phone } = req.validatedBody || req.body;
+    const { items, date, notes, customerId, isWalkIn, phone, addons } = req.validatedBody || req.body;
 
     if (!userId) {
       return sendError(res, 'UNAUTHORIZED', 'User not authenticated', 401);
@@ -285,6 +286,23 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
             package_id: packageId || null,
           },
         });
+      }
+
+      if (addons && Array.isArray(addons)) {
+        for (const adn of addons) {
+          const addonDb = await tx.addon.findUnique({ where: { id: parseInt(adn.addonId) } });
+          if (!addonDb) throw new Error(`Addon ${adn.addonId} not found`);
+          if (!addonDb.is_active) throw new Error(`Addon "${addonDb.name}" is no longer available`);
+          
+          await tx.appointmentAddon.create({
+            data: {
+              appointment_id: apt.id,
+              addon_id: addonDb.id,
+              price_at_booking: addonDb.price,
+              quantity: parseInt(adn.quantity) || 1,
+            }
+          });
+        }
       }
 
       return apt;
