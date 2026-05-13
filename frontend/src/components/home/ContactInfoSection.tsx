@@ -26,11 +26,11 @@ export const ContactInfoSection: React.FC<ContactInfoSectionProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
 
-  // Hide section if all fields are empty
-  const hasAny = [phone, address, hours, email, mapsLink, facebookLink, instagramLink].some(
-    (v) => v && v.trim() !== '',
-  );
-  if (!hasAny) return null;
+  // No longer hiding section; using fallbacks instead.
+  // const hasAny = [phone, address, hours, email, mapsLink, facebookLink, instagramLink].some(
+  //   (v) => v && v.trim() !== '',
+  // );
+  // if (!hasAny) return null;
 
   const studioImage =
     'https://scontent.fmnl3-3.fna.fbcdn.net/v/t39.30808-6/506120168_122108135750898795_5073906802378404612_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=111&ccb=1-7&_nc_sid=2a1932&_nc_eui2=AeEbmC_TATBbFX2bVq2E23r1yXGoMs0ewzzJcagyzR7DPKvMj7SjP1K6dQN3UysQwoeLpxcjbImSge_5b36rY-Xl&_nc_ohc=9x7So1tdgpYQ7kNvwE8yOPN&_nc_oc=Adqg0eq6u8IWc4w2DDRLQ8TMRAz8TpZEz8aqsWP8UhYJWrSiHm3xaFqhSlNB-bitHTI&_nc_zt=23&_nc_ht=scontent.fmnl3-3.fna&_nc_gid=MfU_u1wve31DOP8T264iRA&_nc_ss=7b2a8&oh=00_Af5xxizNKUXB6rGa_o_o9Ag9R58uxcTP6vVUxRRxoIvcJg&oe=6A01EAD3';
@@ -97,141 +97,151 @@ export const ContactInfoSection: React.FC<ContactInfoSectionProps> = ({
           {/* Right Column: Interaction & Map */}
           <div className="lg:col-span-7 space-y-10 lg:pt-12">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <AnimatedCard className="bg-white border-none shadow-card p-8 space-y-5 group/card">
-                <div className="flex items-start justify-between">
-                  <div className="p-3 bg-primary-light/30 rounded-2xl text-primary ring-1 ring-primary/20 group-hover/card:bg-primary group-hover/card:text-white transition-colors duration-500">
-                    <MapPin className="h-6 w-6" />
+              <AnimatedCard className="bg-white/80 backdrop-blur-sm border-none shadow-card p-8 group/card">
+                <div className="flex flex-col h-full space-y-6">
+                  <div className="flex items-start justify-between">
+                    <div className="p-3.5 bg-primary-light/40 rounded-2xl text-primary ring-1 ring-primary/20 group-hover/card:bg-primary group-hover/card:text-white transition-all duration-500 shadow-sm">
+                      <MapPin className="h-6 w-6" />
+                    </div>
+                    {address && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-primary h-10 w-10 rounded-full hover:bg-primary-light/40 transition-all duration-300"
+                        onClick={() => copyToClipboard(address)}
+                        title="Copy Address"
+                      >
+                        <AnimatePresence mode="wait">
+                          {copied ? (
+                            <motion.div
+                              key="check"
+                              initial={{ scale: 0.5, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0.5, opacity: 0 }}
+                            >
+                              <Check className="h-4 w-4 text-success" />
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="copy"
+                              initial={{ scale: 0.5, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0.5, opacity: 0 }}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </Button>
+                    )}
                   </div>
-                  {address && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-primary h-9 w-9 rounded-full hover:bg-primary-light/40 transition-all duration-300"
-                      onClick={() => copyToClipboard(address)}
-                      title="Copy Address"
-                    >
-                      <AnimatePresence mode="wait">
-                        {copied ? (
-                          <motion.div
-                            key="check"
-                            initial={{ scale: 0.5, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.5, opacity: 0 }}
-                          >
-                            <Check className="h-4 w-4 text-success" />
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="copy"
-                            initial={{ scale: 0.5, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.5, opacity: 0 }}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </Button>
-                  )}
-                </div>
-                <div>
-                  <h3 className="font-serif text-xl text-foreground mb-2 group-hover/card:text-primary transition-colors duration-500">
-                    Our Address
-                  </h3>
-                  <p className="text-[15px] text-muted-foreground leading-relaxed">
-                    {address || 'Quezon City, Metro Manila'}
-                  </p>
+                  <div className="space-y-3">
+                    <h3 className="font-serif text-xl md:text-2xl text-foreground group-hover/card:text-primary transition-colors duration-500">
+                      Our Address
+                    </h3>
+                    <p className="text-[15px] text-muted-foreground leading-relaxed font-light">
+                      {address || '133-D Bukidnon Street, Corner Nueva Ecija, Bago Bantay, Quezon City, Philippines, 1105'}
+                    </p>
+                  </div>
                 </div>
               </AnimatedCard>
 
               <AnimatedCard
-                className="bg-white border-none shadow-card p-8 space-y-5 group/card"
+                className="bg-white/80 backdrop-blur-sm border-none shadow-card p-8 group/card"
                 delay={100}
               >
-                <div className="p-3 bg-primary-light/30 rounded-2xl text-primary w-fit ring-1 ring-primary/20 group-hover/card:bg-primary group-hover/card:text-white transition-colors duration-500">
-                  <Clock className="h-6 w-6" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-xl text-foreground mb-2 group-hover/card:text-primary transition-colors duration-500">
-                    Operating Hours
-                  </h3>
-                  <p className="text-[15px] text-muted-foreground leading-relaxed whitespace-pre-line">
-                    {hours || '10:00 AM - 9:00 PM'}
-                  </p>
+                <div className="flex flex-col h-full space-y-6">
+                  <div className="p-3.5 bg-primary-light/40 rounded-2xl text-primary w-fit ring-1 ring-primary/20 group-hover/card:bg-primary group-hover/card:text-white transition-all duration-500 shadow-sm">
+                    <Clock className="h-6 w-6" />
+                  </div>
+                  <div className="space-y-3">
+                    <h3 className="font-serif text-xl md:text-2xl text-foreground group-hover/card:text-primary transition-colors duration-500">
+                      Operating Hours
+                    </h3>
+                    <p className="text-[15px] text-muted-foreground leading-relaxed whitespace-pre-line font-light">
+                      {hours || '10:00 AM - 9:00 PM'}
+                    </p>
+                  </div>
                 </div>
               </AnimatedCard>
 
-              <AnimatedCard
-                className="bg-white border-none shadow-card p-8 space-y-6 md:col-span-2"
-                delay={200}
-              >
-                <div className="flex flex-wrap gap-x-12 gap-y-6">
-                  <div className="space-y-3">
-                    <span className="text-[11px] tracking-[0.25em] text-primary/70 uppercase font-bold block">
-                      Connect via Phone
-                    </span>
-                    <div className="flex items-center gap-4 group/link">
-                      <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary-light/40 text-primary ring-1 ring-primary/10 group-hover/link:bg-primary group-hover/link:text-white transition-all duration-300">
-                        <Phone className="h-4 w-4" />
+              <div className="md:col-span-2">
+                <AnimatedCard
+                  className="bg-white/80 backdrop-blur-sm border-none shadow-card p-8"
+                  delay={200}
+                >
+                  <div className="space-y-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                      <div className="space-y-4">
+                        <span className="text-[10px] tracking-[0.3em] text-primary/60 uppercase font-bold block">
+                          Connect via Phone
+                        </span>
+                        <div className="flex items-center gap-5 group/link">
+                          <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-2xl bg-primary-light/40 text-primary ring-1 ring-primary/10 group-hover/link:bg-primary group-hover/link:text-white transition-all duration-500 shadow-sm">
+                            <Phone className="h-5 w-5" />
+                          </div>
+                          <a
+                            href={`tel:${phone || '+639625036220'}`}
+                            className="text-lg font-medium text-foreground hover:text-primary transition-colors duration-300"
+                          >
+                            {phone || '+63 962 503 6220'}
+                          </a>
+                        </div>
                       </div>
-                      <a
-                        href={`tel:${phone}`}
-                        className="text-lg font-medium text-foreground hover:text-primary transition-colors duration-300"
-                      >
-                        {phone || '+63 (000) 000-0000'}
-                      </a>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <span className="text-[11px] tracking-[0.25em] text-primary/70 uppercase font-bold block">
-                      Inquiries via Email
-                    </span>
-                    <div className="flex items-center gap-4 group/link">
-                      <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary-light/40 text-primary ring-1 ring-primary/10 group-hover/link:bg-primary group-hover/link:text-white transition-all duration-300">
-                        <Mail className="h-4 w-4" />
+
+                      <div className="space-y-4 min-w-0">
+                        <span className="text-[10px] tracking-[0.3em] text-primary/60 uppercase font-bold block">
+                          Inquiries via Email
+                        </span>
+                        <div className="flex items-center gap-5 group/link">
+                          <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-2xl bg-primary-light/40 text-primary ring-1 ring-primary/10 group-hover/link:bg-primary group-hover/link:text-white transition-all duration-500 shadow-sm">
+                            <Mail className="h-5 w-5" />
+                          </div>
+                          <a
+                            href={`mailto:${email || 'nailssentialsqc@gmail.com'}`}
+                            className="text-lg font-medium text-foreground hover:text-primary transition-colors duration-300 truncate"
+                            title={email || 'nailssentialsqc@gmail.com'}
+                          >
+                            {email || 'nailssentialsqc@gmail.com'}
+                          </a>
+                        </div>
                       </div>
-                      <a
-                        href={`mailto:${email}`}
-                        className="text-lg font-medium text-foreground hover:text-primary transition-colors duration-300"
-                      >
-                        {email || 'nailssentialsqc@gmail.com'}
-                      </a>
+                    </div>
+
+                    <div className="pt-6 border-t border-border/40 space-y-4">
+                      <span className="text-[10px] tracking-[0.3em] text-primary/60 uppercase font-bold block">
+                        Follow Our Journey
+                      </span>
+                      <div className="flex items-center gap-4">
+                        <motion.a
+                          href={facebookLink || "https://www.facebook.com/profile.php?id=61576963875321"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          whileHover={{ scale: 1.1, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-2xl bg-primary-light/30 text-primary ring-1 ring-primary/20 hover:bg-primary hover:text-white hover:shadow-lg transition-all duration-500 shadow-sm"
+                        >
+                          <svg viewBox="0 0 24 24" className="h-6 w-6 fill-current">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                          </svg>
+                        </motion.a>
+                        <motion.a
+                          href={instagramLink || "https://www.instagram.com/nailssentialsqc"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          whileHover={{ scale: 1.1, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-2xl bg-primary-light/30 text-primary ring-1 ring-primary/20 hover:bg-primary hover:text-white hover:shadow-lg transition-all duration-500 shadow-sm"
+                        >
+                          <svg viewBox="0 0 24 24" className="h-6 w-6 fill-current">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+                          </svg>
+                        </motion.a>
+                      </div>
                     </div>
                   </div>
-                  {/* Hardcoded social links */}
-                  <div className="space-y-3">
-                    <span className="text-[11px] tracking-[0.25em] text-primary/70 uppercase font-bold block">
-                      Follow Us
-                    </span>
-                    <div className="flex items-center gap-3">
-                      <motion.a
-                        href="https://www.facebook.com/profile.php?id=61576963875321"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ scale: 1.1, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex items-center justify-center h-11 w-11 rounded-full bg-primary-light/30 text-primary ring-1 ring-primary/20 hover:bg-primary hover:text-white hover:shadow-lg transition-all duration-300"
-                      >
-                        <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
-                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                        </svg>
-                      </motion.a>
-                      <motion.a
-                        href="https://www.instagram.com/nailssentialsqc"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ scale: 1.1, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex items-center justify-center h-11 w-11 rounded-full bg-primary-light/30 text-primary ring-1 ring-primary/20 hover:bg-primary hover:text-white hover:shadow-lg transition-all duration-300"
-                      >
-                        <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
-                          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-                        </svg>
-                      </motion.a>
-                    </div>
-                  </div>
-                </div>
-              </AnimatedCard>
+                </AnimatedCard>
+              </div>
             </div>
 
             {/* Map Embed Container with Color glow */}

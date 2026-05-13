@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { getAvailability, createAppointment, getAllStaff } from '../api/apiClient';
 import { useAuth } from '../context/AuthContext';
@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Calendar, Clock, CheckCircle2, AlertCircle, Loader2, Trash2 } from 'lucide-react';
+import { useUser, SignInButton } from '@clerk/clerk-react';
 import type { Staff } from '@/types/api';
 import CartPackageItem from '@/components/packages/CartPackageItem';
 
@@ -35,7 +36,9 @@ const formatTime = (time24: string) => {
 
 const Booking: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isSignedIn } = useUser();
 
 
   const { cart, removeFromCart, updateCartItem, clearCart, totalPrice } = useCart();
@@ -49,16 +52,12 @@ const Booking: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [notes, setNotes] = useState('');
+  const [isCustomTime, setIsCustomTime] = useState(false);
 
 
 
   useEffect(() => {
     if (authLoading) return;
-
-    if (!isAuthenticated) {
-      navigate('/login?redirect=/booking');
-      return;
-    }
 
     const fetchData = async () => {
       try {
@@ -100,8 +99,13 @@ const Booking: React.FC = () => {
       return !item.staffId;
     });
 
-    if (invalidItems.length > 0 || !selectedTime) {
-      setError('Please select a technician for all services and a booking time.');
+    if (!selectedTime) {
+      setError('Please select a preferred booking time.');
+      return;
+    }
+
+    if (invalidItems.length > 0) {
+      setError('Please assign a technician for all selected services.');
       return;
     }
 
@@ -230,38 +234,61 @@ const Booking: React.FC = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="utility-xs text-body flex items-center gap-2">
-                    <Clock className="h-3.5 w-3.5 text-body/40" />
-                    Preferred Time
-                  </Label>
-                  <Select value={selectedTime} onValueChange={(val) => setSelectedTime(val || '')}>
-                    <SelectTrigger className="h-9 rounded-md border-hairline focus:ring-2 focus:ring-accent-blue focus:border-accent-blue body-md bg-surface-card">
-                      <SelectValue placeholder="Select Time">
-                        {selectedTime ? formatTime(selectedTime) : undefined}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="rounded-md border-hairline shadow-none bg-surface-card max-h-64">
-                      {slots.map((slot) => (
-                        <SelectItem
-                          key={slot.time}
-                          value={slot.time}
-                          disabled={!slot.available}
-                          className="py-2.5"
-                        >
-                          <div className="flex items-center justify-between w-full gap-4">
-                            <div className="flex items-center gap-2">
-                              <span className="body-md">{formatTime(slot.time)}</span>
+                  <div className="flex justify-between items-center">
+                    <Label className="utility-xs text-body flex items-center gap-2">
+                      <Clock className="h-3.5 w-3.5 text-body/40" />
+                      Preferred Time
+                    </Label>
+                    <button
+                      type="button"
+                      onClick={() => setIsCustomTime(!isCustomTime)}
+                      className="text-[10px] uppercase font-bold text-primary hover:text-primary-dark transition-colors"
+                    >
+                      {isCustomTime ? 'Back to Presets' : 'Custom Time'}
+                    </button>
+                  </div>
+                  {isCustomTime ? (
+                    <div className="relative">
+                      <Input
+                        type="time"
+                        value={selectedTime}
+                        onChange={(e) => setSelectedTime(e.target.value)}
+                        className="h-9 rounded-md border-hairline focus:ring-2 focus:ring-accent-blue focus:border-accent-blue body-md bg-surface-card pr-10"
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <Clock className="h-4 w-4 text-body/30" />
+                      </div>
+                    </div>
+                  ) : (
+                    <Select value={selectedTime} onValueChange={(val) => setSelectedTime(val || '')}>
+                      <SelectTrigger className="h-9 rounded-md border-hairline focus:ring-2 focus:ring-accent-blue focus:border-accent-blue body-md bg-surface-card">
+                        <SelectValue placeholder="Select Time">
+                          {selectedTime ? formatTime(selectedTime) : undefined}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="rounded-md border-hairline shadow-none bg-surface-card max-h-64">
+                        {slots.map((slot) => (
+                          <SelectItem
+                            key={slot.time}
+                            value={slot.time}
+                            disabled={!slot.available}
+                            className="py-2.5"
+                          >
+                            <div className="flex items-center justify-between w-full gap-4">
+                              <div className="flex items-center gap-2">
+                                <span className="body-md">{formatTime(slot.time)}</span>
+                              </div>
+                              {!slot.available && (
+                                <span className="utility-xs text-accent-red-soft bg-accent-red/10 px-2 py-0.5 rounded-sm">
+                                  UNAVAILABLE
+                                </span>
+                              )}
                             </div>
-                            {!slot.available && (
-                              <span className="utility-xs text-accent-red-soft bg-accent-red/10 px-2 py-0.5 rounded-sm">
-                                UNAVAILABLE
-                              </span>
-                            )}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
               </div>
 
@@ -471,20 +498,32 @@ const Booking: React.FC = () => {
                   )}
                 </CardContent>
                 <CardFooter className="pb-6 px-6">
-                  <Button
-                    className="w-full h-11 rounded-md bg-primary text-white utility-xs font-bold hover:bg-primary-pressed transition-colors shadow-none"
-                    disabled={isSubmitting}
-                    onClick={handleBooking}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        SUBMITTING...
-                      </>
-                    ) : (
-                      'SCHEDULE APPOINTMENT'
-                    )}
-                  </Button>
+                  {!isSignedIn ? (
+                    <SignInButton mode="modal" fallbackRedirectUrl={location.pathname}>
+                      <Button
+                        className="w-full h-11 rounded-md bg-primary text-white text-[10px] font-extrabold tracking-[0.2em] uppercase hover:bg-primary-pressed transition-colors shadow-none"
+                      >
+                        Login to Schedule
+                      </Button>
+                    </SignInButton>
+                  ) : (
+                    <Button
+                      className="w-full h-11 rounded-md bg-primary text-white text-[10px] font-extrabold tracking-[0.2em] uppercase hover:bg-primary-pressed transition-colors shadow-none"
+                      disabled={isSubmitting || (isSignedIn && !isAuthenticated && !authLoading)}
+                      onClick={handleBooking}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          SUBMITTING...
+                        </>
+                      ) : isSignedIn && !isAuthenticated && !authLoading ? (
+                        'FINISHING SYNC...'
+                      ) : (
+                        'SCHEDULE APPOINTMENT'
+                      )}
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
 

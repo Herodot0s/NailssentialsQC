@@ -78,7 +78,7 @@ export default function PackageDiscoverySection() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="font-serif text-5xl md:text-6xl font-light text-foreground leading-tight"
+              className="font-serif text-4xl md:text-6xl font-light text-foreground leading-tight"
             >
               Elevate Your <em className="italic text-primary/80">Self-Care</em>
             </motion.h2>
@@ -111,7 +111,7 @@ export default function PackageDiscoverySection() {
           </div>
         </div>
 
-        <div className="relative h-[720px] md:h-[780px] flex items-center justify-center">
+        <div className="relative h-[640px] md:h-[780px] flex items-center justify-center">
           <div className="flex items-center justify-center gap-8 w-full">
             <AnimatePresence mode="popLayout" initial={false}>
               {visibleIndices.map((idx, i) => {

@@ -182,34 +182,6 @@ const Gallery: React.FC = () => {
         </div>
       </section>
 
-      {/* Inspiration CTA */}
-      <section className="py-32 bg-gray-50 border-t border-gray-100">
-        <div className="container max-w-4xl mx-auto px-6 text-center space-y-12">
-          <div className="space-y-4">
-            <p className="text-[10px] tracking-[0.4em] uppercase font-bold text-primary">
-              Ready for your transformation?
-            </p>
-            <h2 className="font-serif text-4xl md:text-5xl font-light">
-              Bring your <span className="italic">inspiration</span> to life.
-            </h2>
-          </div>
-          <p className="text-muted-foreground font-light text-lg">
-            Our artisans are ready to translate these designs or create something entirely unique
-            for you.
-          </p>
-          <div className="pt-4 flex flex-col sm:flex-row justify-center gap-6">
-            <Button className="h-14 px-12 rounded-none uppercase tracking-[0.2em] text-xs font-bold shadow-2xl shadow-primary/20">
-              Book Appointment
-            </Button>
-            <Button
-              variant="outline"
-              className="h-14 px-12 rounded-none uppercase tracking-[0.2em] text-xs font-bold"
-            >
-              View Service Menu
-            </Button>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };

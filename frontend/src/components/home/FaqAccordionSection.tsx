@@ -12,7 +12,8 @@ interface FaqAccordionSectionProps {
 export const FaqAccordionSection: React.FC<FaqAccordionSectionProps> = ({ faqs }) => {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  if (!faqs || faqs.length === 0) return null;
+  // Render section even if empty to show header
+  const faqList = faqs || [];
 
   return (
     <section className="py-24 md:py-32 bg-warm-canvas overflow-hidden">
@@ -53,7 +54,7 @@ export const FaqAccordionSection: React.FC<FaqAccordionSectionProps> = ({ faqs }
 
         <LayoutGroup>
           <div className="space-y-4">
-            {faqs.map((faq, index) => {
+            {faqList.map((faq, index) => {
               const isExpanded = expandedId === faq.id;
 
               return (
@@ -133,6 +134,17 @@ export const FaqAccordionSection: React.FC<FaqAccordionSectionProps> = ({ faqs }
                 </motion.div>
               );
             })}
+            {faqList.length === 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                className="py-12 text-center border-2 border-dashed border-kiln-border/30 rounded-[2rem]"
+              >
+                <p className="text-warm-stone font-light italic">
+                  Our frequently asked questions are being curated. Please check back soon.
+                </p>
+              </motion.div>
+            )}
           </div>
         </LayoutGroup>
 

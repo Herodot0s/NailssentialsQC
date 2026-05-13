@@ -117,7 +117,7 @@ export default function PackageCard({ pkg, isFocused = false }: PackageCardProps
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               onClick={handleAction}
-              className={`w-full h-12 rounded-xl uppercase tracking-[0.2em] text-[11px] font-bold transition-all ${
+              className={`w-full h-12 rounded-xl uppercase tracking-[0.2em] text-[11px] font-bold transition-all border-none ${
                 inCart
                   ? 'bg-forest-confirm hover:bg-forest-confirm/90 text-white'
                   : 'bg-primary hover:bg-primary-hover text-white shadow-premium hover:shadow-xl'

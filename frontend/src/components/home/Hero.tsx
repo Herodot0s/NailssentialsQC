@@ -16,7 +16,7 @@ const Hero: React.FC<HeroProps> = ({
   tagline = 'Experience Pure Luxury',
   headline = 'Life Is Not Perfect, But Your Nails Can Be',
   subheadline = 'Discover a haven of serenity where expert craftsmanship meets premium self-care. Welcome to the NailssentialsQC sanctuary.',
-  buttonLabel = 'Book Your Appointment',
+  buttonLabel = 'Artisan Exhibit',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -119,7 +119,7 @@ const Hero: React.FC<HeroProps> = ({
               transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1], delay: 1.4 }}
               className="flex flex-col sm:flex-row items-center lg:items-start gap-8 pt-8 border-t border-white/10"
             >
-              <Link to="/booking" className="w-full sm:w-auto">
+              <Link to="/gallery" className="w-full sm:w-auto">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     size="lg"
@@ -135,7 +135,7 @@ const Hero: React.FC<HeroProps> = ({
                 className="group flex items-center h-14 px-4 text-white/90 text-[11px] font-bold tracking-[0.2em] uppercase transition-colors duration-200 hover:text-white"
               >
                 <span className="relative">
-                  Explore
+                  Services
                   <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-primary-light transition-all duration-300 group-hover:w-full" />
                 </span>
                 <motion.div

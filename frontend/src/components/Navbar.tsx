@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import { LogOut, Calendar, LayoutDashboard, Menu, ShoppingCart } from 'lucide-react';
+import { Calendar, LayoutDashboard, Menu, ShoppingCart, Image, List } from 'lucide-react';
 import { UserButton, SignInButton, SignUpButton, useUser } from '@clerk/clerk-react';
 
 import NotificationBell from './NotificationBell';
@@ -18,7 +18,7 @@ import { useCart } from '../context/CartContext';
 
 
 const Navbar: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { user: clerkUser, isSignedIn, isLoaded: isClerkLoaded } = useUser();
   const { cart } = useCart();
   const navigate = useNavigate();
@@ -26,11 +26,24 @@ const Navbar: React.FC = () => {
   // Get role from either local DB or Clerk metadata (for immediate sync)
   const userRole = user?.role || (clerkUser?.publicMetadata?.role as string);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
+
+  const isStaffOrManager = userRole === 'staff' || userRole === 'manager';
+  const showCartIcon = !isStaffOrManager || cart.length > 0;
+
+  const CartIcon = (
+    <Link
+      to="/booking"
+      className="relative text-body hover:text-ink transition-all p-2"
+    >
+      <ShoppingCart className="h-5 w-5 stroke-[1.8]" />
+      {isClerkLoaded && cart.length > 0 && (
+        <span className="absolute top-1 right-1 bg-primary text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center shadow-sm">
+          {cart.length}
+        </span>
+      )}
+    </Link>
+  );
 
   return (
     <header className="sticky top-0 z-50 w-full bg-canvas/80 backdrop-blur-md border-b border-hairline/50">
@@ -46,33 +59,10 @@ const Navbar: React.FC = () => {
           </div>
 
           <nav className="hidden md:flex items-center gap-10">
-            <Link
-              to="/services"
-              className="text-[11px] tracking-[0.2em] uppercase font-bold text-body hover:text-ink transition-all"
-            >
-              Services
-            </Link>
-            <Link
-              to="/gallery"
-              className="text-[11px] tracking-[0.2em] uppercase font-bold text-body hover:text-ink transition-all"
-            >
-              Exhibit
-            </Link>
+            {showCartIcon && CartIcon}
+
             {isClerkLoaded && isSignedIn ? (
               <div className="flex items-center gap-6">
-                {userRole === 'customer' && (
-                  <Link
-                    to="/booking"
-                    className="relative text-body hover:text-ink transition-all p-2"
-                  >
-                    <ShoppingCart className="h-5 w-5 stroke-[1.8]" />
-                    {cart.length > 0 && (
-                      <span className="absolute top-1 right-1 bg-primary text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center shadow-sm">
-                        {cart.length}
-                      </span>
-                    )}
-                  </Link>
-                )}
                 {userRole === 'staff' && (
                   <Link
                     to="/dashboard"
@@ -96,6 +86,13 @@ const Navbar: React.FC = () => {
                     }}
                   >
                     <UserButton.MenuItems>
+                      {userRole !== 'manager' && (
+                        <UserButton.Action
+                          label="Cart"
+                          labelIcon={<ShoppingCart className="h-4 w-4" />}
+                          onClick={() => navigate('/booking')}
+                        />
+                      )}
                       {userRole === 'manager' && (
                         <UserButton.Action
                           label="Manager Dashboard"
@@ -110,6 +107,16 @@ const Navbar: React.FC = () => {
                           onClick={() => navigate('/dashboard')}
                         />
                       )}
+                      <UserButton.Action
+                        label="Services"
+                        labelIcon={<List className="h-4 w-4" />}
+                        onClick={() => navigate('/services')}
+                      />
+                      <UserButton.Action
+                        label="Exhibit"
+                        labelIcon={<Image className="h-4 w-4" />}
+                        onClick={() => navigate('/gallery')}
+                      />
                       {userRole === 'customer' && (
                         <UserButton.Action
                           label="My Appointments"
@@ -141,21 +148,10 @@ const Navbar: React.FC = () => {
 
           {/* Mobile Actions */}
           <div className="flex md:hidden items-center gap-3">
+            {showCartIcon && CartIcon}
+            
             {isClerkLoaded && isSignedIn && (
               <div className="flex items-center gap-3">
-                {userRole === 'customer' && (
-                  <Link
-                    to="/booking"
-                    className="relative p-2"
-                  >
-                    <ShoppingCart className="h-5 w-5 stroke-[1.8]" />
-                    {cart.length > 0 && (
-                      <span className="absolute top-1 right-1 bg-primary text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center shadow-sm">
-                        {cart.length}
-                      </span>
-                    )}
-                  </Link>
-                )}
                 {(userRole === 'staff' || userRole === 'manager') && <NotificationBell />}
                 <UserButton
                   appearance={{
@@ -165,80 +161,96 @@ const Navbar: React.FC = () => {
                       userButtonAvatarBox: "h-8 w-8 border border-hairline/50",
                     }
                   }}
-                />
+                >
+                  <UserButton.MenuItems>
+                    {userRole === 'manager' && (
+                      <UserButton.Action
+                        label="Manager Dashboard"
+                        labelIcon={<LayoutDashboard className="h-4 w-4" />}
+                        onClick={() => navigate('/manager')}
+                      />
+                    )}
+                    {userRole !== 'manager' && (
+                      <UserButton.Action
+                        label="Cart"
+                        labelIcon={<ShoppingCart className="h-4 w-4" />}
+                        onClick={() => navigate('/booking')}
+                      />
+                    )}
+                    <UserButton.Action
+                      label="Services"
+                      labelIcon={<List className="h-4 w-4" />}
+                      onClick={() => navigate('/services')}
+                    />
+                    <UserButton.Action
+                      label="Exhibit"
+                      labelIcon={<Image className="h-4 w-4" />}
+                      onClick={() => navigate('/gallery')}
+                    />
+                    {userRole === 'staff' && (
+                      <UserButton.Action
+                        label="Staff Dashboard"
+                        labelIcon={<Calendar className="h-4 w-4" />}
+                        onClick={() => navigate('/dashboard')}
+                      />
+                    )}
+                    {userRole === 'customer' && (
+                      <UserButton.Action
+                        label="My Appointments"
+                        labelIcon={<Calendar className="h-4 w-4" />}
+                        onClick={() => navigate('/appointments')}
+                      />
+                    )}
+                  </UserButton.MenuItems>
+                </UserButton>
               </div>
             )}
 
-            <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex items-center justify-center h-10 w-10 hover:bg-ink/5 transition-colors outline-none border-none rounded-md">
-                <Menu className="h-6 w-6 stroke-[1.5]" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-64 mt-4 border border-hairline shadow-xl rounded-md bg-white p-4 space-y-2 animate-in slide-in-from-top-2 duration-300"
-              >
-                <DropdownMenuItem
-                  onClick={() => navigate('/gallery')}
-                  className="rounded-md px-4 py-3 cursor-pointer hover:bg-surface-soft transition-colors"
+            {(!isClerkLoaded || !isSignedIn) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="inline-flex items-center justify-center h-10 w-10 hover:bg-ink/5 transition-colors outline-none border-none rounded-md">
+                  <Menu className="h-6 w-6 stroke-[1.5]" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-64 mt-4 border border-hairline shadow-xl rounded-md bg-white p-4 space-y-2 animate-in slide-in-from-top-2 duration-300"
                 >
-                  Exhibit
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => navigate('/services')}
-                  className="rounded-md px-4 py-3 cursor-pointer hover:bg-surface-soft transition-colors"
-                >
-                  Services
-                </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => navigate('/gallery')}
+                    className="rounded-md px-4 py-3 cursor-pointer hover:bg-surface-soft transition-colors"
+                  >
+                    Exhibit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => navigate('/services')}
+                    className="rounded-md px-4 py-3 cursor-pointer hover:bg-surface-soft transition-colors"
+                  >
+                    Services
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => navigate('/booking')}
+                    className="rounded-md px-4 py-3 cursor-pointer hover:bg-surface-soft transition-colors"
+                  >
+                    <ShoppingCart className="mr-3 h-4 w-4 stroke-[1.5]" />
+                    Cart {isClerkLoaded && `(${cart.length})`}
+                  </DropdownMenuItem>
 
-                {!isClerkLoaded || !isSignedIn ? (
-                  <>
-                    <DropdownMenuSeparator className="bg-hairline/30" />
-                    <DropdownMenuItem
-                      onClick={() => navigate('/login')}
-                      className="rounded-md px-4 py-3 cursor-pointer hover:bg-surface-soft font-bold text-primary"
-                    >
-                      Login
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => navigate('/register')}
-                      className="rounded-md px-4 py-3 cursor-pointer bg-primary text-white font-bold"
-                    >
-                      Sign Up
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuSeparator className="bg-hairline/30" />
-                    {userRole === 'manager' && (
-                      <DropdownMenuItem onClick={() => navigate('/manager')} className="rounded-md px-4 py-3 cursor-pointer hover:bg-surface-soft">
-                        <LayoutDashboard className="mr-3 h-4 w-4 stroke-[1.5]" />
-                        Manager Dashboard
-                      </DropdownMenuItem>
-                    )}
-                    {userRole === 'staff' && (
-                      <DropdownMenuItem onClick={() => navigate('/dashboard')} className="rounded-md px-4 py-3 cursor-pointer hover:bg-surface-soft">
-                        <Calendar className="mr-3 h-4 w-4 stroke-[1.5]" />
-                        Staff Dashboard
-                      </DropdownMenuItem>
-                    )}
-                    {userRole === 'customer' && (
-                      <DropdownMenuItem onClick={() => navigate('/appointments')} className="rounded-md px-4 py-3 cursor-pointer hover:bg-surface-soft">
-                        <Calendar className="mr-3 h-4 w-4 stroke-[1.5]" />
-                        My Appointments
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator className="bg-hairline/30" />
-                    <DropdownMenuItem
-                      onClick={handleLogout}
-                      className="rounded-md px-4 py-3 text-destructive cursor-pointer hover:bg-destructive/5"
-                    >
-                      <LogOut className="mr-3 h-4 w-4 stroke-[1.5]" />
-                      Logout
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuSeparator className="bg-hairline/30" />
+                  <DropdownMenuItem
+                    onClick={() => navigate('/login')}
+                    className="rounded-md px-4 py-3 cursor-pointer hover:bg-surface-soft font-bold text-primary"
+                  >
+                    Login
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => navigate('/register')}
+                    className="rounded-md px-4 py-3 cursor-pointer bg-primary text-white font-bold"
+                  >
+                    Sign Up
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </div>

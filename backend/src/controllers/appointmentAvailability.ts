@@ -27,6 +27,7 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
     const allSlots = [];
     for (let h = OPERATING_HOURS.start; h < OPERATING_HOURS.end; h++) {
       allSlots.push(`${h.toString().padStart(2, '0')}:00`);
+      allSlots.push(`${h.toString().padStart(2, '0')}:30`);
     }
 
     // 1. Get all technicians
@@ -64,7 +65,7 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
     // 3. For each slot, check if ANY technician is free
     const slotsWithAvailability = allSlots.map((slotTime) => {
       const slotStart = getFullDate(dateOnly, slotTime);
-      const slotEnd = addMinutes(slotStart, 59);
+      const slotEnd = addMinutes(slotStart, 30);
 
       const availableTechnicians = technicians.filter((tech) => {
         const techItems = appointmentItems.filter((item) => item.staff_id === tech.id);
