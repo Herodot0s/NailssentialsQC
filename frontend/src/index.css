@@ -23,6 +23,9 @@
   --color-surface-dark: #23251d;
 
   /* Semantic UI Tokens (for component compatibility) */
+  --color-forest-confirm: #2c8c66;
+  --color-primary-hover: #cd8a5e;
+  --color-brick-error: #cd4239;
   --color-card: #ffffff;
   --color-card-foreground: #23251d;
 
@@ -127,6 +130,9 @@
   /* Components */
   .btn-primary {
     @apply h-10 px-4 bg-primary text-white font-bold rounded-md transition-colors;
+    &:hover {
+      @apply bg-primary-hover;
+    }
     &:active {
       @apply bg-primary-pressed;
     }

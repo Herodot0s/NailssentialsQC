@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import type { CartItem, CartChildService } from '@/types/CartItem';
 
 interface CartContextType {
@@ -26,6 +27,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, isLoaded } = useUser();
   const [cart, setCart] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem('bookingCart');
     const parsed = saved ? JSON.parse(saved) : [];
@@ -33,8 +35,32 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
-    localStorage.setItem('bookingCart', JSON.stringify(cart));
-  }, [cart]);
+    if (!isLoaded) return;
+
+    const storedUserId = localStorage.getItem('lastUserId');
+    const currentUserId = user?.id || null;
+
+    // Clear cart if switching accounts or signing out from an account
+    if (storedUserId && storedUserId !== currentUserId) {
+      setCart([]);
+      localStorage.removeItem('bookingCart');
+    }
+
+    // Update the last known user ID
+    if (currentUserId) {
+      localStorage.setItem('lastUserId', currentUserId);
+    } else {
+      localStorage.removeItem('lastUserId');
+    }
+  }, [user?.id, isLoaded]);
+
+  useEffect(() => {
+    // Only persist to localStorage if Clerk is loaded to avoid overwriting 
+    // the cart during the sign-out/sync transition.
+    if (isLoaded) {
+      localStorage.setItem('bookingCart', JSON.stringify(cart));
+    }
+  }, [cart, isLoaded]);
 
   const addToCart = (item: CartItem) => {
     setCart((prev) => {
