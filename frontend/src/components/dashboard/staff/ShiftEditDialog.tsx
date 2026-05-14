@@ -74,7 +74,7 @@ export const ShiftEditDialog: React.FC<ShiftEditDialogProps> = ({
                 </Label>
                 <Input
                   type="time"
-                  value={form.start}
+                  value={form.start?.slice(0, 5)}
                   onChange={(e) => onFormChange({ ...form, start: e.target.value })}
                   className="rounded-[6px] border-[#bfc1b7] h-10 bg-white text-[#23251d] focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-[#B8794E]"
                   aria-label="Shift start time"
@@ -86,7 +86,7 @@ export const ShiftEditDialog: React.FC<ShiftEditDialogProps> = ({
                 </Label>
                 <Input
                   type="time"
-                  value={form.end}
+                  value={form.end?.slice(0, 5)}
                   onChange={(e) => onFormChange({ ...form, end: e.target.value })}
                   className="rounded-[6px] border-[#bfc1b7] h-10 bg-white text-[#23251d] focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-[#B8794E]"
                   aria-label="Shift end time"

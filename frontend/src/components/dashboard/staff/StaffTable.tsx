@@ -106,9 +106,9 @@ export const StaffTable: React.FC<StaffTableProps> = ({ staffMembers, onStaffCli
                   </TableCell>
                   <TableCell className="text-right pr-8">
                     <Badge
-                      className={`rounded-md border-none text-[11px] font-semibold uppercase tracking-widest ${staff.isActive ? 'bg-forest-confirm text-white' : 'bg-bisque-wash text-warm-stone'}`}
+                      className={`rounded-md border-none text-[11px] font-semibold uppercase tracking-widest ${(staff.isActive ?? (staff as any).is_active) ? 'bg-forest-confirm text-white' : 'bg-bisque-wash text-warm-stone'}`}
                     >
-                      {staff.isActive ? 'Active' : 'Archived'}
+                      {(staff.isActive ?? (staff as any).is_active) ? 'Active' : 'Archived'}
                     </Badge>
                   </TableCell>
                 </TableRow>

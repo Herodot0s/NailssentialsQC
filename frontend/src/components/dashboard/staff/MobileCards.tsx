@@ -13,6 +13,7 @@ interface AppointmentCardProps {
   statusBadge: React.ReactNode;
   onComplete?: () => void;
   date?: string;
+  technicianName?: string;
 }
 
 export const AppointmentCard: React.FC<AppointmentCardProps> = ({
@@ -23,6 +24,7 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
   statusBadge,
   onComplete,
   date,
+  technicianName,
 }) => {
   return (
     <Card className="rounded-md border border-[#bfc1b7] shadow-none bg-white overflow-hidden mb-4">
@@ -41,9 +43,17 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
           {statusBadge}
         </div>
 
-        <div className="flex items-center gap-2 text-[#4d4f46]">
-          <Scissors className="h-4 w-4 opacity-60" />
-          <span className="text-sm font-medium">{serviceName}</span>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-[#4d4f46]">
+            <Scissors className="h-4 w-4 opacity-60" />
+            <span className="text-sm font-medium">{serviceName}</span>
+          </div>
+          {technicianName && (
+            <div className="flex items-center gap-2 text-[#B8794E]">
+              <span className="text-[10px] font-bold uppercase tracking-widest">Artisan:</span>
+              <span className="text-xs font-bold">{technicianName}</span>
+            </div>
+          )}
         </div>
 
         {onComplete && (

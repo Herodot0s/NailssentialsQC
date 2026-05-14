@@ -206,39 +206,79 @@ export const getHistoricalAnalytics = async (req: AuthRequest, res: Response) =>
       },
     });
 
-    // Create a map of date -> category -> total
-    const dailyData: Record<string, DailyData> = {};
-    const interval = eachDayOfInterval({ start, end });
+    // Determine granularity
+    const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const useMonthly = daysDiff > 62; // roughly 2 months
 
-    interval.forEach((day) => {
-      dailyData[format(day, 'yyyy-MM-dd')] = {
-        date: format(day, 'MMM dd'),
+    let intervals: Date[];
+    if (useMonthly) {
+      intervals = [];
+      let current = new Date(start);
+      current.setDate(1);
+      while (current <= end) {
+        intervals.push(new Date(current));
+        current.setMonth(current.getMonth() + 1);
+      }
+    } else {
+      intervals = eachDayOfInterval({ start, end });
+    }
+
+    const allCategories = await prisma.serviceCategory.findMany({
+      include: { services: true }
+    });
+    const allCategoryNames = allCategories.map((c) => c.name);
+
+    const dataMap: Record<string, DailyData & { servicesByCategory: Record<string, Record<string, number>> }> = {};
+
+    intervals.forEach((dateObj) => {
+      const key = useMonthly ? format(dateObj, 'yyyy-MM') : format(dateObj, 'yyyy-MM-dd');
+      
+      const initCategories: Record<string, number> = {};
+      const initServicesByCategory: Record<string, Record<string, number>> = {};
+      
+      allCategories.forEach((cat) => {
+        initCategories[cat.name] = 0;
+        initServicesByCategory[cat.name] = {};
+        cat.services.forEach((svc) => {
+          initServicesByCategory[cat.name][svc.name] = 0;
+        });
+      });
+
+      dataMap[key] = {
+        date: useMonthly ? format(dateObj, 'MMM yyyy') : format(dateObj, 'MMM dd'),
         total: 0,
-        categories: {},
+        categories: initCategories,
         services: {},
+        servicesByCategory: initServicesByCategory,
       };
     });
 
     commissions.forEach((comm) => {
-      const dateKey = format(comm.commission_date, 'yyyy-MM-dd');
-      if (dailyData[dateKey]) {
+      const key = useMonthly ? format(comm.commission_date, 'yyyy-MM') : format(comm.commission_date, 'yyyy-MM-dd');
+      
+      // If the exact date is outside our interval bounds but somehow matched, or start/end issues
+      if (dataMap[key]) {
         const catName = comm.service.category.name;
         const svcName = comm.service.name;
         const amount = Number(comm.base_amount);
 
-        dailyData[dateKey].total += amount;
+        dataMap[key].total += amount;
 
-        if (!dailyData[dateKey].categories[catName]) dailyData[dateKey].categories[catName] = 0;
-        dailyData[dateKey].categories[catName] += amount;
+        if (!dataMap[key].categories[catName]) dataMap[key].categories[catName] = 0;
+        dataMap[key].categories[catName] += amount;
 
-        if (!dailyData[dateKey].services[svcName]) dailyData[dateKey].services[svcName] = 0;
-        dailyData[dateKey].services[svcName] += amount;
+        if (!dataMap[key].services[svcName]) dataMap[key].services[svcName] = 0;
+        dataMap[key].services[svcName] += amount;
+
+        if (!dataMap[key].servicesByCategory[catName]) dataMap[key].servicesByCategory[catName] = {};
+        if (!dataMap[key].servicesByCategory[catName][svcName]) dataMap[key].servicesByCategory[catName][svcName] = 0;
+        dataMap[key].servicesByCategory[catName][svcName] += amount;
       }
     });
 
     return res.status(200).json({
       success: true,
-      data: Object.values(dailyData),
+      data: Object.values(dataMap),
     });
   } catch (error: unknown) {
     console.error('Get historical analytics error:', error);

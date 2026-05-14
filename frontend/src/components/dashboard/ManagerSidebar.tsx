@@ -55,9 +55,6 @@ const groups: SidebarGroup[] = [
       { id: 'attendance', label: 'Attendance', icon: Clock },
       { id: 'performance', label: 'Success Metrics', icon: TrendingUp },
       { id: 'service-history', label: 'Service Log', icon: History },
-      { id: 'deductions', label: 'Deductions', icon: Wallet },
-      { id: 'payroll', label: 'Salary Slips', icon: DollarSign },
-      { id: 'payroll-setup', label: 'Payroll Config', icon: Wrench },
     ],
   },
 ];

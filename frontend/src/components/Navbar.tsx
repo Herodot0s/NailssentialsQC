@@ -29,7 +29,7 @@ const Navbar: React.FC = () => {
 
 
   const isStaffOrManager = userRole === 'staff' || userRole === 'manager';
-  const showCartIcon = !isStaffOrManager || cart.length > 0;
+  const showCartIcon = !isStaffOrManager;
 
   const CartIcon = (
     <Link
@@ -86,7 +86,7 @@ const Navbar: React.FC = () => {
                     }}
                   >
                     <UserButton.MenuItems>
-                      {userRole !== 'manager' && (
+                      {userRole !== 'manager' && userRole !== 'staff' && (
                         <UserButton.Action
                           label="Cart"
                           labelIcon={<ShoppingCart className="h-4 w-4" />}
@@ -107,16 +107,20 @@ const Navbar: React.FC = () => {
                           onClick={() => navigate('/dashboard')}
                         />
                       )}
-                      <UserButton.Action
-                        label="Services"
-                        labelIcon={<List className="h-4 w-4" />}
-                        onClick={() => navigate('/services')}
-                      />
-                      <UserButton.Action
-                        label="Exhibit"
-                        labelIcon={<Image className="h-4 w-4" />}
-                        onClick={() => navigate('/gallery')}
-                      />
+                      {userRole !== 'staff' && (
+                        <UserButton.Action
+                          label="Services"
+                          labelIcon={<List className="h-4 w-4" />}
+                          onClick={() => navigate('/services')}
+                        />
+                      )}
+                      {userRole !== 'staff' && (
+                        <UserButton.Action
+                          label="Exhibit"
+                          labelIcon={<Image className="h-4 w-4" />}
+                          onClick={() => navigate('/gallery')}
+                        />
+                      )}
                       {userRole === 'customer' && (
                         <UserButton.Action
                           label="My Appointments"
@@ -170,23 +174,27 @@ const Navbar: React.FC = () => {
                         onClick={() => navigate('/manager')}
                       />
                     )}
-                    {userRole !== 'manager' && (
+                    {userRole !== 'manager' && userRole !== 'staff' && (
                       <UserButton.Action
                         label="Cart"
                         labelIcon={<ShoppingCart className="h-4 w-4" />}
                         onClick={() => navigate('/booking')}
                       />
                     )}
-                    <UserButton.Action
-                      label="Services"
-                      labelIcon={<List className="h-4 w-4" />}
-                      onClick={() => navigate('/services')}
-                    />
-                    <UserButton.Action
-                      label="Exhibit"
-                      labelIcon={<Image className="h-4 w-4" />}
-                      onClick={() => navigate('/gallery')}
-                    />
+                    {userRole !== 'staff' && (
+                      <UserButton.Action
+                        label="Services"
+                        labelIcon={<List className="h-4 w-4" />}
+                        onClick={() => navigate('/services')}
+                      />
+                    )}
+                    {userRole !== 'staff' && (
+                      <UserButton.Action
+                        label="Exhibit"
+                        labelIcon={<Image className="h-4 w-4" />}
+                        onClick={() => navigate('/gallery')}
+                      />
+                    )}
                     {userRole === 'staff' && (
                       <UserButton.Action
                         label="Staff Dashboard"

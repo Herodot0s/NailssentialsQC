@@ -36,6 +36,8 @@ export interface CreateStaffRequest {
   sssNumber?: string;
   pagIbigNumber?: string;
   profilePictureUrl?: string;
+  isActive?: boolean;
+  role?: string;
 }
 
 export interface StaffMember {

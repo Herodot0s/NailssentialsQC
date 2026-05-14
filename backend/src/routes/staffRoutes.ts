@@ -57,11 +57,11 @@ const validateScheduleBody = (req: any, res: any, next: any) => {
 
 const router = Router();
 
+// Apply authentication to all staff routes
+router.use(authenticateToken);
+
 // Staff list is viewable by all (for booking)
 router.get('/', getAllStaff);
-
-// All other staff routes are restricted to managers
-router.use(authenticateToken);
 
 // Management routes restricted to managers
 router.use(authorizeRoles('manager'));
