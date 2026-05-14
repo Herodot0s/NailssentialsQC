@@ -4,7 +4,7 @@
 
 ### Payroll Configuration & Calculation
 - [x] **PAY-01**: User (Manager) can edit the dynamic base commission rate and commission tiers for staff.
-- [ ] **PAY-02**: System automatically calculates weekly payout periods.
+- [x] **PAY-02**: System automatically calculates weekly payout periods.
 - [ ] **PAY-03**: System calculates gross pay, total deductions, and net pay per staff member based on daily performance.
 
 ### Deductions Management
