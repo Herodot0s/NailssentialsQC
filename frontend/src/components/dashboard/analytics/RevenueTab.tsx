@@ -220,7 +220,7 @@ export const RevenueTab: React.FC<RevenueTabProps> = ({ dateRange }) => {
               <DropdownMenuContent align="start" className="w-64 max-h-[300px] overflow-y-auto">
                 <DropdownMenuCheckboxItem
                   checked={selectedServices.length === servicesInCategory.length}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={(checked: boolean) => {
                     if (checked) {
                       setSelectedServices(servicesInCategory);
                     } else {
@@ -235,7 +235,7 @@ export const RevenueTab: React.FC<RevenueTabProps> = ({ dateRange }) => {
                   <DropdownMenuCheckboxItem
                     key={service}
                     checked={selectedServices.includes(service)}
-                    onCheckedChange={(checked) => {
+                    onCheckedChange={(checked: boolean) => {
                       setSelectedServices((prev) =>
                         checked ? [...prev, service] : prev.filter((s) => s !== service)
                       );

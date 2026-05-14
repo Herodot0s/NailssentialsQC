@@ -13,7 +13,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Briefcase, Check, Wallet, Fingerprint, RefreshCw, Upload, Camera, Loader2, UserCheck, UserMinus } from 'lucide-react';
+import { Briefcase, Check, Wallet, Fingerprint, Upload, Loader2, UserCheck, UserMinus } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { uploadFile } from '@/api/apiClient';
 import type { StaffDetailSheetProps } from '../types';
@@ -31,27 +31,9 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const { user: clerkUser } = useUser();
 
-  const handleSyncFromClerk = () => {
-    if (!clerkUser) return;
-    
-    // Only sync if the staff email matches the current clerk user email
-    // or if the staff member is viewing their own profile.
-    const clerkEmail = clerkUser.primaryEmailAddress?.emailAddress;
-    const isSameUser = clerkEmail && staff.email === clerkEmail;
-
-    if (isSameUser) {
-      onStaffChange({
-        ...staff,
-        username: clerkUser.username || staff.username,
-        fullName: clerkUser.fullName || staff.fullName,
-        profilePictureUrl: clerkUser.imageUrl || staff.profilePictureUrl,
-      });
-    }
-  };
-
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !staff) return;
 
     setIsUploading(true);
     try {

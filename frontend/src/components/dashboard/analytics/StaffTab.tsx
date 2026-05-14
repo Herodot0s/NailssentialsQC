@@ -127,7 +127,7 @@ export const StaffTab: React.FC<StaffTabProps> = ({ dateRange }) => {
                 dataKey="revenue"
                 radius={[0, 4, 4, 0]}
               >
-                {safeData.map((entry, index) => (
+                {safeData.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={DIVERSE_COLORS[index % DIVERSE_COLORS.length]} />
                 ))}
               </Bar>

@@ -6,7 +6,6 @@ import type {
   CreateAppointmentRequest,
   CreateServiceRequest,
   UpdateServiceRequest,
-  ScheduleItem,
   UpdateCustomerProfileRequest,
   SiteSettingsData,
   SiteContent,
@@ -99,7 +98,7 @@ export const createStaff = (data: CreateStaffRequest) => apiClient.post('/staff'
 export const updateStaff = (id: number, data: Partial<CreateStaffRequest>) =>
   apiClient.put(`/staff/${id}`, data);
 export const getStaffSchedule = (id: number) => apiClient.get(`/staff/${id}/schedule`);
-export const updateStaffSchedule = (id: number, data: { schedules: ScheduleItem[] }) =>
+export const updateStaffSchedule = (id: number, data: { schedules: any[] }) =>
   apiClient.put(`/staff/${id}/schedule`, data);
 
 // Appointment methods
@@ -125,15 +124,20 @@ export const getPayrollDetails = (id: number) => apiClient.get(`/payroll/periods
 export const generatePayroll = (data: {
   startDate: string;
   endDate: string;
-  totalSalonSales: number;
+  payroll_period_id?: number;
 }) => apiClient.post('/payroll/generate', data);
 export const addDeduction = (data: {
   staffId: number;
+  payrollPeriodId?: number;
   type: string;
   amount: number;
   notes?: string;
 }) => apiClient.post('/payroll/deductions', data);
-export const lockPayroll = (id: number) => apiClient.patch(`/payroll/periods/${id}/lock`);
+export const deleteDeduction = (id: number) => apiClient.delete(`/payroll/deductions/${id}`);
+export const generateNextPeriod = () => apiClient.post('/payroll/periods/generate');
+export const lockPayroll = (id: number) => apiClient.post(`/payroll/periods/${id}/lock`);
+export const exportPayrollExcel = (id: number) => 
+  apiClient.get(`/payroll/export/${id}`, { responseType: 'blob' });
 
 // Payroll Setup
 export const getSalaryComponents = () => apiClient.get('/payroll/components');

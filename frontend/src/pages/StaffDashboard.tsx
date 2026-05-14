@@ -73,7 +73,7 @@ interface Appointment {
     id: number;
     service: { name: string; price: number };
     staff_id: number;
-    staff: { id: number; full_name: string };
+    staff: { id: number; full_name: string; user_id?: number };
     start_time: string;
     end_time: string;
     status: string;

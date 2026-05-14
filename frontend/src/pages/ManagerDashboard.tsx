@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Plus, DollarSign, Menu } from 'lucide-react';
+import { Loader2, Plus, Menu } from 'lucide-react';
 import {
   getDailySales,
-  getReports,
   getAllStaff,
   createStaff,
   updateStaff,
@@ -30,6 +29,18 @@ import PackagesView from '@/components/packages/PackagesView';
 import { AnalyticsDashboard } from '@/components/dashboard/analytics/AnalyticsDashboard';
 import { MessagesView } from '@/components/dashboard/MessagesView';
 import { LogWalkInDialog } from '@/components/dashboard/customers/LogWalkInDialog';
+import { PayrollListView } from '@/components/dashboard/payroll/PayrollListView';
+import { PayrollDetailView } from '@/components/dashboard/payroll/PayrollDetailView';
+import { DeductionDetailSheet } from '@/components/dashboard/payroll/DeductionDetailSheet';
+import {
+  getPayrollPeriods,
+  getPayrollDetails,
+  generateNextPeriod,
+  lockPayroll,
+  exportPayrollExcel,
+  addDeduction,
+  generatePayroll,
+} from '../api/apiClient';
 
 import { ManagerSidebar } from '@/components/dashboard/ManagerSidebar';
 import { StaffDetailSheet } from '@/components/dashboard/staff/StaffDetailSheet';
@@ -70,6 +81,12 @@ const ManagerDashboard: React.FC = () => {
   const [showShiftEditModal, setShowShiftEditModal] = useState(false);
   const [editingDay, setEditingDay] = useState<number | null>(null);
   const [shiftForm, setShiftForm] = useState({ start: '12:00', end: '22:00', isActive: true });
+
+  // Payroll State
+  const [payrollPeriods, setPayrollPeriods] = useState<any[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<any | null>(null);
+  const [selectedStaffPayroll, setSelectedStaffPayroll] = useState<any | null>(null);
+  const [showDeductionSheet, setShowDeductionSheet] = useState(false);
 
 
   // Status Modal State
@@ -166,9 +183,37 @@ const ManagerDashboard: React.FC = () => {
     }
   };
 
+  const fetchPayrollPeriods = async () => {
+    try {
+      const res = await getPayrollPeriods();
+      if (res.data.success) {
+        setPayrollPeriods(res.data.data.items || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch payroll periods');
+    }
+  };
+
+  const fetchPeriodDetails = async (id: number) => {
+    try {
+      const res = await getPayrollDetails(id);
+      if (res.data.success) {
+        setSelectedPeriod(res.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch period details');
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [dateRange]);
+
+  useEffect(() => {
+    if (activeView === 'payroll') {
+      fetchPayrollPeriods();
+    }
+  }, [activeView]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -375,6 +420,115 @@ const ManagerDashboard: React.FC = () => {
     }
   };
 
+  // --- Payroll Handlers ---
+  const handleGenerateNextPeriod = async () => {
+    try {
+      await generateNextPeriod();
+      fetchPayrollPeriods();
+      setStatusModal({
+        open: true,
+        type: 'success',
+        title: 'Period Generated',
+        description: 'Next payroll period created successfully.',
+      });
+    } catch (err) {
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Generation Failed',
+        description: 'Failed to generate next payroll period.',
+      });
+    }
+  };
+
+  const handleExportPayroll = async (id: number) => {
+    try {
+      const res = await exportPayrollExcel(id);
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Payroll_Report_${id}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+    } catch (err) {
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Export Failed',
+        description: 'Failed to export payroll report.',
+      });
+    }
+  };
+
+  const handleLockPeriod = async (id: number) => {
+    if (!confirm('Lock Period: This action cannot be undone. Are you sure?')) return;
+    try {
+      await lockPayroll(id);
+      fetchPeriodDetails(id);
+      fetchPayrollPeriods();
+      setStatusModal({
+        open: true,
+        type: 'success',
+        title: 'Period Locked',
+        description: 'Payroll period finalized and locked.',
+      });
+    } catch (err) {
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Lock Failed',
+        description: 'Failed to lock payroll period.',
+      });
+    }
+  };
+
+  const handleRegeneratePayroll = async (id: number) => {
+    if (!selectedPeriod) return;
+    try {
+      await generatePayroll({
+        startDate: selectedPeriod.start_date,
+        endDate: selectedPeriod.end_date,
+        payroll_period_id: id,
+      });
+      fetchPeriodDetails(id);
+    } catch (err) {
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Recalculation Failed',
+        description: 'Failed to recalculate payroll.',
+      });
+    }
+  };
+
+  const handleAddDeduction = async (data: { type: string; amount: number; notes: string }) => {
+    if (!selectedStaffPayroll || !selectedPeriod) return;
+    try {
+      await addDeduction({
+        staffId: selectedStaffPayroll.staff_id,
+        payrollPeriodId: selectedPeriod.id,
+        ...data,
+      });
+      // Recalculate to see results immediately
+      await handleRegeneratePayroll(selectedPeriod.id);
+      // Close sheet or keep open? UI-SPEC usually keeps open if adding multiple
+      // But we need to refresh selectedStaffPayroll too
+      const res = await getPayrollDetails(selectedPeriod.id);
+      if (res.data.success) {
+        setSelectedPeriod(res.data.data);
+        const updatedStaff = res.data.data.payrolls.find((p: any) => p.id === selectedStaffPayroll.id);
+        setSelectedStaffPayroll(updatedStaff);
+      }
+    } catch (err) {
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Adjustment Failed',
+        description: 'Failed to add deduction.',
+      });
+    }
+  };
+
   if (isLoading && !salesStats) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-white">
@@ -506,6 +660,31 @@ const ManagerDashboard: React.FC = () => {
             <MessagesView />
           </div>
         )}
+
+        {activeView === 'payroll' && (
+          <div className="animate-in fade-in duration-700">
+            {selectedPeriod ? (
+              <PayrollDetailView
+                period={selectedPeriod}
+                onBack={() => setSelectedPeriod(null)}
+                onExport={() => handleExportPayroll(selectedPeriod.id)}
+                onLock={() => handleLockPeriod(selectedPeriod.id)}
+                onRegenerate={() => handleRegeneratePayroll(selectedPeriod.id)}
+                onStaffClick={(p) => {
+                  setSelectedStaffPayroll(p);
+                  setShowDeductionSheet(true);
+                }}
+              />
+            ) : (
+              <PayrollListView
+                periods={payrollPeriods}
+                onViewDetails={(p) => fetchPeriodDetails(p.id)}
+                onExport={(p) => handleExportPayroll(p.id)}
+                onGenerateNext={handleGenerateNextPeriod}
+              />
+            )}
+          </div>
+        )}
       </main>
 
       <StaffDetailSheet
@@ -558,6 +737,14 @@ const ManagerDashboard: React.FC = () => {
         type={statusModal.type}
         title={statusModal.title}
         description={statusModal.description}
+      />
+
+      <DeductionDetailSheet
+        open={showDeductionSheet}
+        onOpenChange={setShowDeductionSheet}
+        staffPayroll={selectedStaffPayroll}
+        isLocked={selectedPeriod?.is_locked || false}
+        onAddDeduction={handleAddDeduction}
       />
     </div>
   );

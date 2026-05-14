@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  DollarSign,
   Users,
   Clock,
   Wallet,
@@ -14,7 +13,6 @@ import {
   Heart,
   TrendingUp,
   History,
-  Wrench,
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import type { ManagerSidebarProps, ActiveView } from './types';
@@ -53,6 +51,7 @@ const groups: SidebarGroup[] = [
     items: [
       { id: 'staff', label: 'Employee Files', icon: Users },
       { id: 'attendance', label: 'Attendance', icon: Clock },
+      { id: 'payroll', label: 'Payroll', icon: Wallet },
       { id: 'performance', label: 'Success Metrics', icon: TrendingUp },
       { id: 'service-history', label: 'Service Log', icon: History },
     ],

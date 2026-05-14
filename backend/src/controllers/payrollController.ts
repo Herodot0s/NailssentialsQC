@@ -13,33 +13,52 @@ import { evaluatePayrollFormula } from '../utils/payrollEvaluator';
  */
 export const generatePayroll = async (req: AuthRequest, res: Response) => {
   try {
-    const { start_date, end_date } = req.validatedBody || req.body;
+    const { start_date, end_date, payroll_period_id } = req.validatedBody || req.body;
 
-    if (!start_date || !end_date) {
+    if (!payroll_period_id && (!start_date || !end_date)) {
       return sendError(res, 'MISSING_FIELDS', 'start_date and end_date are required', 400);
     }
 
-    const startDate = new Date(start_date);
-    const endDate = new Date(end_date);
+    let startDate: Date;
+    let endDate: Date;
+    let payrollPeriod: any;
 
-    // Calculate previous month's date range for divide-by-4 rule (synchronous, needed before parallel queries)
-    const lastMonth = subMonths(startDate, 1);
-    const prevMonthStart = startOfMonth(lastMonth);
-    const prevMonthEnd = endOfMonth(lastMonth);
+    // 1. Identify or Create Payroll Period
+    if (payroll_period_id) {
+      payrollPeriod = await prisma.payrollPeriod.findUnique({
+        where: { id: Number(payroll_period_id) },
+      });
+      if (!payrollPeriod) return sendError(res, 'NOT_FOUND', 'Payroll period not found', 404);
+      if (payrollPeriod.is_locked) return sendError(res, 'LOCKED', 'Cannot recalculate a locked period', 400);
+      startDate = new Date(payrollPeriod.start_date);
+      endDate = new Date(payrollPeriod.end_date);
+    } else {
+      startDate = new Date(start_date);
+      endDate = new Date(end_date);
 
-    // Group all independent DB queries in Promise.all (per D-06, D-07)
-    const [
-      existingPeriod,
-      transactions,
-      staffProfiles,
-      prevMonthCommissions,
-      currentPeriodCommissions,
-    ] = await Promise.all([
-      prisma.payrollPeriod.findFirst({
+      // Check for overlap
+      const existingOverlap = await prisma.payrollPeriod.findFirst({
         where: {
           OR: [{ start_date: { lte: endDate }, end_date: { gte: startDate } }],
         },
-      }),
+      });
+
+      if (existingOverlap) {
+        // If it's an exact match, allow recalculation
+        if (
+          format(existingOverlap.start_date, 'yyyy-MM-dd') === format(startDate, 'yyyy-MM-dd') &&
+          format(existingOverlap.end_date, 'yyyy-MM-dd') === format(endDate, 'yyyy-MM-dd')
+        ) {
+          payrollPeriod = existingOverlap;
+          if (payrollPeriod.is_locked) return sendError(res, 'LOCKED', 'Cannot recalculate a locked period', 400);
+        } else {
+          return sendError(res, 'OVERLAP', 'Payroll period overlaps with existing period', 400);
+        }
+      }
+    }
+
+    // 2. Fetch Data in Parallel
+    const [transactions, staffProfiles, currentPeriodCommissions] = await Promise.all([
       prisma.transaction.findMany({
         where: {
           transaction_date: { gte: startDate, lte: endDate },
@@ -51,88 +70,68 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       }),
       prisma.commission.findMany({
         where: {
-          commission_date: {
-            gte: prevMonthStart,
-            lte: prevMonthEnd,
-          },
-        },
-      }),
-      prisma.commission.findMany({
-        where: {
-          commission_date: {
-            gte: startDate,
-            lte: endDate,
-          },
+          commission_date: { gte: startDate, lte: endDate },
         },
       }),
     ]);
 
-    if (existingPeriod) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Payroll period overlaps with existing period' });
-    }
-
-    // Post-processing: compute total salon sales after parallel queries (per D-07)
     const totalSalonSales = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
 
-    // Create payroll period
-    const payrollPeriod = await prisma.payrollPeriod.create({
-      data: {
-        start_date: startDate,
-        end_date: endDate,
-        total_salon_sales: totalSalonSales,
-        is_locked: false,
-      },
-    });
+    // 3. WIPE AND REGENERATE Logic
+    if (payrollPeriod) {
+      await prisma.$transaction([
+        // Update total sales for existing period
+        prisma.payrollPeriod.update({
+          where: { id: payrollPeriod.id },
+          data: { total_salon_sales: totalSalonSales },
+        }),
+        // Delete existing payrolls (items cascade)
+        prisma.staffPayroll.deleteMany({ where: { payroll_period_id: payrollPeriod.id } }),
+        // Detach manual deductions (keep them for regeneration)
+        prisma.deductionLog.updateMany({
+          where: { payroll_period_id: payrollPeriod.id, NOT: { type: 'lates_early_out' } },
+          data: { payroll_period_id: null },
+        }),
+        // Delete tardiness deductions (will be recalculated)
+        prisma.deductionLog.deleteMany({
+          where: { payroll_period_id: payrollPeriod.id, type: 'lates_early_out' },
+        }),
+      ]);
+    } else {
+      // Create new period
+      payrollPeriod = await prisma.payrollPeriod.create({
+        data: {
+          start_date: startDate,
+          end_date: endDate,
+          total_salon_sales: totalSalonSales,
+          is_locked: false,
+        },
+      });
+    }
 
-    // Calculate weeks in period for base pay
+    // 4. Aggregations
     const daysInPeriod = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
     const weeksInPeriod = Math.ceil(daysInPeriod / 7);
 
-    // Sum by staff for divide-by-4 calculation
-    const prevMonthCommissionsByStaff = new Map<number, number>();
-    for (const c of prevMonthCommissions) {
-      const staffId = c.staff_id;
-      prevMonthCommissionsByStaff.set(
-        staffId,
-        (prevMonthCommissionsByStaff.get(staffId) || 0) + Number(c.commission_amount),
-      );
-    }
+    // Group daily performance for daily_breakdown JSON
+    const staffDailyBreakdown = new Map<number, Record<string, number>>();
+    const staffTotalSales = new Map<number, number>();
 
-    const currentCommissionsByStaff = new Map<number, number>();
     for (const c of currentPeriodCommissions) {
-      const staffId = c.staff_id;
-      currentCommissionsByStaff.set(
-        staffId,
-        (currentCommissionsByStaff.get(staffId) || 0) + Number(c.base_amount),
-      );
+      const sId = c.staff_id;
+      const dKey = format(c.commission_date, 'yyyy-MM-dd');
+
+      if (!staffDailyBreakdown.has(sId)) staffDailyBreakdown.set(sId, {});
+      const breakMap = staffDailyBreakdown.get(sId)!;
+      breakMap[dKey] = (breakMap[dKey] || 0) + Number(c.base_amount);
+
+      staffTotalSales.set(sId, (staffTotalSales.get(sId) || 0) + Number(c.base_amount));
     }
 
+    // 5. Process Staff Payrolls
     for (const staff of staffProfiles) {
-      // 1. Fetch active Salary Structure Assignment
-      const assignment = await prisma.salaryStructureAssignment.findFirst({
-        where: { staff_id: staff.id, is_active: true },
-        include: {
-          salary_structure: {
-            include: {
-              components: {
-                include: { salary_component: true },
-              },
-            },
-          },
-        },
-      });
-
-      let basePay = 0;
-      let totalCommissions = 0;
-      let totalDeductions = 0;
-      const payrollItems: any[] = [];
-
-      // Calculate commissions and attendance for context
-      const prevMonthTotal = prevMonthCommissionsByStaff.get(staff.id) || 0;
-      const staffCommissions = Math.round((prevMonthTotal / 4) * 100) / 100;
-      const currentSales = currentCommissionsByStaff.get(staff.id) || 0;
+      const currentSales = staffTotalSales.get(staff.id) || 0;
+      const dailyBreakdown = staffDailyBreakdown.get(staff.id) || {};
 
       const [manualDeductions, attendanceRecords] = await Promise.all([
         prisma.deductionLog.findMany({
@@ -149,94 +148,50 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       );
       const manualDeductionTotal = manualDeductions.reduce((sum, d) => sum + Number(d.amount), 0);
 
-      if (assignment) {
-        // --- Interview-based Flexible Logic ---
-        basePay = Number(assignment.base_pay);
+      // --- Calculation Engine ---
+      const basePay = Number(staff.base_pay_per_week) * weeksInPeriod;
+      
+      // Use direct fields from StaffProfile (Phase 8 simplicity)
+      let commissionRate = Number(staff.base_commission_rate);
+      if (!commissionRate || commissionRate === 0) {
+        commissionRate = 0.08; // Default to 8% if not set
+      }
 
-        const context = {
-          base: basePay,
-          commissions: staffCommissions,
-          tardiness: tardinessDeduction,
-          total_sales: totalSalonSales,
-        };
+      const totalCommissions = Math.round(currentSales * commissionRate * 100) / 100;
+      const totalDeductions = tardinessDeduction + manualDeductionTotal;
+      const netPay = basePay + totalCommissions - totalDeductions;
 
-        for (const comp of assignment.salary_structure.components) {
-          let amount = 0;
-          if (comp.formula) {
-            amount = evaluatePayrollFormula(comp.formula, context);
-          } else if (comp.amount) {
-            amount = Number(comp.amount);
-          }
-
-          if (comp.salary_component.type === 'earning') {
-            if (comp.salary_component.name.toLowerCase().includes('commission')) {
-              totalCommissions += amount;
-            } else if (comp.salary_component.name.toLowerCase().includes('base')) {
-              // Base pay is already handled or might be a component
-              // If it's a component, we add it here
-              amount = basePay; // Standard behavior
-            }
-          } else {
-            totalDeductions += amount;
-          }
-
-          payrollItems.push({
-            component_name: comp.salary_component.name,
-            component_type: comp.salary_component.type,
-            amount: amount,
-            formula_used: comp.formula,
-          });
-        }
-
-        // Add manual deductions as additional items
-        if (manualDeductions.length > 0) {
-          manualDeductions.forEach((d) => {
-            totalDeductions += Number(d.amount);
-            payrollItems.push({
-              component_name: d.type || 'Manual Deduction',
-              component_type: 'deduction',
-              amount: Number(d.amount),
-              formula_used: 'Manual',
-            });
-          });
-        }
-      } else {
-        // --- Fallback to Legacy Hardcoded Logic (Aligned with Sample Table) ---
-        basePay = Number(staff.base_pay_per_week) * weeksInPeriod;
-        totalCommissions = currentSales * 0.08;
-        totalDeductions = tardinessDeduction + manualDeductionTotal;
-
-        payrollItems.push({
+      const payrollItems: any[] = [
+        {
           component_name: 'Base Pay',
           component_type: 'earning',
           amount: basePay,
-        });
-        payrollItems.push({
-          component_name: '8% Commission',
+        },
+        {
+          component_name: `${(commissionRate * 100).toFixed(0)}% Commission`,
           component_type: 'earning',
           amount: totalCommissions,
+        },
+      ];
+
+      if (tardinessDeduction > 0) {
+        payrollItems.push({
+          component_name: 'Lates/Early Out',
+          component_type: 'deduction',
+          amount: tardinessDeduction,
         });
-        if (tardinessDeduction > 0) {
-          payrollItems.push({
-            component_name: 'Lates/Early Out',
-            component_type: 'deduction',
-            amount: tardinessDeduction,
-          });
-        }
-        if (manualDeductions.length > 0) {
-          manualDeductions.forEach((d) => {
-            payrollItems.push({
-              component_name: d.type || 'Manual Deduction',
-              component_type: 'deduction',
-              amount: Number(d.amount),
-            });
-          });
-        }
       }
 
-      const netPay = basePay + totalCommissions - totalDeductions;
+      manualDeductions.forEach((d) => {
+        payrollItems.push({
+          component_name: (d.type || 'Deduction').replace(/_/g, ' ').toUpperCase(),
+          component_type: 'deduction',
+          amount: Number(d.amount),
+          formula_used: 'Manual',
+        });
+      });
 
-      // Create staff payroll entry with items
+      // 6. Save StaffPayroll
       await prisma.staffPayroll.create({
         data: {
           staff_id: staff.id,
@@ -246,13 +201,14 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
           deductions: totalDeductions,
           net_pay: netPay,
           status: 'draft',
+          daily_breakdown: dailyBreakdown as any,
           items: {
             create: payrollItems,
           },
         },
       });
 
-      // Link manual deductions to this payroll period
+      // Link manual deductions to this period
       if (manualDeductions.length > 0) {
         await prisma.deductionLog.updateMany({
           where: { id: { in: manualDeductions.map((d) => d.id) } },
@@ -260,7 +216,7 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
         });
       }
 
-      // Log tardiness deductions
+      // Re-create tardiness logs (historical snapshot for this period)
       for (const att of attendanceRecords.filter((a) => Number(a.deduction_amount) > 0)) {
         await prisma.deductionLog.create({
           data: {
@@ -272,17 +228,6 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
           },
         });
       }
-
-      // Mark this staff's previous month commissions as paid
-      if (prevMonthCommissionsByStaff.get(staff.id)) {
-        await prisma.commission.updateMany({
-          where: {
-            staff_id: staff.id,
-            is_paid: false,
-          },
-          data: { is_paid: true },
-        });
-      }
     }
 
     await logSystemAction(
@@ -290,7 +235,7 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       'PAYROLL_GENERATED',
       'PayrollPeriod',
       payrollPeriod.id,
-      { message: 'Generated payroll for period' },
+      { message: `Generated/Recalculated payroll for period ${payrollPeriod.id}` },
     );
 
     return res.status(201).json({ success: true, data: payrollPeriod });
@@ -514,135 +459,127 @@ export const exportPayrollExcel = async (req: AuthRequest, res: Response) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Payroll Report');
 
-    // 1. Staff Names Row (Header)
-    const staffPayrolls = period.payrolls;
-    const headerRow: (string | number)[] = [''];
-    staffPayrolls.forEach((p) => {
-      headerRow.push(p.staff.full_name);
-    });
-    worksheet.addRow(headerRow);
-    worksheet.getRow(1).font = { bold: true };
-
-    // 2. Daily Sales Rows
     const days = eachDayOfInterval({ start: period.start_date, end: period.end_date });
-    const staffDailySales = new Map<number, Map<string, number>>();
+    const dateHeaders = days.map((day) => format(day, 'MMM d'));
 
-    // Initialize map
-    staffPayrolls.forEach((p) => {
-      staffDailySales.set(p.staff_id, new Map());
-    });
+    // 1. Header row
+    const headerRow = [
+      'Staff Name',
+      ...dateHeaders,
+      'Total Sales',
+      'Commission Pay',
+      'Basic Pay',
+      'Gross Pay',
+      'CA',
+      'Loan',
+      'Uniform',
+      'Reloan',
+      'Lates/Early Out',
+      'Total Deductions',
+      'Net Pay',
+    ];
 
-    // Aggregate daily sales
-    commissions.forEach((c) => {
-      const dateKey = format(c.commission_date, 'yyyy-MM-dd');
-      const staffMap = staffDailySales.get(c.staff_id);
-      if (staffMap) {
-        staffMap.set(dateKey, (staffMap.get(dateKey) || 0) + Number(c.base_amount));
-      }
-    });
+    const titleRow = worksheet.addRow([
+      `PAYROLL REPORT: ${format(period.start_date, 'MMMM d')} - ${format(
+        period.end_date,
+        'MMMM d, yyyy',
+      )}`,
+    ]);
+    titleRow.font = { bold: true, size: 14 };
 
-    days.forEach((day) => {
-      const dateKey = format(day, 'yyyy-MM-dd');
-      const displayDate = format(day, 'MMMM d');
-      const row: (string | number)[] = [displayDate];
+    if (!period.is_locked) {
+      const draftRow = worksheet.addRow(['*** DRAFT - NOT FINALIZED ***']);
+      draftRow.font = { color: { argb: 'FFFF0000' }, bold: true };
+    }
 
-      staffPayrolls.forEach((p) => {
-        const sales = staffDailySales.get(p.staff_id)?.get(dateKey) || 0;
-        row.push(sales > 0 ? sales : 'OFF');
-      });
-      worksheet.addRow(row);
-    });
+    worksheet.addRow([]); // Spacer
 
-    // 3. Commission (Sum of Sales)
-    const commissionSumRow: (string | number)[] = ['Commission'];
-    staffPayrolls.forEach((p) => {
-      let sum = 0;
+    const header = worksheet.addRow(headerRow);
+    header.font = { bold: true };
+    header.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' },
+    };
+
+    // 2. Staff Rows
+    period.payrolls.forEach((p) => {
+      const staffDailySales = commissions
+        .filter((c) => c.staff_id === p.staff_id)
+        .reduce((acc, c) => {
+          const dateKey = format(c.commission_date, 'yyyy-MM-dd');
+          acc[dateKey] = (acc[dateKey] || 0) + Number(c.base_amount);
+          return acc;
+        }, {} as Record<string, number>);
+
+      const rowData: (string | number)[] = [p.staff.full_name];
+
+      let totalSales = 0;
       days.forEach((day) => {
-        const dateKey = format(day, 'yyyy-MM-dd');
-        sum += staffDailySales.get(p.staff_id)?.get(dateKey) || 0;
+        const sales = staffDailySales[format(day, 'yyyy-MM-dd')] || 0;
+        rowData.push(sales > 0 ? sales : 0);
+        totalSales += sales;
       });
-      commissionSumRow.push(sum);
+
+      const commPay = p.commissions;
+      const basicPay = p.base_pay;
+      const grossPay = Number(commPay) + Number(basicPay);
+
+      // Deductions
+      const getDeduction = (type: string) => {
+        return period.deductions
+          .filter((d) => d.staff_id === p.staff_id && d.type === type)
+          .reduce((sum, d) => sum + Number(d.amount), 0);
+      };
+
+      const ca = getDeduction('cash_advance');
+      const loan = getDeduction('loan');
+      const uniform = getDeduction('uniform');
+      const reloan = getDeduction('reloan');
+      const lates = getDeduction('lates_early_out');
+
+      const totalDeductions = p.deductions;
+      const netPay = p.net_pay;
+
+      rowData.push(
+        totalSales,
+        Number(commPay),
+        Number(basicPay),
+        grossPay,
+        ca > 0 ? -ca : 0,
+        loan > 0 ? -loan : 0,
+        uniform > 0 ? -uniform : 0,
+        reloan > 0 ? -reloan : 0,
+        lates > 0 ? -lates : 0,
+        totalDeductions > 0 ? -totalDeductions : 0,
+        Number(netPay),
+      );
+
+      const row = worksheet.addRow(rowData);
+
+      // Highlight net pay
+      row.getCell(rowData.length).font = { bold: true };
     });
-    worksheet.addRow(commissionSumRow);
-
-    // 4. Commission Pay (8% Comm equivalent)
-    const commRow: (string | number)[] = ['Commission Pay'];
-    staffPayrolls.forEach((p) => {
-      const comm =
-        p.items.find((i) => i.component_name.toLowerCase().includes('commission'))?.amount ||
-        p.commissions;
-      commRow.push(Number(comm));
-    });
-    worksheet.addRow(commRow);
-
-    // 5. Basic Pay
-    const basicRow: (string | number)[] = ['Basic'];
-    staffPayrolls.forEach((p) => {
-      basicRow.push(Number(p.base_pay));
-    });
-    worksheet.addRow(basicRow);
-
-    // 6. Gross Pay
-    const grossRow: (string | number)[] = ['Gross Pay'];
-    staffPayrolls.forEach((p) => {
-      const comm =
-        p.items.find((i) => i.component_name.toLowerCase().includes('commission'))?.amount ||
-        p.commissions;
-      grossRow.push(Number(p.base_pay) + Number(comm));
-    });
-    worksheet.addRow(grossRow);
-
-    // 7. Deductions
-    const deductionTypes = ['CA', 'Loan', 'Uniform', 'Reloan', 'Lates/Early Out'];
-    deductionTypes.forEach((type) => {
-      const rowLabel = type === 'Lates/Early Out' ? type : type === 'CA' ? 'Less CA' : type;
-      const row: (string | number)[] = [rowLabel];
-
-      staffPayrolls.forEach((p) => {
-        if (type === 'Lates/Early Out') {
-          const tardiness = p.items.find((i) => i.component_name === 'Tardiness')?.amount || 0;
-          row.push(Number(tardiness) > 0 ? -Number(tardiness) : 0);
-        } else {
-          const specificDeduction = period.deductions
-            .filter(
-              (d) => d.staff_id === p.staff_id && d.type.toLowerCase().includes(type.toLowerCase()),
-            )
-            .reduce((sum, d) => sum + Number(d.amount), 0);
-          row.push(specificDeduction > 0 ? -specificDeduction : '');
-        }
-      });
-      worksheet.addRow(row);
-    });
-
-    // 8. Net Pay
-    const netRow: (string | number)[] = ['Net Pay'];
-    worksheet.addRow(netRow);
-    const lastRowIndex = worksheet.rowCount;
-    staffPayrolls.forEach((p, idx) => {
-      worksheet.getRow(lastRowIndex).getCell(idx + 2).value = Number(p.net_pay);
-    });
-
-    worksheet.getRow(lastRowIndex).font = { bold: true };
 
     // Auto-fit columns
-    worksheet.columns.forEach((column) => {
-      column.width = 15;
+    worksheet.columns.forEach((column, i) => {
+      column.width = i === 0 ? 25 : 12;
     });
-    const firstCol = worksheet.getColumn(1);
-    if (firstCol) firstCol.width = 20;
 
-    // Set response headers
+    // Filename
+    let filename = `Payroll_Report_${format(period.start_date, 'yyyy-MM-dd')}.xlsx`;
+    if (!period.is_locked) {
+      filename = `[DRAFT]_` + filename;
+    }
+
     res.setHeader(
       'Content-Type',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     );
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="Payroll_Report_${format(period.start_date, 'yyyy-MM-dd')}.xlsx"`,
-    );
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
 
-    // Stream to response
     await workbook.xlsx.write(res);
+    res.end();
     res.end();
   } catch (error: unknown) {
     console.error('Export payroll error:', error);

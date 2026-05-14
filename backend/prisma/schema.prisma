@@ -322,6 +322,7 @@ model StaffPayroll {
   deductions        Decimal  @db.Decimal(10, 2)
   net_pay           Decimal  @db.Decimal(10, 2)
   status            String   @default("draft") // draft, paid
+  daily_breakdown   Json?
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 

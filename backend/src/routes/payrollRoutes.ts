@@ -95,7 +95,7 @@ router.post(
   authorizeRoles('manager'),
   generateNextPeriod,
 );
-router.patch(
+router.post(
   '/periods/:id/lock',
   authenticateToken,
   authorizeRoles('manager'),

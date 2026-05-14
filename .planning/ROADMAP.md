@@ -10,7 +10,7 @@
 2. Manager can update the base commission rates via API.
 3. System can correctly define and store a weekly payroll period boundary.
 
-### Phase 9: Weekly Calculation Engine
+### Phase 9: Weekly Calculation Engine [Complete]
 **Goal:** Implement the logic to accurately calculate the payroll matching the exact spreadsheet behavior.
 **Requirements:** PAY-03
 **Success Criteria:**

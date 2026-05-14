@@ -1,8 +1,6 @@
 import type {
   SalesStats,
   StaffMember,
-  PayrollRecord,
-  PayrollPeriod,
   AttendanceRecord,
   Category,
   Review,
@@ -46,7 +44,8 @@ export type ActiveView =
   | 'messages'
   | 'customer-care'
   | 'performance'
-  | 'service-history';
+  | 'service-history'
+  | 'payroll';
 
 export interface ManagerSidebarProps {
   activeView: ActiveView;
@@ -97,6 +96,8 @@ export interface AddStaffDialogProps {
     sssNumber: string;
     pagIbigNumber: string;
     profilePictureUrl: string;
+    scheduledStart: string;
+    scheduledEnd: string;
   };
   onFormChange: (form: AddStaffDialogProps['form']) => void;
   onSubmit: (e: React.FormEvent) => void;

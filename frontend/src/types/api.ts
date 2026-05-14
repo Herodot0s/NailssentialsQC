@@ -38,6 +38,8 @@ export interface CreateStaffRequest {
   profilePictureUrl?: string;
   isActive?: boolean;
   role?: string;
+  scheduledStart?: string;
+  scheduledEnd?: string;
 }
 
 export interface StaffMember {
@@ -56,6 +58,8 @@ export interface StaffMember {
   pagIbigNumber?: string;
   profilePictureUrl?: string;
   password?: string;
+  scheduledStart?: string;
+  scheduledEnd?: string;
   createdAt: string;
 }
 
