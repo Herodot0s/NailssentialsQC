@@ -501,6 +501,30 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                     </div>
                   </div>
                 </div>
+                <div className="grid grid-cols-2 gap-8 pt-5">
+                  <div className="space-y-3">
+                    <Label className="text-[11px] font-[800] uppercase tracking-[0.15em] text-[#6c6e63] ml-1">
+                      Shift Start
+                    </Label>
+                    <Input
+                      type="time"
+                      value={form.scheduledStart || '12:00'}
+                      onChange={(e) => onFormChange({ ...form, scheduledStart: e.target.value })}
+                      className="rounded-[6px] border-[#bfc1b7] h-12 bg-white text-[#23251d] focus-visible:ring-[#B8794E]"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <Label className="text-[11px] font-[800] uppercase tracking-[0.15em] text-[#6c6e63] ml-1">
+                      Shift End
+                    </Label>
+                    <Input
+                      type="time"
+                      value={form.scheduledEnd || '22:00'}
+                      onChange={(e) => onFormChange({ ...form, scheduledEnd: e.target.value })}
+                      className="rounded-[6px] border-[#bfc1b7] h-12 bg-white text-[#23251d] focus-visible:ring-[#B8794E]"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

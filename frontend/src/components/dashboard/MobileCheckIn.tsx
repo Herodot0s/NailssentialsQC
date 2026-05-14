@@ -49,53 +49,46 @@ export const MobileCheckIn: React.FC<MobileCheckInProps> = (props) => {
       return;
     }
 
-    try {
-      let checkInDate: Date | null = null;
+    const calculate = () => {
+      try {
+        let checkInDate: Date | null = null;
 
-      // Use the most precise time available
-      if (props.checkInRaw) {
-        checkInDate = new Date(props.checkInRaw);
-      } else if (props.checkInTime) {
-        // Fallback to parsing checkInTime (e.g. "09:00 AM" or "09:00:00")
-        let h = 0,
-          m = 0;
-        const timeStr = props.checkInTime;
-
-        if (timeStr.includes(' ')) {
-          const [baseTime, ampm] = timeStr.split(' ');
-          const [hoursStr, minutesStr] = baseTime.split(':');
-          h = parseInt(hoursStr);
-          m = parseInt(minutesStr);
-          if (ampm === 'PM' && h < 12) h += 12;
-          if (ampm === 'AM' && h === 12) h = 0;
-        } else {
-          const [hoursStr, minutesStr] = timeStr.split(':');
-          h = parseInt(hoursStr || '0');
-          m = parseInt(minutesStr || '0');
+        if (props.checkInRaw) {
+          checkInDate = new Date(props.checkInRaw);
+        } else if (props.checkInTime) {
+          // Fallback parsing
+          const timeStr = props.checkInTime;
+          let h = 0, m = 0;
+          if (timeStr.includes(' ')) {
+            const [base, ampm] = timeStr.split(' ');
+            const [hs, ms] = base.split(':');
+            h = parseInt(hs); m = parseInt(ms);
+            if (ampm === 'PM' && h < 12) h += 12;
+            if (ampm === 'AM' && h === 12) h = 0;
+          } else {
+            const [hs, ms] = timeStr.split(':');
+            h = parseInt(hs || '0'); m = parseInt(ms || '0');
+          }
+          checkInDate = new Date(currentTime);
+          checkInDate.setHours(h, m, 0, 0);
         }
-        checkInDate = new Date(currentTime);
-        checkInDate.setHours(h, m, 0, 0);
-      }
 
-      if (!checkInDate || isNaN(checkInDate.getTime())) {
+        if (!checkInDate || isNaN(checkInDate.getTime())) {
+          setDuration('--:--:--');
+          return;
+        }
+
+        const diff = Math.max(0, currentTime.getTime() - checkInDate.getTime());
+        const hh = Math.floor(diff / 3600000).toString().padStart(2, '0');
+        const mm = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+        const ss = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+        setDuration(`${hh}:${mm}:${ss}`);
+      } catch (e) {
         setDuration('--:--:--');
-        return;
       }
+    };
 
-      const diff = Math.max(0, currentTime.getTime() - checkInDate.getTime());
-      const hh = Math.floor(diff / 3600000)
-        .toString()
-        .padStart(2, '0');
-      const mm = Math.floor((diff % 3600000) / 60000)
-        .toString()
-        .padStart(2, '0');
-      const ss = Math.floor((diff % 60000) / 1000)
-        .toString()
-        .padStart(2, '0');
-      setDuration(`${hh}:${mm}:${ss}`);
-    } catch (e) {
-      setDuration('--:--:--');
-    }
+    calculate();
   }, [isCheckedIn, props.checkInTime, props.checkInRaw, currentTime]);
 
   return (

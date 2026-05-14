@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import {
   Sheet,
@@ -13,7 +13,9 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Briefcase, Check, Wallet, Fingerprint, Key } from 'lucide-react';
+import { Briefcase, Check, Wallet, Fingerprint, Upload, Loader2, UserCheck, UserMinus } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
+import { uploadFile } from '@/api/apiClient';
 import type { StaffDetailSheetProps } from '../types';
 
 export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
@@ -26,7 +28,57 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
   onEditShift,
   onUpdateBaseline,
 }) => {
-  const [showPassword, setShowPassword] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const { user: clerkUser } = useUser();
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !staff) return;
+
+    setIsUploading(true);
+    try {
+      const res = await uploadFile(file);
+      if (res.data.success) {
+        onStaffChange({ ...staff, profilePictureUrl: res.data.data.url });
+      }
+    } catch (err) {
+      console.error('Avatar upload failed:', err);
+      alert('Failed to upload avatar.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Auto-sync with Clerk when same user
+  useEffect(() => {
+    if (open && clerkUser && staff) {
+      const clerkEmail = clerkUser.primaryEmailAddress?.emailAddress;
+      if (clerkEmail && staff.email === clerkEmail) {
+        const updates: any = {};
+        let hasChanges = false;
+
+        if (clerkUser.username && staff.username !== clerkUser.username) {
+          updates.username = clerkUser.username;
+          hasChanges = true;
+        }
+        if (clerkUser.fullName && staff.fullName !== clerkUser.fullName) {
+          updates.fullName = clerkUser.fullName;
+          hasChanges = true;
+        }
+        if (clerkUser.imageUrl && staff.profilePictureUrl !== clerkUser.imageUrl) {
+          // Note: Clerk imageUrl is dynamic, maybe we only sync if local is empty?
+          // But user said "sync", so we sync.
+          updates.profilePictureUrl = clerkUser.imageUrl;
+          hasChanges = true;
+        }
+
+        if (hasChanges) {
+          onStaffChange({ ...staff, ...updates });
+        }
+      }
+    }
+  }, [open, clerkUser?.id, staff?.id, staff?.email]);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -58,7 +110,7 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                   </SheetTitle>
                   <SheetDescription className="text-[#4d4f46] text-sm mt-1 flex items-center gap-2 font-medium">
                     <Briefcase className="h-3.5 w-3.5 opacity-60" /> Senior Artisan • Joined{' '}
-                    {format(new Date(staff.createdAt), 'MMMM yyyy')}
+                    {staff.createdAt ? format(new Date(staff.createdAt), 'MMMM yyyy') : 'N/A'}
                   </SheetDescription>
                 </div>
               </SheetHeader>
@@ -104,9 +156,16 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="p-5 bg-white border border-[#bfc1b7] rounded-[6px] space-y-2">
-                            <Label className="text-[10px] uppercase font-bold text-[#6c6e63] tracking-wider">
-                              System Username
-                            </Label>
+                            <div className="flex justify-between items-center">
+                              <Label className="text-[10px] uppercase font-bold text-[#6c6e63] tracking-wider">
+                                System Username
+                              </Label>
+                              {clerkUser?.primaryEmailAddress?.emailAddress === staff.email && (
+                                <div className="flex items-center gap-1 px-2 py-0.5 bg-[#d9eddf] text-[#2c8c66] rounded-full text-[9px] font-bold uppercase tracking-tighter animate-in fade-in zoom-in duration-300">
+                                  <Check className="h-2 w-2" /> Clerk Linked
+                                </div>
+                              )}
+                            </div>
                             <Input
                               value={staff.username || ''}
                               onChange={(e) =>
@@ -116,9 +175,26 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                             />
                           </div>
                           <div className="p-5 bg-white border border-[#bfc1b7] rounded-[6px] space-y-2">
-                            <Label className="text-[10px] uppercase font-bold text-[#6c6e63] tracking-wider">
-                              Avatar URL
-                            </Label>
+                            <div className="flex justify-between items-center">
+                              <Label className="text-[10px] uppercase font-bold text-[#6c6e63] tracking-wider">
+                                Avatar URL
+                              </Label>
+                              <div className="flex gap-1">
+                                <label className="cursor-pointer">
+                                  <div className="h-5 px-2 bg-[#23251d] text-white text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 rounded-[4px] hover:bg-[#33342d] transition-colors">
+                                    {isUploading ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Upload className="h-2.5 w-2.5" />} 
+                                    Upload
+                                  </div>
+                                  <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className="hidden" 
+                                    onChange={handlePhotoUpload}
+                                    disabled={isUploading}
+                                  />
+                                </label>
+                              </div>
+                            </div>
                             <Input
                               value={staff.profilePictureUrl || ''}
                               onChange={(e) =>
@@ -152,53 +228,37 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                             />
                           </div>
                         </div>
-
-                        <div className="p-5 bg-white border border-[#bfc1b7] rounded-[6px] space-y-2">
-                          <div className="flex justify-between items-center">
-                            <div className="space-y-0.5">
-                              <Label className="text-[10px] uppercase font-bold text-[#6c6e63] tracking-wider">
-                                Reset Credentials
-                              </Label>
-                              <div className="text-[9px] text-[#9b9c92] font-medium leading-tight">
-                                Existing passwords are encrypted and cannot be retrieved.
-                              </div>
-                            </div>
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="p-5 bg-white border border-[#bfc1b7] rounded-[6px] space-y-3">
+                            <Label className="text-[10px] uppercase font-bold text-[#6c6e63] tracking-wider">
+                              Employment Status
+                            </Label>
                             <div className="flex gap-2">
                               <Button
-                                variant="ghost"
-                                className="h-6 px-2 text-[10px] font-bold text-[#B8794E] uppercase tracking-wider hover:bg-[#B8794E]/5"
-                                onClick={() => {
-                                  const chars =
-                                    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-                                  let pass = '';
-                                  for (let i = 0; i < 12; i++)
-                                    pass += chars.charAt(Math.floor(Math.random() * chars.length));
-                                  onStaffChange({ ...staff, password: pass });
-                                  setShowPassword(true);
-                                }}
+                                type="button"
+                                variant="outline"
+                                onClick={() => onStaffChange({ ...staff, isActive: true })}
+                                className={`flex-1 h-10 rounded-[4px] text-[10px] uppercase font-bold tracking-widest gap-2 transition-all ${
+                                  staff.isActive 
+                                    ? 'bg-[#d9eddf] text-[#2c8c66] border-[#2c8c66] hover:bg-[#d9eddf]' 
+                                    : 'border-[#bfc1b7] text-[#9b9c92] hover:bg-gray-50'
+                                }`}
                               >
-                                Gen
+                                <UserCheck className="h-3 w-3" /> Active
                               </Button>
                               <Button
-                                variant="ghost"
-                                className="h-6 px-2 text-[10px] font-bold text-[#23251d] uppercase tracking-wider hover:bg-black/5"
-                                onClick={() => setShowPassword(!showPassword)}
+                                type="button"
+                                variant="outline"
+                                onClick={() => onStaffChange({ ...staff, isActive: false })}
+                                className={`flex-1 h-10 rounded-[4px] text-[10px] uppercase font-bold tracking-widest gap-2 transition-all ${
+                                  !staff.isActive 
+                                    ? 'bg-[#f7d6d3] text-[#cd4239] border-[#cd4239] hover:bg-[#f7d6d3]' 
+                                    : 'border-[#bfc1b7] text-[#9b9c92] hover:bg-gray-50'
+                                }`}
                               >
-                                {showPassword ? 'Hide' : 'Show'}
+                                <UserMinus className="h-3 w-3" /> Archived
                               </Button>
                             </div>
-                          </div>
-                          <div className="relative">
-                            <Input
-                              type={showPassword ? 'text' : 'password'}
-                              placeholder="Type new password to override..."
-                              value={staff.password || ''}
-                              onChange={(e) =>
-                                onStaffChange({ ...staff, password: e.target.value })
-                              }
-                              className="rounded-[4px] border-[#bfc1b7] bg-[#fcfcfa] text-sm focus-visible:ring-[#B8794E] pr-10"
-                            />
-                            <Key className="absolute right-3 top-2.5 h-3.5 w-3.5 text-[#bfc1b7]" />
                           </div>
                         </div>
 

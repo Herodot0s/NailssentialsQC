@@ -64,7 +64,7 @@ export const RetentionTab: React.FC<RetentionTabProps> = ({ dateRange }) => {
 
   if (!data) {
     return (
-      <Card className="rounded-none border-none shadow-sm bg-white">
+      <Card className="rounded-2xl border-none shadow-sm bg-white">
         <CardContent className="py-16 text-center">
           <p className="font-serif text-xl font-light text-foreground mb-2">
             No data for this period
@@ -87,12 +87,12 @@ export const RetentionTab: React.FC<RetentionTabProps> = ({ dateRange }) => {
       {/* Left Column */}
       <div className="space-y-8">
         {/* Retention Rate Hero Card */}
-        <Card className="rounded-none border-none shadow-sm bg-white">
+        <Card className="rounded-2xl border border-gray-100 shadow-sm bg-white">
           <CardContent className="p-8 text-center">
             <p className="text-[10px] tracking-[0.3em] uppercase font-bold text-muted-foreground mb-4">
               60-Day Repeat Rate
             </p>
-            <p className="font-serif text-5xl font-light text-foreground">{data.retentionRate}%</p>
+            <p className="font-serif text-5xl font-light text-primary">{data.retentionRate}%</p>
             <p className="text-xs text-muted-foreground mt-2">
               {data.returningCustomers} of {data.totalCustomers} customers returned within 60 days
             </p>
@@ -100,8 +100,8 @@ export const RetentionTab: React.FC<RetentionTabProps> = ({ dateRange }) => {
         </Card>
 
         {/* Retention Trend Line Chart */}
-        <Card className="rounded-none border-none shadow-sm bg-white">
-          <CardHeader className="border-b border-gray-50">
+        <Card className="rounded-2xl border border-gray-100 shadow-sm bg-white overflow-hidden">
+          <CardHeader className="border-b border-gray-50 bg-gray-50/50">
             <CardTitle className="font-serif text-2xl font-light !uppercase-none !tracking-normal !text-2xl">
               Retention Trend
             </CardTitle>
@@ -115,23 +115,23 @@ export const RetentionTab: React.FC<RetentionTabProps> = ({ dateRange }) => {
                     dataKey="month"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: '#666' }}
                   />
                   <YAxis
                     domain={[0, 100]}
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: '#666' }}
                     tickFormatter={(v) => `${v}%`}
                   />
-                  <Tooltip formatter={(value: any) => [`${value}%`, 'Retention Rate']} />
+                  <Tooltip formatter={(value: any) => [`${value}%`, 'Retention Rate']} cursor={{ fill: '#f9fafb' }} />
                   <Line
                     type="monotone"
                     dataKey="rate"
-                    stroke="#B8794E"
-                    strokeWidth={2}
-                    dot={{ fill: '#B8794E', r: 3 }}
-                    activeDot={{ r: 5 }}
+                    stroke="#118ab2"
+                    strokeWidth={3}
+                    dot={{ fill: '#118ab2', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 6, strokeWidth: 0 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -147,8 +147,8 @@ export const RetentionTab: React.FC<RetentionTabProps> = ({ dateRange }) => {
       {/* Right Column */}
       <div className="space-y-8">
         {/* New vs Returning Donut Chart */}
-        <Card className="rounded-none border-none shadow-sm bg-white">
-          <CardHeader className="border-b border-gray-50">
+        <Card className="rounded-2xl border border-gray-100 shadow-sm bg-white overflow-hidden">
+          <CardHeader className="border-b border-gray-50 bg-gray-50/50">
             <CardTitle className="font-serif text-2xl font-light !uppercase-none !tracking-normal !text-2xl">
               Customer Composition
             </CardTitle>
@@ -163,8 +163,8 @@ export const RetentionTab: React.FC<RetentionTabProps> = ({ dateRange }) => {
                   dataKey="value"
                   paddingAngle={2}
                 >
-                  <Cell fill="#B8794E" />
-                  <Cell fill="#E7E2DF" />
+                  <Cell fill="#118ab2" />
+                  <Cell fill="#e0e1dd" />
                 </Pie>
                 <Tooltip />
               </PieChart>
@@ -172,20 +172,20 @@ export const RetentionTab: React.FC<RetentionTabProps> = ({ dateRange }) => {
             {/* Center label */}
             <div
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
-              style={{ top: '-10px' }}
+              style={{ top: '30px' }}
             >
               <span className="font-serif text-2xl font-light">{data.retentionRate}%</span>
             </div>
             {/* Legend */}
             <div className="flex justify-center gap-6 mt-4">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3" style={{ backgroundColor: '#B8794E' }} />
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#118ab2' }} />
                 <span className="text-[10px] uppercase tracking-tight font-bold text-muted-foreground">
                   Returning Customers
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3" style={{ backgroundColor: '#E7E2DF' }} />
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#e0e1dd' }} />
                 <span className="text-[10px] uppercase tracking-tight font-bold text-muted-foreground">
                   New Customers
                 </span>
@@ -195,8 +195,8 @@ export const RetentionTab: React.FC<RetentionTabProps> = ({ dateRange }) => {
         </Card>
 
         {/* Top Returning Customers Table */}
-        <Card className="rounded-none border-none shadow-sm bg-white">
-          <CardHeader className="border-b border-gray-50">
+        <Card className="rounded-2xl border border-gray-100 shadow-sm bg-white overflow-hidden">
+          <CardHeader className="border-b border-gray-50 bg-gray-50/50">
             <CardTitle className="font-serif text-2xl font-light !uppercase-none !tracking-normal !text-2xl">
               Top Returning Customers
             </CardTitle>
@@ -204,7 +204,7 @@ export const RetentionTab: React.FC<RetentionTabProps> = ({ dateRange }) => {
           <CardContent className="p-0">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-100">
+                <tr className="border-b border-gray-100 bg-gray-50/20">
                   <th className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground text-left px-6 py-4">
                     Rank
                   </th>
@@ -223,11 +223,11 @@ export const RetentionTab: React.FC<RetentionTabProps> = ({ dateRange }) => {
                 {data.topCustomers.map((customer, i) => (
                   <tr
                     key={i}
-                    className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+                    className="border-b border-gray-50 hover:bg-gray-50/80 transition-colors"
                   >
-                    <td className="px-6 py-4 text-sm font-semibold">{i + 1}</td>
+                    <td className="px-6 py-4 text-sm font-semibold text-muted-foreground">{i + 1}</td>
                     <td className="px-6 py-4 text-sm font-medium">{customer.name}</td>
-                    <td className="px-6 py-4 text-sm">{customer.visitCount}</td>
+                    <td className="px-6 py-4 text-sm font-semibold">{customer.visitCount}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">
                       {formatDate(customer.lastVisit)}
                     </td>

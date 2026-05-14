@@ -1,15 +1,16 @@
 # NailssentialsQC
 
-## Current Milestone: v2.0 Premium Experience & Expansion
+## Current Milestone: v2.1 Advanced Payroll & Export System
 
-**Goal:** Overhaul the entire UI/UX to match Airbnb's premium design system, while expanding the platform with a content CMS, advanced analytics, and expanded salon services.
+**Goal:** Overhaul the payroll system for weekly payout cycles, featuring dynamic commission rates, detailed deductions, PDF payslips for staff, and Excel master reports for managers.
 
 **Target features:**
-- Full UI/UX Overhaul using Airbnb DESIGN.md (clean white canvas, soft radii, Rausch accents) and the 'impeccable' skill.
-- Nail Art Exhibit / Gallery Page.
-- Comprehensive Manager CMS (CRUD for both business entities and website content like gallery/landing info).
-- Advanced Manager Analytics (Revenue, retention, staff performance, detailed breakdowns).
-- Service Packages/Bundles combining Nail, Spa, Hair, Waxing, and Threading services.
+- Weekly payroll generation and payout tracking.
+- Dynamic, manager-editable base commission rates.
+- Categorized deduction management (Cash Advance, Loan, Uniform, Reloan, Lates/Early Out).
+- PDF generation for individual staff payslips.
+- Excel generation for Manager's master payroll view, formatted precisely like the spreadsheet.
+- Easy-to-navigate Manager UI to finalize and review payroll before export.
 
 ## What This Is
 
@@ -55,11 +56,14 @@ A reliable, bug-free salon management system that customers, staff, and managers
 
 <!-- Currently building toward these. -->
 
-**Premium UI/UX:**
-- [ ] **UI-01**: Implement Design Tokens (Airbnb radii, spacing, Rausch palette) — applied in Phase 1, needs formal closure
-- [ ] **UI-02**: Redesign Customer Landing Page & Booking Flow — partial (landing page done, booking flow deferred to v2.1)
+**Payroll System (v2.1):**
+- [ ] **PAY-01**: Update database schema for deductions and base commission rates
+- [ ] **PAY-02**: Implement weekly payroll generation and payout logic
+- [ ] **PAY-03**: Build PDF generation for Staff payslips
+- [ ] **PAY-04**: Build Excel generation for Manager master payroll export
+- [ ] **PAY-05**: Develop Manager UI for editing commissions, managing deductions, and finalizing payroll
 
-**v2.1 Planning:**
+**Deferred (v2.2 Planning):**
 - [ ] Complete Phase 2 remaining plans (02-02, 02-03, 02-04) for full booking flow redesign
 
 ### Out of Scope
@@ -132,4 +136,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-10 after v2.0 milestone*
+*Last updated: 2026-05-14 starting v2.1 milestone*

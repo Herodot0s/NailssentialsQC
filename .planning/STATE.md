@@ -1,18 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Premium Experience & Expansion
-status: milestone_complete
-stopped_at: v2.0 milestone archived — shipped 2026-05-10
-last_updated: "2026-05-14"
-last_activity: 2026-05-14 - Moved 'Exhibit', 'Services', and 'My Appointments' to avatar menu; hidden hamburger on mobile when signed in
+milestone: v2.1
+milestone_name: Advanced Payroll & Export System
+status: completed
+stopped_at: Phase 10 context gathered
+last_updated: "2026-05-14T08:13:00.562Z"
+last_activity: 2026-05-14
 progress:
-  total_phases: 7
-  completed_phases: 6
-  partial_phases: 1
-  total_plans: 28
-  completed_plans: 25
-  deferred_plans: 3
+  total_phases: 4
+  completed_phases: 2
+  total_plans: 3
+  completed_plans: 3
   percent: 100
 ---
 
@@ -23,22 +21,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-10 after v2.0 milestone)
 
 **Core value:** A reliable, bug-free salon management system that customers, staff, and managers can trust for daily operations — with verified correctness through full test coverage.
-**Current focus:** v2.0 shipped — next: v2.1 Booking Flow
+**Current focus:** Phase 10 — manager-payroll-ui-excel-export
 
 ## Current Position
 
-Milestone: v2.0 Premium Experience & Expansion — SHIPPED 2026-05-10
-Phase: 7/7 complete (Phase 2 partial — 3 plans deferred to v2.1)
-Status: Ready for v2.1 planning
-Last activity: 2026-05-13
-
-Progress: [██████████] 100% — milestone shipped
+Phase: 10 (manager-payroll-ui-excel-export) — READY_TO_PLAN
+Plan: 0 of 0
+Status: Phase 9 complete — proceeding to Phase 10 Manager UI & Excel Export
+Last activity: 2026-05-14
 
 ## Session Continuity
 
-Last session: 2026-05-07T10:29:00+08:00
-Stopped at: Vercel Blob token synced
-Resume file: None
+Last session: 2026-05-14T08:13:00.554Z
+Stopped at: Phase 10 context gathered
+Resume file: .planning/phases/10-manager-payroll-ui-excel-export/10-CONTEXT.md
 
 ### Quick Tasks Completed
 

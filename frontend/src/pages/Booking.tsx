@@ -56,6 +56,15 @@ const Booking: React.FC = () => {
 
 
   const { cart, removeFromCart, updateCartItem, clearCart, totalPrice } = useCart();
+  const { user } = useAuth();
+
+  const isStaffOrManager = user?.role === 'staff' || user?.role === 'manager';
+
+  useEffect(() => {
+    if (isStaffOrManager) {
+      navigate('/');
+    }
+  }, [isStaffOrManager, navigate]);
 
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);

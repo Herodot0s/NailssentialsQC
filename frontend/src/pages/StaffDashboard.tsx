@@ -73,6 +73,7 @@ interface Appointment {
     id: number;
     service: { name: string; price: number };
     staff_id: number;
+    staff: { id: number; full_name: string; user_id?: number };
     start_time: string;
     end_time: string;
     status: string;
@@ -83,8 +84,9 @@ const StaffDashboard: React.FC = () => {
   const { user } = useAuth();
   const { user: clerkUser } = useUser();
   
-  // Use username as primary display name
-  const displayName = user?.username || clerkUser?.username || clerkUser?.fullName || 'Artisan';
+  // Prioritize actual username, then fallback to email prefix or full name
+  const rawDisplayName = clerkUser?.username || user?.username || clerkUser?.fullName || 'Artisan';
+  const displayName = rawDisplayName.includes('@') ? rawDisplayName.split('@')[0] : rawDisplayName;
 
   const [status, setStatus] = useState<AttendanceStatus | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -121,7 +123,9 @@ const StaffDashboard: React.FC = () => {
         getMyPayroll(),
       ]);
 
-      if (attRes.data.success) setStatus(attRes.data.data.status);
+      if (attRes.data.success) {
+        setStatus(attRes.data.data.status);
+      }
       if (aptRes.data.success) {
         const aptData = aptRes.data.data;
         const aptItems = Array.isArray(aptData) ? aptData : aptData?.items || [];
@@ -143,10 +147,18 @@ const StaffDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    if (user) {
+      fetchDashboardData();
+      const fetchInterval = setInterval(fetchDashboardData, 30000); // Re-fetch every 30 seconds
+      const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+      return () => {
+        clearInterval(fetchInterval);
+        clearInterval(timer);
+      };
+    }
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [user?.id]); // Re-fetch if user ID changes (e.g. after sync)
 
   const handleCheckIn = async () => {
     if (user?.role === 'manager') {
@@ -349,25 +361,32 @@ const StaffDashboard: React.FC = () => {
     }
   };
 
-  if (isLoading && !status) {
+  if (isLoading || !user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gap-6 text-center px-6 bg-[#eeefe9]">
         <Loader2 className="h-10 w-10 animate-spin text-[#B8794E]" />
         <p className="text-[12px] tracking-widest uppercase font-bold text-[#4d4f46]">
-          Loading Artisan Dashboard
+          {!user ? 'Authenticating...' : 'Loading Artisan Dashboard'}
         </p>
       </div>
     );
   }
 
-  const todayStr = new Date().toLocaleDateString('en-CA');
-  const todayAppointments = appointments.filter(
-    (a) => a.appointment_date.split('T')[0] === todayStr,
-  );
+  const getLocalDateStr = (date: Date | string) => {
+    const d = new Date(date);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
+  const todayStr = getLocalDateStr(new Date());
+  
+  const todayAppointments = appointments.filter((a) => {
+    const aptDateStr = getLocalDateStr(a.appointment_date);
+    return aptDateStr === todayStr;
+  });
 
   const upcomingAppointments = appointments
     .filter((a) => {
-      const aptDateStr = a.appointment_date.split('T')[0];
+      const aptDateStr = getLocalDateStr(a.appointment_date);
       if (aptDateStr === todayStr) return false;
 
       const aptDate = new Date(aptDateStr);
@@ -376,6 +395,22 @@ const StaffDashboard: React.FC = () => {
       return diffDays > 0 && diffDays <= 14;
     })
     .sort((a, b) => a.appointment_date.localeCompare(b.appointment_date));
+
+  // Helper to filter items for the current staff member
+  const filterMyItems = (items: Appointment['items']) => {
+    if (user?.role === 'manager') return items;
+    
+    const filtered = items.filter(
+      (i) =>
+        i.staff_id === user?.staffProfileId ||
+        (i.staff && i.staff.user_id === user?.id) ||
+        (user?.role === 'staff' && (!user?.staffProfileId || !i.staff_id)) // Fallback for staff
+    );
+    
+    // If we found specific items for this staff, return them. 
+    // Otherwise, if the user is staff, return ALL items (since backend already filtered the appointment)
+    return filtered.length > 0 ? filtered : (user?.role === 'staff' ? items : []);
+  };
 
   return (
     <div
@@ -499,7 +534,7 @@ const StaffDashboard: React.FC = () => {
                       Today's Appointments
                     </CardTitle>
                     <CardDescription className="text-[13px] md:text-[14px] text-[#4d4f46] mt-1 md:mt-2">
-                      Viewing {todayAppointments.length} scheduled services for today
+                      Viewing {todayAppointments.reduce((acc, apt) => acc + filterMyItems(apt.items).length, 0)} scheduled services for today
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-0">
@@ -517,7 +552,7 @@ const StaffDashboard: React.FC = () => {
                               Service
                             </TableHead>
                             <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">
-                              Status
+                              {user?.role === 'manager' ? 'Artisan' : 'Status'}
                             </TableHead>
                             <TableHead className="pr-8 h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">
                               Actions
@@ -536,11 +571,7 @@ const StaffDashboard: React.FC = () => {
                             </TableRow>
                           ) : (
                             todayAppointments.map((apt) => {
-                              const myItems = apt.items.filter(
-                                (i) =>
-                                  i.staff_id === user?.staffProfileId ||
-                                  (!user?.staffProfileId && i.staff_id === user?.id),
-                              );
+                              const myItems = filterMyItems(apt.items);
                               return myItems.map((item) => {
                                 const isActive = item.status === 'in_progress';
                                 const now = currentTime.toLocaleTimeString([], {
@@ -565,7 +596,13 @@ const StaffDashboard: React.FC = () => {
                                     <TableCell className="font-medium text-sm text-[#4d4f46]">
                                       {item.service.name}
                                     </TableCell>
-                                    <TableCell>{getStatusBadge(item.status)}</TableCell>
+                                    <TableCell className="font-bold text-sm text-[#B8794E]">
+                                      {user?.role === 'manager' ? (
+                                        item.staff?.full_name || 'Unassigned'
+                                      ) : (
+                                        getStatusBadge(item.status)
+                                      )}
+                                    </TableCell>
                                     <TableCell className="pr-8 text-right">
                                       {item.status !== 'completed' && (
                                         <Button
@@ -593,11 +630,7 @@ const StaffDashboard: React.FC = () => {
                         </p>
                       ) : (
                         todayAppointments.flatMap((apt) => {
-                          const myItems = apt.items.filter(
-                            (i) =>
-                              i.staff_id === user?.staffProfileId ||
-                              (!user?.staffProfileId && i.staff_id === user?.id),
-                          );
+                          const myItems = filterMyItems(apt.items);
                           return myItems.map((item) => (
                             <AppointmentCard
                               key={item.id}
@@ -612,6 +645,7 @@ const StaffDashboard: React.FC = () => {
                                   ? () => handleComplete(apt.id)
                                   : undefined
                               }
+                              technicianName={user?.role === 'manager' ? item.staff?.full_name : undefined}
                             />
                           ));
                         })
@@ -647,7 +681,7 @@ const StaffDashboard: React.FC = () => {
                               Service
                             </TableHead>
                             <TableHead className="pr-8 h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">
-                              Status
+                              {user?.role === 'manager' ? 'Artisan' : 'Status'}
                             </TableHead>
                           </TableRow>
                         </TableHeader>
@@ -663,11 +697,7 @@ const StaffDashboard: React.FC = () => {
                             </TableRow>
                           ) : (
                             upcomingAppointments.map((apt) => {
-                              const myItems = apt.items.filter(
-                                (i) =>
-                                  i.staff_id === user?.staffProfileId ||
-                                  (!user?.staffProfileId && i.staff_id === user?.id),
-                              );
+                              const myItems = filterMyItems(apt.items);
                               return myItems.map((item) => (
                                 <TableRow
                                   key={item.id}
@@ -690,7 +720,13 @@ const StaffDashboard: React.FC = () => {
                                     {item.service.name}
                                   </TableCell>
                                   <TableCell className="pr-8 text-right">
-                                    {getStatusBadge(item.status)}
+                                    {user?.role === 'manager' ? (
+                                      <span className="font-bold text-sm text-[#B8794E]">
+                                        {item.staff?.full_name || 'Unassigned'}
+                                      </span>
+                                    ) : (
+                                      getStatusBadge(item.status)
+                                    )}
                                   </TableCell>
                                 </TableRow>
                               ));
@@ -707,11 +743,7 @@ const StaffDashboard: React.FC = () => {
                         </p>
                       ) : (
                         upcomingAppointments.flatMap((apt) => {
-                          const myItems = apt.items.filter(
-                            (i) =>
-                              i.staff_id === user?.staffProfileId ||
-                              (!user?.staffProfileId && i.staff_id === user?.id),
-                          );
+                          const myItems = filterMyItems(apt.items);
                           const dateStr = new Date(apt.appointment_date).toLocaleDateString(
                             undefined,
                             { month: 'short', day: 'numeric', weekday: 'short' },
@@ -726,6 +758,7 @@ const StaffDashboard: React.FC = () => {
                               status={item.status}
                               statusBadge={getStatusBadge(item.status)}
                               date={dateStr}
+                              technicianName={user?.role === 'manager' ? item.staff?.full_name : undefined}
                             />
                           ));
                         })
@@ -884,7 +917,7 @@ const StaffDashboard: React.FC = () => {
           <TabsContent value="history" className="mt-0">
             <StaffPersonalHistory
               appointments={appointments}
-              staffProfileId={user?.staffProfileId || 0}
+              staffProfileId={user?.staffProfileId || user?.id || 0}
             />
           </TabsContent>
 

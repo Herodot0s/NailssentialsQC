@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useStaffPerformance } from './hooks/useAnalyticsData';
@@ -9,15 +9,12 @@ interface StaffTabProps {
   dateRange: DateRange;
 }
 
-const CHART_COLORS: Record<string, string> = {
-  Nail: '#B8794E',
-  Spa: '#D9A07E',
-  Hair: '#9A6440',
-  Waxing: '#E6B69E',
-  Threading: '#F2CCBE',
-  Packages: '#5D7285',
-};
-const FALLBACK_COLORS = ['#B8794E', '#D9A07E', '#9A6440', '#E6B69E', '#F2CCBE', '#5D7285'];
+const DIVERSE_COLORS = [
+  '#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#073b4c',
+  '#e07a5f', '#3d405b', '#81b29a', '#f2cc8f', '#9b5de5',
+  '#f15bb5', '#fee440', '#00bbf9', '#00f5d4', '#ff9f1c',
+  '#2ec4b6', '#ffbf69', '#8338ec', '#ff006e', '#8ac926',
+];
 
 const formatCurrency = (v: number) =>
   new Intl.NumberFormat('en-PH', {
@@ -31,7 +28,7 @@ const formatCompact = (v: number) =>
   new Intl.NumberFormat('en-PH', { notation: 'compact', compactDisplay: 'short' }).format(v);
 
 const RankBadge: React.FC<{ rank: number }> = ({ rank }) => {
-  const colors: Record<number, string> = { 1: '#B8794E', 2: '#8E8680', 3: '#9A6440' };
+  const colors: Record<number, string> = { 1: '#ffd166', 2: '#e0e1dd', 3: '#e07a5f' };
   const color = colors[rank];
   return (
     <span className="inline-flex items-center gap-1.5 text-sm font-semibold">
@@ -46,7 +43,7 @@ const StaffTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   return (
-    <div className="bg-white shadow-sm border border-gray-100 p-4" style={{ borderRadius: 0 }}>
+    <div className="bg-white shadow-lg border border-gray-100 p-4 rounded-xl" style={{ borderRadius: '12px' }}>
       <p className="text-sm font-medium mb-1">{d?.fullName}</p>
       <p className="text-sm text-muted-foreground">
         {formatCurrency(d?.revenue)} revenue, {d?.serviceCount} services
@@ -84,7 +81,7 @@ export const StaffTab: React.FC<StaffTabProps> = ({ dateRange }) => {
 
   if (!safeData.length) {
     return (
-      <Card className="rounded-none border-none shadow-sm bg-white">
+      <Card className="rounded-2xl border-none shadow-sm bg-white">
         <CardContent className="py-16 text-center">
           <p className="font-serif text-xl font-light text-foreground mb-2">
             No data for this period
@@ -100,8 +97,8 @@ export const StaffTab: React.FC<StaffTabProps> = ({ dateRange }) => {
   return (
     <div className="space-y-8">
       {/* Horizontal Bar Chart */}
-      <Card className="rounded-none border-none shadow-sm bg-white">
-        <CardHeader className="border-b border-gray-50">
+      <Card className="rounded-2xl border border-gray-100 shadow-sm bg-white overflow-hidden">
+        <CardHeader className="border-b border-gray-50 bg-gray-50/50">
           <CardTitle className="font-serif text-2xl font-light !uppercase-none !tracking-normal !text-2xl">
             Staff Revenue Ranking
           </CardTitle>
@@ -114,7 +111,7 @@ export const StaffTab: React.FC<StaffTabProps> = ({ dateRange }) => {
                 type="number"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: '#666' }}
                 tickFormatter={formatCompact}
               />
               <YAxis
@@ -123,23 +120,25 @@ export const StaffTab: React.FC<StaffTabProps> = ({ dateRange }) => {
                 width={120}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: '#666' }}
               />
-              <Tooltip content={<StaffTooltip />} />
+              <Tooltip content={<StaffTooltip />} cursor={{ fill: '#f9fafb' }} />
               <Bar
                 dataKey="revenue"
-                fill="#B8794E"
                 radius={[0, 4, 4, 0]}
-                activeBar={{ fill: '#9A6440' }}
-              />
+              >
+                {safeData.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={DIVERSE_COLORS[index % DIVERSE_COLORS.length]} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
       {/* Leaderboard Table */}
-      <Card className="rounded-none border-none shadow-sm bg-white">
-        <CardHeader className="border-b border-gray-50">
+      <Card className="rounded-2xl border border-gray-100 shadow-sm bg-white overflow-hidden">
+        <CardHeader className="border-b border-gray-50 bg-gray-50/50">
           <CardTitle className="font-serif text-2xl font-light !uppercase-none !tracking-normal !text-2xl">
             Performance Leaderboard
           </CardTitle>
@@ -147,7 +146,7 @@ export const StaffTab: React.FC<StaffTabProps> = ({ dateRange }) => {
         <CardContent className="p-0">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-100">
+              <tr className="border-b border-gray-100 bg-gray-50/20">
                 <th className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground text-left px-6 py-4">
                   Rank
                 </th>
@@ -170,13 +169,13 @@ export const StaffTab: React.FC<StaffTabProps> = ({ dateRange }) => {
                 <React.Fragment key={staff.staffId}>
                   <tr
                     onClick={() => toggleExpand(staff.staffId)}
-                    className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors cursor-pointer"
+                    className="border-b border-gray-50 hover:bg-gray-50/80 transition-colors cursor-pointer"
                   >
                     <td className="px-6 py-4">
                       <RankBadge rank={i + 1} />
                     </td>
                     <td className="px-6 py-4 text-sm font-medium">{staff.fullName}</td>
-                    <td className="px-6 py-4 text-sm font-semibold">
+                    <td className="px-6 py-4 text-sm font-semibold text-primary">
                       {formatCurrency(staff.revenue)}
                     </td>
                     <td className="px-6 py-4 text-sm">{formatCurrency(staff.commission)}</td>
@@ -185,7 +184,7 @@ export const StaffTab: React.FC<StaffTabProps> = ({ dateRange }) => {
                   <AnimatePresence>
                     {expandedStaff === staff.staffId && (
                       <tr>
-                        <td colSpan={5}>
+                        <td colSpan={5} className="p-0">
                           <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
@@ -193,33 +192,31 @@ export const StaffTab: React.FC<StaffTabProps> = ({ dateRange }) => {
                             transition={{ duration: 0.3, ease: 'easeInOut' }}
                             className="overflow-hidden"
                           >
-                            <div className="bg-gray-50/30 px-6 py-4">
+                            <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-100">
                               <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-3">
                                 Category Breakdown
                               </p>
-                              <div className="space-y-2">
-                                {Object.entries(staff.categoryBreakdown).map(([cat, amount]) => {
+                              <div className="space-y-3">
+                                {Object.entries(staff.categoryBreakdown).map(([cat, amount], idx) => {
                                   const maxAmount = Math.max(
-                                    ...Object.values(staff.categoryBreakdown),
+                                    ...Object.values(staff.categoryBreakdown).map((v) => Number(v))
                                   );
-                                  const pct = maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
-                                  const colorIdx = Object.keys(CHART_COLORS).indexOf(cat);
-                                  const color =
-                                    CHART_COLORS[cat] ||
-                                    FALLBACK_COLORS[colorIdx >= 0 ? colorIdx : 0];
+                                  const amt = Number(amount);
+                                  const pct = maxAmount > 0 ? (amt / maxAmount) * 100 : 0;
+                                  const color = DIVERSE_COLORS[idx % DIVERSE_COLORS.length];
                                   return (
                                     <div key={cat} className="flex items-center gap-3">
-                                      <span className="text-xs text-muted-foreground w-20 shrink-0">
+                                      <span className="text-xs text-muted-foreground w-20 shrink-0 truncate">
                                         {cat}
                                       </span>
-                                      <div className="flex-1 h-4 bg-gray-100 rounded-none overflow-hidden">
+                                      <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
                                         <div
-                                          className="h-full transition-all duration-500"
+                                          className="h-full rounded-full transition-all duration-500"
                                           style={{ width: `${pct}%`, backgroundColor: color }}
                                         />
                                       </div>
-                                      <span className="text-xs font-semibold w-20 text-right">
-                                        {formatCurrency(amount)}
+                                      <span className="text-xs font-semibold w-24 text-right">
+                                        {formatCurrency(amt)}
                                       </span>
                                     </div>
                                   );

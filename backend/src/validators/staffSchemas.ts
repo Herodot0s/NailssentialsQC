@@ -13,6 +13,8 @@ export const createStaffSchema = z.object({
   pagIbigNumber: z.string().optional().nullable(),
   profilePictureUrl: z.string().url().optional().or(z.literal('')).nullable(),
   role: z.enum(['staff', 'manager']).optional(),
+  isActive: z.preprocess((val) => val === 'true' || val === true, z.boolean()).optional(),
+  is_active: z.preprocess((val) => val === 'true' || val === true, z.boolean()).optional(),
 });
 
 export const updateStaffSchema = createStaffSchema.partial();

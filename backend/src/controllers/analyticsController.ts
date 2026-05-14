@@ -46,6 +46,10 @@ export const getStaffPerformance = async (req: AuthRequest, res: Response) => {
       include: { service: { include: { category: true } }, staff: true },
     });
 
+    // Get all categories
+    const allCategories = await prisma.serviceCategory.findMany();
+    const allCategoryNames = allCategories.map((c) => c.name);
+
     const categoryBreakdownMap: Record<number, Record<string, number>> = {};
     commissions.forEach((c) => {
       if (!categoryBreakdownMap[c.staff_id]) categoryBreakdownMap[c.staff_id] = {};
@@ -56,14 +60,22 @@ export const getStaffPerformance = async (req: AuthRequest, res: Response) => {
     });
 
     const data = commissionAgg
-      .map((agg) => ({
-        staffId: agg.staff_id,
-        fullName: staffMap.get(agg.staff_id) || 'Unknown',
-        revenue: Number(agg._sum.base_amount || 0),
-        commission: Number(agg._sum.commission_amount || 0),
-        serviceCount: agg._count.id,
-        categoryBreakdown: categoryBreakdownMap[agg.staff_id] || {},
-      }))
+      .map((agg) => {
+        const staffCategories = categoryBreakdownMap[agg.staff_id] || {};
+        const fullCategoryBreakdown: Record<string, number> = {};
+        allCategoryNames.forEach(name => {
+          fullCategoryBreakdown[name] = staffCategories[name] || 0;
+        });
+
+        return {
+          staffId: agg.staff_id,
+          fullName: staffMap.get(agg.staff_id) || 'Unknown',
+          revenue: Number(agg._sum.base_amount || 0),
+          commission: Number(agg._sum.commission_amount || 0),
+          serviceCount: agg._count.id,
+          categoryBreakdown: fullCategoryBreakdown,
+        };
+      })
       .sort((a, b) => b.revenue - a.revenue);
 
     return res.status(200).json({ success: true, data });

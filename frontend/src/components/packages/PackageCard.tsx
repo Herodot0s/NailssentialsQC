@@ -3,6 +3,7 @@ import { Sparkles, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { ServicePackage } from '@/types/api';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -13,7 +14,10 @@ interface PackageCardProps {
 
 export default function PackageCard({ pkg, isFocused = false }: PackageCardProps) {
   const { addPackageToCart, isPackageInCart } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  const isStaffOrManager = user?.role === 'staff' || user?.role === 'manager';
 
   const pkgPrice = parseFloat(pkg.price);
   const totalValue = parseFloat(pkg.services_total);
@@ -117,13 +121,16 @@ export default function PackageCard({ pkg, isFocused = false }: PackageCardProps
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               onClick={handleAction}
+              disabled={isStaffOrManager}
               className={`w-full h-12 rounded-xl uppercase tracking-[0.2em] text-[11px] font-bold transition-all border-none ${
                 inCart
                   ? 'bg-forest-confirm hover:bg-forest-confirm/90 text-white'
                   : 'bg-primary hover:bg-primary-hover text-white shadow-premium hover:shadow-xl'
-              }`}
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              {inCart ? (
+              {isStaffOrManager ? (
+                'Disabled for Staff'
+              ) : inCart ? (
                 <>
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   View in Cart

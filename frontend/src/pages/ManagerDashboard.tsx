@@ -1,29 +1,22 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Plus, DollarSign, Menu } from 'lucide-react';
+import { Loader2, Plus, Menu } from 'lucide-react';
 import {
   getDailySales,
-  getReports,
   getAllStaff,
   createStaff,
   updateStaff,
-  getPayrollPeriods,
-  generatePayroll,
-  lockPayroll,
   getAllReviews,
   moderateReview,
   getCategories,
   getAllAttendance,
   updateAttendance,
-  addDeduction,
   getStaffSchedule,
   updateStaffSchedule,
   getAppointments,
 } from '../api/apiClient';
 
-import SalarySlipModal from '@/components/SalarySlipModal';
 import { StaffTable } from '@/components/dashboard/staff/StaffTable';
-import { PayrollTable } from '@/components/dashboard/payroll/PayrollTable';
 import { AttendanceLedger } from '@/components/dashboard/staff/AttendanceLedger';
 import { ReviewModeration } from '@/components/dashboard/customers/ReviewModeration';
 import { CustomerCareView } from '@/components/dashboard/customers/CustomerCareView';
@@ -36,35 +29,38 @@ import PackagesView from '@/components/packages/PackagesView';
 import { AnalyticsDashboard } from '@/components/dashboard/analytics/AnalyticsDashboard';
 import { MessagesView } from '@/components/dashboard/MessagesView';
 import { LogWalkInDialog } from '@/components/dashboard/customers/LogWalkInDialog';
+import { PayrollListView } from '@/components/dashboard/payroll/PayrollListView';
+import { PayrollDetailView } from '@/components/dashboard/payroll/PayrollDetailView';
+import { DeductionDetailSheet } from '@/components/dashboard/payroll/DeductionDetailSheet';
+import {
+  getPayrollPeriods,
+  getPayrollDetails,
+  generateNextPeriod,
+  lockPayroll,
+  exportPayrollExcel,
+  addDeduction,
+  generatePayroll,
+} from '../api/apiClient';
 
 import { ManagerSidebar } from '@/components/dashboard/ManagerSidebar';
-import { DeductionsView } from '@/components/dashboard/payroll/DeductionsView';
-import PayrollSetupView from '@/components/dashboard/payroll/PayrollSetupView';
 import { StaffDetailSheet } from '@/components/dashboard/staff/StaffDetailSheet';
 import { AddStaffDialog } from '@/components/dashboard/staff/AddStaffDialog';
 import { ShiftEditDialog } from '@/components/dashboard/staff/ShiftEditDialog';
-import { PayrollRunDialog } from '@/components/dashboard/payroll/PayrollRunDialog';
-import { DeductionEntryDialog } from '@/components/dashboard/payroll/DeductionEntryDialog';
 import { StatusModal } from '@/components/dashboard/StatusModal';
 import type { ActiveView } from '@/components/dashboard/types';
-
 import type {
-  PayrollPeriod,
-  AttendanceRecord,
-  Category,
   UpdateAttendanceRequest,
-  PayrollRecord,
   Review,
   StaffMember,
   ScheduleItem,
   SalesStats,
+  AttendanceRecord,
+  Category,
 } from '@/types/api';
 
 const ManagerDashboard: React.FC = () => {
   const [activeView, setActiveView] = useState<ActiveView>('advanced-analytics');
   const [salesStats, setSalesStats] = useState<SalesStats | null>(null);
-  const [payrollReport, setPayrollReport] = useState<PayrollRecord[]>([]);
-  const [payrollPeriods, setPayrollPeriods] = useState<PayrollPeriod[]>([]);
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
@@ -79,8 +75,6 @@ const ManagerDashboard: React.FC = () => {
 
   // Modals & Sheets
   const [showAddStaffModal, setShowAddStaffModal] = useState(false);
-  const [showPayrollModal, setShowPayrollModal] = useState(false);
-  const [showDeductionModal, setShowDeductionModal] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [showStaffSheet, setShowStaffSheet] = useState(false);
   const [staffSchedule, setStaffSchedule] = useState<ScheduleItem[]>([]);
@@ -88,9 +82,12 @@ const ManagerDashboard: React.FC = () => {
   const [editingDay, setEditingDay] = useState<number | null>(null);
   const [shiftForm, setShiftForm] = useState({ start: '12:00', end: '22:00', isActive: true });
 
-  // Salary Slip State
-  const [showSalarySlip, setShowSalarySlip] = useState(false);
-  const [selectedPayroll, setSelectedPayroll] = useState<PayrollRecord | null>(null);
+  // Payroll State
+  const [payrollPeriods, setPayrollPeriods] = useState<any[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<any | null>(null);
+  const [selectedStaffPayroll, setSelectedStaffPayroll] = useState<any | null>(null);
+  const [showDeductionSheet, setShowDeductionSheet] = useState(false);
+
 
   // Status Modal State
   const [statusModal, setStatusModal] = useState<{
@@ -117,20 +114,10 @@ const ManagerDashboard: React.FC = () => {
     sssNumber: '',
     pagIbigNumber: '',
     profilePictureUrl: '',
+    scheduledStart: '12:00',
+    scheduledEnd: '22:00',
   });
 
-  const [payrollForm, setPayrollForm] = useState({
-    startDate: '',
-    endDate: '',
-    totalSalonSales: '',
-  });
-
-  const [deductionForm, setDeductionForm] = useState({
-    staffId: '',
-    type: 'Cash Advance',
-    amount: '',
-    notes: '',
-  });
 
   const dateRange = useMemo(
     () => ({
@@ -164,12 +151,10 @@ const ManagerDashboard: React.FC = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [salesRes, payrollRes, staffRes, periodsRes, reviewsRes, attRes, catRes, appRes] =
+      const [salesRes, staffRes, reviewsRes, attRes, catRes, appRes] =
         await Promise.all([
           getDailySales(),
-          getReports({ startDate: dateRange.start, endDate: dateRange.end }),
           getAllStaff(),
-          getPayrollPeriods(),
           getAllReviews(),
           getAllAttendance({ startDate: dateRange.start }),
           getCategories(),
@@ -177,16 +162,10 @@ const ManagerDashboard: React.FC = () => {
         ]);
 
       if (salesRes.data.success) setSalesStats(salesRes.data.data);
-      if (payrollRes.data.success) setPayrollReport(payrollRes.data.data.report);
 
       if (staffRes.data.success) {
         const staffData = staffRes.data.data;
         setStaffMembers(Array.isArray(staffData) ? staffData : staffData?.items || []);
-      }
-
-      if (periodsRes.data.success) {
-        const periodsData = periodsRes.data.data;
-        setPayrollPeriods(Array.isArray(periodsData) ? periodsData : periodsData?.items || []);
       }
 
       if (reviewsRes.data.success) setReviews(reviewsRes.data.data);
@@ -204,9 +183,37 @@ const ManagerDashboard: React.FC = () => {
     }
   };
 
+  const fetchPayrollPeriods = async () => {
+    try {
+      const res = await getPayrollPeriods();
+      if (res.data.success) {
+        setPayrollPeriods(res.data.data.items || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch payroll periods');
+    }
+  };
+
+  const fetchPeriodDetails = async (id: number) => {
+    try {
+      const res = await getPayrollDetails(id);
+      if (res.data.success) {
+        setSelectedPeriod(res.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch period details');
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [dateRange]);
+
+  useEffect(() => {
+    if (activeView === 'payroll') {
+      fetchPayrollPeriods();
+    }
+  }, [activeView]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -250,6 +257,8 @@ const ManagerDashboard: React.FC = () => {
         sssNumber: '',
         pagIbigNumber: '',
         profilePictureUrl: '',
+        scheduledStart: '12:00',
+        scheduledEnd: '22:00',
       });
       fetchData();
     } catch (err: unknown) {
@@ -268,6 +277,7 @@ const ManagerDashboard: React.FC = () => {
     try {
       await updateStaff(selectedStaff.id, {
         fullName: selectedStaff.fullName,
+        username: selectedStaff.username,
         basePayPerWeek: selectedStaff.basePayPerWeek,
         dailyTarget: selectedStaff.dailyTarget,
         sssNumber: selectedStaff.sssNumber,
@@ -276,7 +286,10 @@ const ManagerDashboard: React.FC = () => {
         specializations: selectedStaff.specializations ?? undefined,
         email: selectedStaff.email ?? undefined,
         phone: selectedStaff.phone ?? undefined,
+        isActive: selectedStaff.isActive,
         password: selectedStaff.password,
+        scheduledStart: selectedStaff.scheduledStart,
+        scheduledEnd: selectedStaff.scheduledEnd,
       });
       setStatusModal({
         open: true,
@@ -300,82 +313,7 @@ const ManagerDashboard: React.FC = () => {
     }
   };
 
-  const handleGeneratePayroll = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await generatePayroll({
-        startDate: payrollForm.startDate,
-        endDate: payrollForm.endDate,
-        totalSalonSales: parseFloat(payrollForm.totalSalonSales),
-      });
-      setShowPayrollModal(false);
-      fetchData();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to generate payroll.';
-      setStatusModal({
-        open: true,
-        type: 'error',
-        title: 'Generation Failed',
-        description: message,
-      });
-    }
-  };
 
-  const handleLockPayroll = async (id: number) => {
-    if (
-      !window.confirm(
-        'Are you sure you want to finalize this payroll? This action cannot be undone.',
-      )
-    )
-      return;
-    try {
-      await lockPayroll(id);
-      fetchData();
-    } catch (err) {
-      setStatusModal({
-        open: true,
-        type: 'error',
-        title: 'Operation Failed',
-        description: 'Failed to lock payroll.',
-      });
-    }
-  };
-
-  const handleModerateReview = async (id: number, approved: boolean) => {
-    try {
-      await moderateReview(id, approved);
-      fetchData();
-    } catch (err) {
-      setStatusModal({
-        open: true,
-        type: 'error',
-        title: 'Operation Failed',
-        description: 'Failed to moderate review.',
-      });
-    }
-  };
-
-  const handleAddDeduction = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await addDeduction({
-        staffId: parseInt(deductionForm.staffId),
-        type: deductionForm.type,
-        amount: parseFloat(deductionForm.amount),
-        notes: deductionForm.notes,
-      });
-      setShowDeductionModal(false);
-      setDeductionForm({ staffId: '', type: 'Cash Advance', amount: '', notes: '' });
-      fetchData();
-    } catch (err) {
-      setStatusModal({
-        open: true,
-        type: 'error',
-        title: 'Operation Failed',
-        description: 'Failed to add deduction.',
-      });
-    }
-  };
 
   const handleStaffClick = async (staff: StaffMember) => {
     setSelectedStaff(staff);
@@ -468,10 +406,127 @@ const ManagerDashboard: React.FC = () => {
       });
     }
   };
+  const handleModerateReview = async (id: number, approved: boolean) => {
+    try {
+      await moderateReview(id, approved);
+      fetchData();
+    } catch (err) {
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Operation Failed',
+        description: 'Failed to moderate review.',
+      });
+    }
+  };
 
-  const handlePayrollRowClick = (record: PayrollRecord) => {
-    setSelectedPayroll(record);
-    setShowSalarySlip(true);
+  // --- Payroll Handlers ---
+  const handleGenerateNextPeriod = async () => {
+    try {
+      await generateNextPeriod();
+      fetchPayrollPeriods();
+      setStatusModal({
+        open: true,
+        type: 'success',
+        title: 'Period Generated',
+        description: 'Next payroll period created successfully.',
+      });
+    } catch (err) {
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Generation Failed',
+        description: 'Failed to generate next payroll period.',
+      });
+    }
+  };
+
+  const handleExportPayroll = async (id: number) => {
+    try {
+      const res = await exportPayrollExcel(id);
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Payroll_Report_${id}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+    } catch (err) {
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Export Failed',
+        description: 'Failed to export payroll report.',
+      });
+    }
+  };
+
+  const handleLockPeriod = async (id: number) => {
+    if (!confirm('Lock Period: This action cannot be undone. Are you sure?')) return;
+    try {
+      await lockPayroll(id);
+      fetchPeriodDetails(id);
+      fetchPayrollPeriods();
+      setStatusModal({
+        open: true,
+        type: 'success',
+        title: 'Period Locked',
+        description: 'Payroll period finalized and locked.',
+      });
+    } catch (err) {
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Lock Failed',
+        description: 'Failed to lock payroll period.',
+      });
+    }
+  };
+
+  const handleRegeneratePayroll = async (id: number) => {
+    if (!selectedPeriod) return;
+    try {
+      await generatePayroll({
+        startDate: selectedPeriod.start_date,
+        endDate: selectedPeriod.end_date,
+        payroll_period_id: id,
+      });
+      fetchPeriodDetails(id);
+    } catch (err) {
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Recalculation Failed',
+        description: 'Failed to recalculate payroll.',
+      });
+    }
+  };
+
+  const handleAddDeduction = async (data: { type: string; amount: number; notes: string }) => {
+    if (!selectedStaffPayroll || !selectedPeriod) return;
+    try {
+      await addDeduction({
+        staffId: selectedStaffPayroll.staff_id,
+        payrollPeriodId: selectedPeriod.id,
+        ...data,
+      });
+      // Recalculate to see results immediately
+      await handleRegeneratePayroll(selectedPeriod.id);
+      // Close sheet or keep open? UI-SPEC usually keeps open if adding multiple
+      // But we need to refresh selectedStaffPayroll too
+      const res = await getPayrollDetails(selectedPeriod.id);
+      if (res.data.success) {
+        setSelectedPeriod(res.data.data);
+        const updatedStaff = res.data.data.payrolls.find((p: any) => p.id === selectedStaffPayroll.id);
+        setSelectedStaffPayroll(updatedStaff);
+      }
+    } catch (err) {
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Adjustment Failed',
+        description: 'Failed to add deduction.',
+      });
+    }
   };
 
   if (isLoading && !salesStats) {
@@ -521,22 +576,6 @@ const ManagerDashboard: React.FC = () => {
                 <Plus className="h-4 w-4" /> New Employee
               </Button>
             )}
-            {activeView === 'deductions' && (
-              <Button
-                onClick={() => setShowDeductionModal(true)}
-                className="rounded-none gap-2 px-6 h-12 text-[10px] uppercase font-bold tracking-widest bg-primary"
-              >
-                <Plus className="h-4 w-4" /> Log Entry
-              </Button>
-            )}
-            {activeView === 'payroll' && (
-              <Button
-                onClick={() => setShowPayrollModal(true)}
-                className="rounded-none gap-2 px-6 h-12 text-[10px] uppercase font-bold tracking-widest"
-              >
-                <DollarSign className="h-4 w-4" /> Run Weekly Payroll
-              </Button>
-            )}
           </div>
         </header>
 
@@ -556,33 +595,6 @@ const ManagerDashboard: React.FC = () => {
           </div>
         )}
 
-        {activeView === 'deductions' && (
-          <div className="animate-in fade-in duration-700">
-            <DeductionsView
-              staffMembers={staffMembers}
-              deductionForm={deductionForm}
-              onFormChange={setDeductionForm}
-              onSubmit={handleAddDeduction}
-            />
-          </div>
-        )}
-
-        {activeView === 'payroll' && (
-          <div className="animate-in fade-in duration-700">
-            <PayrollTable
-              payrollReport={payrollReport}
-              onPayrollRowClick={handlePayrollRowClick}
-              payrollPeriods={payrollPeriods}
-              onLockPayroll={handleLockPayroll}
-            />
-          </div>
-        )}
-
-        {activeView === 'payroll-setup' && (
-          <div className="animate-in fade-in duration-700">
-            <PayrollSetupView />
-          </div>
-        )}
 
         {activeView === 'performance' && (
           <div className="animate-in fade-in duration-700">
@@ -648,6 +660,31 @@ const ManagerDashboard: React.FC = () => {
             <MessagesView />
           </div>
         )}
+
+        {activeView === 'payroll' && (
+          <div className="animate-in fade-in duration-700">
+            {selectedPeriod ? (
+              <PayrollDetailView
+                period={selectedPeriod}
+                onBack={() => setSelectedPeriod(null)}
+                onExport={() => handleExportPayroll(selectedPeriod.id)}
+                onLock={() => handleLockPeriod(selectedPeriod.id)}
+                onRegenerate={() => handleRegeneratePayroll(selectedPeriod.id)}
+                onStaffClick={(p) => {
+                  setSelectedStaffPayroll(p);
+                  setShowDeductionSheet(true);
+                }}
+              />
+            ) : (
+              <PayrollListView
+                periods={payrollPeriods}
+                onViewDetails={(p) => fetchPeriodDetails(p.id)}
+                onExport={(p) => handleExportPayroll(p.id)}
+                onGenerateNext={handleGenerateNextPeriod}
+              />
+            )}
+          </div>
+        )}
       </main>
 
       <StaffDetailSheet
@@ -661,11 +698,6 @@ const ManagerDashboard: React.FC = () => {
         onUpdateBaseline={handleUpdateStaffBaseline}
       />
 
-      <SalarySlipModal
-        open={showSalarySlip}
-        onOpenChange={setShowSalarySlip}
-        payroll={selectedPayroll}
-      />
 
       <AddStaffDialog
         open={showAddStaffModal}
@@ -692,22 +724,6 @@ const ManagerDashboard: React.FC = () => {
         onSubmit={handleSaveShift}
       />
 
-      <PayrollRunDialog
-        open={showPayrollModal}
-        onOpenChange={setShowPayrollModal}
-        form={payrollForm}
-        onFormChange={setPayrollForm}
-        onSubmit={handleGeneratePayroll}
-      />
-
-      <DeductionEntryDialog
-        open={showDeductionModal}
-        onOpenChange={setShowDeductionModal}
-        staffMembers={staffMembers}
-        form={deductionForm}
-        onFormChange={setDeductionForm}
-        onSubmit={handleAddDeduction}
-      />
 
       <LogWalkInDialog
         open={showWalkInModal}
@@ -721,6 +737,14 @@ const ManagerDashboard: React.FC = () => {
         type={statusModal.type}
         title={statusModal.title}
         description={statusModal.description}
+      />
+
+      <DeductionDetailSheet
+        open={showDeductionSheet}
+        onOpenChange={setShowDeductionSheet}
+        staffPayroll={selectedStaffPayroll}
+        isLocked={selectedPeriod?.is_locked || false}
+        onAddDeduction={handleAddDeduction}
       />
     </div>
   );

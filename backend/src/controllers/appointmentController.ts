@@ -360,6 +360,12 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
   } catch (error: unknown) {
     console.error('Create appointment error:', error);
     const message = error instanceof Error ? error.message : 'Failed to create appointment';
+    
+    // Handle specific validation/conflict errors with 400 instead of 500
+    if (message.includes('already booked') || message.includes('not found') || message.includes('available')) {
+      return sendError(res, 'BAD_REQUEST', message, 400);
+    }
+    
     return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
   }
 };

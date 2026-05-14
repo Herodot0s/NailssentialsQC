@@ -103,6 +103,8 @@ model StaffProfile {
   specializations  String?
   daily_target     Decimal  @default(6000.00) @db.Decimal(10, 2)
   base_pay_per_week Decimal @default(2500.00) @db.Decimal(10, 2)
+  base_commission_rate Decimal @default(0.10) @db.Decimal(5, 2)
+  commission_tier  Int?
   scheduled_start  String   @default("12:00:00")
   scheduled_end    String   @default("22:00:00")
   is_available     Boolean  @default(true)
@@ -306,6 +308,7 @@ model PayrollPeriod {
   created_at        DateTime       @default(now())
   updated_at        DateTime       @updatedAt
   payrolls          StaffPayroll[]
+  deductions        DeductionLog[]
 
   @@map("payroll_periods")
 }
@@ -319,6 +322,7 @@ model StaffPayroll {
   deductions        Decimal  @db.Decimal(10, 2)
   net_pay           Decimal  @db.Decimal(10, 2)
   status            String   @default("draft") // draft, paid
+  daily_breakdown   Json?
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 
@@ -409,18 +413,29 @@ model SalaryStructureAssignment {
   @@map("salary_structure_assignments")
 }
 
+enum DeductionType {
+  cash_advance
+  loan
+  uniform
+  reloan
+  lates_early_out
+  other
+}
+
 model DeductionLog {
   id                Int      @id @default(autoincrement())
   staff_id          Int
   payroll_period_id Int?
-  type              String   // CA, Uniform, Loan, Tardiness, Absence
+  type              DeductionType
   amount            Decimal  @db.Decimal(10, 2)
   notes             String?  @db.Text
   created_at        DateTime @default(now())
 
-  staff StaffProfile @relation(fields: [staff_id], references: [id])
+  staff  StaffProfile   @relation(fields: [staff_id], references: [id])
+  period PayrollPeriod? @relation(fields: [payroll_period_id], references: [id])
 
   @@index([staff_id])
+  @@index([payroll_period_id])
   @@map("deduction_logs")
 }
 

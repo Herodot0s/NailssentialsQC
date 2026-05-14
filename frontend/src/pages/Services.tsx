@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import PackageDiscoverySection from '@/components/packages/PackageDiscoverySection';
 import { useMemo } from 'react';
 
@@ -93,6 +94,9 @@ const Services: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { cart, addToCart } = useCart();
+  const { user } = useAuth();
+
+  const isStaffOrManager = user?.role === 'staff' || user?.role === 'manager';
 
   // Auto-select service if ID is in URL
   useEffect(() => {
@@ -551,10 +555,11 @@ const Services: React.FC = () => {
                       </Button>
                     ) : (
                       <Button
-                        className="w-full h-12 md:h-14 rounded-xl text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-bold text-white shadow-premium hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-300"
+                        className="w-full h-12 md:h-14 rounded-xl text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-bold text-white shadow-premium hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{
                           backgroundColor: getCategoryConfig(selectedService.category_id).color,
                         }}
+                        disabled={isStaffOrManager}
                         onClick={() => {
                           addToCart({
                             serviceId: selectedService.id,
@@ -565,7 +570,7 @@ const Services: React.FC = () => {
                           });
                         }}
                       >
-                        Add to Cart
+                        {isStaffOrManager ? 'Booking Disabled for Staff' : 'Add to Cart'}
                       </Button>
                     )}
                   </motion.div>

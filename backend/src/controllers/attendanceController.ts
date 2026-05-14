@@ -8,6 +8,15 @@ interface PrismaError extends Error {
   code: string;
 }
 
+const getManilaToday = () => {
+  const now = new Date();
+  const manilaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+  const todayStr = manilaTime.toISOString().split('T')[0];
+  const today = new Date(todayStr + 'T00:00:00Z');
+  const dayOfWeek = today.getUTCDay();
+  return { today, dayOfWeek };
+};
+
 /**
  * Get current attendance status for the logged-in staff and recent history.
  */
@@ -32,9 +41,7 @@ export const getAttendanceStatus = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const dayOfWeek = today.getDay();
+    const { today, dayOfWeek } = getManilaToday();
 
     const attendance = await prisma.attendance.findUnique({
       where: {
@@ -81,6 +88,8 @@ export const getAttendanceStatus = async (req: AuthRequest, res: Response) => {
     return res.status(200).json({
       success: true,
       data: {
+        staffName: staffProfile.full_name,
+        staffId: staffProfile.id,
         status: {
           isCheckedIn: !!attendance?.check_in && !attendance?.check_out,
           checkInTime: attendance?.check_in
@@ -132,9 +141,7 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
     }
 
     const now = new Date();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const dayOfWeek = today.getDay();
+    const { today, dayOfWeek } = getManilaToday();
 
     // Check if already checked out (Review Finding: Logic Edge Case)
     const existingAttendance = await prisma.attendance.findUnique({
@@ -178,7 +185,7 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
     const scheduledMinutes = parseInt(scheduledParts[1]);
 
     const scheduledStartTime = new Date(today);
-    scheduledStartTime.setHours(scheduledHours, scheduledMinutes, 0, 0);
+    scheduledStartTime.setUTCHours(scheduledHours - 8, scheduledMinutes, 0, 0);
 
     let tardinessMinutes = 0;
     const gracePeriod = 15;
@@ -280,8 +287,7 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
     }
 
     const now = new Date();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const { today } = getManilaToday();
 
     const attendance = await prisma.attendance.update({
       where: {
@@ -302,7 +308,7 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
     const endMinutes = parseInt(endParts[1]);
 
     const scheduledEndTime = new Date(today);
-    scheduledEndTime.setHours(endHours, endMinutes, 0, 0);
+    scheduledEndTime.setUTCHours(endHours - 8, endMinutes, 0, 0);
 
     const earlyOutMinutes = Math.floor((scheduledEndTime.getTime() - now.getTime()) / (1000 * 60));
     const isEarlyOut = earlyOutMinutes > 0;

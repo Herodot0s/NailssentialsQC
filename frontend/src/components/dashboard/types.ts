@@ -1,8 +1,6 @@
 import type {
   SalesStats,
   StaffMember,
-  PayrollRecord,
-  PayrollPeriod,
   AttendanceRecord,
   Category,
   Review,
@@ -14,12 +12,7 @@ export interface StaffTableProps {
   onStaffClick: (staff: StaffMember) => void;
 }
 
-export interface PayrollTableProps {
-  payrollReport: PayrollRecord[];
-  onPayrollRowClick: (record: PayrollRecord) => void;
-  payrollPeriods: PayrollPeriod[];
-  onLockPayroll: (id: number) => void;
-}
+
 
 export interface AttendanceLedgerProps {
   attendance: AttendanceRecord[];
@@ -42,9 +35,6 @@ export interface HistoricalData {
 export type ActiveView =
   | 'staff'
   | 'attendance'
-  | 'deductions'
-  | 'payroll'
-  | 'payroll-setup'
   | 'reviews'
   | 'exhibits'
   | 'content'
@@ -54,7 +44,8 @@ export type ActiveView =
   | 'messages'
   | 'customer-care'
   | 'performance'
-  | 'service-history';
+  | 'service-history'
+  | 'payroll';
 
 export interface ManagerSidebarProps {
   activeView: ActiveView;
@@ -76,12 +67,7 @@ export interface OverviewViewProps {
   staffMembers: StaffMember[];
 }
 
-export interface DeductionsViewProps {
-  staffMembers: StaffMember[];
-  deductionForm: { staffId: string; type: string; amount: string; notes: string };
-  onFormChange: (form: DeductionsViewProps['deductionForm']) => void;
-  onSubmit: (e: React.FormEvent) => void;
-}
+
 
 export interface StaffDetailSheetProps {
   open: boolean;
@@ -110,6 +96,8 @@ export interface AddStaffDialogProps {
     sssNumber: string;
     pagIbigNumber: string;
     profilePictureUrl: string;
+    scheduledStart: string;
+    scheduledEnd: string;
   };
   onFormChange: (form: AddStaffDialogProps['form']) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -124,19 +112,3 @@ export interface ShiftEditDialogProps {
   onSubmit: (e: React.FormEvent) => void;
 }
 
-export interface PayrollRunDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  form: { startDate: string; endDate: string; totalSalonSales: string };
-  onFormChange: (form: PayrollRunDialogProps['form']) => void;
-  onSubmit: (e: React.FormEvent) => void;
-}
-
-export interface DeductionEntryDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  staffMembers: StaffMember[];
-  form: { staffId: string; type: string; amount: string; notes: string };
-  onFormChange: (form: DeductionEntryDialogProps['form']) => void;
-  onSubmit: (e: React.FormEvent) => void;
-}
