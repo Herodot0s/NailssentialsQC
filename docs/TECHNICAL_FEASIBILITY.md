@@ -6,21 +6,7 @@ The following subsections present the technical feasibility assessment of the Na
 
 ## 3.1.1 Hardware Requirements
 
-### 3.1.1.1 Development Environment
 
-The system was developed on commodity hardware with the following minimum specifications:
-
-| Component | Minimum Specification |
-|-----------|----------------------|
-| Processor | Intel Core i5 (8th Gen) or equivalent |
-| Memory | 8 GB RAM |
-| Storage | 256 GB SSD |
-| Display | 1920 × 1080 resolution |
-| Network | Broadband internet (≥ 10 Mbps) |
-
-The development environment runs Docker Desktop (Docker Compose v3.8) to host a local PostgreSQL 17 instance alongside the application services, requiring no specialized hardware beyond a standard laptop or desktop workstation.
-
-### 3.1.1.2 Production Server
 
 The system is deployed on Vercel's serverless infrastructure, which eliminates the need for dedicated server hardware. The cloud platform dynamically provisions compute resources based on demand, offering:
 
@@ -29,15 +15,13 @@ The system is deployed on Vercel's serverless infrastructure, which eliminates t
 - **Managed SSL/TLS** certificates for HTTPS enforcement
 - **Zero server maintenance** for the development team
 
-### 3.1.1.3 End-User Devices
 
-The web-based interface is accessible from any device with a modern web browser (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+). No specialized client hardware or native application installation is required. Touch-target compliance with WCAG AA standards (≥ 40 × 40 px) ensures usability on tablets and smartphones for on-the-floor salon operations.
+The web-based interface is accessible from any device with a modern web browser (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+). No specialized client hardware or native application installation is required. Touch-target compliance (≥ 40 × 40 px) ensures usability on tablets and smartphones for on-the-floor salon operations.
 
 ---
 
 ## 3.1.2 Software Requirements
 
-### 3.1.2.1 Technology Stack Overview
 
 The system adopts a full-stack JavaScript/TypeScript architecture, selected for its unified language ecosystem, mature tooling, and proven suitability for web-based line-of-business applications.
 
@@ -61,7 +45,6 @@ The system adopts a full-stack JavaScript/TypeScript architecture, selected for 
 | **Email** | Nodemailer | 8.0 | Transactional email for appointment notifications |
 | **Validation** | Zod | 4.4 / express-validator 7.3 | Schema-based request validation |
 
-### 3.1.2.2 Development Tooling
 
 | Tool | Purpose |
 |------|---------|
@@ -76,7 +59,6 @@ The system adopts a full-stack JavaScript/TypeScript architecture, selected for 
 
 ## 3.1.3 System Architecture
 
-### 3.1.3.1 Architectural Pattern
 
 The system follows a **three-tier client–server architecture** consisting of:
 
@@ -86,7 +68,6 @@ The system follows a **three-tier client–server architecture** consisting of:
 
 3. **Data Tier** — A PostgreSQL 17 relational database accessed exclusively through Prisma ORM. The schema defines 20 models with enforced referential integrity, composite indexes for query performance, and explicit table mappings via `@@map` annotations.
 
-### 3.1.3.2 API Design
 
 All endpoints follow RESTful conventions with a consistent JSON response envelope:
 
@@ -122,7 +103,6 @@ The API is organized into 16 route modules:
 | Customers | `/api/v1/customers` | Customer profile management |
 | Upload | `/api/upload` | File upload handling (Vercel Blob) |
 
-### 3.1.3.3 Deployment Architecture
 
 The production deployment leverages Vercel's platform capabilities:
 
@@ -137,7 +117,6 @@ For local development, Docker Compose orchestrates three services: `db` (Postgre
 
 ## 3.1.4 Database Design
 
-### 3.1.4.1 Schema Overview
 
 The PostgreSQL schema comprises 20 interconnected models designed around the domain entities of a nail salon operation:
 
@@ -151,7 +130,6 @@ The PostgreSQL schema comprises 20 interconnected models designed around the dom
 | **Communication** | `Notification`, `Message`, `Review` | In-app notifications, messaging, and customer reviews |
 | **Audit** | `SystemLog` | Action-level audit trail with IP and user-agent tracking |
 
-### 3.1.4.2 Key Design Decisions
 
 1. **Enum-Based Status Management**: PostgreSQL enums (`AppointmentStatus`, `PaymentMethod`, `TransactionStatus`, `Role`, `SalaryComponentType`) enforce domain-valid state transitions at the database level, preventing invalid data from entering the system.
 
@@ -167,7 +145,6 @@ The PostgreSQL schema comprises 20 interconnected models designed around the dom
 
 ## 3.1.5 Security Architecture
 
-### 3.1.5.1 Authentication
 
 The system delegates authentication to **Clerk**, a managed identity platform that provides:
 
@@ -176,7 +153,6 @@ The system delegates authentication to **Clerk**, a managed identity platform th
 - **Account linking** for users who register through different providers but share the same email
 - **Automatic user provisioning** with role extraction from Clerk's `publicMetadata`
 
-### 3.1.5.2 Role-Based Access Control (RBAC)
 
 The system enforces three-tier RBAC through the `authorizeRoles()` middleware:
 
@@ -188,7 +164,6 @@ The system enforces three-tier RBAC through the `authorizeRoles()` middleware:
 
 Role assignment is derived from Clerk's `publicMetadata.role` property, with `customer` as the default fallback. The authorization middleware returns HTTP 403 with structured error codes for unauthorized access attempts.
 
-### 3.1.5.3 Input Validation
 
 Request validation employs a dual-layer strategy:
 
@@ -197,7 +172,6 @@ Request validation employs a dual-layer strategy:
 
 Validation errors return HTTP 400 with flattened error details, enabling precise client-side error rendering.
 
-### 3.1.5.4 Rate Limiting
 
 The backend includes `express-rate-limit` for protecting against brute-force attacks on authentication endpoints and preventing API abuse.
 
@@ -205,7 +179,6 @@ The backend includes `express-rate-limit` for protecting against brute-force att
 
 ## 3.1.6 Payroll Calculation Engine
 
-### 3.1.6.1 Commission Calculation Model
 
 The system implements a **tiered commission model** derived from field observations of the salon's existing spreadsheet-based payroll workflow:
 
@@ -218,7 +191,6 @@ The system implements a **tiered commission model** derived from field observati
 
 Commission calculations are executed atomically within Prisma `$transaction` blocks during appointment completion, ensuring data consistency between transaction records, commission entries, and notification delivery.
 
-### 3.1.6.2 Payroll Generation Workflow
 
 The payroll engine follows a **wipe-and-regenerate** strategy that preserves manual deductions while recalculating derived values:
 
@@ -234,7 +206,6 @@ The payroll engine follows a **wipe-and-regenerate** strategy that preserves man
 
 6. **Deduction Categories**: The system supports six deduction types — Cash Advance, Loan, Uniform, Reloan, Lates/Early Out, and Other — each tracked individually in `DeductionLog` and summarized in `StaffPayrollItem` records.
 
-### 3.1.6.3 Excel Export
 
 The payroll export generates an XLSX workbook using ExcelJS with the following structure:
 
@@ -250,7 +221,6 @@ The export respects the period's lock status, prefixing draft exports with `[DRA
 
 ## 3.1.7 Frontend Architecture
 
-### 3.1.7.1 Component Architecture
 
 The frontend employs a **page-centric component hierarchy** organized by user role:
 
@@ -278,13 +248,11 @@ src/
 └── types/                 # Shared TypeScript type definitions
 ```
 
-### 3.1.7.2 State Management Strategy
 
 - **Server State**: TanStack React Query manages all API data with configurable stale times (10-minute staleness for CMS content, shorter intervals for real-time data like attendance)
 - **Client State**: React's built-in `useState` and `useContext` for UI-local state (form inputs, modal visibility, sidebar navigation)
 - **Form State**: React Hook Form (v7.73) for complex multi-step forms (booking flow, staff profile editing)
 
-### 3.1.7.3 Analytics Dashboard
 
 The manager analytics module provides three visualization tabs:
 
@@ -296,7 +264,6 @@ The manager analytics module provides three visualization tabs:
 
 ## 3.1.8 Scalability and Performance
 
-### 3.1.8.1 Current Capacity Assessment
 
 For the target deployment (a single nail salon with 5–10 staff members and ~50–100 daily appointments), the system architecture provides substantial headroom:
 
@@ -308,14 +275,12 @@ For the target deployment (a single nail salon with 5–10 staff members and ~50
 | API response time | < 200ms for indexed queries |
 | Static asset delivery | < 50ms via global CDN |
 
-### 3.1.8.2 Performance Optimizations
 
 1. **Cursor-based pagination** on high-volume endpoints (payroll periods) prevents offset-scanning degradation
 2. **Parallel data fetching** with `Promise.all()` in the payroll controller reduces sequential database round trips
 3. **In-memory verification caching** (15-minute TTL) in the auth middleware eliminates redundant Clerk API calls
 4. **Asynchronous email delivery** — post-completion notifications execute outside the request–response cycle to avoid blocking
 
-### 3.1.8.3 Known Limitations
 
 - The system is designed for **single-tenant, single-location** deployment. Multi-tenant or multi-location support is explicitly out of scope.
 - The payroll calculation engine processes staff members **sequentially** within a single request. For salons exceeding 50 staff members, batch processing or background job queues would be recommended.
@@ -325,7 +290,6 @@ For the target deployment (a single nail salon with 5–10 staff members and ~50
 
 ## 3.1.9 Development and Testing Infrastructure
 
-### 3.1.9.1 Testing Framework
 
 | Layer | Framework | Scope |
 |-------|-----------|-------|
@@ -333,7 +297,6 @@ For the target deployment (a single nail salon with 5–10 staff members and ~50
 | Frontend Component | Vitest 4.1 + React Testing Library | Component rendering, user interaction simulation |
 | End-to-End | Manual + scripted (`e2e-test.js`) | Full-flow validation of booking and payroll workflows |
 
-### 3.1.9.2 Code Quality
 
 - **TypeScript strict mode** enabled across both frontend and backend (`"strict": true`)
 - **ESLint** with Prettier integration enforces consistent code style
