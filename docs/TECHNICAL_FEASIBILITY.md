@@ -39,7 +39,7 @@ The system adopts a full-stack JavaScript/TypeScript architecture, selected for 
 | **ORM** | Prisma | 7.8 | Type-safe database access with schema-first migrations |
 | **Database** | PostgreSQL | 17 (Alpine) | ACID-compliant relational database |
 | **Authentication** | Clerk | 5.x (frontend) / 2.x (backend) | Managed identity with email verification and MFA |
-| **File Storage** | Vercel Blob | 2.3 | Cloud object storage for profile pictures and exhibits |
+| **File Storage** | Cloudinary | 2.x (SDK) | Cloud image hosting for profile pictures and exhibits |
 | **Excel Generation** | ExcelJS | 4.4 | Server-side XLSX workbook creation for payroll exports |
 | **PDF Generation** | jsPDF + html2canvas | 4.2 / 1.4 | Client-side PDF rendering for staff payslips |
 | **Email** | Nodemailer | 8.0 | Transactional email for appointment notifications |
@@ -95,13 +95,13 @@ The API is organized into 16 route modules:
 | Reports | `/api/v1/reports` | Revenue and performance reporting |
 | Analytics | `/api/v1/reports` | KPI summaries, staff performance, retention |
 | CMS | `/api/v1/cms` | Landing page content management |
-| Exhibits | `/api/v1/exhibits` | Nail art gallery CRUD with Vercel Blob |
+| Exhibits | `/api/v1/exhibits` | Nail art gallery CRUD with Cloudinary |
 | Packages | `/api/v1/packages` | Service bundle management |
 | Reviews | `/api/v1/reviews` | Customer service reviews |
 | Notifications | `/api/v1/notifications` | In-app notification delivery |
 | Messages | `/api/v1/messages` | Internal messaging system |
 | Customers | `/api/v1/customers` | Customer profile management |
-| Upload | `/api/upload` | File upload handling (Vercel Blob) |
+| Upload | `/api/upload` | File upload handling (Cloudinary) |
 
 
 The production deployment leverages Vercel's platform capabilities:
