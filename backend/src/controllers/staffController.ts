@@ -20,8 +20,11 @@ export const getAllStaff = async (req: Request, res: Response) => {
 
     const where: Prisma.UserWhereInput = {
       role: { in: ['staff', 'manager'] },
-      is_active: true, // Only active staff for booking
     };
+
+    if (!isManager) {
+      where.is_active = true;
+    }
     if (cursor) {
       where.id = { gt: cursor };
     }
@@ -49,6 +52,8 @@ export const getAllStaff = async (req: Request, res: Response) => {
             specializations: true,
             base_pay_per_week: true,
             daily_target: true,
+            scheduled_start: true,
+            scheduled_end: true,
           },
         },
       },
@@ -77,6 +82,8 @@ export const getAllStaff = async (req: Request, res: Response) => {
         sssNumber: isManager ? u.sss_number : undefined,
         pagIbigNumber: isManager ? u.tin_number : undefined,
         createdAt: isManager ? u.created_at : undefined,
+        scheduledStart: isManager ? u.staff_profile?.scheduled_start : undefined,
+        scheduledEnd: isManager ? u.staff_profile?.scheduled_end : undefined,
       })),
       nextCursor,
       hasMore,
@@ -142,6 +149,8 @@ export const createStaff = async (req: Request, res: Response) => {
             specializations,
             base_pay_per_week: basePayPerWeek ? parseFloat(basePayPerWeek) : 2500.0,
             daily_target: dailyTarget ? parseFloat(dailyTarget) : 6000.0,
+            scheduled_start: '12:00:00',
+            scheduled_end: '22:00:00',
           },
         },
       },
@@ -196,14 +205,24 @@ export const updateStaff = async (req: Request, res: Response) => {
     pagIbigNumber,
     profilePictureUrl,
     role,
+    username,
+    is_active,
+    baseCommissionRate,
+    commissionTier,
   } = body;
+
+  const currentUser = getCurrentUser(req as AuthRequest);
+  const isManager = currentUser?.role === 'manager';
+
+  const finalIsActive = isActive !== undefined ? isActive : is_active;
 
   try {
     const data: Prisma.UserUpdateInput = {
       email,
       phone,
-      is_active: isActive,
+      is_active: finalIsActive === undefined ? undefined : Boolean(finalIsActive),
       role,
+      username,
       sss_number: sssNumber,
       tin_number: pagIbigNumber,
       profile_picture_url: profilePictureUrl,
@@ -213,13 +232,23 @@ export const updateStaff = async (req: Request, res: Response) => {
             full_name: fullName,
             specializations,
             base_pay_per_week:
-              basePayPerWeek !== undefined && basePayPerWeek !== null
+              isManager && basePayPerWeek !== undefined && basePayPerWeek !== null
                 ? parseFloat(basePayPerWeek as any)
                 : undefined,
             daily_target:
-              dailyTarget !== undefined && dailyTarget !== null
+              isManager && dailyTarget !== undefined && dailyTarget !== null
                 ? parseFloat(dailyTarget as any)
                 : undefined,
+            base_commission_rate:
+              isManager && baseCommissionRate !== undefined && baseCommissionRate !== null
+                ? parseFloat(baseCommissionRate as any)
+                : undefined,
+            commission_tier:
+              isManager && commissionTier !== undefined && commissionTier !== null
+                ? parseInt(commissionTier as any)
+                : undefined,
+            scheduled_start: undefined,
+            scheduled_end: undefined,
           },
           create: {
             full_name: fullName || 'New Staff',
@@ -232,6 +261,16 @@ export const updateStaff = async (req: Request, res: Response) => {
               dailyTarget !== undefined && dailyTarget !== null
                 ? parseFloat(dailyTarget as any)
                 : 6000.0,
+            base_commission_rate:
+              baseCommissionRate !== undefined && baseCommissionRate !== null
+                ? parseFloat(baseCommissionRate as any)
+                : 0.10,
+            commission_tier:
+              commissionTier !== undefined && commissionTier !== null
+                ? parseInt(commissionTier as any)
+                : undefined,
+            scheduled_start: '12:00:00',
+            scheduled_end: '22:00:00',
           },
         },
       },
@@ -252,6 +291,7 @@ export const updateStaff = async (req: Request, res: Response) => {
     await logSystemAction(req as AuthRequest, 'STAFF_UPDATED', 'Staff', idNum, {
       message: 'Updated staff profile',
     });
+
 
     res.json({
       success: true,
@@ -343,6 +383,33 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
     await logSystemAction(req as AuthRequest, 'SCHEDULE_UPDATED', 'Staff', staffId, {
       message: 'Updated staff schedule',
     });
+
+    // Update today's attendance record if it exists to reflect the new schedule immediately
+    try {
+      const now = new Date();
+      const manilaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+      const todayStr = manilaTime.toISOString().split('T')[0];
+      const today = new Date(todayStr + 'T00:00:00Z');
+      const dayOfWeek = today.getUTCDay();
+
+      // Find if any of the updated schedules match today's day of week
+      const todaySched = (schedules as ScheduleItem[]).find(s => s.day_of_week === dayOfWeek);
+      if (todaySched) {
+        // Use exact date object to match @db.Date behavior in Prisma/Postgres
+        await prisma.attendance.updateMany({
+          where: {
+            staff_id: staffId,
+            date: today,
+          },
+          data: {
+            scheduled_start: normalizeTime(todaySched.start_time),
+            scheduled_end: normalizeTime(todaySched.end_time),
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Failed to sync today attendance after schedule update:', err);
+    }
 
     res.json({ success: true, message: 'Schedule updated successfully' });
   } catch (error: unknown) {

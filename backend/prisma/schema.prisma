@@ -308,6 +308,7 @@ model PayrollPeriod {
   created_at        DateTime       @default(now())
   updated_at        DateTime       @updatedAt
   payrolls          StaffPayroll[]
+  deductions        DeductionLog[]
 
   @@map("payroll_periods")
 }
@@ -429,9 +430,11 @@ model DeductionLog {
   notes             String?  @db.Text
   created_at        DateTime @default(now())
 
-  staff StaffProfile @relation(fields: [staff_id], references: [id])
+  staff  StaffProfile   @relation(fields: [staff_id], references: [id])
+  period PayrollPeriod? @relation(fields: [payroll_period_id], references: [id])
 
   @@index([staff_id])
+  @@index([payroll_period_id])
   @@map("deduction_logs")
 }
 

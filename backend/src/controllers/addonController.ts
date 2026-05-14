@@ -41,7 +41,7 @@ export const updateAddon = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name, description, price, is_active } = req.body;
     const addon = await prisma.addon.update({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id as string) },
       data: {
         name,
         description,
@@ -60,7 +60,7 @@ export const deleteAddon = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     await prisma.addon.delete({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id as string) },
     });
     return sendSuccess(res, { message: 'Deleted successfully' }, 200);
   } catch (error: unknown) {

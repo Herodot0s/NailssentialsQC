@@ -8,6 +8,9 @@ import {
   getMyPayroll,
   lockPayroll,
   exportPayrollExcel,
+  getDeductions,
+  deleteDeduction,
+  generateNextPeriod,
 } from '../controllers/payrollController';
 import {
   getSalaryComponents,
@@ -72,6 +75,25 @@ router.post(
   authorizeRoles('manager'),
   validateZod(addDeductionSchema),
   addDeduction,
+);
+router.get(
+  '/deductions',
+  authenticateToken,
+  authorizeRoles('manager'),
+  getDeductions,
+);
+router.delete(
+  '/deductions/:id',
+  authenticateToken,
+  authorizeRoles('manager'),
+  validateIdParam,
+  deleteDeduction,
+);
+router.post(
+  '/periods/generate',
+  authenticateToken,
+  authorizeRoles('manager'),
+  generateNextPeriod,
 );
 router.patch(
   '/periods/:id/lock',

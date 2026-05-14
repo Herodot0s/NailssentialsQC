@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Webhook } from 'svix';
 import { clerkClient } from '@clerk/express';
+import { Role } from '@prisma/client';
 import prisma from '../utils/prisma';
 import { sendSuccess, sendError } from '../utils/apiHelpers';
 
@@ -62,7 +63,7 @@ export const handleClerkWebhook = async (req: Request, res: Response) => {
       if (!email) return res.status(200).json({ success: true, message: 'No email, skipping' });
 
       const fullName = `${first_name || ''} ${last_name || ''}`.trim() || 'User';
-      let role = (public_metadata?.role as string) || 'customer';
+      let role = ((public_metadata?.role as string) || 'customer') as Role;
 
       // If user was just created and doesn't have a role in Clerk yet, set it to 'customer'
       if (eventType === 'user.created' && !public_metadata?.role) {

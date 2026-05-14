@@ -1,10 +1,10 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { Prisma } from '@prisma/client';
 import * as ExcelJS from 'exceljs';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
-import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
-import { sendSuccess, sendError } from '../utils/apiHelpers';
+import { format, subMonths, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
+import { sendError } from '../utils/apiHelpers';
 import { logSystemAction } from '../utils/systemLog';
 import { evaluatePayrollFormula } from '../utils/payrollEvaluator';
 
@@ -28,7 +28,13 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
     const prevMonthEnd = endOfMonth(lastMonth);
 
     // Group all independent DB queries in Promise.all (per D-06, D-07)
-    const [existingPeriod, transactions, staffProfiles, prevMonthCommissions] = await Promise.all([
+    const [
+      existingPeriod,
+      transactions,
+      staffProfiles,
+      prevMonthCommissions,
+      currentPeriodCommissions,
+    ] = await Promise.all([
       prisma.payrollPeriod.findFirst({
         where: {
           OR: [{ start_date: { lte: endDate }, end_date: { gte: startDate } }],
@@ -48,6 +54,14 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
           commission_date: {
             gte: prevMonthStart,
             lte: prevMonthEnd,
+          },
+        },
+      }),
+      prisma.commission.findMany({
+        where: {
+          commission_date: {
+            gte: startDate,
+            lte: endDate,
           },
         },
       }),
@@ -86,6 +100,15 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       );
     }
 
+    const currentCommissionsByStaff = new Map<number, number>();
+    for (const c of currentPeriodCommissions) {
+      const staffId = c.staff_id;
+      currentCommissionsByStaff.set(
+        staffId,
+        (currentCommissionsByStaff.get(staffId) || 0) + Number(c.base_amount),
+      );
+    }
+
     for (const staff of staffProfiles) {
       // 1. Fetch active Salary Structure Assignment
       const assignment = await prisma.salaryStructureAssignment.findFirst({
@@ -109,6 +132,7 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       // Calculate commissions and attendance for context
       const prevMonthTotal = prevMonthCommissionsByStaff.get(staff.id) || 0;
       const staffCommissions = Math.round((prevMonthTotal / 4) * 100) / 100;
+      const currentSales = currentCommissionsByStaff.get(staff.id) || 0;
 
       const [manualDeductions, attendanceRecords] = await Promise.all([
         prisma.deductionLog.findMany({
@@ -165,19 +189,21 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
         }
 
         // Add manual deductions as additional items
-        if (manualDeductionTotal > 0) {
-          totalDeductions += manualDeductionTotal;
-          payrollItems.push({
-            component_name: 'Manual Deductions',
-            component_type: 'deduction',
-            amount: manualDeductionTotal,
-            formula_used: 'Manual',
+        if (manualDeductions.length > 0) {
+          manualDeductions.forEach((d) => {
+            totalDeductions += Number(d.amount);
+            payrollItems.push({
+              component_name: d.type || 'Manual Deduction',
+              component_type: 'deduction',
+              amount: Number(d.amount),
+              formula_used: 'Manual',
+            });
           });
         }
       } else {
-        // --- Fallback to Legacy Hardcoded Logic ---
+        // --- Fallback to Legacy Hardcoded Logic (Aligned with Sample Table) ---
         basePay = Number(staff.base_pay_per_week) * weeksInPeriod;
-        totalCommissions = staffCommissions;
+        totalCommissions = currentSales * 0.08;
         totalDeductions = tardinessDeduction + manualDeductionTotal;
 
         payrollItems.push({
@@ -186,20 +212,24 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
           amount: basePay,
         });
         payrollItems.push({
-          component_name: 'Commissions',
+          component_name: '8% Commission',
           component_type: 'earning',
           amount: totalCommissions,
         });
-        payrollItems.push({
-          component_name: 'Tardiness',
-          component_type: 'deduction',
-          amount: tardinessDeduction,
-        });
-        if (manualDeductionTotal > 0) {
+        if (tardinessDeduction > 0) {
           payrollItems.push({
-            component_name: 'Manual Deductions',
+            component_name: 'Lates/Early Out',
             component_type: 'deduction',
-            amount: manualDeductionTotal,
+            amount: tardinessDeduction,
+          });
+        }
+        if (manualDeductions.length > 0) {
+          manualDeductions.forEach((d) => {
+            payrollItems.push({
+              component_name: d.type || 'Manual Deduction',
+              component_type: 'deduction',
+              amount: Number(d.amount),
+            });
           });
         }
       }
@@ -236,7 +266,7 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
           data: {
             staff_id: staff.id,
             payroll_period_id: payrollPeriod.id,
-            type: 'Tardiness',
+            type: 'lates_early_out',
             amount: att.deduction_amount,
             notes: `Tardiness on ${format(att.date, 'yyyy-MM-dd')}`,
           },
@@ -353,6 +383,11 @@ export const addDeduction = async (req: AuthRequest, res: Response) => {
         .json({ success: false, message: 'staff_id, type, and amount are required' });
     }
 
+    const validTypes = ['cash_advance', 'loan', 'uniform', 'reloan', 'lates_early_out', 'other'];
+    if (!validTypes.includes(type)) {
+      return res.status(400).json({ success: false, message: 'Invalid deduction type' });
+    }
+
     const staff = await prisma.staffProfile.findUnique({
       where: { id: parseInt(staff_id) },
     });
@@ -453,22 +488,15 @@ export const exportPayrollExcel = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.validatedParams ?? {};
     const period = await prisma.payrollPeriod.findUnique({
-      where: { id },
+      where: { id: Number(id) },
       include: {
         payrolls: {
           include: {
-            staff: {
-              include: {
-                user: {
-                  select: {
-                    sss_number: true,
-                    tin_number: true,
-                  },
-                },
-              },
-            },
+            staff: true,
+            items: true,
           },
         },
+        deductions: true,
       },
     });
 
@@ -476,39 +504,132 @@ export const exportPayrollExcel = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ success: false, message: 'Payroll period not found' });
     }
 
+    const commissions = await prisma.commission.findMany({
+      where: {
+        staff_id: { in: period.payrolls.map((p) => p.staff_id) },
+        commission_date: { gte: period.start_date, lte: period.end_date },
+      },
+    });
+
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Payroll Report');
 
-    // Define columns
-    worksheet.columns = [
-      { header: 'Staff Full Name', key: 'fullName', width: 30 },
-      { header: 'Payroll Period', key: 'period', width: 25 },
-      { header: 'Base Pay', key: 'basePay', width: 15 },
-      { header: 'Commissions', key: 'commissions', width: 15 },
-      { header: 'Deductions', key: 'deductions', width: 15 },
-      { header: 'Net Pay', key: 'netPay', width: 15 },
-      { header: 'TIN', key: 'tin', width: 20 },
-      { header: 'SSS', key: 'sss', width: 20 },
-    ];
+    // 1. Staff Names Row (Header)
+    const staffPayrolls = period.payrolls;
+    const headerRow: (string | number)[] = [''];
+    staffPayrolls.forEach((p) => {
+      headerRow.push(p.staff.full_name);
+    });
+    worksheet.addRow(headerRow);
+    worksheet.getRow(1).font = { bold: true };
 
-    const periodString = `${format(period.start_date, 'MMM dd, yyyy')} - ${format(period.end_date, 'MMM dd, yyyy')}`;
+    // 2. Daily Sales Rows
+    const days = eachDayOfInterval({ start: period.start_date, end: period.end_date });
+    const staffDailySales = new Map<number, Map<string, number>>();
 
-    // Add rows
-    period.payrolls.forEach((p) => {
-      worksheet.addRow({
-        fullName: p.staff.full_name,
-        period: periodString,
-        basePay: Number(p.base_pay),
-        commissions: Number(p.commissions),
-        deductions: Number(p.deductions),
-        netPay: Number(p.net_pay),
-        tin: p.staff.user.tin_number || 'N/A',
-        sss: p.staff.user.sss_number || 'N/A',
-      });
+    // Initialize map
+    staffPayrolls.forEach((p) => {
+      staffDailySales.set(p.staff_id, new Map());
     });
 
-    // Style the header
-    worksheet.getRow(1).font = { bold: true };
+    // Aggregate daily sales
+    commissions.forEach((c) => {
+      const dateKey = format(c.commission_date, 'yyyy-MM-dd');
+      const staffMap = staffDailySales.get(c.staff_id);
+      if (staffMap) {
+        staffMap.set(dateKey, (staffMap.get(dateKey) || 0) + Number(c.base_amount));
+      }
+    });
+
+    days.forEach((day) => {
+      const dateKey = format(day, 'yyyy-MM-dd');
+      const displayDate = format(day, 'MMMM d');
+      const row: (string | number)[] = [displayDate];
+
+      staffPayrolls.forEach((p) => {
+        const sales = staffDailySales.get(p.staff_id)?.get(dateKey) || 0;
+        row.push(sales > 0 ? sales : 'OFF');
+      });
+      worksheet.addRow(row);
+    });
+
+    // 3. Commission (Sum of Sales)
+    const commissionSumRow: (string | number)[] = ['Commission'];
+    staffPayrolls.forEach((p) => {
+      let sum = 0;
+      days.forEach((day) => {
+        const dateKey = format(day, 'yyyy-MM-dd');
+        sum += staffDailySales.get(p.staff_id)?.get(dateKey) || 0;
+      });
+      commissionSumRow.push(sum);
+    });
+    worksheet.addRow(commissionSumRow);
+
+    // 4. Commission Pay (8% Comm equivalent)
+    const commRow: (string | number)[] = ['Commission Pay'];
+    staffPayrolls.forEach((p) => {
+      const comm =
+        p.items.find((i) => i.component_name.toLowerCase().includes('commission'))?.amount ||
+        p.commissions;
+      commRow.push(Number(comm));
+    });
+    worksheet.addRow(commRow);
+
+    // 5. Basic Pay
+    const basicRow: (string | number)[] = ['Basic'];
+    staffPayrolls.forEach((p) => {
+      basicRow.push(Number(p.base_pay));
+    });
+    worksheet.addRow(basicRow);
+
+    // 6. Gross Pay
+    const grossRow: (string | number)[] = ['Gross Pay'];
+    staffPayrolls.forEach((p) => {
+      const comm =
+        p.items.find((i) => i.component_name.toLowerCase().includes('commission'))?.amount ||
+        p.commissions;
+      grossRow.push(Number(p.base_pay) + Number(comm));
+    });
+    worksheet.addRow(grossRow);
+
+    // 7. Deductions
+    const deductionTypes = ['CA', 'Loan', 'Uniform', 'Reloan', 'Lates/Early Out'];
+    deductionTypes.forEach((type) => {
+      const rowLabel = type === 'Lates/Early Out' ? type : type === 'CA' ? 'Less CA' : type;
+      const row: (string | number)[] = [rowLabel];
+
+      staffPayrolls.forEach((p) => {
+        if (type === 'Lates/Early Out') {
+          const tardiness = p.items.find((i) => i.component_name === 'Tardiness')?.amount || 0;
+          row.push(Number(tardiness) > 0 ? -Number(tardiness) : 0);
+        } else {
+          const specificDeduction = period.deductions
+            .filter(
+              (d) => d.staff_id === p.staff_id && d.type.toLowerCase().includes(type.toLowerCase()),
+            )
+            .reduce((sum, d) => sum + Number(d.amount), 0);
+          row.push(specificDeduction > 0 ? -specificDeduction : '');
+        }
+      });
+      worksheet.addRow(row);
+    });
+
+    // 8. Net Pay
+    const netRow: (string | number)[] = ['Net Pay'];
+    worksheet.addRow(netRow);
+    const lastRowIndex = worksheet.rowCount;
+    staffPayrolls.forEach((p, idx) => {
+      worksheet.getRow(lastRowIndex).getCell(idx + 2).value = Number(p.net_pay);
+    });
+
+    worksheet.getRow(lastRowIndex).font = { bold: true };
+
+    // Auto-fit columns
+    worksheet.columns.forEach((column) => {
+      column.width = 15;
+    });
+    const firstCol = worksheet.getColumn(1);
+    if (firstCol) firstCol.width = 20;
 
     // Set response headers
     res.setHeader(
@@ -529,3 +650,90 @@ export const exportPayrollExcel = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ success: false, message });
   }
 };
+
+/**
+ * Manager: Get all deduction logs.
+ */
+export const getDeductions = async (req: AuthRequest, res: Response) => {
+  try {
+    const deductions = await prisma.deductionLog.findMany({
+      include: { staff: { select: { full_name: true } } },
+      orderBy: { created_at: 'desc' }
+    });
+    return res.status(200).json({ success: true, data: deductions });
+  } catch (error) {
+    console.error('Get deductions error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch deductions' });
+  }
+};
+
+/**
+ * Manager: Delete a deduction log.
+ */
+export const deleteDeduction = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const idStr = Array.isArray(id) ? id[0] : id;
+    const idNum = parseInt(idStr as string);
+    
+    // Check if deduction is already part of a payroll period
+    const existing = await prisma.deductionLog.findUnique({ where: { id: idNum } });
+    if (!existing) return res.status(404).json({ success: false, message: 'Deduction not found' });
+    if (existing.payroll_period_id) return res.status(400).json({ success: false, message: 'Cannot delete deduction linked to a payroll period' });
+    
+    await prisma.deductionLog.delete({ where: { id: idNum } });
+    await logSystemAction(req as AuthRequest, 'DEDUCTION_DELETED', 'Deduction', idNum, { message: 'Deleted payroll deduction' });
+    
+    return res.status(200).json({ success: true, message: 'Deduction deleted successfully' });
+  } catch (error) {
+    console.error('Delete deduction error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to delete deduction' });
+  }
+};
+
+/**
+ * Manager: Generate next payroll period dates
+ */
+export const generateNextPeriod = async (req: AuthRequest, res: Response) => {
+  try {
+    const latestPeriod = await prisma.payrollPeriod.findFirst({
+      orderBy: { end_date: 'desc' },
+    });
+
+    let newStartDate: Date;
+    let newEndDate: Date;
+
+    if (latestPeriod) {
+      newStartDate = new Date(latestPeriod.end_date);
+      newStartDate.setDate(newStartDate.getDate() + 1);
+    } else {
+      const { start_date } = req.body;
+      if (!start_date) {
+        return res.status(400).json({ success: false, message: 'start_date is required when no previous periods exist' });
+      }
+      newStartDate = new Date(start_date);
+    }
+
+    newEndDate = new Date(newStartDate);
+    newEndDate.setDate(newEndDate.getDate() + 6);
+
+    const newPeriod = await prisma.payrollPeriod.create({
+      data: {
+        start_date: newStartDate,
+        end_date: newEndDate,
+        total_salon_sales: 0,
+        is_locked: false,
+      }
+    });
+
+    await logSystemAction(req as AuthRequest, 'PERIOD_GENERATED', 'PayrollPeriod', newPeriod.id, {
+      message: 'Generated next payroll period',
+    });
+
+    return res.status(201).json({ success: true, data: newPeriod });
+  } catch (error) {
+    console.error('Generate next period error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to generate next period' });
+  }
+};
+
