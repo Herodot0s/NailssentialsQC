@@ -2,7 +2,7 @@
 
 ## Milestone v2.1: Advanced Payroll & Export System
 
-### Phase 8: Payroll Models & Backend Foundations
+### Phase 8: Payroll Models & Backend Foundations [Complete]
 **Goal:** Extend the database schema to support categorized deductions, weekly periods, and dynamic base commissions.
 **Requirements:** PAY-01, PAY-02, PAY-04
 **Success Criteria:**
