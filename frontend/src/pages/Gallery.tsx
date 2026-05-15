@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getExhibits } from '../api/apiClient';
 import type { Exhibit } from '../types/api';
-import { Loader2, Sparkles, Filter, ExternalLink, Camera, Heart } from 'lucide-react';
+import { Loader2, Sparkles, Filter, ExternalLink, Camera } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -145,9 +145,6 @@ const Gallery: React.FC = () => {
                             <Camera className="h-3 w-3" /> By {ex.artist?.full_name || 'Artisan'}
                           </div>
                           <div className="flex gap-3">
-                            <button className="p-2 bg-white/10 hover:bg-white/20 transition-colors rounded-full text-white">
-                              <Heart className="h-4 w-4" />
-                            </button>
                             <button
                               onClick={() => window.open(ex.image_url, '_blank')}
                               className="p-2 bg-white/10 hover:bg-white/20 transition-colors rounded-full text-white"
