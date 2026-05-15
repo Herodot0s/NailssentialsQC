@@ -1,11 +1,8 @@
 import { Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
-import fs from 'fs';
-import path from 'path';
 
-const logFile = path.join(process.cwd(), 'debug-package-controller.log');
-const log = (msg: string) => fs.appendFileSync(logFile, `[${new Date().toISOString()}] ${msg}\n`);
+
 
 export const getAllPackages = async (req: AuthRequest, res: Response) => {
   try {
@@ -23,7 +20,6 @@ export const getAllPackages = async (req: AuthRequest, res: Response) => {
       orderBy: { display_order: 'asc' },
     });
 
-    log(`getAllPackages found ${packages.length} packages`);
     const data = packages.map((pkg) => ({
       ...pkg,
       services: pkg.items.map((item) => ({
@@ -43,7 +39,6 @@ export const getAllPackages = async (req: AuthRequest, res: Response) => {
 
     return res.json({ success: true, data: cleanData });
   } catch (error) {
-    log(`getAllPackages error: ${error instanceof Error ? error.stack : error}`);
     console.error('getAllPackages error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error' });
   }
