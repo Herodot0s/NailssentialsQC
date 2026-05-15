@@ -296,11 +296,7 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
     return res.status(201).json({ success: true, data: payrollPeriod });
   } catch (error: unknown) {
     console.error('Generate payroll error:', error);
-    const fs = require('fs');
-    const logPath = require('path').join(__dirname, '../../payroll_error.log');
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const errorStack = error instanceof Error ? error.stack : '';
-    fs.appendFileSync(logPath, `[${new Date().toISOString()}] ERROR: ${errorMessage}\nSTACK: ${errorStack}\n\n`);
+
 
     const message = error instanceof Error ? error.message : 'Failed to generate payroll';
     return res.status(500).json({ success: false, message });
