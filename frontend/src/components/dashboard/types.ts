@@ -88,6 +88,7 @@ export interface AddStaffDialogProps {
     fullName: string;
     email: string;
     phone: string;
+    role: 'staff' | 'manager';
     username: string;
     password: string;
     specializations: string;

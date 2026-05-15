@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Clock, Scissors, Calendar } from 'lucide-react';
+import { formatTime12h } from '@/lib/utils';
 import type { PayrollRecord } from '@/types/api';
 
 interface AppointmentCardProps {
@@ -35,7 +36,7 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
               <Clock className="h-3.5 w-3.5" />
               <span className="text-[13px] font-bold tabular-nums">
                 {date ? `${date} • ` : ''}
-                {startTime} — {endTime}
+                {formatTime12h(startTime)} — {formatTime12h(endTime)}
               </span>
             </div>
             <h3 className="text-lg font-bold text-[#23251d] leading-tight">{customerName}</h3>

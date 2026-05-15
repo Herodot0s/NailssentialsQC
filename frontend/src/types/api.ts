@@ -217,7 +217,7 @@ export interface Service {
   id: number;
   name: string;
   price: number;
-  duration: number;
+  duration_minutes: number;
   category_id: number;
   is_active: boolean;
   image_url?: string | null;

@@ -10,9 +10,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Camera, History, TrendingUp, Award } from 'lucide-react';
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { formatTime12h } from '@/lib/utils';
+
 
 interface StaffPersonalHistoryProps {
   appointments: Array<{
@@ -39,15 +41,6 @@ export const StaffPersonalHistory: React.FC<StaffPersonalHistoryProps> = ({
 }) => {
   const [selectedWork, setSelectedWork] = React.useState<any>(null);
 
-  const formatTime12h = (timeStr: string) => {
-    if (!timeStr) return '--:--';
-    try {
-      const date = parse(timeStr, 'HH:mm', new Date());
-      return format(date, 'h:mm aa');
-    } catch {
-      return timeStr;
-    }
-  };
 
   const safeAppointments = Array.isArray(appointments) ? appointments : [];
   const myWork = safeAppointments

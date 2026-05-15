@@ -4,8 +4,8 @@ import { AuthRequest } from '../middleware/authMiddleware';
 import {
   addMinutes,
   areIntervalsOverlapping,
-  startOfWeek,
-  endOfWeek,
+  startOfISOWeek,
+  endOfISOWeek,
   startOfDay,
   endOfDay,
 } from 'date-fns';
@@ -107,8 +107,8 @@ export const getCommissionSummary = async (req: AuthRequest, res: Response) => {
     if (!staff) return res.status(404).json({ success: false, message: 'Staff profile not found' });
 
     const today = new Date();
-    const weekStart = startOfWeek(today);
-    const weekEnd = endOfWeek(today);
+    const weekStart = startOfISOWeek(today);
+    const weekEnd = endOfISOWeek(today);
 
     const dailyCommissions = await prisma.commission.aggregate({
       where: {

@@ -215,6 +215,10 @@ const ManageServices: React.FC = () => {
       setError('Duration must be greater than 0');
       return;
     }
+    if (parseInt(String(currentService.duration_minutes || '0')) > 600) {
+      setError('Service duration cannot exceed 10 hours (600 minutes), as it would not fit within store operating hours.');
+      return;
+    }
 
     try {
       const payload = {

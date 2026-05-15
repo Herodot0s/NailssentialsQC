@@ -106,6 +106,7 @@ const ManagerDashboard: React.FC = () => {
     fullName: '',
     email: '',
     phone: '',
+    role: 'staff' as 'staff' | 'manager',
     username: '',
     password: '',
     specializations: '',
@@ -176,8 +177,8 @@ const ManagerDashboard: React.FC = () => {
         const appData = appRes.data.data;
         setAppointments(Array.isArray(appData) ? appData : appData?.items || []);
       }
-    } catch (err: unknown) {
-      console.error('Fetch error:', err instanceof Error ? err.message : err);
+    } catch (err: any) {
+      console.error('Fetch error:', err.response?.data?.error?.message || err.message);
     } finally {
       setIsLoading(false);
     }
@@ -249,6 +250,7 @@ const ManagerDashboard: React.FC = () => {
         fullName: '',
         email: '',
         phone: '',
+        role: 'staff',
         username: '',
         password: '',
         specializations: '',
@@ -261,8 +263,8 @@ const ManagerDashboard: React.FC = () => {
         scheduledEnd: '22:00',
       });
       fetchData();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to add staff member.';
+    } catch (err: any) {
+      const message = err.response?.data?.error?.message || err.message || 'Failed to add staff member.';
       setStatusModal({
         open: true,
         type: 'error',
@@ -509,16 +511,24 @@ const ManagerDashboard: React.FC = () => {
         payrollPeriodId: selectedPeriod.id,
         ...data,
       });
-      // Recalculate to see results immediately
-      await handleRegeneratePayroll(selectedPeriod.id);
-      // Close sheet or keep open? UI-SPEC usually keeps open if adding multiple
-      // But we need to refresh selectedStaffPayroll too
+      
+      // Regenerate payroll for this period to incorporate the new deduction
+      await generatePayroll({
+        startDate: selectedPeriod.start_date,
+        endDate: selectedPeriod.end_date,
+        payroll_period_id: selectedPeriod.id,
+      });
+
+      // Refresh everything
       const res = await getPayrollDetails(selectedPeriod.id);
       if (res.data.success) {
         setSelectedPeriod(res.data.data);
-        const updatedStaff = res.data.data.payrolls.find((p: any) => p.id === selectedStaffPayroll.id);
+        const updatedStaff = res.data.data.payrolls.find(
+          (p: any) => p.staff_id === selectedStaffPayroll.staff_id
+        );
         setSelectedStaffPayroll(updatedStaff);
       }
+      fetchPayrollPeriods();
     } catch (err) {
       setStatusModal({
         open: true,

@@ -100,6 +100,29 @@ export const LogWalkInDialog: React.FC<LogWalkInDialogProps> = ({
       return;
     }
 
+    // Operating Hours Validation
+    const [hours] = walkInTime.split(':').map(Number);
+    if (hours < 12) {
+      setError('Store opens at 12:00 PM.');
+      return;
+    }
+
+    // Check if all services fit within operating hours (end by 10 PM)
+    const tooLate = selectedItems.some(item => {
+      const service = services.find(s => s.id.toString() === item.serviceId);
+      const duration = service?.duration_minutes || 0;
+      const startTimeDate = new Date(`1970-01-01T${walkInTime}:00`);
+      const endTimeDate = new Date(startTimeDate.getTime() + duration * 60000);
+      const endHour = endTimeDate.getHours();
+      const endMin = endTimeDate.getMinutes();
+      return endHour > 22 || (endHour === 22 && endMin > 0);
+    });
+
+    if (tooLate) {
+      setError('Time is too late for the duration of the selected treatments. Store closes at 10:00 PM.');
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
     try {
@@ -158,6 +181,8 @@ export const LogWalkInDialog: React.FC<LogWalkInDialogProps> = ({
                       type="time"
                       value={walkInTime}
                       onChange={(e) => setWalkInTime(e.target.value)}
+                      min="12:00"
+                      max="21:30"
                       className="rounded-md border-hairline h-12 pl-12 bg-white"
                     />
                   </div>

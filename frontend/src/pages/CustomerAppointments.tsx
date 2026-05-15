@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { formatTime12h } from '@/lib/utils';
+
 
 const CustomerAppointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -58,8 +60,9 @@ const CustomerAppointments: React.FC = () => {
         const aptItems = Array.isArray(aptData) ? aptData : aptData?.items || [];
         setAppointments(aptItems);
       }
-    } catch {
-      setError('Failed to synchronize ritual history.');
+    } catch (err: any) {
+      const message = err.response?.data?.error?.message || err.message || 'Failed to synchronize ritual history.';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -89,8 +92,8 @@ const CustomerAppointments: React.FC = () => {
       });
       setShowReviewModal(false);
       fetchAppointments();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to submit review.';
+    } catch (err: any) {
+      const message = err.response?.data?.error?.message || err.message || 'Failed to submit review.';
       alert(message);
     }
   };
@@ -106,8 +109,8 @@ const CustomerAppointments: React.FC = () => {
       await cancelAppointment(cancelForm.appointmentId, { reason: cancelForm.reason });
       setShowCancelModal(false);
       fetchAppointments();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to cancel ritual.';
+    } catch (err: any) {
+      const message = err.response?.data?.error?.message || err.message || 'Failed to cancel ritual.';
       alert(message);
     } finally {
       setIsCancelling(false);
@@ -235,7 +238,7 @@ const CustomerAppointments: React.FC = () => {
                     <div className="flex flex-col sm:flex-row">
                       <div className="bg-primary/5 p-8 flex flex-col justify-center items-center text-center min-w-[160px] border-r border-primary/5">
                         <span className="text-[10px] font-bold text-primary uppercase tracking-widest mb-4">
-                          {item.start_time}
+                          {formatTime12h(item.start_time)}
                         </span>
                         <div className="w-12 h-12 rounded-full border border-primary/20 flex items-center justify-center font-serif text-primary text-xl">
                           {item.service.name.charAt(0)}
@@ -254,6 +257,9 @@ const CustomerAppointments: React.FC = () => {
                             <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
                               <User className="h-3 w-3" /> Artisan: {item.staff.full_name}
                             </div>
+                            <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">
+                                  Technician Scheduled: {formatTime12h(item.start_time)} — {formatTime12h(item.end_time)}
+                                </p>
                           </div>
 
                           {item.status === 'completed' && !item.review && (

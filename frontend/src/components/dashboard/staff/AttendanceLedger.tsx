@@ -23,7 +23,6 @@ import {
   isBefore,
   min,
   max,
-  parse,
 } from 'date-fns';
 import {
   LineChart,
@@ -39,6 +38,8 @@ import { getStaffSchedule, getAllAttendance } from '@/api/apiClient';
 import type { AttendanceLedgerProps } from '../types';
 import type { StaffMember, ScheduleItem, AttendanceRecord } from '@/types/api';
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
+import { formatTime12h } from '@/lib/utils';
+
 
 export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({
   attendance,
@@ -47,16 +48,6 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({
 }) => {
   const [schedules, setSchedules] = useState<Record<number, ScheduleItem[]>>({});
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
-  const format12h = (timeStr?: string | null) => {
-    if (!timeStr) return '';
-    try {
-      // Handle HH:mm or HH:mm:ss
-      const date = parse(timeStr.substring(0, 5), 'HH:mm', new Date());
-      return format(date, 'h:mm aa');
-    } catch (e) {
-      return timeStr;
-    }
-  };
 
   // Modal state
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
@@ -196,7 +187,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({
         date: format(day, 'MMM dd'),
         expected: expectedVal,
         actual: actualVal,
-        expectedStr: schedStart ? `${format12h(schedStart)} - ${format12h(schedEnd)}` : 'Off',
+        expectedStr: schedStart ? `${formatTime12h(schedStart)} - ${formatTime12h(schedEnd)}` : 'Off',
         actualStr: record?.check_in
           ? format(new Date(record.check_in), 'h:mm aa')
           : dateStr > format(new Date(), 'yyyy-MM-dd')
@@ -290,7 +281,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({
                   </span>
                   <span className="font-mono text-sm">
                     {sched ? (
-                      `${format12h(sched.start_time)} - ${format12h(sched.end_time)}`
+                      `${formatTime12h(sched.start_time)} - ${formatTime12h(sched.end_time)}`
                     ) : (
                       <span className="text-muted-foreground italic">Off Duty</span>
                     )}
@@ -633,7 +624,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({
                           </span>
                           <span className="font-mono text-lg">
                             {schedStart
-                              ? `${format12h(schedStart)} - ${format12h(schedEnd)}`
+                              ? `${formatTime12h(schedStart)} - ${formatTime12h(schedEnd)}`
                               : 'Off Duty'}
                           </span>
                         </div>

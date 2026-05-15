@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Briefcase, Check, Wallet, Fingerprint, Upload, Loader2, UserCheck, UserMinus } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { uploadFile } from '@/api/apiClient';
+import { formatTime12h } from '@/lib/utils';
 import type { StaffDetailSheetProps } from '../types';
 
 export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
@@ -262,6 +263,40 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                           </div>
                         </div>
 
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="p-5 bg-white border border-[#bfc1b7] rounded-[6px] space-y-3">
+                            <Label className="text-[10px] uppercase font-bold text-[#6c6e63] tracking-wider">
+                              System Role
+                            </Label>
+                            <div className="flex gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => onStaffChange({ ...staff, role: 'staff' })}
+                                className={`flex-1 h-10 rounded-[4px] text-[10px] uppercase font-bold tracking-widest gap-2 transition-all ${
+                                  staff.role === 'staff'
+                                    ? 'bg-[#23251d] text-white border-[#23251d] hover:bg-[#23251d]'
+                                    : 'border-[#bfc1b7] text-[#9b9c92] hover:bg-gray-50'
+                                }`}
+                              >
+                                Staff
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => onStaffChange({ ...staff, role: 'manager' })}
+                                className={`flex-1 h-10 rounded-[4px] text-[10px] uppercase font-bold tracking-widest gap-2 transition-all ${
+                                  staff.role === 'manager'
+                                    ? 'bg-[#23251d] text-white border-[#23251d] hover:bg-[#23251d]'
+                                    : 'border-[#bfc1b7] text-[#9b9c92] hover:bg-gray-50'
+                                }`}
+                              >
+                                Manager
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+
                         <div className="p-5 bg-white border border-[#bfc1b7] rounded-[6px] grid grid-cols-2 gap-8 items-center">
                           <div className="space-y-1">
                             <Label className="text-[10px] uppercase font-bold text-[#6c6e63] tracking-wider">
@@ -298,7 +333,31 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                         <Check className="h-3 w-3" /> Specializations
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {categories.map((cat) => (
+                        {/* Always show 'Hair' as the first option */}
+                        <button
+                          key="hair-specialization"
+                          onClick={() => {
+                            const current = staff.specializations || '';
+                            const specs = current
+                              .split(',')
+                              .map((s) => s.trim())
+                              .filter(Boolean);
+                            const next = specs.includes('Hair')
+                              ? specs.filter((s) => s !== 'Hair')
+                              : [...specs, 'Hair'];
+                            onStaffChange({ ...staff, specializations: next.join(', ') });
+                          }}
+                          className={`px-4 py-1.5 rounded-full text-[11px] font-bold tracking-tight transition-all border ${
+                            staff.specializations?.split(',').map(s => s.trim()).includes('Hair')
+                              ? 'bg-[#23251d] text-white border-[#23251d]'
+                              : 'bg-white text-[#4d4f46] border-[#bfc1b7] hover:border-[#23251d]'
+                          }`}
+                        >
+                          Hair
+                        </button>
+                        {categories
+                          .filter(cat => !cat.name.toLowerCase().includes('hair'))
+                          .map((cat) => (
                           <button
                             key={cat.id}
                             onClick={() => {
@@ -313,7 +372,7 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                               onStaffChange({ ...staff, specializations: next.join(', ') });
                             }}
                             className={`px-4 py-1.5 rounded-full text-[11px] font-bold tracking-tight transition-all border ${
-                              staff.specializations?.includes(cat.name)
+                              staff.specializations?.split(',').map(s => s.trim()).includes(cat.name)
                                 ? 'bg-[#23251d] text-white border-[#23251d]'
                                 : 'bg-white text-[#4d4f46] border-[#bfc1b7] hover:border-[#23251d]'
                             }`}
@@ -362,7 +421,7 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                                   style={{ viewTransitionName: `shift-edit-${idx}` }}
                                   className="font-mono text-xs font-bold text-[#23251d]"
                                 >
-                                  {sched.start_time}—{sched.end_time}
+                                  {formatTime12h(sched.start_time)}—{formatTime12h(sched.end_time)}
                                 </div>
                               ) : (
                                 <span
