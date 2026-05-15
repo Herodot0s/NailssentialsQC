@@ -50,6 +50,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Mail, Loader2 } from 'lucide-react';
+import { formatTime12h, formatDuration } from '@/lib/utils';
+
 
 interface AttendanceStatus {
   isCheckedIn: boolean;
@@ -139,8 +141,8 @@ const StaffDashboard: React.FC = () => {
         const staffData = staffRes.data.data;
         setStaff(Array.isArray(staffData) ? staffData : staffData?.items || []);
       }
-    } catch (err: unknown) {
-      console.error('Fetch error:', err instanceof Error ? err.message : err);
+    } catch (err: any) {
+      console.error('Fetch error:', err.response?.data?.error?.message || err.message);
     } finally {
       setIsLoading(false);
     }
@@ -185,9 +187,8 @@ const StaffDashboard: React.FC = () => {
       const diffMinutes = (now.getTime() - scheduledStartTime.getTime()) / (1000 * 60);
 
       if (diffMinutes < -15) {
-        const earlyMins = Math.abs(Math.floor(diffMinutes));
         setAttendanceMessage({
-          text: `You are early by ${earlyMins} minutes. Please wait until at least 15 minutes before your shift.`,
+          text: `You are early by ${formatDuration(Math.abs(diffMinutes))}. Please wait until at least 15 minutes before your shift.`,
           type: 'warning',
         });
         return;
@@ -195,7 +196,7 @@ const StaffDashboard: React.FC = () => {
 
       if (diffMinutes > 15) {
         setAttendanceMessage({
-          text: `You are late by ${Math.floor(diffMinutes)} minutes. Deductions will be applied to your payroll.`,
+          text: `You are late by ${formatDuration(diffMinutes)}. Deductions will be applied to your payroll.`,
           type: 'error',
         });
       } else {
@@ -207,7 +208,9 @@ const StaffDashboard: React.FC = () => {
       await checkIn();
       fetchDashboardData();
     } catch (err: any) {
-      console.error('Check-in failed:', err.response?.data?.message || err.message);
+      const msg = err.response?.data?.error?.message || err.message;
+      console.error('Check-in failed:', msg);
+      setAttendanceMessage({ text: msg, type: 'error' });
     }
   };
 
@@ -237,7 +240,7 @@ const StaffDashboard: React.FC = () => {
 
       if (diffMinutes > 15) {
         setAttendanceMessage({
-          text: `You are checking out early by ${Math.floor(diffMinutes)} minutes. Management has been notified.`,
+          text: `You are checking out early by ${formatDuration(diffMinutes)}. Management has been notified.`,
           type: 'warning',
         });
       } else {
@@ -249,7 +252,9 @@ const StaffDashboard: React.FC = () => {
       await checkOut();
       fetchDashboardData();
     } catch (err: any) {
-      console.error('Check-out failed:', err.response?.data?.message || err.message);
+      const msg = err.response?.data?.error?.message || err.message;
+      console.error('Check-out failed:', msg);
+      setAttendanceMessage({ text: msg, type: 'error' });
     }
   };
 
@@ -274,7 +279,9 @@ const StaffDashboard: React.FC = () => {
       setPaymentAptId(null);
       fetchDashboardData();
     } catch (err: any) {
-      console.error('Failed to finalize ritual:', err.response?.data?.message || err.message);
+      const msg = err.response?.data?.error?.message || err.message;
+      console.error('Failed to finalize ritual:', msg);
+      alert(msg);
     } finally {
       setIsProcessingPayment(false);
     }
@@ -309,8 +316,9 @@ const StaffDashboard: React.FC = () => {
       setShowMessageModal(false);
       setNewMessage({ receiverId: '', subject: '', body: '' });
       fetchDashboardData();
-    } catch {
-      alert('Failed to send message.');
+    } catch (err: any) {
+      const msg = err.response?.data?.error?.message || err.message;
+      alert(msg || 'Failed to send message.');
     }
   };
 
@@ -484,7 +492,7 @@ const StaffDashboard: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <div className="w-2.5 h-2.5 rounded-full bg-[#B8794E] animate-pulse" />
                   <span className="text-[12px] font-bold uppercase text-[#23251d]">
-                    Checked in at {status.checkInTime}
+                    Checked in at {formatTime12h(status.checkInTime)}
                   </span>
                 </div>
                 <SwipeButton
@@ -588,8 +596,8 @@ const StaffDashboard: React.FC = () => {
                                     className={`hover:bg-[#e5e7e0]/50 border-b border-[#bfc1b7] transition-all duration-200 ${isActive ? 'bg-[#B8794E]/5' : ''} ${isCurrentTimeSlot ? 'bg-[#dceaf6]/30' : ''}`}
                                   >
                                     <TableCell className="pl-8 py-6 font-bold text-sm tabular-nums text-[#23251d]">
-                                      {item.start_time} — {item.end_time}
-                                    </TableCell>
+                                    {formatTime12h(item.start_time)} — {formatTime12h(item.end_time)}
+                                  </TableCell>
                                     <TableCell className="text-lg font-bold text-[#23251d]">
                                       {apt.customer.full_name}
                                     </TableCell>
@@ -711,7 +719,7 @@ const StaffDashboard: React.FC = () => {
                                     })}
                                   </TableCell>
                                   <TableCell className="py-6 font-bold text-sm tabular-nums text-[#23251d]">
-                                    {item.start_time} — {item.end_time}
+                                    {formatTime12h(item.start_time)} — {formatTime12h(item.end_time)}
                                   </TableCell>
                                   <TableCell className="text-lg font-bold text-[#23251d]">
                                     {apt.customer.full_name}

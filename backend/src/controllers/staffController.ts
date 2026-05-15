@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import prisma from '../utils/prisma';
 import { sendSuccess, sendError, getCurrentUser } from '../utils/apiHelpers';
 import { logSystemAction } from '../utils/systemLog';
+import { clerkClient } from '@clerk/express';
 
 /**
  * Get all staff members
@@ -131,15 +132,50 @@ export const createStaff = async (req: Request, res: Response) => {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password || 'password123', 10);
+    // Clerk Synchronization
+    let clerkId = null;
+    const targetRole = role || 'staff';
+
+    if (email) {
+      try {
+        // Check if user exists in Clerk
+        const clerkUsers = await clerkClient.users.getUserList({ emailAddress: [email] });
+        let clerkUser = clerkUsers.data[0];
+
+        if (clerkUser) {
+          clerkId = clerkUser.id;
+          // Sync role to Clerk metadata
+          await clerkClient.users.updateUserMetadata(clerkId, {
+            publicMetadata: { role: targetRole },
+          });
+        } else {
+          // Create user in Clerk
+          const nameParts = fullName.split(' ');
+          const firstName = nameParts[0];
+          const lastName = nameParts.slice(1).join(' ') || ' ';
+
+          const newClerkUser = await clerkClient.users.createUser({
+            emailAddress: [email],
+            firstName,
+            lastName,
+            publicMetadata: { role: targetRole },
+            // Skip password, they will use Clerk's flow
+          });
+          clerkId = newClerkUser.id;
+        }
+      } catch (clerkError: any) {
+        console.error('Clerk sync error during creation:', clerkError);
+        return sendError(res, 'CLERK_SYNC_ERROR', `Failed to sync with Clerk: ${clerkError.message}`, 500);
+      }
+    }
 
     const newUser = await prisma.user.create({
       data: {
+        clerk_id: clerkId,
         username: username || email || fullName.toLowerCase().replace(/\s+/g, '.'),
         email,
         phone,
-        password_hash: hashedPassword,
-        role: role || 'staff',
+        role: targetRole as any,
         sss_number: sssNumber,
         tin_number: pagIbigNumber,
         profile_picture_url: profilePictureUrl,
@@ -278,6 +314,31 @@ export const updateStaff = async (req: Request, res: Response) => {
 
     if (password) {
       data.password_hash = await bcrypt.hash(password, 10);
+    }
+
+    // Sync changes to Clerk if necessary
+    const existingUser = await prisma.user.findUnique({ where: { id: idNum } });
+    if (existingUser?.clerk_id) {
+      try {
+        const metadata: any = {};
+        if (role) metadata.role = role;
+        
+        if (Object.keys(metadata).length > 0) {
+          await clerkClient.users.updateUserMetadata(existingUser.clerk_id, {
+            publicMetadata: metadata,
+          });
+        }
+
+        if (email && email !== existingUser.email) {
+          // This is complex in Clerk (usually requires verification), 
+          // but we can try to update the primary email if the manager is forced.
+          // For now, just log it.
+          console.log(`Email change requested for user ${existingUser.clerk_id} to ${email}`);
+        }
+      } catch (clerkError: any) {
+        console.error('Clerk sync error during update:', clerkError);
+        // We continue anyway as the local DB update is primary for some fields
+      }
     }
 
     const updatedUser = await prisma.user.update({

@@ -72,3 +72,5 @@ Resume file: .planning/phases/10-manager-payroll-ui-excel-export/10-CONTEXT.md
 | 20260514-update-manager-dropdown | Update manager dropdown: remove Cart, ensure Dashboard/Services/Exhibit order | 2026-05-14 | local | [.planning/quick/20260514-update-manager-dropdown/](./quick/20260514-update-manager-dropdown/) |
 | 20260514-clerk-auto-role | Auto-assign 'customer' role to Clerk metadata on user creation | 2026-05-14 | local | [.planning/quick/20260514-clerk-auto-role/](./quick/20260514-clerk-auto-role/) |
 | 20260514-addons-booking | Implement addons CRUD in Manager Dashboard and Addons selection in Booking cart | 2026-05-14 | local | [.planning/quick/20260514-addons-booking/](./quick/20260514-addons-booking/) |
+| 20260515-staff-dashboard-notice-duration-format | Use hours and minutes for staff dashboard attendance notices | 2026-05-15 | local | [.planning/quick/20260515-staff-dashboard-notice-duration-format/](./quick/20260515-staff-dashboard-notice-duration-format/) |
+

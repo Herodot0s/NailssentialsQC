@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import * as ExcelJS from 'exceljs';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
-import { format, subMonths, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
+import { format, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, startOfISOWeek, endOfISOWeek, addDays, startOfDay, endOfDay } from 'date-fns';
 import { sendError } from '../utils/apiHelpers';
 import { logSystemAction } from '../utils/systemLog';
 import { evaluatePayrollFormula } from '../utils/payrollEvaluator';
@@ -13,7 +13,10 @@ import { evaluatePayrollFormula } from '../utils/payrollEvaluator';
  */
 export const generatePayroll = async (req: AuthRequest, res: Response) => {
   try {
-    const { start_date, end_date, payroll_period_id } = req.validatedBody || req.body;
+    const body = req.validatedBody || req.body;
+    const start_date = body.start_date || body.startDate;
+    const end_date = body.end_date || body.endDate;
+    const payroll_period_id = body.payroll_period_id || body.payrollPeriodId;
 
     if (!payroll_period_id && (!start_date || !end_date)) {
       return sendError(res, 'MISSING_FIELDS', 'start_date and end_date are required', 400);
@@ -33,8 +36,8 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       startDate = new Date(payrollPeriod.start_date);
       endDate = new Date(payrollPeriod.end_date);
     } else {
-      startDate = new Date(start_date);
-      endDate = new Date(end_date);
+      startDate = startOfDay(startOfISOWeek(new Date(start_date)));
+      endDate = endOfDay(endOfISOWeek(startDate));
 
       // Check for overlap
       const existingOverlap = await prisma.payrollPeriod.findFirst({
@@ -66,11 +69,21 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
         },
       }),
       prisma.staffProfile.findMany({
-        where: { is_available: true },
+        where: { 
+          is_available: true,
+          user: {
+            role: { not: 'manager' }
+          }
+        },
       }),
       prisma.commission.findMany({
         where: {
           commission_date: { gte: startDate, lte: endDate },
+        },
+        include: {
+          service: {
+            include: { category: true },
+          },
         },
       }),
     ]);
@@ -113,13 +126,48 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
     const daysInPeriod = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
     const weeksInPeriod = Math.ceil(daysInPeriod / 7);
 
-    // Group daily performance for daily_breakdown JSON
+    // Group performance for daily_breakdown and aggregate actual commissions
     const staffDailyBreakdown = new Map<number, Record<string, number>>();
     const staffTotalSales = new Map<number, number>();
+    const staffTieredCommissions = new Map<number, number>();
+    const staffHairCommissions = new Map<number, number>();
+
+    // Rule: Weekly Hair Specialization Quota (20% if >= 6k hair sales in a week, else 10% for hair services)
+    // Non-hair services use the Tiered Base Rate (already calculated in Commission table)
+    
+    // Group commissions by staff and week to check Hair quota
+    const staffWeeklyHairSales = new Map<string, number>(); // key: "staffId-weekNum"
+    for (const c of currentPeriodCommissions) {
+      const isHair = c.service?.category?.name?.toLowerCase().includes('hair');
+      const staff = staffProfiles.find(s => s.id === c.staff_id);
+      const isHairSpecialist = staff?.specializations?.toLowerCase().includes('hair');
+
+      if (isHair && isHairSpecialist) {
+        const weekKey = `${c.staff_id}-${c.period_week}`;
+        staffWeeklyHairSales.set(weekKey, (staffWeeklyHairSales.get(weekKey) || 0) + Number(c.base_amount));
+      }
+    }
 
     for (const c of currentPeriodCommissions) {
       const sId = c.staff_id;
       const dKey = format(c.commission_date, 'yyyy-MM-dd');
+      const isHair = c.service?.category?.name?.toLowerCase().includes('hair');
+      const staff = staffProfiles.find(s => s.id === c.staff_id);
+      const isHairSpecialist = staff?.specializations?.toLowerCase().includes('hair');
+
+      let finalCommissionAmount = Number(c.commission_amount);
+
+      // Apply Hair Specialization Quota (Upshift to 20% if weekly hair sales hit 6k)
+      if (isHair && isHairSpecialist) {
+        const weekKey = `${c.staff_id}-${c.period_week}`;
+        const weeklyHairTotal = staffWeeklyHairSales.get(weekKey) || 0;
+        const rate = weeklyHairTotal >= 6000 ? 0.2 : 0.1;
+        finalCommissionAmount = Number(c.base_amount) * rate;
+        
+        staffHairCommissions.set(sId, (staffHairCommissions.get(sId) || 0) + finalCommissionAmount);
+      } else {
+        staffTieredCommissions.set(sId, (staffTieredCommissions.get(sId) || 0) + finalCommissionAmount);
+      }
 
       if (!staffDailyBreakdown.has(sId)) staffDailyBreakdown.set(sId, {});
       const breakMap = staffDailyBreakdown.get(sId)!;
@@ -131,6 +179,9 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
     // 5. Process Staff Payrolls
     for (const staff of staffProfiles) {
       const currentSales = staffTotalSales.get(staff.id) || 0;
+      const tieredCommissions = staffTieredCommissions.get(staff.id) || 0;
+      const hairCommissions = staffHairCommissions.get(staff.id) || 0;
+      const totalCommissions = tieredCommissions + hairCommissions;
       const dailyBreakdown = staffDailyBreakdown.get(staff.id) || {};
 
       const [manualDeductions, attendanceRecords] = await Promise.all([
@@ -151,13 +202,6 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       // --- Calculation Engine ---
       const basePay = Number(staff.base_pay_per_week) * weeksInPeriod;
       
-      // Use direct fields from StaffProfile (Phase 8 simplicity)
-      let commissionRate = Number(staff.base_commission_rate);
-      if (!commissionRate || commissionRate === 0) {
-        commissionRate = 0.08; // Default to 8% if not set
-      }
-
-      const totalCommissions = Math.round(currentSales * commissionRate * 100) / 100;
       const totalDeductions = tardinessDeduction + manualDeductionTotal;
       const netPay = basePay + totalCommissions - totalDeductions;
 
@@ -167,12 +211,23 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
           component_type: 'earning',
           amount: basePay,
         },
-        {
-          component_name: `${(commissionRate * 100).toFixed(0)}% Commission`,
-          component_type: 'earning',
-          amount: totalCommissions,
-        },
       ];
+
+      if (tieredCommissions > 0) {
+        payrollItems.push({
+          component_name: 'Tiered Commission',
+          component_type: 'earning',
+          amount: tieredCommissions,
+        });
+      }
+
+      if (hairCommissions > 0) {
+        payrollItems.push({
+          component_name: 'Hair Specialty Commission',
+          component_type: 'earning',
+          amount: hairCommissions,
+        });
+      }
 
       if (tardinessDeduction > 0) {
         payrollItems.push({
@@ -241,6 +296,12 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
     return res.status(201).json({ success: true, data: payrollPeriod });
   } catch (error: unknown) {
     console.error('Generate payroll error:', error);
+    const fs = require('fs');
+    const logPath = require('path').join(__dirname, '../../payroll_error.log');
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : '';
+    fs.appendFileSync(logPath, `[${new Date().toISOString()}] ERROR: ${errorMessage}\nSTACK: ${errorStack}\n\n`);
+
     const message = error instanceof Error ? error.message : 'Failed to generate payroll';
     return res.status(500).json({ success: false, message });
   }
@@ -296,7 +357,10 @@ export const getPayrollDetails = async (req: AuthRequest, res: Response) => {
       where: { id },
       include: {
         payrolls: {
-          include: { staff: { select: { full_name: true, specializations: true } } },
+          include: { 
+            staff: { select: { full_name: true, specializations: true } },
+            items: true
+          },
         },
         deductions: {
           include: { staff: { select: { full_name: true } } },
@@ -320,12 +384,15 @@ export const getPayrollDetails = async (req: AuthRequest, res: Response) => {
  */
 export const addDeduction = async (req: AuthRequest, res: Response) => {
   try {
-    const { staff_id, payroll_period_id, type, amount, notes } = req.body;
+    const body = req.validatedBody || req.body;
+    const staff_id = body.staff_id || body.staffId;
+    const payroll_period_id = body.payroll_period_id || body.payrollPeriodId;
+    const { type, amount, notes } = body;
 
     if (!staff_id || !type || !amount) {
       return res
         .status(400)
-        .json({ success: false, message: 'staff_id, type, and amount are required' });
+        .json({ success: false, message: 'staff_id/staffId, type, and amount are required' });
     }
 
     const validTypes = ['cash_advance', 'loan', 'uniform', 'reloan', 'lates_early_out', 'other'];
@@ -335,18 +402,19 @@ export const addDeduction = async (req: AuthRequest, res: Response) => {
 
     const staff = await prisma.staffProfile.findUnique({
       where: { id: parseInt(staff_id) },
+      include: { user: true }
     });
 
-    if (!staff) {
-      return res.status(404).json({ success: false, message: 'Staff not found' });
+    if (!staff || staff.user.role === 'manager') {
+      return res.status(404).json({ success: false, message: 'Staff not found or is a manager' });
     }
 
     const deduction = await prisma.deductionLog.create({
       data: {
-        staff_id: parseInt(staff_id),
-        payroll_period_id: payroll_period_id ? parseInt(payroll_period_id) : null,
-        type,
-        amount: parseFloat(amount),
+        staff_id: Number(staff_id),
+        payroll_period_id: payroll_period_id ? Number(payroll_period_id) : null,
+        type: type as any,
+        amount: Number(amount),
         notes,
       },
     });
@@ -641,18 +709,21 @@ export const generateNextPeriod = async (req: AuthRequest, res: Response) => {
     let newEndDate: Date;
 
     if (latestPeriod) {
-      newStartDate = new Date(latestPeriod.end_date);
-      newStartDate.setDate(newStartDate.getDate() + 1);
-    } else {
-      const { start_date } = req.body;
-      if (!start_date) {
-        return res.status(400).json({ success: false, message: 'start_date is required when no previous periods exist' });
+      // Get the day after the last period ends
+      const dayAfter = addDays(new Date(latestPeriod.end_date), 1);
+      // Snap to the Monday of that week
+      newStartDate = startOfDay(startOfISOWeek(dayAfter));
+      // If snapping to Monday moved us backwards into the previous period, move forward to the next Monday
+      if (newStartDate <= latestPeriod.end_date) {
+        newStartDate = addDays(newStartDate, 7);
       }
-      newStartDate = new Date(start_date);
+    } else {
+      const body = req.body || {};
+      const baseDate = body.start_date || body.startDate ? new Date(body.start_date || body.startDate) : new Date();
+      newStartDate = startOfDay(startOfISOWeek(baseDate));
     }
 
-    newEndDate = new Date(newStartDate);
-    newEndDate.setDate(newEndDate.getDate() + 6);
+    newEndDate = endOfDay(endOfISOWeek(newStartDate));
 
     const newPeriod = await prisma.payrollPeriod.create({
       data: {
@@ -668,9 +739,12 @@ export const generateNextPeriod = async (req: AuthRequest, res: Response) => {
     });
 
     return res.status(201).json({ success: true, data: newPeriod });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Generate next period error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to generate next period' });
+    return res.status(500).json({ 
+      success: false, 
+      message: error.message || 'Failed to generate next period' 
+    });
   }
 };
 

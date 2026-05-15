@@ -128,8 +128,8 @@ const Services: React.FC = () => {
         const [catRes, svcRes] = await Promise.all([getCategories(), getServices()]);
         setCategories(catRes.data.data || []);
         setServices(svcRes.data.data || []);
-      } catch {
-        setError('Failed to load services. Please try again later.');
+      } catch (err: any) {
+        setError(err.response?.data?.error?.message || 'Failed to load services. Please try again later.');
       } finally {
         setIsLoading(false);
       }

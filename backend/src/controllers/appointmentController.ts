@@ -205,19 +205,32 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
     }
 
     const appointment = await prisma.$transaction(async (tx) => {
-      // 1. Strict Availability Check (Conflict Prevention)
+      // 1. Operating Hours & Strict Availability Check (Conflict Prevention)
+      const OPERATING_HOURS = { start: 12, end: 22 };
       for (const item of items) {
         const { serviceId, staffId, startTime } = item;
         const service = await tx.service.findUnique({ where: { id: parseInt(serviceId) } });
         if (!service) throw new Error(`Service ${serviceId} not found`);
 
+        const startDateTime = getFullDate(date, startTime);
+        const endDateTime = addMinutes(startDateTime, service.duration_minutes);
+
+        // Operating Hours Check
+        const startHour = startDateTime.getHours();
+        const endHour = endDateTime.getHours();
+        const endMinutes = endDateTime.getMinutes();
+
+        if (startHour < OPERATING_HOURS.start) {
+          throw new Error(`Appointments cannot start before 12:00 PM.`);
+        }
+        if (endHour > OPERATING_HOURS.end || (endHour === OPERATING_HOURS.end && endMinutes > 0)) {
+          throw new Error(`Service "${service.name}" ends at ${format(endDateTime, 'h:mm a')}, which is past closing time (10:00 PM).`);
+        }
+
         const staffProfile = await tx.staffProfile.findFirst({
           where: { user_id: parseInt(staffId) },
         });
         if (!staffProfile) throw new Error(`Staff profile for user ${staffId} not found`);
-
-        const startDateTime = getFullDate(date, startTime);
-        const endDateTime = addMinutes(startDateTime, service.duration_minutes);
 
         // Check for overlapping appointments for this staff member
         const existingAppointments = await tx.appointmentItem.findMany({

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { cn, formatTime12h } from '@/lib/utils';
 import { getAvailability, createAppointment, getAllStaff, getAddons } from '../api/apiClient';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,13 +41,6 @@ interface SelectedAddon {
   name: string;
 }
 
-const formatTime = (time24: string) => {
-  if (!time24) return '';
-  const [hours, minutes] = time24.split(':').map(Number);
-  const period = hours >= 12 ? 'PM' : 'AM';
-  const hours12 = hours % 12 || 12;
-  return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
-};
 
 const Booking: React.FC = () => {
   const navigate = useNavigate();
@@ -101,7 +95,7 @@ const Booking: React.FC = () => {
         ]);
         const staffData = staffRes.data.data;
         const staffItems = Array.isArray(staffData) ? staffData : staffData?.items || [];
-        setStaffList(staffItems.filter((s: Staff) => s.role === 'staff' || s.role === 'manager'));
+        setStaffList(staffItems.filter((s: Staff) => s.role === 'staff'));
         setSlots(availRes.data.data);
         setAvailableAddons(addonsRes.data.data || []);
       } catch (err) {
@@ -154,7 +148,27 @@ const Booking: React.FC = () => {
       return;
     }
 
+    // Operating Hours Validation
+    const [hours] = selectedTime.split(':').map(Number);
+    if (hours < 12) {
+      setError('Store opens at 12:00 PM. Please select a later time.');
+      return;
+    }
 
+    // Check if all services fit within operating hours (end by 10 PM)
+    const tooLate = cart.some(item => {
+      const duration = item.duration || 0;
+      const startTimeDate = new Date(`1970-01-01T${selectedTime}:00`);
+      const endTimeDate = new Date(startTimeDate.getTime() + duration * 60000);
+      const endHour = endTimeDate.getHours();
+      const endMin = endTimeDate.getMinutes();
+      return endHour > 22 || (endHour === 22 && endMin > 0);
+    });
+
+    if (tooLate) {
+      setError('Selected time is too late for the duration of one or more treatments. Store closes at 10:00 PM.');
+      return;
+    }
 
     setIsSubmitting(true);
     setError(null);
@@ -188,8 +202,8 @@ const Booking: React.FC = () => {
       setSuccess(true);
       clearCart();
       setTimeout(() => navigate('/appointments'), 3000);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to book appointment.';
+    } catch (err: any) {
+      const message = err.response?.data?.error?.message || err.message || 'Failed to book appointment.';
       setError(message);
     } finally {
       setIsSubmitting(false);
@@ -303,6 +317,8 @@ const Booking: React.FC = () => {
                         type="time"
                         value={selectedTime}
                         onChange={(e) => setSelectedTime(e.target.value)}
+                        min="12:00"
+                        max="21:30"
                         className="h-9 rounded-md border-hairline focus:ring-2 focus:ring-accent-blue focus:border-accent-blue body-md bg-surface-card pr-10"
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -313,7 +329,7 @@ const Booking: React.FC = () => {
                     <Select value={selectedTime} onValueChange={(val) => setSelectedTime(val || '')}>
                       <SelectTrigger className="h-9 rounded-md border-hairline focus:ring-2 focus:ring-accent-blue focus:border-accent-blue body-md bg-surface-card">
                         <SelectValue placeholder="Select Time">
-                          {selectedTime ? formatTime(selectedTime) : undefined}
+                          {selectedTime ? formatTime12h(selectedTime) : undefined}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="rounded-md border-hairline shadow-none bg-surface-card max-h-64">
@@ -326,7 +342,7 @@ const Booking: React.FC = () => {
                           >
                             <div className="flex items-center justify-between w-full gap-4">
                               <div className="flex items-center gap-2">
-                                <span className="body-md">{formatTime(slot.time)}</span>
+                                <span className="body-md">{formatTime12h(slot.time)}</span>
                               </div>
                               {!slot.available && (
                                 <span className="utility-xs text-accent-red-soft bg-accent-red/10 px-2 py-0.5 rounded-sm">
@@ -549,9 +565,9 @@ const Booking: React.FC = () => {
                                   className="flex justify-between items-baseline"
                                 >
                                   <p className="body-sm text-body">{child.serviceName}</p>
-                                  <p className="utility-xs text-body/50">
-                                    {child.startTime || '--:--'}
-                                  </p>
+                                    <p className="utility-xs text-body/50">
+                                      {child.startTime ? formatTime12h(child.startTime) : '--:--'}
+                                    </p>
                                 </div>
                               ))}
                             </div>
@@ -564,7 +580,7 @@ const Booking: React.FC = () => {
                           <div className="space-y-0.5">
                             <p className="body-strong text-ink">{item.serviceName}</p>
                             <p className="utility-xs text-body/50">
-                              {item.staffName || 'Unassigned'} • {item.startTime || '--:--'}
+                              {item.staffName || 'Unassigned'} • {item.startTime ? formatTime12h(item.startTime) : '--:--'}
                             </p>
                           </div>
                           <p className="body-strong text-ink">₱{item.price.toLocaleString()}</p>
@@ -599,7 +615,7 @@ const Booking: React.FC = () => {
                     <div className="flex justify-between items-center">
                       <div className="utility-xs text-body/60">Base Time</div>
                       <div className="body-md font-semibold text-ink">
-                        {selectedTime ? formatTime(selectedTime) : 'Not set'}
+                        {selectedTime ? formatTime12h(selectedTime) : 'Not set'}
                       </div>
                     </div>
                     <div className="flex justify-between items-center pt-2">

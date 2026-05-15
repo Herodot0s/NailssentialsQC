@@ -11,6 +11,7 @@ import {
   subMonths,
   startOfMonth,
   endOfMonth,
+  startOfISOWeek,
 } from 'date-fns';
 import { sendAppointmentCompletion } from '../utils/email';
 import { createNotification } from './notificationController';
@@ -44,21 +45,26 @@ const getTieredCommissionRate = async (tx: Prisma.TransactionClient) => {
 };
 
 /**
- * Helper to check if staff hits their specialty quota (Rule 2).
- * 20% rate applied if staff hits >₱6000 in specific services during current month.
+ * Helper to check if staff hits their weekly hair specialty quota.
+ * 20% rate applied if staff hits >=₱6000 in HAIR services during current week.
  */
-const checkSpecialtyQuota = async (staffId: number, tx: Prisma.TransactionClient) => {
-  const startOfCurrMonth = startOfMonth(new Date());
+const checkHairSpecialtyQuota = async (staffId: number, tx: Prisma.TransactionClient) => {
+  const startOfWeek = startOfISOWeek(new Date());
 
-  const staffSales = await tx.commission.aggregate({
+  const staffHairSales = await tx.commission.aggregate({
     where: {
       staff_id: staffId,
-      commission_date: { gte: startOfCurrMonth },
+      commission_date: { gte: startOfWeek },
+      service: {
+        category: {
+          name: { contains: 'Hair', mode: 'insensitive' },
+        },
+      },
     },
     _sum: { base_amount: true },
   });
 
-  const totalSales = Number(staffSales._sum.base_amount || 0);
+  const totalSales = Number(staffHairSales._sum.base_amount || 0);
   return totalSales >= 6000;
 };
 
@@ -95,7 +101,9 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
         customer: true,
         items: {
           include: {
-            service: true,
+            service: {
+              include: { category: true },
+            },
             staff: true,
           },
         },
@@ -196,8 +204,20 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
         const commissionsCreated = [];
         for (const item of appointment.items) {
           console.log(`Processing commission for item ${item.id}, staff ${item.staff_id}`);
-          const hasHitQuota = await checkSpecialtyQuota(item.staff_id, tx);
-          const commissionRate = hasHitQuota ? 0.2 : baseRate;
+          
+          const isHairService = item.service.category.name.toLowerCase().includes('hair');
+          const isHairSpecialist = item.staff.specializations?.toLowerCase().includes('hair');
+
+          let commissionRate: number;
+
+          if (isHairService && isHairSpecialist) {
+            const hasHitQuota = await checkHairSpecialtyQuota(item.staff_id, tx);
+            commissionRate = hasHitQuota ? 0.2 : 0.1;
+            console.log(`- Hair Service & Specialist detected. Rate: ${commissionRate * 100}% (Quota Hit: ${hasHitQuota})`);
+          } else {
+            commissionRate = baseRate;
+            console.log(`- Standard Service/Staff. Rate: ${commissionRate * 100}%`);
+          }
 
           const commissionAmount = Number(item.price_at_booking) * commissionRate;
 
@@ -216,6 +236,7 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
             },
           });
           commissionsCreated.push(commission);
+
 
           // Create in-app notification for staff member
           await tx.notification.create({

@@ -1,7 +1,9 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
+import { formatTime12h } from '@/lib/utils';
+
 import type { StaffMember } from '@/types/api';
 
 interface AppointmentTimelineProps {
@@ -28,15 +30,6 @@ export const AppointmentTimeline: React.FC<AppointmentTimelineProps> = ({
 }) => {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
 
-  const formatTime12h = (timeStr: string) => {
-    if (!timeStr) return '--:--';
-    try {
-      const date = parse(timeStr, 'HH:mm', new Date());
-      return format(date, 'h:mm aa');
-    } catch {
-      return timeStr;
-    }
-  };
 
   const safeAppointments = Array.isArray(appointments) ? appointments : [];
 
