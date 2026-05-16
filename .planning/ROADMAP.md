@@ -26,10 +26,11 @@
 2. Manager can click "Export Excel" to download a spreadsheet mirroring the requested layout.
 3. Excel export correctly maps the dynamic columns (dates) and rows (staff metrics).
 
-### Phase 11: Staff Payslip UI & PDF Generation
-**Goal:** Enable staff to view their weekly breakdown and download a PDF payslip.
-**Requirements:** PAY-05
+### Phase 11: Staff Dashboard & Booking Optimization
+**Goal:** Enhance staff dashboard with detailed commission tracking and optimize the booking system for reliability and availability.
+**Requirements:** PAY-05, BOK-04, BOK-05
 **Success Criteria:**
-1. Staff dashboard includes a "Download Payslip" button for past weekly periods.
-2. The generated PDF correctly formats earnings, base pay, commissions, and deductions.
-3. Staff can only access their own payslips.
+1. Staff "Commissions" tab shows detailed list of successful appointments with 5/8/10% rates.
+2. Staff can download a PDF payslip for past weekly periods.
+3. Booking system blocks past times for today's date.
+4. Booking time slot selection and technician assignment clearly show availability.

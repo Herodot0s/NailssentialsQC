@@ -8,6 +8,7 @@ import {
   getAppointments,
   completeAppointment,
   getCommissionSummary,
+  getStaffCommissions,
   getMyPayroll,
   sendMessage,
   getAllStaff,
@@ -15,9 +16,9 @@ import {
 } from '../api/apiClient';
 import { MessagesView } from '@/components/dashboard/MessagesView';
 import { LogWalkInDialog } from '@/components/dashboard/customers/LogWalkInDialog';
-import { AppointmentCard, PayrollCard } from '@/components/dashboard/staff/MobileCards';
+import { AppointmentCard } from '@/components/dashboard/staff/MobileCards';
 import { StaffPersonalHistory } from '@/components/dashboard/staff/StaffPersonalHistory';
-import type { PayrollRecord, StaffMember } from '@/types/api';
+import type { PayrollRecord, StaffMember, Commission } from '@/types/api';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import SwipeButton from '@/components/ui/swipe-button';
@@ -96,6 +97,7 @@ const StaffDashboard: React.FC = () => {
   const [commission, setCommission] = useState({ today: 0, thisWeek: 0 });
   const [myPayrolls, setMyPayrolls] = useState<PayrollRecord[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [commissionsList, setCommissionsList] = useState<Commission[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -138,6 +140,9 @@ const StaffDashboard: React.FC = () => {
       }
       if (commRes.data.success) setCommission(commRes.data.data);
       if (payrollRes.data.success) setMyPayrolls(payrollRes.data.data);
+
+      const commListRes = await getStaffCommissions();
+      if (commListRes.data.success) setCommissionsList(commListRes.data.data);
 
       const staffRes = await getAllStaff();
       if (staffRes.data.success) {
@@ -817,34 +822,112 @@ const StaffDashboard: React.FC = () => {
               <Card className="rounded-md border border-[#bfc1b7] shadow-none bg-white">
                 <CardHeader className="p-6 md:p-10 pb-0">
                   <CardTitle className="text-[10px] md:text-[12px] font-bold text-[#B8794E] uppercase tracking-widest">
-                    Performance Metrics
+                    Recent Commissions
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 md:p-10 space-y-8 md:space-y-10">
-                  <div className="space-y-3 md:space-y-4">
-                    <div className="flex justify-between text-[11px] md:text-[12px] font-bold uppercase text-[#4d4f46]">
-                      <span>Commission Rate</span>
-                      <span className="text-[#B8794E]">Active (8%)</span>
-                    </div>
-                    <div className="h-2 w-full bg-[#eeefe9] rounded-full overflow-hidden">
-                      <div className="h-full bg-[#B8794E]" style={{ width: '80%' }} />
-                    </div>
-                    <p className="text-[10px] md:text-[11px] text-[#6c6e63] italic">
-                      Rate based on monthly performance tier.
-                    </p>
-                  </div>
-                  <div className="space-y-3 md:space-y-4">
-                    <div className="flex justify-between text-[11px] md:text-[12px] font-bold uppercase text-[#4d4f46]">
-                      <span>Target Quota</span>
-                      <span className="text-[#B8794E]">Target: ₱6,000</span>
-                    </div>
-                    <div className="h-2 w-full bg-[#eeefe9] rounded-full overflow-hidden">
-                      <div className="h-full bg-[#B8794E]" style={{ width: '45%' }} />
-                    </div>
+                <CardContent className="p-6 md:p-10">
+                  <div className="space-y-4">
+                    {commissionsList.slice(0, 5).map((c) => (
+                      <div key={c.id} className="flex justify-between items-center border-b border-[#bfc1b7] pb-4 last:border-0 last:pb-0">
+                        <div>
+                          <p className="text-sm font-bold text-[#23251d]">{c.service.name}</p>
+                          <p className="text-[11px] text-[#6c6e63]">
+                            {new Date(c.commission_date).toLocaleDateString()} • {c.transaction.appointment.customer.full_name}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-[#B8794E]">₱{Number(c.commission_amount).toLocaleString()}</p>
+                          <p className="text-[10px] font-medium text-[#6c6e63] uppercase tracking-wider">{Number(c.commission_rate)}% Rate</p>
+                        </div>
+                      </div>
+                    ))}
+                    {commissionsList.length === 0 && (
+                      <p className="text-sm text-[#6c6e63] italic">No recent commissions found.</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
             </div>
+
+            <Card className="rounded-md border border-[#bfc1b7] shadow-none overflow-hidden bg-white">
+              <CardHeader className="bg-[#fcfcfa] border-b border-[#bfc1b7] p-6 md:p-8">
+                <CardTitle className="text-xl md:text-2xl font-bold text-[#23251d]">
+                  Commission Breakdown
+                </CardTitle>
+                <CardDescription className="text-[13px] md:text-[14px] text-[#4d4f46] mt-1 md:mt-2">
+                  Detailed list of earned commissions per service
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="hidden md:block">
+                  <Table>
+                    <TableHeader className="bg-[#e5e7e0] border-b border-[#bfc1b7]">
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="pl-8 h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Date</TableHead>
+                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Client</TableHead>
+                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Service</TableHead>
+                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Service Price</TableHead>
+                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Rate</TableHead>
+                        <TableHead className="pr-8 h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">Commission</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {commissionsList.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-20 text-[#6c6e63] italic text-sm font-medium">
+                            No commission records found.
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        commissionsList.map((c) => (
+                          <TableRow key={c.id} className="hover:bg-[#e5e7e0]/50 border-b border-[#bfc1b7] transition-all duration-200">
+                            <TableCell className="pl-8 py-6 font-bold text-sm text-[#23251d]">
+                              {new Date(c.commission_date).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-sm font-bold text-[#23251d]">
+                              {c.transaction.appointment.customer.full_name}
+                            </TableCell>
+                            <TableCell className="text-sm text-[#4d4f46]">
+                              {c.service.name}
+                            </TableCell>
+                            <TableCell className="text-sm tabular-nums text-[#4d4f46]">
+                              ₱{Number(c.base_amount).toLocaleString()}
+                            </TableCell>
+                            <TableCell className="text-sm font-bold text-[#B8794E]">
+                              {Number(c.commission_rate)}%
+                            </TableCell>
+                            <TableCell className="pr-8 text-right font-bold text-lg text-[#B8794E] tabular-nums">
+                              ₱{Number(c.commission_amount).toLocaleString()}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="md:hidden p-4 space-y-4">
+                  {commissionsList.map((c) => (
+                    <Card key={c.id} className="border border-[#bfc1b7] shadow-none p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className="text-[10px] font-bold text-[#B8794E] uppercase tracking-widest">{new Date(c.commission_date).toLocaleDateString()}</p>
+                          <h4 className="font-bold text-[#23251d]">{c.service.name}</h4>
+                        </div>
+                        <Badge className="bg-[#B8794E] text-white border-none">{Number(c.commission_rate)}%</Badge>
+                      </div>
+                      <div className="flex justify-between items-center text-[12px] text-[#4d4f46] mb-3">
+                        <span>{c.transaction.appointment.customer.full_name}</span>
+                        <span>Service: ₱{Number(c.base_amount).toLocaleString()}</span>
+                      </div>
+                      <div className="pt-3 border-t border-[#bfc1b7] flex justify-between items-center">
+                        <span className="text-[10px] font-bold uppercase text-[#6c6e63]">Commission</span>
+                        <span className="text-lg font-bold text-[#B8794E]">₱{Number(c.commission_amount).toLocaleString()}</span>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
             <Card className="rounded-md border border-[#bfc1b7] shadow-none overflow-hidden bg-white">
               <CardHeader className="bg-[#fcfcfa] border-b border-[#bfc1b7] p-6 md:p-8">
@@ -884,7 +967,7 @@ const StaffDashboard: React.FC = () => {
                       {myPayrolls.length === 0 ? (
                         <TableRow>
                           <TableCell
-                            colSpan={5}
+                            colSpan={6}
                             className="text-center py-20 text-[#6c6e63] italic text-sm font-medium"
                           >
                             No payroll records found.
@@ -928,16 +1011,6 @@ const StaffDashboard: React.FC = () => {
                       )}
                     </TableBody>
                   </Table>
-                </div>
-
-                <div className="md:hidden p-4 space-y-2 bg-[#eeefe9]/20">
-                  {myPayrolls.length === 0 ? (
-                    <p className="text-center py-12 text-[#6c6e63] italic text-sm font-medium">
-                      No payroll records found.
-                    </p>
-                  ) : (
-                    myPayrolls.map((p) => <PayrollCard key={p.id || Math.random()} payroll={p} />)
-                  )}
                 </div>
               </CardContent>
             </Card>

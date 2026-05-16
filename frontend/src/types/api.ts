@@ -116,6 +116,25 @@ export interface Appointment {
   }[];
 }
 
+export interface Commission {
+  id: number;
+  transaction_id: number;
+  staff_id: number;
+  service_id: number;
+  base_amount: number;
+  commission_rate: number;
+  commission_amount: number;
+  commission_date: string;
+  service: { name: string; price: number };
+  transaction: {
+    receipt_number: string;
+    appointment: {
+      appointment_date: string;
+      customer: { full_name: string };
+    };
+  };
+}
+
 // Attendance API types
 export interface UpdateAttendanceRequest {
   checkIn?: string | null;

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Advanced Payroll & Export System
-status: completed
-stopped_at: Phase 10 context gathered
-last_updated: "2026-05-14T08:13:00.562Z"
-last_activity: 2026-05-14
+status: in_progress
+stopped_at: Phase 11 enhancements implemented
+last_updated: "2026-05-16T02:22:00.000Z"
+last_activity: 2026-05-16
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 3
   completed_plans: 3
-  percent: 100
+  percent: 75
 ---
 
 # Project State
@@ -76,3 +76,4 @@ Resume file: .planning/phases/10-manager-payroll-ui-excel-export/10-CONTEXT.md
 | 20260515-remove-gallery-heart-icon | Remove non-functional heart icon from Gallery | 2026-05-15 | local | [.planning/quick/20260515-remove-gallery-heart-icon/](./quick/20260515-remove-gallery-heart-icon/) |
 | 20260516-fix-frontend-production-build | Fix frontend TypeScript errors and enable production build | 2026-05-16 | local | [.planning/quick/20260516-fix-frontend-production-build/](./quick/20260516-fix-frontend-production-build/) |
 
+| 20260516-phase-11-enhancements | Implement detailed commission view, fix past-time booking, and add technician availability indicators | 2026-05-16 | local | [.planning/ROADMAP.md] |

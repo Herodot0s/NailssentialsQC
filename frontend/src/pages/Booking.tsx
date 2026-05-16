@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -25,6 +26,7 @@ import CartPackageItem from '@/components/packages/CartPackageItem';
 interface Slot {
   time: string;
   available: boolean;
+  availableTechnicianIds?: number[];
 }
 
 interface Addon {
@@ -148,7 +150,15 @@ const Booking: React.FC = () => {
       return;
     }
 
-    // Operating Hours Validation
+    // Operating Hours & Past Time Validation
+    const now = new Date();
+    const selectedDateTime = new Date(`${selectedDate}T${selectedTime}`);
+    
+    if (selectedDateTime < now) {
+      setError('Selected time has already passed. Please select a future time.');
+      return;
+    }
+
     const [hours] = selectedTime.split(':').map(Number);
     if (hours < 12) {
       setError('Store opens at 12:00 PM. Please select a later time.');
@@ -433,24 +443,33 @@ const Booking: React.FC = () => {
                                       </SelectValue>
                                     </SelectTrigger>
                                     <SelectContent className="rounded-md border-hairline shadow-none bg-surface-card">
-                                      {staffList.map((staff) => (
-                                        <SelectItem
-                                          key={staff.id}
-                                          value={staff.id.toString()}
-                                          className="py-2"
-                                        >
-                                          <div className="flex flex-col">
-                                            <span className="body-md font-semibold">
-                                              {staff.fullName}
-                                            </span>
-                                            {staff.specializations && (
-                                              <span className="utility-xs text-body/50">
-                                                {staff.specializations}
-                                              </span>
-                                            )}
-                                          </div>
-                                        </SelectItem>
-                                      ))}
+                                      {staffList.map((staff) => {
+                                        const isAvailable = !selectedTime || !slots.find(s => s.time === selectedTime)?.availableTechnicianIds || slots.find(s => s.time === selectedTime)?.availableTechnicianIds?.includes(staff.id);
+                                        return (
+                                          <SelectItem
+                                            key={staff.id}
+                                            value={staff.id.toString()}
+                                            className="py-2"
+                                            disabled={!isAvailable}
+                                          >
+                                            <div className="flex flex-col">
+                                              <div className="flex items-center justify-between">
+                                                <span className="body-md font-semibold">
+                                                  {staff.fullName}
+                                                </span>
+                                                {!isAvailable && (
+                                                  <Badge variant="outline" className="text-[9px] uppercase border-accent-red/30 text-accent-red h-4">Taken</Badge>
+                                                )}
+                                              </div>
+                                              {staff.specializations && (
+                                                <span className="utility-xs text-body/50">
+                                                  {staff.specializations}
+                                                </span>
+                                              )}
+                                            </div>
+                                          </SelectItem>
+                                        );
+                                      })}
                                     </SelectContent>
                                   </Select>
                                 </div>

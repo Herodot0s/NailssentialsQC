@@ -12,10 +12,12 @@ import type { CartItem } from '@/types/CartItem';
 import { useCart } from '@/context/CartContext';
 import type { Staff } from '@/types/api';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface Slot {
   time: string;
   available: boolean;
+  availableTechnicianIds?: number[];
 }
 
 interface CartPackageItemProps {
@@ -24,7 +26,7 @@ interface CartPackageItemProps {
   slots: Slot[];
 }
 
-export default function CartPackageItem({ item, staffList }: CartPackageItemProps) {
+export default function CartPackageItem({ item, staffList, slots }: CartPackageItemProps) {
   const { removeFromCart, updateChildService } = useCart();
 
   if (!item.packageId || !item.childServices) return null;
@@ -138,18 +140,26 @@ export default function CartPackageItem({ item, staffList }: CartPackageItemProp
                       <SelectValue placeholder="Assign staff...">{child.staffName}</SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-md border-hairline shadow-none bg-surface-card">
-                      {staffList.map((staff) => (
-                        <SelectItem key={staff.id} value={staff.id.toString()} className="py-2.5">
-                          <div className="flex flex-col">
-                            <span className="body-md font-semibold">{staff.fullName}</span>
-                            {staff.specializations && (
-                              <span className="utility-xs text-body/50">
-                                {staff.specializations}
-                              </span>
-                            )}
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {staffList.map((staff) => {
+                        const isAvailable = !child.startTime || !slots.find(s => s.time === child.startTime)?.availableTechnicianIds || slots.find(s => s.time === child.startTime)?.availableTechnicianIds?.includes(staff.id);
+                        return (
+                          <SelectItem key={staff.id} value={staff.id.toString()} className="py-2.5" disabled={!isAvailable}>
+                            <div className="flex flex-col">
+                              <div className="flex items-center justify-between">
+                                <span className="body-md font-semibold">{staff.fullName}</span>
+                                {!isAvailable && (
+                                  <Badge variant="outline" className="text-[9px] uppercase border-accent-red/30 text-accent-red h-4">Taken</Badge>
+                                )}
+                              </div>
+                              {staff.specializations && (
+                                <span className="utility-xs text-body/50">
+                                  {staff.specializations}
+                                </span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
