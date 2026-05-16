@@ -63,8 +63,19 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
     });
 
     // 3. For each slot, check if ANY technician is free
+    const now = new Date();
+    const isToday = dateOnly === getDatePart(now.toISOString());
+
     const slotsWithAvailability = allSlots.map((slotTime) => {
       const slotStart = getFullDate(dateOnly, slotTime);
+      
+      // If it's today, filter out slots that have already passed
+      if (isToday && slotStart < now) {
+        return {
+          time: slotTime,
+          available: false,
+        };
+      }
       const slotEnd = addMinutes(slotStart, 30);
 
       const availableTechnicians = technicians.filter((tech) => {
@@ -86,6 +97,7 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
       return {
         time: slotTime,
         available: availableTechnicians.length >= requiredCount,
+        availableTechnicianIds: availableTechnicians.map(t => t.id),
       };
     });
 

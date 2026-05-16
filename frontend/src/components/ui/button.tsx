@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { motion } from 'framer-motion';
+import { Slot } from '@radix-ui/react-slot';
+import { motion, type HTMLMotionProps } from 'framer-motion';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-xl border border-transparent bg-clip-padding text-xs font-semibold tracking-widest whitespace-nowrap uppercase transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-xl border border-transparent bg-clip-padding text-xs font-semibold tracking-widest whitespace-nowrap uppercase transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg:shrink-0]:size-3.5",
   {
     variants: {
       variant: {
@@ -39,22 +40,36 @@ const buttonVariants = cva(
   },
 );
 
-function Button({
-  className,
-  variant = 'default',
-  size = 'default',
-  ...props
-}: React.ComponentProps<typeof motion.button> & VariantProps<typeof buttonVariants>) {
-  return (
-    <motion.button
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
-      {...props}
-    />
-  );
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
 }
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    if (asChild) {
+      return (
+        <Slot
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          {...(props as any)}
+        />
+      );
+    }
+
+    return (
+      <motion.button
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref as any}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+        {...(props as HTMLMotionProps<"button">)}
+      />
+    );
+  }
+);
+Button.displayName = 'Button';
 
 export { Button, buttonVariants };
