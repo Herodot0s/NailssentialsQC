@@ -184,6 +184,12 @@ export interface PayrollRecord {
   deductions: number;
   net_pay: number;
   base_pay: number;
+  daily_breakdown?: Record<string, number>;
+  items?: {
+    component_name: string;
+    component_type: 'earning' | 'deduction';
+    amount: number;
+  }[];
   period?: {
     start_date: string;
     end_date: string;

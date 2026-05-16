@@ -49,7 +49,8 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Mail, Loader2 } from 'lucide-react';
+import { Plus, Mail, Loader2, Eye } from 'lucide-react';
+import { PayslipModal } from '@/components/dashboard/staff/PayslipModal';
 import { formatTime12h, formatDuration } from '@/lib/utils';
 
 
@@ -113,6 +114,8 @@ const StaffDashboard: React.FC = () => {
   const [servicePhotoUrl, setServicePhotoUrl] = useState<string>('');
   const [gcashReferenceNo, setGcashReferenceNo] = useState<string>('');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'cash' | 'gcash' | null>(null);
+  const [selectedPayroll, setSelectedPayroll] = useState<PayrollRecord | null>(null);
+  const [isPayslipModalOpen, setIsPayslipModalOpen] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const fetchDashboardData = async () => {
@@ -303,6 +306,11 @@ const StaffDashboard: React.FC = () => {
     } finally {
       setIsUploadingPhoto(false);
     }
+  };
+
+  const handleViewDetails = (payroll: PayrollRecord) => {
+    setSelectedPayroll(payroll);
+    setIsPayslipModalOpen(true);
   };
 
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -864,8 +872,11 @@ const StaffDashboard: React.FC = () => {
                         <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">
                           Deductions
                         </TableHead>
-                        <TableHead className="pr-8 h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">
+                        <TableHead className="h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">
                           Net Payout
+                        </TableHead>
+                        <TableHead className="pr-8 h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">
+                          Actions
                         </TableHead>
                       </TableRow>
                     </TableHeader>
@@ -899,8 +910,18 @@ const StaffDashboard: React.FC = () => {
                             <TableCell className="text-sm text-[#cd4239] font-bold tabular-nums">
                               -₱{(p.deductions || 0).toLocaleString()}
                             </TableCell>
-                            <TableCell className="pr-8 text-right font-bold text-xl text-[#B8794E] tabular-nums">
+                            <TableCell className="text-right font-bold text-xl text-[#B8794E] tabular-nums">
                               ₱{(p.net_pay || 0).toLocaleString()}
+                            </TableCell>
+                            <TableCell className="pr-8 text-right">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewDetails(p)}
+                                className="rounded-md h-9 gap-2 border-[#bfc1b7] bg-white hover:bg-[#eeefe9] text-[#23251d] font-bold uppercase text-[11px]"
+                              >
+                                <Eye className="h-3.5 w-3.5" /> Details
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ))
@@ -1176,6 +1197,12 @@ const StaffDashboard: React.FC = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        <PayslipModal
+          isOpen={isPayslipModalOpen}
+          onClose={() => setIsPayslipModalOpen(false)}
+          payroll={selectedPayroll}
+        />
       </div>
     </div>
   );

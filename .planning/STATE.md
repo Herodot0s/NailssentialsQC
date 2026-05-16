@@ -74,4 +74,5 @@ Resume file: .planning/phases/10-manager-payroll-ui-excel-export/10-CONTEXT.md
 | 20260514-addons-booking | Implement addons CRUD in Manager Dashboard and Addons selection in Booking cart | 2026-05-14 | local | [.planning/quick/20260514-addons-booking/](./quick/20260514-addons-booking/) |
 | 20260515-staff-dashboard-notice-duration-format | Use hours and minutes for staff dashboard attendance notices | 2026-05-15 | local | [.planning/quick/20260515-staff-dashboard-notice-duration-format/](./quick/20260515-staff-dashboard-notice-duration-format/) |
 | 20260515-remove-gallery-heart-icon | Remove non-functional heart icon from Gallery | 2026-05-15 | local | [.planning/quick/20260515-remove-gallery-heart-icon/](./quick/20260515-remove-gallery-heart-icon/) |
+| 20260516-fix-frontend-production-build | Fix frontend TypeScript errors and enable production build | 2026-05-16 | local | [.planning/quick/20260516-fix-frontend-production-build/](./quick/20260516-fix-frontend-production-build/) |
 

@@ -445,7 +445,10 @@ export const getMyPayroll = async (req: AuthRequest, res: Response) => {
 
     const payrolls = await prisma.staffPayroll.findMany({
       where: { staff_id: staffProfile.id },
-      include: { period: true },
+      include: { 
+        period: true,
+        items: true
+      },
       orderBy: { created_at: 'desc' },
     });
 
