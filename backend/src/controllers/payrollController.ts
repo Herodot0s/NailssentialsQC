@@ -605,7 +605,7 @@ export const exportPayrollExcel = async (req: AuthRequest, res: Response) => {
       const reloan = getDeduction('reloan');
       const lates = getDeduction('lates_early_out');
 
-      const totalDeductions = p.deductions;
+      const totalDeductions = Number(p.deductions);
       const netPay = p.net_pay;
 
       rowData.push(
