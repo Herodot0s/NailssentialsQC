@@ -44,7 +44,6 @@ import {
   DialogContent,
   DialogDescription,
   DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
@@ -103,7 +102,6 @@ const ManagerDashboard: React.FC = () => {
   const [selectedStaffPayroll, setSelectedStaffPayroll] = useState<any | null>(null);
   const [showDeductionSheet, setShowDeductionSheet] = useState(false);
 
-
   // Status Modal State
   const [statusModal, setStatusModal] = useState<{
     open: boolean;
@@ -156,7 +154,6 @@ const ManagerDashboard: React.FC = () => {
     isActive: true,
   });
 
-
   const dateRange = useMemo(
     () => ({
       start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -190,7 +187,7 @@ const ManagerDashboard: React.FC = () => {
     try {
       setIsLoading(true);
       const [salesRes, staffRes, reviewsRes, attRes, catRes, appRes] =
-        await Promise.all([
+        await Promise.allSettled([
           getDailySales(),
           getAllStaff(),
           getAllReviews(),
@@ -199,19 +196,23 @@ const ManagerDashboard: React.FC = () => {
           getAppointments(),
         ]);
 
-      if (salesRes.data.success) setSalesStats(salesRes.data.data);
+      if (salesRes.status === 'fulfilled' && salesRes.value.data.success)
+        setSalesStats(salesRes.value.data.data);
 
-      if (staffRes.data.success) {
-        const staffData = staffRes.data.data;
+      if (staffRes.status === 'fulfilled' && staffRes.value.data.success) {
+        const staffData = staffRes.value.data.data;
         setStaffMembers(Array.isArray(staffData) ? staffData : staffData?.items || []);
       }
 
-      if (reviewsRes.data.success) setReviews(reviewsRes.data.data);
-      if (attRes.data.success) setAttendance(attRes.data.data);
-      if (catRes.data.success) setCategories(catRes.data.data);
+      if (reviewsRes.status === 'fulfilled' && reviewsRes.value.data.success)
+        setReviews(reviewsRes.value.data.data);
+      if (attRes.status === 'fulfilled' && attRes.value.data.success)
+        setAttendance(attRes.value.data.data);
+      if (catRes.status === 'fulfilled' && catRes.value.data.success)
+        setCategories(catRes.value.data.data);
 
-      if (appRes.data.success) {
-        const appData = appRes.data.data;
+      if (appRes.status === 'fulfilled' && appRes.value.data.success) {
+        const appData = appRes.value.data.data;
         setAppointments(Array.isArray(appData) ? appData : appData?.items || []);
       }
     } catch (err: any) {
@@ -408,7 +409,8 @@ const ManagerDashboard: React.FC = () => {
       });
       fetchCustomers(true);
     } catch (err: any) {
-      const message = err.response?.data?.error?.message || err.message || 'Failed to update customer.';
+      const message =
+        err.response?.data?.error?.message || err.message || 'Failed to update customer.';
       setStatusModal({
         open: true,
         type: 'error',
@@ -437,7 +439,8 @@ const ManagerDashboard: React.FC = () => {
       });
       fetchCustomers(true);
     } catch (err: any) {
-      const message = err.response?.data?.error?.message || err.message || 'Failed to delete customer.';
+      const message =
+        err.response?.data?.error?.message || err.message || 'Failed to delete customer.';
       setStatusModal({
         open: true,
         type: 'error',
@@ -474,7 +477,8 @@ const ManagerDashboard: React.FC = () => {
       });
       fetchData();
     } catch (err: any) {
-      const message = err.response?.data?.error?.message || err.message || 'Failed to add staff member.';
+      const message =
+        err.response?.data?.error?.message || err.message || 'Failed to add staff member.';
       setStatusModal({
         open: true,
         type: 'error',
@@ -524,8 +528,6 @@ const ManagerDashboard: React.FC = () => {
       });
     }
   };
-
-
 
   const handleStaffClick = async (staff: StaffMember) => {
     setSelectedStaff(staff);
@@ -721,7 +723,7 @@ const ManagerDashboard: React.FC = () => {
         payrollPeriodId: selectedPeriod.id,
         ...data,
       });
-      
+
       // Regenerate payroll for this period to incorporate the new deduction
       await generatePayroll({
         startDate: selectedPeriod.start_date,
@@ -734,7 +736,7 @@ const ManagerDashboard: React.FC = () => {
       if (res.data.success) {
         setSelectedPeriod(res.data.data);
         const updatedStaff = res.data.data.payrolls.find(
-          (p: any) => p.staff_id === selectedStaffPayroll.staff_id
+          (p: any) => p.staff_id === selectedStaffPayroll.staff_id,
         );
         setSelectedStaffPayroll(updatedStaff);
       }
@@ -814,7 +816,6 @@ const ManagerDashboard: React.FC = () => {
             />
           </div>
         )}
-
 
         {activeView === 'performance' && (
           <div className="animate-in fade-in duration-700">
@@ -934,7 +935,6 @@ const ManagerDashboard: React.FC = () => {
         onUpdateBaseline={handleUpdateStaffBaseline}
       />
 
-
       <AddStaffDialog
         open={showAddStaffModal}
         onOpenChange={setShowAddStaffModal}
@@ -959,7 +959,6 @@ const ManagerDashboard: React.FC = () => {
         onFormChange={setShiftForm}
         onSubmit={handleSaveShift}
       />
-
 
       <LogWalkInDialog
         open={showWalkInModal}
@@ -995,7 +994,14 @@ const ManagerDashboard: React.FC = () => {
         open={showAddCustomerModal}
         onOpenChange={setShowAddCustomerModal}
         form={newCustomerForm}
-        onFormChange={setNewCustomerForm}
+        onFormChange={(form) =>
+          setNewCustomerForm({
+            ...form,
+            password: form.password || '',
+            allergies: form.allergies || '',
+            notes: form.notes || '',
+          })
+        }
         onSubmit={handleCreateOrUpdateCustomer}
         isEdit={isEditCustomer}
       />
@@ -1018,8 +1024,8 @@ const ManagerDashboard: React.FC = () => {
           <div className="p-8 space-y-6">
             <p className="text-sm text-[#4d4f46] leading-relaxed">
               Are you sure you want to permanently delete the client file for{' '}
-              <strong className="text-[#23251d]">{customerToDelete?.fullName}</strong>? 
-              This will remove all associated profile details, loyalty records, and system accounts.
+              <strong className="text-[#23251d]">{customerToDelete?.fullName}</strong>? This will
+              remove all associated profile details, loyalty records, and system accounts.
             </p>
             <DialogFooter className="gap-3 sm:justify-end">
               <Button

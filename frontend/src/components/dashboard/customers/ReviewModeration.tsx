@@ -36,11 +36,33 @@ export const ReviewModeration: React.FC<ReviewModerationProps> = ({
                 key={review.id}
                 className="hover:bg-surface-soft/50 border-hairline-soft transition-colors"
               >
-                <TableCell className="pl-8 py-6">
+                <TableCell className="pl-8 py-6 max-w-[280px] sm:max-w-xs md:max-w-md">
                   <p className="body-strong text-ink">{review.customer.full_name}</p>
                   <p className="caption-xs text-mute italic opacity-60">
                     On {review.appointment_item.service.name}
                   </p>
+                  {review.comment && (
+                    <p className="caption-md text-ink mt-2 font-light italic bg-surface-soft/40 p-2.5 border-l-2 border-primary/20 rounded-r-sm break-words">
+                      "{review.comment}"
+                    </p>
+                  )}
+                  {review.image_url && (
+                    <div className="mt-3">
+                      <a
+                        href={review.image_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block group relative cursor-pointer"
+                        title="Click to view full photo"
+                      >
+                        <img
+                          src={review.image_url}
+                          alt="Review attachment"
+                          className="w-16 h-16 object-cover border border-hairline rounded shadow-sm transition-all duration-200 group-hover:brightness-90 group-hover:scale-[1.03]"
+                        />
+                      </a>
+                    </div>
+                  )}
                 </TableCell>
                 <TableCell className="caption-md text-ink uppercase">
                   {review.staff.full_name}
@@ -57,7 +79,7 @@ export const ReviewModeration: React.FC<ReviewModerationProps> = ({
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
-                    {(review.tags as string[]).map((tag) => (
+                    {(Array.isArray(review.tags) ? review.tags : []).map((tag: string) => (
                       <Badge
                         key={tag}
                         variant="outline"
