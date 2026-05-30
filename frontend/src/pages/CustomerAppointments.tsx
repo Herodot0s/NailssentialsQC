@@ -58,7 +58,45 @@ const CustomerAppointments: React.FC = () => {
       if (res.data.success) {
         const aptData = res.data.data;
         const aptItems = Array.isArray(aptData) ? aptData : aptData?.items || [];
-        setAppointments(aptItems);
+        
+        const now = new Date();
+        const upcoming: Appointment[] = [];
+        const past: Appointment[] = [];
+
+        aptItems.forEach((apt: Appointment) => {
+          const datePart = apt.appointment_date.includes('T') 
+            ? apt.appointment_date.split('T')[0] 
+            : apt.appointment_date;
+          const firstItemTime = apt.items[0]?.start_time || '00:00';
+          const aptDateTime = new Date(`${datePart}T${firstItemTime}`);
+          
+          const isUpcomingStatus = apt.status === 'pending' || apt.status === 'confirmed';
+          if (isUpcomingStatus && aptDateTime >= now) {
+            upcoming.push(apt);
+          } else {
+            past.push(apt);
+          }
+        });
+
+        // Upcoming: closest first (ascending)
+        upcoming.sort((a, b) => {
+          const datePartA = a.appointment_date.includes('T') ? a.appointment_date.split('T')[0] : a.appointment_date;
+          const datePartB = b.appointment_date.includes('T') ? b.appointment_date.split('T')[0] : b.appointment_date;
+          const timeA = new Date(`${datePartA}T${a.items[0]?.start_time || '00:00'}`).getTime();
+          const timeB = new Date(`${datePartB}T${b.items[0]?.start_time || '00:00'}`).getTime();
+          return timeA - timeB;
+        });
+
+        // Past: newest first (descending)
+        past.sort((a, b) => {
+          const datePartA = a.appointment_date.includes('T') ? a.appointment_date.split('T')[0] : a.appointment_date;
+          const datePartB = b.appointment_date.includes('T') ? b.appointment_date.split('T')[0] : b.appointment_date;
+          const timeA = new Date(`${datePartA}T${a.items[0]?.start_time || '00:00'}`).getTime();
+          const timeB = new Date(`${datePartB}T${b.items[0]?.start_time || '00:00'}`).getTime();
+          return timeB - timeA;
+        });
+
+        setAppointments([...upcoming, ...past]);
       }
     } catch (err: any) {
       const message = err.response?.data?.error?.message || err.message || 'Failed to synchronize ritual history.';
@@ -212,126 +250,165 @@ const CustomerAppointments: React.FC = () => {
         </div>
       ) : (
         <div className="grid gap-12">
-          {appointments.map((apt) => (
-            <div
-              key={apt.id}
-              className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-1000"
-            >
-              <div className="flex items-center gap-4">
-                <div className="h-[1px] flex-grow bg-primary/10" />
-                <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground">
-                  {new Date(apt.appointment_date).toLocaleDateString([], {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
-                </span>
-                <div className="h-[1px] flex-grow bg-primary/10" />
-              </div>
+          {(() => {
+            let renderedUpcomingHeader = false;
+            let renderedPastHeader = false;
+            const now = new Date();
 
-              <div className="grid gap-6">
-                {apt.items.map((item) => (
-                  <Card
-                    key={item.id}
-                    className="rounded-none border-none shadow-sm hover:shadow-md transition-all overflow-hidden group"
+            return appointments.map((apt) => {
+              const datePart = apt.appointment_date.includes('T') 
+                ? apt.appointment_date.split('T')[0] 
+                : apt.appointment_date;
+              const firstItemTime = apt.items[0]?.start_time || '00:00';
+              const aptDateTime = new Date(`${datePart}T${firstItemTime}`);
+              
+              const isUpcoming = (apt.status === 'pending' || apt.status === 'confirmed') && aptDateTime >= now;
+              
+              let header = null;
+              if (isUpcoming && !renderedUpcomingHeader) {
+                renderedUpcomingHeader = true;
+                header = (
+                  <div key="upcoming-hdr" className="mb-6 first:mt-0 mt-8">
+                    <h2 className="font-serif text-2xl font-light text-primary border-b border-primary/10 pb-2">
+                      Upcoming Sessions
+                    </h2>
+                  </div>
+                );
+              } else if (!isUpcoming && !renderedPastHeader) {
+                renderedPastHeader = true;
+                header = (
+                  <div key="past-hdr" className="mb-6 mt-12">
+                    <h2 className="font-serif text-2xl font-light text-muted-foreground border-b border-hairline pb-2">
+                      Ritual History
+                    </h2>
+                  </div>
+                );
+              }
+
+              return (
+                <React.Fragment key={apt.id}>
+                  {header}
+                  <div
+                    className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 mb-8"
                   >
-                    <div className="flex flex-col sm:flex-row">
-                      <div className="bg-primary/5 p-8 flex flex-col justify-center items-center text-center min-w-[160px] border-r border-primary/5">
-                        <span className="text-[10px] font-bold text-primary uppercase tracking-widest mb-4">
-                          {formatTime12h(item.start_time)}
-                        </span>
-                        <div className="w-12 h-12 rounded-full border border-primary/20 flex items-center justify-center font-serif text-primary text-xl">
-                          {item.service.name.charAt(0)}
-                        </div>
-                      </div>
-
-                      <CardContent className="p-8 flex-grow flex flex-col md:flex-row justify-between gap-8">
-                        <div className="space-y-6">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-3">
-                              <h3 className="font-serif text-2xl font-light">
-                                {item.service.name}
-                              </h3>
-                              {getStatusBadge(item.status)}
-                            </div>
-                            <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
-                              <User className="h-3 w-3" /> Artisan: {item.staff.full_name}
-                            </div>
-                            <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">
-                                  Technician Scheduled: {formatTime12h(item.start_time)} — {formatTime12h(item.end_time)}
-                                </p>
-                          </div>
-
-                          {item.status === 'completed' && !item.review && (
-                            <Button
-                              onClick={() => handleOpenReview(item)}
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 px-4 rounded-none border border-primary/10 text-[9px] uppercase tracking-widest font-bold text-primary hover:bg-primary hover:text-white transition-all"
-                            >
-                              <Star className="mr-2 h-3 w-3 fill-current" /> Rate Ritual
-                            </Button>
-                          )}
-
-                          {item.review && (
-                            <div className="flex items-center gap-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`h-3 w-3 ${i < (item.review?.rating || 0) ? 'text-primary fill-primary' : 'text-muted'}`}
-                                />
-                              ))}
-                              <span className="text-[9px] font-bold text-success-color uppercase tracking-widest ml-2">
-                                Reviewed
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex flex-col justify-between items-end gap-6">
-                          <div className="text-right">
-                            <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest mb-1">
-                              Session Value
-                            </p>
-                            <p className="text-2xl font-serif font-light">
-                              ₱{item.service.price.toLocaleString()}
-                            </p>
-                          </div>
-
-                          <div className="flex flex-col gap-2 items-end">
-                            {apt.status === 'completed' && apt.transactions?.[0] && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-9 px-4 rounded-none text-[9px] uppercase tracking-widest font-bold gap-2 text-muted-foreground hover:text-primary"
-                                onClick={() => {
-                                  setSelectedAppointment(apt);
-                                  setShowReceipt(true);
-                                }}
-                              >
-                                <Receipt className="h-4 w-4" /> View Digital Receipt
-                              </Button>
-                            )}
-
-                            {(apt.status === 'pending' || apt.status === 'confirmed') && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-9 px-4 rounded-none text-[9px] uppercase tracking-widest font-bold gap-2 text-destructive/60 hover:text-destructive hover:bg-destructive/5"
-                                onClick={() => handleOpenCancel(apt.id)}
-                              >
-                                <XCircle className="h-4 w-4" /> Cancel Ritual
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
+                    <div className="flex items-center gap-4">
+                      <div className="h-[1px] flex-grow bg-primary/10" />
+                      <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground">
+                        {new Date(apt.appointment_date).toLocaleDateString([], {
+                          month: 'long',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </span>
+                      <div className="h-[1px] flex-grow bg-primary/10" />
                     </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          ))}
+
+                    <div className="grid gap-6">
+                      {apt.items.map((item) => (
+                        <Card
+                          key={item.id}
+                          className="rounded-none border-none shadow-sm hover:shadow-md transition-all overflow-hidden group"
+                        >
+                          <div className="flex flex-col sm:flex-row">
+                            <div className="bg-primary/5 p-8 flex flex-col justify-center items-center text-center min-w-[160px] border-r border-primary/5">
+                              <span className="text-[10px] font-bold text-primary uppercase tracking-widest mb-4">
+                                {formatTime12h(item.start_time)}
+                              </span>
+                              <div className="w-12 h-12 rounded-full border border-primary/20 flex items-center justify-center font-serif text-primary text-xl">
+                                {item.service.name.charAt(0)}
+                              </div>
+                            </div>
+
+                            <CardContent className="p-8 flex-grow flex flex-col md:flex-row justify-between gap-8">
+                              <div className="space-y-6">
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-3">
+                                    <h3 className="font-serif text-2xl font-light">
+                                      {item.service.name}
+                                    </h3>
+                                    {getStatusBadge(item.status)}
+                                  </div>
+                                  <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
+                                    <User className="h-3 w-3" /> Artisan: {item.staff.full_name}
+                                  </div>
+                                  <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">
+                                    Technician Scheduled: {formatTime12h(item.start_time)} — {formatTime12h(item.end_time)}
+                                  </p>
+                                </div>
+
+                                {item.status === 'completed' && !item.review && (
+                                  <Button
+                                    onClick={() => handleOpenReview(item)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 px-4 rounded-none border border-primary/10 text-[9px] uppercase tracking-widest font-bold text-primary hover:bg-primary hover:text-white transition-all"
+                                  >
+                                    <Star className="mr-2 h-3 w-3 fill-current" /> Rate Ritual
+                                  </Button>
+                                )}
+
+                                {item.review && (
+                                  <div className="flex items-center gap-1">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={`h-3 w-3 ${i < (item.review?.rating || 0) ? 'text-primary fill-primary' : 'text-muted'}`}
+                                      />
+                                    ))}
+                                    <span className="text-[9px] font-bold text-success-color uppercase tracking-widest ml-2">
+                                      Reviewed
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="flex flex-col justify-between items-end gap-6">
+                                <div className="text-right">
+                                  <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest mb-1">
+                                    Session Value
+                                  </p>
+                                  <p className="text-2xl font-serif font-light">
+                                    ₱{item.service.price.toLocaleString()}
+                                  </p>
+                                </div>
+
+                                <div className="flex flex-col gap-2 items-end">
+                                  {apt.status === 'completed' && apt.transactions?.[0] && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-9 px-4 rounded-none text-[9px] uppercase tracking-widest font-bold gap-2 text-muted-foreground hover:text-primary"
+                                      onClick={() => {
+                                        setSelectedAppointment(apt);
+                                        setShowReceipt(true);
+                                      }}
+                                    >
+                                      <Receipt className="h-4 w-4" /> View Digital Receipt
+                                    </Button>
+                                  )}
+
+                                  {(apt.status === 'pending' || apt.status === 'confirmed') && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-9 px-4 rounded-none text-[9px] uppercase tracking-widest font-bold gap-2 text-destructive/60 hover:text-destructive hover:bg-destructive/5"
+                                      onClick={() => handleOpenCancel(apt.id)}
+                                    >
+                                      <XCircle className="h-4 w-4" /> Cancel Ritual
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </React.Fragment>
+              );
+            });
+          })()}
         </div>
       )}
 

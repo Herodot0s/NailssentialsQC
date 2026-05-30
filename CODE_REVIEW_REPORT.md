@@ -10,7 +10,8 @@ This document details critical issues, logic warnings, and code-quality items di
 ### CR-01: Receipt Number Generation Race Condition
 * **File:** `C:\Users\Administrator\Desktop\nailssentialsqc-system\backend\src\controllers\appointmentCompletion.ts`
 * **Line:** 158-165
-* **Issue:** The count of completed transactions for the day (`transactionCount`) is queried outside of the database transaction block. Under concurrent usage (e.g., if a manager completes multiple appointments concurrently or if two different terminals complete transactions at the same time), both requests will retrieve the same transaction count. Because `receipt_number` is defined as `@unique` in the database schema, this race condition will cause the database to throw a unique constraint violation error and fail to complete one of the appointments.
+* **Issue:** The count of completed transactions for the day (`transactionCount`) is queried ou
+mpletes multiple appointments concurrently or if two different terminals complete transactions at the same time), both requests will retrieve the same transaction count. Because `receipt_number` is defined as `@unique` in the database schema, this race condition will cause the database to throw a unique constraint violation error and fail to complete one of the appointments.
 * **Fix:** Move the transaction count query inside the Prisma transaction (`$transaction`) and execute it with locking or utilize a Postgres sequence or UUID generator for guaranteed receipt number uniqueness.
 ```typescript
 const result = await prisma.$transaction(async (tx) => {

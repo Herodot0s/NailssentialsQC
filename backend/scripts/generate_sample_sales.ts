@@ -1,4 +1,10 @@
-import { PrismaClient, Role, AppointmentStatus, PaymentMethod, TransactionStatus } from '@prisma/client';
+import {
+  PrismaClient,
+  Role,
+  AppointmentStatus,
+  PaymentMethod,
+  TransactionStatus,
+} from '@prisma/client';
 import { format, startOfDay, addDays, setHours, setMinutes } from 'date-fns';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
@@ -16,12 +22,12 @@ async function main() {
 
   const staff = await prisma.staffProfile.findMany({
     include: { user: true },
-    where: { user: { role: 'staff', is_active: true } }
+    where: { user: { role: 'staff', is_active: true } },
   });
 
   const services = await prisma.service.findMany({
     where: { is_active: true },
-    take: 10
+    take: 10,
   });
 
   const customer = await prisma.customerProfile.findFirst();
@@ -56,10 +62,10 @@ async function main() {
     for (let i = 0; i < numApps; i++) {
       const randomStaff = staff[Math.floor(Math.random() * staff.length)];
       const randomService = services[Math.floor(Math.random() * services.length)];
-      
+
       const hour = 12 + Math.floor(Math.random() * 8); // 12 PM to 8 PM
       const minute = Math.random() > 0.5 ? 0 : 30;
-      
+
       const startTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`;
       const endHour = hour + Math.floor((randomService.duration_minutes + minute) / 60);
       const endMinute = (randomService.duration_minutes + minute) % 60;
@@ -80,10 +86,10 @@ async function main() {
               start_time: startTime,
               end_time: endTime,
               price_at_booking: randomService.price,
-            }
-          }
+            },
+          },
         },
-        include: { items: true }
+        include: { items: true },
       });
 
       // Create Transaction
@@ -92,16 +98,17 @@ async function main() {
         data: {
           appointment_id: appointment.id,
           amount: randomService.price,
-          payment_method: Math.random() > 0.3 ? 'cash' as PaymentMethod : 'gcash' as PaymentMethod,
+          payment_method:
+            Math.random() > 0.3 ? ('cash' as PaymentMethod) : ('gcash' as PaymentMethod),
           status: 'completed' as TransactionStatus,
           transaction_date: currentDate,
           receipt_number: receiptNum,
-        }
+        },
       });
 
       // Create Commission
       // Use logic similar to payrollController.ts
-      const rate = randomStaff.base_commission_rate || 0.10;
+      const rate = randomStaff.base_commission_rate || 0.1;
       const commissionAmount = Number(randomService.price) * Number(rate);
 
       await prisma.commission.create({
@@ -116,8 +123,8 @@ async function main() {
           period_week: 20, // May 11-17 is week 20 of 2026
           period_month: 5,
           period_year: 2026,
-          is_paid: false
-        }
+          is_paid: false,
+        },
       });
 
       totalGenerated++;

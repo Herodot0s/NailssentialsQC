@@ -142,4 +142,41 @@ describe('Auth Integration Tests', () => {
       expect(response.body.error.code).toBe('UNAUTHORIZED');
     });
   });
+
+  describe('GET /api/v1/auth/me', () => {
+    it('should return authenticated user data', async () => {
+      // 1. Register a user
+      const payload = getUniquePayload();
+      const registerRes = await request(app).post('/api/v1/auth/register').send(payload);
+      const { accessToken } = registerRes.body.data.tokens;
+
+      // 2. Get me
+      const response = await request(app)
+        .get('/api/v1/auth/me')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.user).toBeDefined();
+      expect(response.body.data.user.email).toBe(payload.email);
+    });
+
+    it('should return 401 when token is missing', async () => {
+      const response = await request(app).get('/api/v1/auth/me');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('TOKEN_REQUIRED');
+    });
+
+    it('should return 401 when token is invalid', async () => {
+      const response = await request(app)
+        .get('/api/v1/auth/me')
+        .set('Authorization', 'Bearer invalid_token');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('INVALID_TOKEN');
+    });
+  });
 });

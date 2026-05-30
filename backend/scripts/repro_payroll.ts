@@ -75,12 +75,15 @@ async function main() {
     const staffWeeklyHairSales = new Map<string, number>();
     for (const c of currentPeriodCommissions) {
       const isHair = c.service?.category?.name.toLowerCase().includes('hair');
-      const staff = staffProfiles.find(s => s.id === c.staff_id);
+      const staff = staffProfiles.find((s) => s.id === c.staff_id);
       const isHairSpecialist = staff?.specializations?.toLowerCase().includes('hair');
 
       if (isHair && isHairSpecialist) {
         const weekKey = `${c.staff_id}-${c.period_week}`;
-        staffWeeklyHairSales.set(weekKey, (staffWeeklyHairSales.get(weekKey) || 0) + Number(c.base_amount));
+        staffWeeklyHairSales.set(
+          weekKey,
+          (staffWeeklyHairSales.get(weekKey) || 0) + Number(c.base_amount),
+        );
       }
     }
 
@@ -128,7 +131,6 @@ async function main() {
     }
 
     console.log('🎉 Full repro successful!');
-
   } catch (error) {
     console.error('❌ Error during reproduction:');
     console.error(error);

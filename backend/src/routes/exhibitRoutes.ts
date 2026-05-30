@@ -1,5 +1,10 @@
 import { Router } from 'express';
-import { getAllExhibits, createExhibit, deleteExhibit, updateExhibit } from '../controllers/exhibitController';
+import {
+  getAllExhibits,
+  createExhibit,
+  deleteExhibit,
+  updateExhibit,
+} from '../controllers/exhibitController';
 import { authenticateToken, authorizeRoles } from '../middleware/authMiddleware';
 
 const router = Router();

@@ -1,5 +1,5 @@
 ---
-name: gsd:validate-phase
+name: gsd-validate-phase
 description: Retroactively audit and fill Nyquist validation gaps for a completed phase
 argument-hint: "[phase number]"
 allowed-tools:
@@ -9,8 +9,9 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
-  - Task
+  - Agent
   - AskUserQuestion
+requires: [phase]
 ---
 <objective>
 Audit Nyquist validation coverage for a completed phase. Three states:
@@ -30,6 +31,6 @@ Phase: $ARGUMENTS — optional, defaults to last completed phase.
 </context>
 
 <process>
-Execute @C:/Users/Administrator/Desktop/nailssentialsqc-system/.claude/get-shit-done/workflows/validate-phase.md.
+Execute end-to-end.
 Preserve all workflow gates.
 </process>

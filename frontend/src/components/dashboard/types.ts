@@ -45,6 +45,7 @@ export type ActiveView =
   | 'customer-care'
   | 'performance'
   | 'service-history'
+  | 'customers'
   | 'payroll';
 
 export interface ManagerSidebarProps {

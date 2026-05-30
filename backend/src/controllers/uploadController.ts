@@ -15,8 +15,6 @@ cloudinary.config({
  * Returns { success: true, data: { url: string } }
  */
 export const uploadFile = async (req: Request, res: Response) => {
-  console.log('Upload request received');
-
   const bb = busboy({
     headers: req.headers,
     limits: { files: 1, fileSize: 10 * 1024 * 1024 },
@@ -27,8 +25,6 @@ export const uploadFile = async (req: Request, res: Response) => {
 
   bb.on('file', (_name, file, info) => {
     fileFound = true;
-    console.log('File detected:', info.filename, info.mimeType);
-
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: 'nailssentials',
@@ -43,7 +39,6 @@ export const uploadFile = async (req: Request, res: Response) => {
           return res.status(500).json({ success: false, message: error.message });
         }
 
-        console.log('Cloudinary Success:', result?.secure_url);
         return res.json({
           success: true,
           data: { url: result?.secure_url },
@@ -55,7 +50,6 @@ export const uploadFile = async (req: Request, res: Response) => {
   });
 
   bb.on('close', () => {
-    console.log('Busboy close event');
     setTimeout(() => {
       if (!fileFound && !responseSent) {
         responseSent = true;

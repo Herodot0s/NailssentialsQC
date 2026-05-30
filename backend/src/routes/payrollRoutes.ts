@@ -76,12 +76,7 @@ router.post(
   validateZod(addDeductionSchema),
   addDeduction,
 );
-router.get(
-  '/deductions',
-  authenticateToken,
-  authorizeRoles('manager'),
-  getDeductions,
-);
+router.get('/deductions', authenticateToken, authorizeRoles('manager'), getDeductions);
 router.delete(
   '/deductions/:id',
   authenticateToken,
@@ -89,12 +84,7 @@ router.delete(
   validateIdParam,
   deleteDeduction,
 );
-router.post(
-  '/periods/generate',
-  authenticateToken,
-  authorizeRoles('manager'),
-  generateNextPeriod,
-);
+router.post('/periods/generate', authenticateToken, authorizeRoles('manager'), generateNextPeriod);
 router.post(
   '/periods/:id/lock',
   authenticateToken,

@@ -7,7 +7,7 @@ dotenv.config();
 
 async function syncClerk() {
   console.log('--- Starting Clerk to Database Sync ---');
-  
+
   try {
     let hasMore = true;
     let offset = 0;
@@ -27,16 +27,17 @@ async function syncClerk() {
       }
 
       for (const clerkUser of clerkUsers) {
-        const email = clerkUser.emailAddresses.find(
-          (e) => e.id === clerkUser.primaryEmailAddressId
-        )?.emailAddress || clerkUser.emailAddresses[0]?.emailAddress;
+        const email =
+          clerkUser.emailAddresses.find((e) => e.id === clerkUser.primaryEmailAddressId)
+            ?.emailAddress || clerkUser.emailAddresses[0]?.emailAddress;
 
         if (!email) {
           console.warn(`Skipping user ${clerkUser.id}: No email address found.`);
           continue;
         }
 
-        const fullName = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || 'User';
+        const fullName =
+          `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || 'User';
 
         // Upsert user in database
         await prisma.$transaction(async (tx) => {
@@ -70,7 +71,9 @@ async function syncClerk() {
                 email,
                 username: email, // Use email as username for now
                 role: 'customer',
-                is_active: clerkUser.emailAddresses.some(e => e.verification?.status === 'verified'),
+                is_active: clerkUser.emailAddresses.some(
+                  (e) => e.verification?.status === 'verified',
+                ),
               },
             });
 

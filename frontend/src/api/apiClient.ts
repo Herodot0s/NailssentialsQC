@@ -167,6 +167,11 @@ export const searchCustomers = (query: string) =>
 export const getCustomerHistory = (id: number) => apiClient.get(`/customers/${id}/history`);
 export const updateCustomerProfile = (data: UpdateCustomerProfileRequest) =>
   apiClient.put('/customers/profile', data);
+export const getAllCustomers = (params?: { cursor?: string; limit?: number; search?: string }) =>
+  apiClient.get('/customers', { params });
+export const createCustomer = (data: any) => apiClient.post('/customers', data);
+export const updateCustomer = (id: number, data: any) => apiClient.put(`/customers/${id}`, data);
+export const deleteCustomer = (id: number) => apiClient.delete(`/customers/${id}`);
 
 // Attendance methods
 export const getAttendanceStatus = () => apiClient.get('/attendance/status');

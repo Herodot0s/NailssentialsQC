@@ -85,7 +85,7 @@ interface Appointment {
 }
 
 const StaffDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading, logout } = useAuth();
   const { user: clerkUser } = useUser();
   
   // Prioritize actual username, then fallback to email prefix or full name
@@ -382,12 +382,42 @@ const StaffDashboard: React.FC = () => {
     }
   };
 
-  if (isLoading || !user) {
+  if (isAuthLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gap-6 text-center px-6 bg-[#eeefe9]">
         <Loader2 className="h-10 w-10 animate-spin text-[#B8794E]" />
         <p className="text-[12px] tracking-widest uppercase font-bold text-[#4d4f46]">
-          {!user ? 'Authenticating...' : 'Loading Artisan Dashboard'}
+          Authenticating...
+        </p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gap-6 text-center px-6 bg-[#eeefe9]">
+        <div className="p-8 max-w-md bg-white border border-[#bfc1b7] rounded-md shadow-sm">
+          <h2 className="text-xl font-bold text-[#cd4239] mb-4">Sync Failure</h2>
+          <p className="text-sm text-[#4d4f46] mb-6 leading-relaxed">
+            Failed to synchronize your account with local database. Please ensure your manager has registered your account, or try logging out and logging in again.
+          </p>
+          <Button
+            onClick={logout}
+            className="w-full rounded-md bg-[#23251d] hover:bg-[#33342d] text-white font-bold py-2.5 transition-all shadow-none"
+          >
+            Log Out
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gap-6 text-center px-6 bg-[#eeefe9]">
+        <Loader2 className="h-10 w-10 animate-spin text-[#B8794E]" />
+        <p className="text-[12px] tracking-widest uppercase font-bold text-[#4d4f46]">
+          Loading Artisan Dashboard...
         </p>
       </div>
     );

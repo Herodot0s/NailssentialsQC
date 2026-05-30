@@ -1,5 +1,5 @@
 ---
-name: gsd:eval-review
+name: gsd-eval-review
 description: Audit an executed AI phase's evaluation coverage and produce an EVAL-REVIEW.md remediation plan.
 argument-hint: "[phase number]"
 allowed-tools:
@@ -8,8 +8,9 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
-  - Task
+  - Agent
   - AskUserQuestion
+requires: [phase]
 ---
 <objective>
 Conduct a retroactive evaluation coverage audit of a completed AI phase.
@@ -27,6 +28,6 @@ Phase: $ARGUMENTS — optional, defaults to last completed phase.
 </context>
 
 <process>
-Execute @C:/Users/Administrator/Desktop/nailssentialsqc-system/.claude/get-shit-done/workflows/eval-review.md end-to-end.
+Execute end-to-end.
 Preserve all workflow gates.
 </process>

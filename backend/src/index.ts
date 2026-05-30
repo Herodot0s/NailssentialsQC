@@ -29,12 +29,21 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
-app.use(clerkMiddleware({
-  publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
-  secretKey: process.env.CLERK_SECRET_KEY,
-}));
-
+app.use(
+  express.json({
+    verify: (req: any, res, buf) => {
+      if (req.originalUrl && req.originalUrl.startsWith('/api/v1/auth/webhooks/clerk')) {
+        req.rawBody = buf.toString();
+      }
+    },
+  }),
+);
+app.use(
+  clerkMiddleware({
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+    secretKey: process.env.CLERK_SECRET_KEY,
+  }),
+);
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
@@ -64,7 +73,7 @@ if (
   (process.env.NODE_ENV !== 'production' || !process.env.VERCEL)
 ) {
   app.listen(port, () => {
-    console.log(`[server]: Server is running at http://localhost:${port}`);
+    // No-op for production logging handled by deployment platform
   });
 }
 

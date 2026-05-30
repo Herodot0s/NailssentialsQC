@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Plus, Menu } from 'lucide-react';
+import { Loader2, Plus, Menu, AlertTriangle } from 'lucide-react';
 import {
   getDailySales,
   getAllStaff,
@@ -14,6 +14,10 @@ import {
   getStaffSchedule,
   updateStaffSchedule,
   getAppointments,
+  getAllCustomers,
+  createCustomer,
+  updateCustomer,
+  deleteCustomer,
 } from '../api/apiClient';
 
 import { StaffTable } from '@/components/dashboard/staff/StaffTable';
@@ -32,6 +36,17 @@ import { LogWalkInDialog } from '@/components/dashboard/customers/LogWalkInDialo
 import { PayrollListView } from '@/components/dashboard/payroll/PayrollListView';
 import { PayrollDetailView } from '@/components/dashboard/payroll/PayrollDetailView';
 import { DeductionDetailSheet } from '@/components/dashboard/payroll/DeductionDetailSheet';
+import { CustomerTable } from '@/components/dashboard/customers/CustomerTable';
+import { CustomerDetailSheet } from '@/components/dashboard/customers/CustomerDetailSheet';
+import { AddCustomerDialog } from '@/components/dashboard/customers/AddCustomerDialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   getPayrollPeriods,
   getPayrollDetails,
@@ -117,6 +132,28 @@ const ManagerDashboard: React.FC = () => {
     profilePictureUrl: '',
     scheduledStart: '12:00',
     scheduledEnd: '22:00',
+  });
+
+  // Customers State
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [customerSearchQuery, setCustomerSearchQuery] = useState('');
+  const [customerCursor, setCustomerCursor] = useState<string | undefined>(undefined);
+  const [customerHasMore, setCustomerHasMore] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [showCustomerSheet, setShowCustomerSheet] = useState(false);
+  const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
+  const [isEditCustomer, setIsEditCustomer] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState<any>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [newCustomerForm, setNewCustomerForm] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    username: '',
+    password: '',
+    allergies: '',
+    notes: '',
+    isActive: true,
   });
 
 
@@ -236,6 +273,179 @@ const ManagerDashboard: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Fetch Customers function
+  const fetchCustomers = async (reset = false, searchStr = customerSearchQuery) => {
+    try {
+      const currentCursor = reset ? undefined : customerCursor;
+      const res = await getAllCustomers({
+        search: searchStr,
+        limit: 15,
+        cursor: currentCursor,
+      });
+      if (res.data.success) {
+        const { items, nextCursor, hasMore } = res.data.data;
+        if (reset) {
+          setCustomers(items);
+        } else {
+          setCustomers((prev) => [...prev, ...items]);
+        }
+        setCustomerCursor(nextCursor || undefined);
+        setCustomerHasMore(hasMore);
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch customers:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeView === 'customers') {
+      fetchCustomers(true);
+    }
+  }, [activeView]);
+
+  // Debounced/immediate search effect
+  useEffect(() => {
+    if (activeView !== 'customers') return;
+    const delayDebounceFn = setTimeout(() => {
+      fetchCustomers(true, customerSearchQuery);
+    }, 450);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [customerSearchQuery, activeView]);
+
+  const handleOpenAddCustomer = () => {
+    setNewCustomerForm({
+      fullName: '',
+      email: '',
+      phone: '',
+      username: '',
+      password: '',
+      allergies: '',
+      notes: '',
+      isActive: true,
+    });
+    setIsEditCustomer(false);
+    setShowAddCustomerModal(true);
+  };
+
+  const handleOpenEditCustomer = (customer: any) => {
+    setSelectedCustomer(customer);
+    setNewCustomerForm({
+      fullName: customer.fullName || '',
+      email: customer.email || '',
+      phone: customer.phone || '',
+      username: customer.username || '',
+      password: '',
+      allergies: customer.allergies || '',
+      notes: customer.notes || '',
+      isActive: customer.isActive,
+    });
+    setIsEditCustomer(true);
+    setShowAddCustomerModal(true);
+  };
+
+  const handleCreateOrUpdateCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (isEditCustomer && selectedCustomer) {
+        await updateCustomer(selectedCustomer.id, newCustomerForm);
+        setStatusModal({
+          open: true,
+          type: 'success',
+          title: 'Update Successful',
+          description: 'Customer profile updated successfully.',
+        });
+      } else {
+        await createCustomer(newCustomerForm);
+        setStatusModal({
+          open: true,
+          type: 'success',
+          title: 'Registration Successful',
+          description: 'New customer profile created and synced.',
+        });
+      }
+      setShowAddCustomerModal(false);
+      fetchCustomers(true);
+    } catch (err: any) {
+      const message = err.response?.data?.error?.message || err.message || 'Operation failed.';
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Operation Failed',
+        description: message,
+      });
+    }
+  };
+
+  const handleCustomerClick = (customer: any) => {
+    setSelectedCustomer(customer);
+    setShowCustomerSheet(true);
+  };
+
+  const handleCustomerDetailChange = (updatedCustomer: any) => {
+    setSelectedCustomer(updatedCustomer);
+  };
+
+  const handleCommitCustomerDetailChange = async () => {
+    if (!selectedCustomer) return;
+    try {
+      await updateCustomer(selectedCustomer.id, {
+        fullName: selectedCustomer.fullName,
+        email: selectedCustomer.email,
+        phone: selectedCustomer.phone,
+        username: selectedCustomer.username,
+        allergies: selectedCustomer.allergies,
+        notes: selectedCustomer.notes,
+        isActive: selectedCustomer.isActive,
+      });
+      setShowCustomerSheet(false);
+      setStatusModal({
+        open: true,
+        type: 'success',
+        title: 'Update Successful',
+        description: 'Customer profile updated successfully.',
+      });
+      fetchCustomers(true);
+    } catch (err: any) {
+      const message = err.response?.data?.error?.message || err.message || 'Failed to update customer.';
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Update Failed',
+        description: message,
+      });
+    }
+  };
+
+  const handleDeleteCustomerClick = (customer: any) => {
+    setCustomerToDelete(customer);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDeleteCustomer = async () => {
+    if (!customerToDelete) return;
+    try {
+      await deleteCustomer(customerToDelete.id);
+      setShowDeleteConfirm(false);
+      setCustomerToDelete(null);
+      setStatusModal({
+        open: true,
+        type: 'success',
+        title: 'Deletion Successful',
+        description: 'Customer profile and system access deleted successfully.',
+      });
+      fetchCustomers(true);
+    } catch (err: any) {
+      const message = err.response?.data?.error?.message || err.message || 'Failed to delete customer.';
+      setStatusModal({
+        open: true,
+        type: 'error',
+        title: 'Deletion Failed',
+        description: message,
+      });
+    }
+  };
 
   const handleAddStaff = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -386,7 +596,7 @@ const ManagerDashboard: React.FC = () => {
 
   const handleUpdateAttendance = async (id: number, status: string) => {
     try {
-      let data: UpdateAttendanceRequest = {};
+      const data: UpdateAttendanceRequest = {};
       if (status === 'Present') {
         data.checkIn = new Date().toISOString();
         data.tardinessMinutes = 0;
@@ -635,6 +845,22 @@ const ManagerDashboard: React.FC = () => {
           />
         )}
 
+        {activeView === 'customers' && (
+          <div className="animate-in fade-in duration-700">
+            <CustomerTable
+              customers={customers}
+              onCustomerClick={handleCustomerClick}
+              onEditClick={handleOpenEditCustomer}
+              onDeleteClick={handleDeleteCustomerClick}
+              onAddClick={handleOpenAddCustomer}
+              searchQuery={customerSearchQuery}
+              onSearchChange={setCustomerSearchQuery}
+              hasMore={customerHasMore}
+              onLoadMore={() => fetchCustomers(false)}
+            />
+          </div>
+        )}
+
         {activeView === 'exhibits' && (
           <div className="animate-in fade-in duration-700">
             <ManageExhibits />
@@ -756,6 +982,65 @@ const ManagerDashboard: React.FC = () => {
         isLocked={selectedPeriod?.is_locked || false}
         onAddDeduction={handleAddDeduction}
       />
+
+      <CustomerDetailSheet
+        open={showCustomerSheet}
+        onOpenChange={setShowCustomerSheet}
+        customer={selectedCustomer}
+        onCustomerChange={handleCustomerDetailChange}
+        onUpdateCustomer={handleCommitCustomerDetailChange}
+      />
+
+      <AddCustomerDialog
+        open={showAddCustomerModal}
+        onOpenChange={setShowAddCustomerModal}
+        form={newCustomerForm}
+        onFormChange={setNewCustomerForm}
+        onSubmit={handleCreateOrUpdateCustomer}
+        isEdit={isEditCustomer}
+      />
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="sm:max-w-md border border-[#bfc1b7] shadow-none rounded-[6px] p-0 overflow-hidden bg-white font-sans animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-[#eeefe9] p-8 border-b border-[#bfc1b7] flex items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-rose-50 flex items-center justify-center border border-rose-200 shrink-0">
+              <AlertTriangle className="h-5 w-5 text-rose-500" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl font-bold text-[#23251d] tracking-tight">
+                Delete Customer File
+              </DialogTitle>
+              <DialogDescription className="text-xs text-[#6c6e63] mt-1">
+                This action is irreversible and deletes Clerk access.
+              </DialogDescription>
+            </div>
+          </div>
+          <div className="p-8 space-y-6">
+            <p className="text-sm text-[#4d4f46] leading-relaxed">
+              Are you sure you want to permanently delete the client file for{' '}
+              <strong className="text-[#23251d]">{customerToDelete?.fullName}</strong>? 
+              This will remove all associated profile details, loyalty records, and system accounts.
+            </p>
+            <DialogFooter className="gap-3 sm:justify-end">
+              <Button
+                type="button"
+                variant="ghost"
+                className="rounded-[6px] h-11 px-6 text-[10px] font-[850] text-[#23251d] uppercase tracking-[0.15em] bg-[#e5e7e0] hover:bg-[#dcdfd2]"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Keep File
+              </Button>
+              <Button
+                type="button"
+                className="rounded-[6px] h-11 px-8 text-[10px] font-[850] uppercase tracking-[0.15em] bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/10"
+                onClick={handleConfirmDeleteCustomer}
+              >
+                Delete Permanently
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

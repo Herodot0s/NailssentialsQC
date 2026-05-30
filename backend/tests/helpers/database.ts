@@ -12,7 +12,7 @@ export const truncateAllTables = async () => {
     AND tablename != '_prisma_migrations';
   `;
 
-  const tableNames = tables.map((t) => `"${t.tablename}"`).join(', ');
+  const tableNames = (tables as any).map((t: any) => `"${t.tablename}"`).join(', ');
   if (tableNames.length > 0) {
     await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${tableNames} CASCADE;`);
   }

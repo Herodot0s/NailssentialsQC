@@ -20,8 +20,8 @@ export const getPayrollReport = async (req: AuthRequest, res: Response) => {
         .json({ success: false, message: 'Start date and end date are required' });
     }
 
-    const start = startOfDay(new Date(startDate as string));
-    const end = endOfDay(new Date(endDate as string));
+    const start = new Date(`${startDate}T00:00:00Z`);
+    const end = new Date(`${endDate}T23:59:59Z`);
 
     // 1. Get all staff profiles
     const staffProfiles = await prisma.staffProfile.findMany({
@@ -90,8 +90,11 @@ export const getPayrollReport = async (req: AuthRequest, res: Response) => {
 export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
   try {
     const today = new Date();
-    const start = startOfDay(today);
-    const end = endOfDay(today);
+    const dateStr = format(today, 'yyyy-MM-dd');
+    const start = new Date(`${dateStr}T00:00:00Z`);
+    const end = new Date(`${dateStr}T23:59:59Z`);
+
+    const dbDateToday = start;
 
     // Total Sales
     const salesData = await prisma.transaction.aggregate({
@@ -106,7 +109,7 @@ export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
     // Appointment counts by source
     const onlineAppointments = await prisma.appointment.count({
       where: {
-        appointment_date: start,
+        appointment_date: dbDateToday,
         is_walk_in: false,
         status: 'completed',
       },
@@ -114,7 +117,7 @@ export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
 
     const walkInAppointments = await prisma.appointment.count({
       where: {
-        appointment_date: start,
+        appointment_date: dbDateToday,
         is_walk_in: true,
         status: 'completed',
       },
@@ -124,7 +127,7 @@ export const getDailySalesStats = async (req: AuthRequest, res: Response) => {
     const serviceStats = await prisma.commission.groupBy({
       by: ['service_id'],
       where: {
-        commission_date: { gte: start, lte: end },
+        commission_date: dbDateToday,
       },
       _sum: { base_amount: true },
       _count: { id: true },
@@ -192,8 +195,8 @@ export const getHistoricalAnalytics = async (req: AuthRequest, res: Response) =>
       return res.status(400).json({ success: false, message: 'Date range required' });
     }
 
-    const start = startOfDay(new Date(startDate as string));
-    const end = endOfDay(new Date(endDate as string));
+    const start = new Date(`${startDate}T00:00:00Z`);
+    const end = new Date(`${endDate}T23:59:59Z`);
 
     const commissions = await prisma.commission.findMany({
       where: {
@@ -224,18 +227,21 @@ export const getHistoricalAnalytics = async (req: AuthRequest, res: Response) =>
     }
 
     const allCategories = await prisma.serviceCategory.findMany({
-      include: { services: true }
+      include: { services: true },
     });
     const allCategoryNames = allCategories.map((c) => c.name);
 
-    const dataMap: Record<string, DailyData & { servicesByCategory: Record<string, Record<string, number>> }> = {};
+    const dataMap: Record<
+      string,
+      DailyData & { servicesByCategory: Record<string, Record<string, number>> }
+    > = {};
 
     intervals.forEach((dateObj) => {
       const key = useMonthly ? format(dateObj, 'yyyy-MM') : format(dateObj, 'yyyy-MM-dd');
-      
+
       const initCategories: Record<string, number> = {};
       const initServicesByCategory: Record<string, Record<string, number>> = {};
-      
+
       allCategories.forEach((cat) => {
         initCategories[cat.name] = 0;
         initServicesByCategory[cat.name] = {};
@@ -254,8 +260,10 @@ export const getHistoricalAnalytics = async (req: AuthRequest, res: Response) =>
     });
 
     commissions.forEach((comm) => {
-      const key = useMonthly ? format(comm.commission_date, 'yyyy-MM') : format(comm.commission_date, 'yyyy-MM-dd');
-      
+      const key = useMonthly
+        ? format(comm.commission_date, 'yyyy-MM')
+        : format(comm.commission_date, 'yyyy-MM-dd');
+
       // If the exact date is outside our interval bounds but somehow matched, or start/end issues
       if (dataMap[key]) {
         const catName = comm.service.category.name;
@@ -270,8 +278,10 @@ export const getHistoricalAnalytics = async (req: AuthRequest, res: Response) =>
         if (!dataMap[key].services[svcName]) dataMap[key].services[svcName] = 0;
         dataMap[key].services[svcName] += amount;
 
-        if (!dataMap[key].servicesByCategory[catName]) dataMap[key].servicesByCategory[catName] = {};
-        if (!dataMap[key].servicesByCategory[catName][svcName]) dataMap[key].servicesByCategory[catName][svcName] = 0;
+        if (!dataMap[key].servicesByCategory[catName])
+          dataMap[key].servicesByCategory[catName] = {};
+        if (!dataMap[key].servicesByCategory[catName][svcName])
+          dataMap[key].servicesByCategory[catName][svcName] = 0;
         dataMap[key].servicesByCategory[catName][svcName] += amount;
       }
     });

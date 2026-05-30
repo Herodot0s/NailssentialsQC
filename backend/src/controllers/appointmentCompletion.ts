@@ -7,7 +7,6 @@ import {
   getMonth,
   getYear,
   startOfDay,
-  endOfDay,
   subMonths,
   startOfMonth,
   endOfMonth,
@@ -72,12 +71,6 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { paymentMethod, servicePhotoUrl, gcashReferenceNo } = req.validatedBody || req.body; // 'cash' | 'gcash'
-
-    console.log(`Completing appointment ${id}:`, {
-      paymentMethod,
-      servicePhotoUrl: !!servicePhotoUrl,
-      gcashReferenceNo,
-    });
 
     if (!paymentMethod) {
       return res.status(400).json({ success: false, message: 'Payment method is required' });
@@ -150,122 +143,122 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
       }
     }
 
-    // 2. Generate receipt number (REC-MMYYYY-NNNN)
+    // 2. Generate receipt number constants & date objects consistently aligned to Manila local time
     const today = new Date();
-    const monthYearStr = format(today, 'MMyyyy');
-    const startOfToday = startOfDay(today);
+    const manilaTodayStr = format(today, 'yyyy-MM-dd');
+    const localToday = new Date(manilaTodayStr + 'T00:00:00Z');
+    const monthYearStr = format(localToday, 'MMyyyy');
 
-    const transactionCount = await prisma.transaction.count({
-      where: {
-        transaction_date: {
-          gte: startOfToday,
-        },
-      },
-    });
-    const receiptNumber = `REC-${monthYearStr}-${(transactionCount + 1).toString().padStart(4, '0')}-${id}`;
+    let receiptNumber = '';
 
     // 3. Complete appointment and record transaction & commissions in a database transaction
-    console.log('Starting transaction for appointment completion');
     const result = await prisma.$transaction(async (tx) => {
-      try {
-        // Update appointment status
-        console.log('Updating appointment status');
-        await tx.appointment.update({
-          where: { id: parseInt(id as string) },
-          data: {
-            status: 'completed',
-            service_photo_url: servicePhotoUrl,
-          },
-        });
+      // Check current status inside transaction to prevent double completion
+      const currentAppt = await tx.appointment.findUnique({
+        where: { id: parseInt(id as string) },
+        select: { status: true },
+      });
 
-        // Also update all items to completed
-        await tx.appointmentItem.updateMany({
-          where: { appointment_id: parseInt(id as string) },
-          data: { status: 'completed' },
-        });
-
-        // Create transaction
-        console.log('Creating transaction record');
-        const transaction = await tx.transaction.create({
-          data: {
-            appointment_id: parseInt(id as string),
-            amount: totalAmount,
-            payment_method: paymentMethod as PaymentMethod,
-            status: 'completed',
-            receipt_number: receiptNumber,
-            gcash_reference_no: paymentMethod === 'gcash' ? gcashReferenceNo : null,
-          },
-        });
-
-        // Calculate and create commissions
-        console.log('Calculating base rate');
-        const baseRate = await getTieredCommissionRate(tx);
-
-        const commissionsCreated = [];
-        for (const item of appointment.items) {
-          console.log(`Processing commission for item ${item.id}, staff ${item.staff_id}`);
-          
-          const isHairService = item.service.category.name.toLowerCase().includes('hair');
-          const isHairSpecialist = item.staff.specializations?.toLowerCase().includes('hair');
-
-          let commissionRate: number;
-
-          if (isHairService && isHairSpecialist) {
-            const hasHitQuota = await checkHairSpecialtyQuota(item.staff_id, tx);
-            commissionRate = hasHitQuota ? 0.2 : 0.1;
-            console.log(`- Hair Service & Specialist detected. Rate: ${commissionRate * 100}% (Quota Hit: ${hasHitQuota})`);
-          } else {
-            commissionRate = baseRate;
-            console.log(`- Standard Service/Staff. Rate: ${commissionRate * 100}%`);
-          }
-
-          const commissionAmount = Number(item.price_at_booking) * commissionRate;
-
-          const commission = await tx.commission.create({
-            data: {
-              transaction_id: transaction.id,
-              staff_id: item.staff_id,
-              service_id: item.service_id,
-              base_amount: Number(item.price_at_booking),
-              commission_rate: commissionRate * 100,
-              commission_amount: commissionAmount,
-              commission_date: today,
-              period_week: getISOWeek(today),
-              period_month: getMonth(today) + 1,
-              period_year: getYear(today),
-            },
-          });
-          commissionsCreated.push(commission);
-
-
-          // Create in-app notification for staff member
-          await tx.notification.create({
-            data: {
-              user_id: item.staff.user_id,
-              type: 'APPOINTMENT_COMPLETED',
-              title: 'Appointment Completed',
-              message: `You completed an appointment. Commission: ₱${commissionAmount.toFixed(2)}`,
-            },
-          });
-        }
-
-        // Create in-app notification for customer
-        if (appointment.customer) {
-          await tx.notification.create({
-            data: {
-              user_id: appointment.customer.user_id,
-              type: 'APPOINTMENT_COMPLETED',
-              title: 'Appointment Completed',
-              message: `Your appointment on ${format(today, 'yyyy-MM-dd')} is complete. Receipt: ${receiptNumber}`,
-            },
-          });
-        }
-
-        return { transaction, commissions: commissionsCreated };
-      } catch (innerError) {
-        console.error('Error inside completion transaction:', innerError);
-        throw innerError;
+      if (currentAppt?.status === 'completed') {
+        throw new Error('Appointment is already completed');
       }
+
+      // Query transaction count inside the transaction block to prevent duplicate receipt numbers
+      const transactionCount = await tx.transaction.count({
+        where: {
+          transaction_date: {
+            gte: startOfDay(today),
+          },
+        },
+      });
+      receiptNumber = `REC-${monthYearStr}-${(transactionCount + 1).toString().padStart(4, '0')}-${id}`;
+
+      // Update appointment status
+      await tx.appointment.update({
+        where: { id: parseInt(id as string) },
+        data: {
+          status: 'completed',
+          service_photo_url: servicePhotoUrl,
+        },
+      });
+
+      // Also update all items to completed
+      await tx.appointmentItem.updateMany({
+        where: { appointment_id: parseInt(id as string) },
+        data: { status: 'completed' },
+      });
+
+      // Create transaction
+      const transaction = await tx.transaction.create({
+        data: {
+          appointment_id: parseInt(id as string),
+          amount: totalAmount,
+          payment_method: paymentMethod as PaymentMethod,
+          status: 'completed',
+          receipt_number: receiptNumber,
+          gcash_reference_no: paymentMethod === 'gcash' ? gcashReferenceNo : null,
+        },
+      });
+
+      // Calculate and create commissions
+      const baseRate = await getTieredCommissionRate(tx);
+
+      const commissionsCreated = [];
+      for (const item of appointment.items) {
+        const isHairService = item.service.category.name.toLowerCase().includes('hair');
+        const isHairSpecialist = item.staff.specializations?.toLowerCase().includes('hair');
+
+        let commissionRate: number;
+
+        if (isHairService && isHairSpecialist) {
+          const hasHitQuota = await checkHairSpecialtyQuota(item.staff_id, tx);
+          commissionRate = hasHitQuota ? 0.2 : 0.1;
+        } else {
+          commissionRate = baseRate;
+        }
+
+        const commissionAmount = Number(item.price_at_booking) * commissionRate;
+
+        const commission = await tx.commission.create({
+          data: {
+            transaction_id: transaction.id,
+            staff_id: item.staff_id,
+            service_id: item.service_id,
+            base_amount: Number(item.price_at_booking),
+            commission_rate: commissionRate * 100,
+            commission_amount: commissionAmount,
+            commission_date: localToday,
+            period_week: getISOWeek(localToday),
+            period_month: getMonth(localToday) + 1,
+            period_year: getYear(localToday),
+          },
+        });
+        commissionsCreated.push(commission);
+
+        // Create in-app notification for staff member
+        await tx.notification.create({
+          data: {
+            user_id: item.staff.user_id,
+            type: 'APPOINTMENT_COMPLETED',
+            title: 'Appointment Completed',
+            message: `You completed an appointment. Commission: ₱${commissionAmount.toFixed(2)}`,
+          },
+        });
+      }
+
+      // Create in-app notification for customer
+      if (appointment.customer) {
+        await tx.notification.create({
+          data: {
+            user_id: appointment.customer.user_id,
+            type: 'APPOINTMENT_COMPLETED',
+            title: 'Appointment Completed',
+            message: `Your appointment on ${manilaTodayStr} is complete. Receipt: ${receiptNumber}`,
+          },
+        });
+      }
+
+      return { transaction, commissions: commissionsCreated };
     });
 
     await logSystemAction(req as AuthRequest, 'COMMISSIONS_CREATED', 'Appointment', Number(id), {
@@ -300,6 +293,12 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
   } catch (error: unknown) {
     console.error('Complete appointment error details:', error);
     const message = error instanceof Error ? error.message : 'Failed to complete appointment';
+    if (error instanceof Error && error.message === 'Appointment is already completed') {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'ALREADY_COMPLETED', message },
+      });
+    }
     return res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_SERVER_ERROR', message },

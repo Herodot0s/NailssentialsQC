@@ -112,6 +112,8 @@ const Booking: React.FC = () => {
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(e.target.value);
+    setSelectedTime('');
+    setError(null);
   };
 
   const updateAddonQuantity = (addon: Addon, delta: number) => {
@@ -226,6 +228,24 @@ const Booking: React.FC = () => {
     [],
   );
 
+  const minTimeForSelectedDate = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (selectedDate !== todayStr) {
+      return '12:00';
+    }
+    const now = new Date();
+    const currentHours = now.getHours().toString().padStart(2, '0');
+    const currentMinutes = now.getMinutes().toString().padStart(2, '0');
+    const currentTimeStr = `${currentHours}:${currentMinutes}`;
+    return currentTimeStr > '12:00' ? currentTimeStr : '12:00';
+  }, [selectedDate]);
+
+  const isSlotInPast = (dateStr: string, timeStr: string) => {
+    const now = new Date();
+    const slotDateTime = new Date(`${dateStr}T${timeStr}`);
+    return slotDateTime < now;
+  };
+
   const finalTotalPrice = useMemo(() => {
     return totalPrice + selectedAddons.reduce((sum, a) => sum + a.price * a.quantity, 0);
   }, [totalPrice, selectedAddons]);
@@ -327,7 +347,7 @@ const Booking: React.FC = () => {
                         type="time"
                         value={selectedTime}
                         onChange={(e) => setSelectedTime(e.target.value)}
-                        min="12:00"
+                        min={minTimeForSelectedDate}
                         max="21:30"
                         className="h-9 rounded-md border-hairline focus:ring-2 focus:ring-accent-blue focus:border-accent-blue body-md bg-surface-card pr-10"
                       />
@@ -343,25 +363,32 @@ const Booking: React.FC = () => {
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="rounded-md border-hairline shadow-none bg-surface-card max-h-64">
-                        {slots.map((slot) => (
-                          <SelectItem
-                            key={slot.time}
-                            value={slot.time}
-                            disabled={!slot.available}
-                            className="py-2.5"
-                          >
-                            <div className="flex items-center justify-between w-full gap-4">
-                              <div className="flex items-center gap-2">
-                                <span className="body-md">{formatTime12h(slot.time)}</span>
+                        {slots.map((slot) => {
+                          const slotPassed = isSlotInPast(selectedDate, slot.time);
+                          return (
+                            <SelectItem
+                              key={slot.time}
+                              value={slot.time}
+                              disabled={!slot.available || slotPassed}
+                              className="py-2.5"
+                            >
+                              <div className="flex items-center justify-between w-full gap-4">
+                                <div className="flex items-center gap-2">
+                                  <span className="body-md">{formatTime12h(slot.time)}</span>
+                                </div>
+                                {!slot.available ? (
+                                  <span className="utility-xs text-accent-red-soft bg-accent-red/10 px-2 py-0.5 rounded-sm">
+                                    UNAVAILABLE
+                                  </span>
+                                ) : slotPassed ? (
+                                  <span className="utility-xs text-accent-red-soft bg-accent-red/10 px-2 py-0.5 rounded-sm">
+                                    PASSED
+                                  </span>
+                                ) : null}
                               </div>
-                              {!slot.available && (
-                                <span className="utility-xs text-accent-red-soft bg-accent-red/10 px-2 py-0.5 rounded-sm">
-                                  UNAVAILABLE
-                                </span>
-                              )}
-                            </div>
-                          </SelectItem>
-                        ))}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   )}

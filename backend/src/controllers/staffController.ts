@@ -165,7 +165,12 @@ export const createStaff = async (req: Request, res: Response) => {
         }
       } catch (clerkError: any) {
         console.error('Clerk sync error during creation:', clerkError);
-        return sendError(res, 'CLERK_SYNC_ERROR', `Failed to sync with Clerk: ${clerkError.message}`, 500);
+        return sendError(
+          res,
+          'CLERK_SYNC_ERROR',
+          `Failed to sync with Clerk: ${clerkError.message}`,
+          500,
+        );
       }
     }
 
@@ -300,7 +305,7 @@ export const updateStaff = async (req: Request, res: Response) => {
             base_commission_rate:
               baseCommissionRate !== undefined && baseCommissionRate !== null
                 ? parseFloat(baseCommissionRate as any)
-                : 0.10,
+                : 0.1,
             commission_tier:
               commissionTier !== undefined && commissionTier !== null
                 ? parseInt(commissionTier as any)
@@ -313,7 +318,8 @@ export const updateStaff = async (req: Request, res: Response) => {
     };
 
     if (password) {
-      data.password_hash = await bcrypt.hash(password, 10);
+      const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10);
+      data.password_hash = await bcrypt.hash(password, saltRounds);
     }
 
     // Sync changes to Clerk if necessary
@@ -322,7 +328,7 @@ export const updateStaff = async (req: Request, res: Response) => {
       try {
         const metadata: any = {};
         if (role) metadata.role = role;
-        
+
         if (Object.keys(metadata).length > 0) {
           await clerkClient.users.updateUserMetadata(existingUser.clerk_id, {
             publicMetadata: metadata,
@@ -330,10 +336,10 @@ export const updateStaff = async (req: Request, res: Response) => {
         }
 
         if (email && email !== existingUser.email) {
-          // This is complex in Clerk (usually requires verification), 
+          // This is complex in Clerk (usually requires verification),
           // but we can try to update the primary email if the manager is forced.
           // For now, just log it.
-          console.log(`Email change requested for user ${existingUser.clerk_id} to ${email}`);
+        // Sync email change
         }
       } catch (clerkError: any) {
         console.error('Clerk sync error during update:', clerkError);
@@ -352,7 +358,6 @@ export const updateStaff = async (req: Request, res: Response) => {
     await logSystemAction(req as AuthRequest, 'STAFF_UPDATED', 'Staff', idNum, {
       message: 'Updated staff profile',
     });
-
 
     res.json({
       success: true,
@@ -376,11 +381,24 @@ export const updateStaff = async (req: Request, res: Response) => {
 export const getStaffSchedule = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const idStr = (Array.isArray(id) ? id[0] : id) as string;
-    const schedule = await prisma.staffSchedule.findMany({
-      where: { staff_id: parseInt(idStr) },
+    const idNum = parseInt((Array.isArray(id) ? id[0] : id) as string, 10);
+
+    const user = await prisma.user.findUnique({
+      where: { id: idNum },
+      include: {
+        staff_profile: {
+          include: {
+            schedules: true,
+          },
+        },
+      },
     });
-    res.json({ success: true, data: schedule });
+
+    if (!user || !user.staff_profile) {
+      return sendError(res, 'NOT_FOUND', 'Staff member profile not found', 404);
+    }
+
+    res.json({ success: true, data: user.staff_profile.schedules });
   } catch (error: unknown) {
     console.error('Get schedule error:', error);
     const message = error instanceof Error ? error.message : 'Failed to fetch schedule';
@@ -397,6 +415,15 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
     const staffId =
       typeof staffIdParam === 'number' ? staffIdParam : parseInt(String(staffIdParam), 10);
     const { schedules } = req.validatedBody ?? req.body;
+
+    // Consolidate staff existence check
+    const staff = await prisma.user.findUnique({
+      where: { id: staffId },
+    });
+
+    if (!staff) {
+      return sendError(res, 'NOT_FOUND', 'Staff member not found', 404);
+    }
 
     // Use a transaction to update all schedules for the staff
     type ScheduleItem = {
@@ -454,7 +481,7 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
       const dayOfWeek = today.getUTCDay();
 
       // Find if any of the updated schedules match today's day of week
-      const todaySched = (schedules as ScheduleItem[]).find(s => s.day_of_week === dayOfWeek);
+      const todaySched = (schedules as ScheduleItem[]).find((s) => s.day_of_week === dayOfWeek);
       if (todaySched) {
         // Use exact date object to match @db.Date behavior in Prisma/Postgres
         await prisma.attendance.updateMany({
@@ -465,7 +492,7 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
           data: {
             scheduled_start: normalizeTime(todaySched.start_time),
             scheduled_end: normalizeTime(todaySched.end_time),
-          }
+          },
         });
       }
     } catch (err) {

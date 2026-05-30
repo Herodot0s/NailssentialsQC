@@ -23,7 +23,7 @@ const CACHE_TTL = 1000 * 60 * 15; // 15 minutes
 
 export const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const auth = getAuth(req);
-  
+
   if (!auth.userId) {
     return res.status(401).json({
       success: false,
@@ -41,14 +41,18 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     // 2. If not found by clerk_id, check if user exists with the same email (Link Account)
     if (!user) {
       const clerkUser = await clerkClient.users.getUser(auth.userId);
-      const email = clerkUser.emailAddresses.find(e => e.id === clerkUser.primaryEmailAddressId)?.emailAddress 
-                 || clerkUser.emailAddresses[0]?.emailAddress 
-                 || null;
-      
+      const email =
+        clerkUser.emailAddresses.find((e) => e.id === clerkUser.primaryEmailAddressId)
+          ?.emailAddress ||
+        clerkUser.emailAddresses[0]?.emailAddress ||
+        null;
+
       const fullName = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || 'User';
-      const primaryEmail = clerkUser.emailAddresses.find(e => e.id === clerkUser.primaryEmailAddressId);
+      const primaryEmail = clerkUser.emailAddresses.find(
+        (e) => e.id === clerkUser.primaryEmailAddressId,
+      );
       const isVerified = primaryEmail?.verification?.status === 'verified';
-      
+
       // Extract role from Clerk publicMetadata (default to customer)
       const clerkRole = (clerkUser.publicMetadata?.role as string) || 'customer';
       const role = ['manager', 'staff', 'customer'].includes(clerkRole) ? clerkRole : 'customer';
@@ -56,22 +60,19 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
       if (email) {
         user = await prisma.user.findFirst({
           where: {
-            OR: [
-              { email: email },
-              { username: email }
-            ]
+            OR: [{ email: email }, { username: email }],
           },
           include: { customer_profile: true, staff_profile: true },
         });
 
         if (user) {
           // Link existing account to Clerk and sync profile/role
-          user = await prisma.$transaction(async (tx) => {
+          user = (await prisma.$transaction(async (tx) => {
             const updatedUser = await tx.user.update({
               where: { id: user!.id },
-              data: { 
+              data: {
                 clerk_id: auth.userId,
-                role: role as any
+                role: role as any,
               },
             });
 
@@ -93,7 +94,7 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
               where: { id: updatedUser.id },
               include: { customer_profile: true, staff_profile: true },
             });
-          }) as any;
+          })) as any;
         }
       }
 
@@ -142,7 +143,7 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     const cached = verificationCache.get(auth.userId);
     const now = Date.now();
 
-    if (!cached || (now - cached.lastChecked) > CACHE_TTL) {
+    if (!cached || now - cached.lastChecked > CACHE_TTL) {
       const clerkUser = await clerkClient.users.getUser(auth.userId);
       const primaryEmail = clerkUser.emailAddresses.find(
         (e) => e.id === clerkUser.primaryEmailAddressId,
@@ -156,7 +157,7 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
           include: { customer_profile: true, staff_profile: true },
         });
       }
-      
+
       verificationCache.set(auth.userId, { isVerified, lastChecked: now });
     }
 
@@ -172,7 +173,6 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     };
     req.auth = auth;
     next();
-
   } catch (error) {
     console.error('Auth Middleware Error:', error);
     return res.status(401).json({
@@ -181,8 +181,6 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     });
   }
 };
-
-
 
 export const authorizeRoles = (...roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {

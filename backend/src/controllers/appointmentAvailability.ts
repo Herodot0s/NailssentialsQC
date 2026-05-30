@@ -15,19 +15,28 @@ import { sendSuccess } from '../utils/apiHelpers';
 
 export const getAvailableSlots = async (req: Request, res: Response) => {
   try {
-    const { date, count } = req.query; // YYYY-MM-DD
+    const { date, count, duration, slot_increment } = req.query; // YYYY-MM-DD
     if (!date) {
       return res.status(400).json({ success: false, message: 'Date is required' });
     }
     const requiredCount = count ? parseInt(count as string) : 1;
+    const requiredDuration = duration ? parseInt(duration as string) : 30;
+    const increment = slot_increment ? parseInt(slot_increment as string) : 30;
     const dateStr = Array.isArray(date) ? (date[0] as string) : (date as string);
     const dateOnly = getDatePart(dateStr);
 
     const OPERATING_HOURS = { start: 12, end: 22 }; // 12 PM to 10 PM
     const allSlots = [];
-    for (let h = OPERATING_HOURS.start; h < OPERATING_HOURS.end; h++) {
-      allSlots.push(`${h.toString().padStart(2, '0')}:00`);
-      allSlots.push(`${h.toString().padStart(2, '0')}:30`);
+
+    // Generate slots based on increment
+    let currentSlot = getFullDate(dateOnly, `${OPERATING_HOURS.start.toString().padStart(2, '0')}:00`);
+    const endOfDayTime = getFullDate(dateOnly, `${OPERATING_HOURS.end.toString().padStart(2, '0')}:00`);
+
+    while (currentSlot < endOfDayTime) {
+      const hours = currentSlot.getHours().toString().padStart(2, '0');
+      const minutes = currentSlot.getMinutes().toString().padStart(2, '0');
+      allSlots.push(`${hours}:${minutes}`);
+      currentSlot = addMinutes(currentSlot, increment);
     }
 
     // 1. Get all technicians
@@ -49,8 +58,8 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
       where: {
         appointment: {
           appointment_date: {
-            gte: startOfDay(parsedDate),
-            lte: endOfDay(parsedDate),
+            gte: `${dateOnly}T00:00:00Z`,
+            lte: `${dateOnly}T23:59:59Z`,
           },
         },
         status: { in: ['pending', 'confirmed', 'in_progress'] },
@@ -62,42 +71,65 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
       },
     });
 
-    // 3. For each slot, check if ANY technician is free
+    // 3. Pre-process busy intervals for each technician (O(A))
+    const techBusyIntervals = new Map<number, { start: number; end: number }[]>();
+    appointmentItems.forEach((item) => {
+      const start = getFullDate(dateOnly, item.start_time).getTime();
+      const end = getFullDate(dateOnly, item.end_time).getTime();
+      if (!techBusyIntervals.has(item.staff_id)) {
+        techBusyIntervals.set(item.staff_id, []);
+      }
+      techBusyIntervals.get(item.staff_id)!.push({ start, end });
+    });
+
+    // Sort intervals for each technician for efficient conflict checking (O(A log A))
+    techBusyIntervals.forEach((intervals) => {
+      intervals.sort((a, b) => a.start - b.start);
+    });
+
     const now = new Date();
     const isToday = dateOnly === getDatePart(now.toISOString());
+    const nowTime = now.getTime();
+    const operatingEndTime = getFullDate(
+      dateOnly,
+      `${OPERATING_HOURS.end.toString().padStart(2, '0')}:00`,
+    ).getTime();
 
+    // 4. For each slot, check availability efficiently (O(S * T))
     const slotsWithAvailability = allSlots.map((slotTime) => {
-      const slotStart = getFullDate(dateOnly, slotTime);
-      
+      const slotStartTime = getFullDate(dateOnly, slotTime).getTime();
+      const slotEndTime = slotStartTime + requiredDuration * 60000;
+
       // If it's today, filter out slots that have already passed
-      if (isToday && slotStart < now) {
+      if (isToday && slotStartTime < nowTime) {
         return {
           time: slotTime,
           available: false,
         };
       }
-      const slotEnd = addMinutes(slotStart, 30);
+
+      // Check if the service fits within operating hours
+      if (slotEndTime > operatingEndTime) {
+        return {
+          time: slotTime,
+          available: false,
+        };
+      }
 
       const availableTechnicians = technicians.filter((tech) => {
-        const techItems = appointmentItems.filter((item) => item.staff_id === tech.id);
+        const intervals = techBusyIntervals.get(tech.id);
+        if (!intervals) return true; // No appointments = available
 
-        const hasConflict = techItems.some((item) => {
-          const itemStart = getFullDate(dateOnly, item.start_time);
-          const itemEnd = getFullDate(dateOnly, item.end_time);
-
-          return areIntervalsOverlapping(
-            { start: slotStart, end: slotEnd },
-            { start: itemStart, end: itemEnd },
-          );
-        });
-
-        return !hasConflict;
+        // Check for overlap: slotStart < intervalEnd && slotEnd > intervalStart
+        return !intervals.some(
+          (interval) => slotStartTime < interval.end && slotEndTime > interval.start,
+        );
       });
 
       return {
         time: slotTime,
         available: availableTechnicians.length >= requiredCount,
-        availableTechnicianIds: availableTechnicians.map(t => t.id),
+        availableTechnicianIds: availableTechnicians.map((t) => t.id),
       };
     });
 
@@ -126,8 +158,8 @@ export const getCommissionSummary = async (req: AuthRequest, res: Response) => {
       where: {
         staff_id: staff.id,
         commission_date: {
-          gte: startOfDay(today),
-          lte: endOfDay(today),
+          gte: `${getDatePart(today.toISOString())}T00:00:00Z`,
+          lte: `${getDatePart(today.toISOString())}T23:59:59Z`,
         },
       },
       _sum: { commission_amount: true },
