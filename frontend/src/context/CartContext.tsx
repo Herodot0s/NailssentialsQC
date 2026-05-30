@@ -47,7 +47,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Migration/Merge: If logging in from guest, merge guest items into user cart
       if (cartLoadedForUser.current === null && currentUserId) {
         const guestCart = [...cart];
-        guestCart.forEach(guestItem => {
+        guestCart.forEach((guestItem) => {
           if (!newCart.find((i: CartItem) => i.serviceId === guestItem.serviceId)) {
             newCart.push(guestItem);
           }
@@ -65,10 +65,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Only persist if Clerk is loaded and we have loaded the cart for the current user
     if (!isLoaded || cartLoadedForUser.current === undefined) return;
-    
+
     const currentUserId = user?.id || null;
-    
-    // Safety check: Don't save if the cart state doesn't match the current user 
+
+    // Safety check: Don't save if the cart state doesn't match the current user
     // (prevents overwriting User B's cart with User A's state during transition)
     if (currentUserId !== cartLoadedForUser.current) return;
 

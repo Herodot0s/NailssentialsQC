@@ -140,7 +140,8 @@ export const ContactInfoSection: React.FC<ContactInfoSectionProps> = ({
                       Our Address
                     </h3>
                     <p className="text-[15px] text-muted-foreground leading-relaxed font-light">
-                      {address || '133-D Bukidnon Street, Corner Nueva Ecija, Bago Bantay, Quezon City, Philippines, 1105'}
+                      {address ||
+                        '133-D Bukidnon Street, Corner Nueva Ecija, Bago Bantay, Quezon City, Philippines, 1105'}
                     </p>
                   </div>
                 </div>
@@ -214,7 +215,9 @@ export const ContactInfoSection: React.FC<ContactInfoSectionProps> = ({
                       </span>
                       <div className="flex items-center gap-4">
                         <motion.a
-                          href={facebookLink || "https://www.facebook.com/profile.php?id=61576963875321"}
+                          href={
+                            facebookLink || 'https://www.facebook.com/profile.php?id=61576963875321'
+                          }
                           target="_blank"
                           rel="noopener noreferrer"
                           whileHover={{ scale: 1.1, y: -2 }}
@@ -226,7 +229,7 @@ export const ContactInfoSection: React.FC<ContactInfoSectionProps> = ({
                           </svg>
                         </motion.a>
                         <motion.a
-                          href={instagramLink || "https://www.instagram.com/nailssentialsqc"}
+                          href={instagramLink || 'https://www.instagram.com/nailssentialsqc'}
                           target="_blank"
                           rel="noopener noreferrer"
                           whileHover={{ scale: 1.1, y: -2 }}

@@ -11,15 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import {
-  User,
-  Sparkles,
-  Phone,
-  Mail,
-  ShieldAlert,
-  FileText,
-  Key,
-} from 'lucide-react';
+import { User, Sparkles, Phone, Mail, ShieldAlert, FileText, Key, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CustomerForm {
@@ -91,7 +83,7 @@ export const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
       (form.username ? 1 : 0) +
       (form.notes ? 1 : 0) +
       (form.allergies ? 1 : 0)) *
-      16.6
+      16.6,
   );
 
   return (
@@ -169,7 +161,7 @@ export const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
                   <div
                     className={cn(
                       'absolute left-0 bottom-0 h-0.5 bg-[#B8794E] transition-all duration-300',
-                      focusedField === 'fullName' ? 'w-full' : 'w-0'
+                      focusedField === 'fullName' ? 'w-full' : 'w-0',
                     )}
                   />
                 </div>
@@ -189,7 +181,7 @@ export const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
                   <div
                     className={cn(
                       'absolute left-0 bottom-0 h-0.5 bg-[#B8794E] transition-all duration-300',
-                      focusedField === 'email' ? 'w-full' : 'w-0'
+                      focusedField === 'email' ? 'w-full' : 'w-0',
                     )}
                   />
                 </div>
@@ -199,9 +191,7 @@ export const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
                     value={form.phone}
                     onFocus={() => setFocusedField('phone')}
                     onBlur={() => setFocusedField(null)}
-                    onChange={(e) =>
-                      onFormChange({ ...form, phone: formatPhone(e.target.value) })
-                    }
+                    onChange={(e) => onFormChange({ ...form, phone: formatPhone(e.target.value) })}
                     placeholder="Phone Number (e.g. +63 917...)"
                     className="rounded-[6px] border-[#bfc1b7] h-12 bg-white text-sm focus:ring-0 focus:border-[#23251d] transition-all"
                   />
@@ -209,7 +199,7 @@ export const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
                   <div
                     className={cn(
                       'absolute left-0 bottom-0 h-0.5 bg-[#B8794E] transition-all duration-300',
-                      focusedField === 'phone' ? 'w-full' : 'w-0'
+                      focusedField === 'phone' ? 'w-full' : 'w-0',
                     )}
                   />
                 </div>
@@ -227,7 +217,7 @@ export const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
                   <div
                     className={cn(
                       'absolute left-0 bottom-0 h-0.5 bg-[#B8794E] transition-all duration-300',
-                      focusedField === 'username' ? 'w-full' : 'w-0'
+                      focusedField === 'username' ? 'w-full' : 'w-0',
                     )}
                   />
                 </div>
@@ -246,7 +236,7 @@ export const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
                   <div
                     className={cn(
                       'absolute left-0 bottom-0 h-0.5 bg-[#B8794E] transition-all duration-300',
-                      focusedField === 'password' ? 'w-full' : 'w-0'
+                      focusedField === 'password' ? 'w-full' : 'w-0',
                     )}
                   />
                 </div>
@@ -304,7 +294,7 @@ export const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
                 'rounded-[6px] px-10 h-12 font-[850] text-xs uppercase tracking-[0.15em] transition-all relative overflow-hidden active:scale-[0.97]',
                 isSubmitting
                   ? 'bg-[#bfc1b7]'
-                  : 'bg-primary text-white hover:bg-primary/95 shadow-md shadow-primary/15'
+                  : 'bg-primary text-white hover:bg-primary/95 shadow-md shadow-primary/15',
               )}
             >
               <div className="flex items-center gap-2 relative z-10">

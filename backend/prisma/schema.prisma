@@ -394,6 +394,8 @@ model Review {
   appointment_item_id    Int             @unique
   rating                 Int
   tags                   Json?
+  comment                String?
+  image_url              String?
   is_approved_for_public Boolean         @default(false)
   created_at             DateTime        @default(now())
   appointment_item       AppointmentItem @relation(fields: [appointment_item_id], references: [id])

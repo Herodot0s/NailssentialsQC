@@ -27,10 +27,26 @@ interface RevenueTabProps {
 }
 
 const DIVERSE_COLORS = [
-  '#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#073b4c',
-  '#e07a5f', '#3d405b', '#81b29a', '#f2cc8f', '#9b5de5',
-  '#f15bb5', '#fee440', '#00bbf9', '#00f5d4', '#ff9f1c',
-  '#2ec4b6', '#ffbf69', '#8338ec', '#ff006e', '#8ac926',
+  '#ef476f',
+  '#ffd166',
+  '#06d6a0',
+  '#118ab2',
+  '#073b4c',
+  '#e07a5f',
+  '#3d405b',
+  '#81b29a',
+  '#f2cc8f',
+  '#9b5de5',
+  '#f15bb5',
+  '#fee440',
+  '#00bbf9',
+  '#00f5d4',
+  '#ff9f1c',
+  '#2ec4b6',
+  '#ffbf69',
+  '#8338ec',
+  '#ff006e',
+  '#8ac926',
 ];
 
 const formatCurrency = (v: number) =>
@@ -47,7 +63,10 @@ const formatCompact = (v: number) =>
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white shadow-lg border border-gray-100 p-4 rounded-xl" style={{ borderRadius: '12px' }}>
+    <div
+      className="bg-white shadow-lg border border-gray-100 p-4 rounded-xl"
+      style={{ borderRadius: '12px' }}
+    >
       <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">
         {label}
       </p>
@@ -80,7 +99,7 @@ export const RevenueTab: React.FC<RevenueTabProps> = ({ dateRange }) => {
     const names = new Set<string>();
     if (Array.isArray(data)) {
       data.forEach((d: any) =>
-        Object.keys(d.servicesByCategory?.[selectedCategory] || {}).forEach((n) => names.add(n))
+        Object.keys(d.servicesByCategory?.[selectedCategory] || {}).forEach((n) => names.add(n)),
       );
     }
     return Array.from(names).sort();
@@ -94,7 +113,7 @@ export const RevenueTab: React.FC<RevenueTabProps> = ({ dateRange }) => {
       const names = new Set<string>();
       if (Array.isArray(data)) {
         data.forEach((d: any) =>
-          Object.keys(d.servicesByCategory?.[name] || {}).forEach((n) => names.add(n))
+          Object.keys(d.servicesByCategory?.[name] || {}).forEach((n) => names.add(n)),
         );
       }
       setSelectedServices(Array.from(names).sort());
@@ -205,7 +224,9 @@ export const RevenueTab: React.FC<RevenueTabProps> = ({ dateRange }) => {
         {/* Multi-Select Services Filter */}
         {selectedCategory !== 'All' && servicesInCategory.length > 0 && (
           <div className="flex flex-wrap items-center gap-3 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
-            <span className="text-xs font-semibold tracking-wider uppercase text-muted-foreground">Filter Services:</span>
+            <span className="text-xs font-semibold tracking-wider uppercase text-muted-foreground">
+              Filter Services:
+            </span>
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
@@ -237,7 +258,7 @@ export const RevenueTab: React.FC<RevenueTabProps> = ({ dateRange }) => {
                     checked={selectedServices.includes(service)}
                     onCheckedChange={(checked: boolean) => {
                       setSelectedServices((prev) =>
-                        checked ? [...prev, service] : prev.filter((s) => s !== service)
+                        checked ? [...prev, service] : prev.filter((s) => s !== service),
                       );
                     }}
                   >
@@ -254,14 +275,21 @@ export const RevenueTab: React.FC<RevenueTabProps> = ({ dateRange }) => {
       <Card className="rounded-2xl border border-gray-100 shadow-sm bg-white overflow-hidden">
         <CardHeader className="border-b border-gray-50 bg-gray-50/50">
           <CardTitle className="font-serif text-2xl font-light !uppercase-none !tracking-normal !text-2xl">
-            {selectedCategory === 'All' ? 'Revenue by Category' : `Revenue by Service: ${selectedCategory}`}
+            {selectedCategory === 'All'
+              ? 'Revenue by Category'
+              : `Revenue by Service: ${selectedCategory}`}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-              <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#666' }} />
+              <XAxis
+                dataKey="date"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: '#666' }}
+              />
               <YAxis
                 axisLine={false}
                 tickLine={false}
@@ -295,7 +323,12 @@ export const RevenueTab: React.FC<RevenueTabProps> = ({ dateRange }) => {
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-              <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#666' }} />
+              <XAxis
+                dataKey="date"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: '#666' }}
+              />
               <YAxis
                 axisLine={false}
                 tickLine={false}

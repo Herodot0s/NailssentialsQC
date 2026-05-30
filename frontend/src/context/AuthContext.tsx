@@ -3,7 +3,6 @@ import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import apiClient, { setTokenProvider } from '../api/apiClient';
 import type { User } from '@/types/User';
 
-
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
@@ -38,8 +37,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       try {
         // Give the interceptor a moment to get the token provider
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         // Fetch/Sync user with local DB
         const response = await apiClient.get('/auth/me');
         if (response.data.success) {
@@ -56,12 +55,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     syncUser();
   }, [isClerkLoaded, isSignedIn]);
 
-
   const login = (userData: User) => {
     // This will be handled by Clerk components now, but we keep the signature for compatibility
     setUser(userData);
   };
-
 
   const logout = async () => {
     await signOut();
@@ -88,7 +85,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -96,4 +92,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

@@ -408,31 +408,32 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div className="relative group">
-                    <Input
-                      required
-                      type="email"
-                      value={form.email}
-                      onFocus={() => setFocusedField('cre-email')}
-                      onBlur={() => setFocusedField(null)}
-                      onChange={(e) => onFormChange({ ...form, email: e.target.value })}
-                      placeholder="Email Address"
-                      className="rounded-[6px] border-[#bfc1b7] h-12 bg-[#ffffff] font-['IBM_Plex_Sans_Variable'] text-[15px] px-5 focus:ring-0 focus:border-[#23251d] group-hover:border-[#6c6e63]"
-                    />
-                  </div>
-                  <div className="relative group">
-                    <Input
-                      required
-                      value={form.phone}
-                      onFocus={() => setFocusedField('cre-phone')}
-                      onBlur={() => setFocusedField(null)}
-                      onChange={(e) =>
-                        onFormChange({ ...form, phone: formatPhone(e.target.value) })
-                      }
-                      placeholder="Phone Number"
-                      className="rounded-[6px] border-[#bfc1b7] h-12 bg-[#ffffff] font-['IBM_Plex_Sans_Variable'] text-[15px] px-5 focus:ring-0 focus:border-[#23251d] group-hover:border-[#6c6e63]"
-                    />
-                    <Phone className="absolute right-4 top-3.5 h-5 w-5 text-[#bfc1b7]" />
+                    <div className="relative group">
+                      <Input
+                        required
+                        type="email"
+                        value={form.email}
+                        onFocus={() => setFocusedField('cre-email')}
+                        onBlur={() => setFocusedField(null)}
+                        onChange={(e) => onFormChange({ ...form, email: e.target.value })}
+                        placeholder="Email Address"
+                        className="rounded-[6px] border-[#bfc1b7] h-12 bg-[#ffffff] font-['IBM_Plex_Sans_Variable'] text-[15px] px-5 focus:ring-0 focus:border-[#23251d] group-hover:border-[#6c6e63]"
+                      />
+                    </div>
+                    <div className="relative group">
+                      <Input
+                        required
+                        value={form.phone}
+                        onFocus={() => setFocusedField('cre-phone')}
+                        onBlur={() => setFocusedField(null)}
+                        onChange={(e) =>
+                          onFormChange({ ...form, phone: formatPhone(e.target.value) })
+                        }
+                        placeholder="Phone Number"
+                        className="rounded-[6px] border-[#bfc1b7] h-12 bg-[#ffffff] font-['IBM_Plex_Sans_Variable'] text-[15px] px-5 focus:ring-0 focus:border-[#23251d] group-hover:border-[#6c6e63]"
+                      />
+                      <Phone className="absolute right-4 top-3.5 h-5 w-5 text-[#bfc1b7]" />
+                    </div>
                   </div>
                 </div>
               </div>

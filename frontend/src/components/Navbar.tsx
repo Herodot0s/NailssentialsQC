@@ -27,7 +27,6 @@ import { SignInButton, SignUpButton, useUser, useClerk } from '@clerk/clerk-reac
 import NotificationBell from './NotificationBell';
 import { useCart } from '../context/CartContext';
 
-
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const { user: clerkUser, isSignedIn, isLoaded: isClerkLoaded } = useUser();
@@ -38,16 +37,11 @@ const Navbar: React.FC = () => {
   // Get role from either local DB or Clerk metadata (for immediate sync)
   const userRole = user?.role || (clerkUser?.publicMetadata?.role as string);
 
-
-
   const isStaffOrManager = userRole === 'staff' || userRole === 'manager';
   const showCartIcon = !isStaffOrManager;
 
   const CartIcon = (
-    <Link
-      to="/booking"
-      className="relative text-body hover:text-ink transition-all p-2"
-    >
+    <Link to="/booking" className="relative text-body hover:text-ink transition-all p-2">
       <ShoppingCart className="h-5 w-5 stroke-[1.8]" />
       {isClerkLoaded && cart.length > 0 && (
         <span className="absolute top-1 right-1 bg-primary text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center shadow-sm">
@@ -218,9 +212,7 @@ const Navbar: React.FC = () => {
                   </button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <Button
-                    className="h-10 px-6 rounded-full bg-primary text-white hover:bg-primary-pressed transition-all uppercase tracking-[0.2em] text-[10px] font-extrabold shadow-sm"
-                  >
+                  <Button className="h-10 px-6 rounded-full bg-primary text-white hover:bg-primary-pressed transition-all uppercase tracking-[0.2em] text-[10px] font-extrabold shadow-sm">
                     Sign Up
                   </Button>
                 </SignUpButton>

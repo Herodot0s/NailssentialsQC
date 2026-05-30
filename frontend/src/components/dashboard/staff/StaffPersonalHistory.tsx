@@ -15,7 +15,6 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { formatTime12h } from '@/lib/utils';
 
-
 interface StaffPersonalHistoryProps {
   appointments: Array<{
     id: number;
@@ -40,7 +39,6 @@ export const StaffPersonalHistory: React.FC<StaffPersonalHistoryProps> = ({
   staffProfileId,
 }) => {
   const [selectedWork, setSelectedWork] = React.useState<any>(null);
-
 
   const safeAppointments = Array.isArray(appointments) ? appointments : [];
   const myWork = safeAppointments

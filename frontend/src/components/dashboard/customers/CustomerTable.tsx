@@ -158,7 +158,9 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({
                   <TableCell>
                     <Badge
                       className={`rounded-md border-none text-[10px] font-semibold uppercase tracking-widest ${
-                        customer.isActive ? 'bg-forest-confirm text-white' : 'bg-bisque-wash text-warm-stone'
+                        customer.isActive
+                          ? 'bg-forest-confirm text-white'
+                          : 'bg-bisque-wash text-warm-stone'
                       }`}
                     >
                       {customer.isActive ? 'Active' : 'Deactivated'}

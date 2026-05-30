@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { Button } from '../button';
-import React from 'react';
 
 describe('Button Component', () => {
   it('renders correctly with default props', () => {
@@ -21,7 +20,7 @@ describe('Button Component', () => {
     render(
       <Button asChild>
         <a href="/test">Link Button</a>
-      </Button>
+      </Button>,
     );
     const link = screen.getByRole('link', { name: /link button/i });
     expect(link).toBeInTheDocument();

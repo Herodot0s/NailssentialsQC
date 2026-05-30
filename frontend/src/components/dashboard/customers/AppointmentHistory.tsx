@@ -8,7 +8,6 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { formatTime12h } from '@/lib/utils';
 
-
 interface AppointmentHistoryProps {
   appointments: Array<{
     id: number;
@@ -29,7 +28,6 @@ export const AppointmentHistory: React.FC<AppointmentHistoryProps> = ({ appointm
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'online' | 'walkin'>('all');
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
-
 
   const safeAppointments = Array.isArray(appointments) ? appointments : [];
   const filteredAppointments = safeAppointments.filter((app) => {

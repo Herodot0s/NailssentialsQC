@@ -109,7 +109,9 @@ export const CustomerDetailSheet: React.FC<CustomerDetailSheetProps> = ({
                   </SheetTitle>
                   <SheetDescription className="text-[#4d4f46] text-sm mt-1 flex items-center gap-2 font-medium">
                     <User className="h-3.5 w-3.5 opacity-60" /> Registered{' '}
-                    {customer.createdAt ? format(new Date(customer.createdAt), 'MMMM yyyy') : 'Recently'}
+                    {customer.createdAt
+                      ? format(new Date(customer.createdAt), 'MMMM yyyy')
+                      : 'Recently'}
                   </SheetDescription>
                 </div>
               </SheetHeader>
@@ -205,7 +207,8 @@ export const CustomerDetailSheet: React.FC<CustomerDetailSheetProps> = ({
                       <div className="grid gap-4">
                         <div className="p-5 bg-white border border-[#bfc1b7] rounded-[6px] space-y-2">
                           <Label className="text-[10px] uppercase font-bold text-rose-500 tracking-wider flex items-center gap-1.5">
-                            <ShieldAlert className="h-3.5 w-3.5" /> Medical Allergies / Contraindications
+                            <ShieldAlert className="h-3.5 w-3.5" /> Medical Allergies /
+                            Contraindications
                           </Label>
                           <Textarea
                             placeholder="Specify nail allergies, skin conditions, chemical sensitivities..."
@@ -219,7 +222,8 @@ export const CustomerDetailSheet: React.FC<CustomerDetailSheetProps> = ({
 
                         <div className="p-5 bg-white border border-[#bfc1b7] rounded-[6px] space-y-2">
                           <Label className="text-[10px] uppercase font-bold text-[#6c6e63] tracking-wider flex items-center gap-1.5">
-                            <Sparkles className="h-3.5 w-3.5 text-primary" /> Ritual Preferences & General Notes
+                            <Sparkles className="h-3.5 w-3.5 text-primary" /> Ritual Preferences &
+                            General Notes
                           </Label>
                           <Textarea
                             placeholder="Service preferences (shape, colors, drinks, talkative or silent service)..."
@@ -312,8 +316,8 @@ export const CustomerDetailSheet: React.FC<CustomerDetailSheetProps> = ({
                                   app.status === 'completed'
                                     ? 'bg-[#d9eddf] text-[#2c8c66]'
                                     : app.status === 'cancelled'
-                                    ? 'bg-[#f7d6d3] text-[#cd4239]'
-                                    : 'bg-blue-50 text-blue-600'
+                                      ? 'bg-[#f7d6d3] text-[#cd4239]'
+                                      : 'bg-blue-50 text-blue-600'
                                 }`}
                               >
                                 {app.status}

@@ -53,7 +53,6 @@ apiClient.interceptors.request.use(
   },
 );
 
-
 // Response interceptor for handling errors
 apiClient.interceptors.response.use(
   (response) => response,
@@ -136,7 +135,7 @@ export const addDeduction = (data: {
 export const deleteDeduction = (id: number) => apiClient.delete(`/payroll/deductions/${id}`);
 export const generateNextPeriod = () => apiClient.post('/payroll/periods/generate');
 export const lockPayroll = (id: number) => apiClient.post(`/payroll/periods/${id}/lock`);
-export const exportPayrollExcel = (id: number) => 
+export const exportPayrollExcel = (id: number) =>
   apiClient.get(`/payroll/export/${id}`, { responseType: 'blob' });
 
 // Payroll Setup
@@ -284,13 +283,17 @@ export const deletePackage = (id: number) =>
   apiClient.delete<{ success: boolean; message: string }>(`/packages/${id}`);
 
 // Addon endpoints
-export const getAddons = (params?: { showAll?: boolean }) =>
-  apiClient.get('/addons', { params });
-export const createAddon = (data: { name: string; description?: string; price: number; is_active?: boolean }) =>
-  apiClient.post('/addons', data);
-export const updateAddon = (id: number, data: { name?: string; description?: string; price?: number; is_active?: boolean }) =>
-  apiClient.put(`/addons/${id}`, data);
-export const deleteAddon = (id: number) =>
-  apiClient.delete(`/addons/${id}`);
+export const getAddons = (params?: { showAll?: boolean }) => apiClient.get('/addons', { params });
+export const createAddon = (data: {
+  name: string;
+  description?: string;
+  price: number;
+  is_active?: boolean;
+}) => apiClient.post('/addons', data);
+export const updateAddon = (
+  id: number,
+  data: { name?: string; description?: string; price?: number; is_active?: boolean },
+) => apiClient.put(`/addons/${id}`, data);
+export const deleteAddon = (id: number) => apiClient.delete(`/addons/${id}`);
 
 export default apiClient;

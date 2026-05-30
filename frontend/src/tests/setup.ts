@@ -36,4 +36,3 @@ window.ResizeObserver = vi.fn().mockImplementation(() => ({
 // Mock URL.createObjectURL
 window.URL.createObjectURL = vi.fn();
 window.URL.revokeObjectURL = vi.fn();
-

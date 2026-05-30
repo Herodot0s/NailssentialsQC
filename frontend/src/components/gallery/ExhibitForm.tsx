@@ -11,7 +11,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Loader2, Upload, X, Sparkles } from 'lucide-react';
-import { getAllStaff, getServices, uploadFile, createExhibit, updateExhibit } from '../../api/apiClient';
+import {
+  getAllStaff,
+  getServices,
+  uploadFile,
+  createExhibit,
+  updateExhibit,
+} from '../../api/apiClient';
 import type { StaffMember, Service, Exhibit } from '../../types/api';
 
 interface ExhibitFormProps {
@@ -162,12 +168,19 @@ const ExhibitForm: React.FC<ExhibitFormProps> = ({ initialData, onSuccess, onCan
               Artist (Staff) <span className="text-primary">*</span>
             </Label>
             <Select value={staffId} onValueChange={(val) => setStaffId(val || '')} required>
-              <SelectTrigger id="staff" className="rounded-none border-gray-200 h-14 focus:ring-primary/20">
+              <SelectTrigger
+                id="staff"
+                className="rounded-none border-gray-200 h-14 focus:ring-primary/20"
+              >
                 <SelectValue placeholder="Select Artist" />
               </SelectTrigger>
               <SelectContent className="rounded-none border-none shadow-2xl">
                 {staff.map((s) => (
-                  <SelectItem key={s.id} value={s.staffProfileId.toString()} className="rounded-none py-3">
+                  <SelectItem
+                    key={s.id}
+                    value={s.staffProfileId.toString()}
+                    className="rounded-none py-3"
+                  >
                     {s.fullName}
                   </SelectItem>
                 ))}
@@ -183,11 +196,16 @@ const ExhibitForm: React.FC<ExhibitFormProps> = ({ initialData, onSuccess, onCan
               Service Context
             </Label>
             <Select value={serviceId} onValueChange={(val) => setServiceId(val || '')}>
-              <SelectTrigger id="service" className="rounded-none border-gray-200 h-14 focus:ring-primary/20">
+              <SelectTrigger
+                id="service"
+                className="rounded-none border-gray-200 h-14 focus:ring-primary/20"
+              >
                 <SelectValue placeholder="None" />
               </SelectTrigger>
               <SelectContent className="rounded-none border-none shadow-2xl">
-                <SelectItem value="none" className="rounded-none py-3 italic">None</SelectItem>
+                <SelectItem value="none" className="rounded-none py-3 italic">
+                  None
+                </SelectItem>
                 {services.map((s) => (
                   <SelectItem key={s.id} value={s.id.toString()} className="rounded-none py-3">
                     {s.name}
@@ -202,13 +220,21 @@ const ExhibitForm: React.FC<ExhibitFormProps> = ({ initialData, onSuccess, onCan
           <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground">
             Display Image <span className="text-primary">*</span>
           </Label>
-          <div className={cn(
-            "mt-1 flex justify-center px-6 pt-10 pb-10 border-2 border-dashed rounded-none transition-all duration-500",
-            previewUrl ? "border-primary/20 bg-primary/5" : "border-gray-200 hover:border-primary/40 bg-gray-50/50"
-          )}>
+          <div
+            className={cn(
+              'mt-1 flex justify-center px-6 pt-10 pb-10 border-2 border-dashed rounded-none transition-all duration-500',
+              previewUrl
+                ? 'border-primary/20 bg-primary/5'
+                : 'border-gray-200 hover:border-primary/40 bg-gray-50/50',
+            )}
+          >
             {previewUrl ? (
               <div className="relative group/preview w-full max-w-xs aspect-[4/5] max-h-[350px] shadow-2xl overflow-hidden bg-white">
-                <img src={previewUrl} alt="Preview" className="w-full h-full object-cover transition-transform duration-700 group-hover/preview:scale-110" />
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover/preview:scale-110"
+                />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
                   <Button
                     type="button"

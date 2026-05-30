@@ -150,16 +150,17 @@ export const createStaff = async (req: Request, res: Response) => {
           });
         } else {
           // Create user in Clerk
-          const nameParts = fullName.split(' ');
-          const firstName = nameParts[0];
-          const lastName = nameParts.slice(1).join(' ') || ' ';
+          const nameParts = fullName.trim().split(/\s+/);
+          const firstName = nameParts[0] || 'User';
+          const lastName = nameParts.slice(1).join(' ') || 'Staff';
 
           const newClerkUser = await clerkClient.users.createUser({
             emailAddress: [email],
             firstName,
             lastName,
             publicMetadata: { role: targetRole },
-            // Skip password, they will use Clerk's flow
+            password: password,
+            username: username,
           });
           clerkId = newClerkUser.id;
         }

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { getAppointments, submitReview, cancelAppointment } from '../api/apiClient';
+import { getAppointments, submitReview, cancelAppointment, uploadFile } from '../api/apiClient';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, User, Loader2, AlertCircle, Receipt, Star, XCircle } from 'lucide-react';
+import { Calendar, User, Loader2, AlertCircle, Receipt, Star, XCircle, X } from 'lucide-react';
 import ReceiptModal from '@/components/ReceiptModal';
 import type { AppointmentItem, Appointment, AppointmentWithServices } from '@/types/api';
 import {
@@ -18,7 +18,6 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { formatTime12h } from '@/lib/utils';
-
 
 const CustomerAppointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -35,7 +34,13 @@ const CustomerAppointments: React.FC = () => {
     tags: [] as string[],
     serviceName: '',
     staffName: '',
+    comment: '',
+    imageUrl: '',
   });
+
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const reviewFileInputRef = useRef<HTMLInputElement>(null);
 
   // Cancellation State
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -58,18 +63,18 @@ const CustomerAppointments: React.FC = () => {
       if (res.data.success) {
         const aptData = res.data.data;
         const aptItems = Array.isArray(aptData) ? aptData : aptData?.items || [];
-        
+
         const now = new Date();
         const upcoming: Appointment[] = [];
         const past: Appointment[] = [];
 
         aptItems.forEach((apt: Appointment) => {
-          const datePart = apt.appointment_date.includes('T') 
-            ? apt.appointment_date.split('T')[0] 
+          const datePart = apt.appointment_date.includes('T')
+            ? apt.appointment_date.split('T')[0]
             : apt.appointment_date;
           const firstItemTime = apt.items[0]?.start_time || '00:00';
           const aptDateTime = new Date(`${datePart}T${firstItemTime}`);
-          
+
           const isUpcomingStatus = apt.status === 'pending' || apt.status === 'confirmed';
           if (isUpcomingStatus && aptDateTime >= now) {
             upcoming.push(apt);
@@ -80,8 +85,12 @@ const CustomerAppointments: React.FC = () => {
 
         // Upcoming: closest first (ascending)
         upcoming.sort((a, b) => {
-          const datePartA = a.appointment_date.includes('T') ? a.appointment_date.split('T')[0] : a.appointment_date;
-          const datePartB = b.appointment_date.includes('T') ? b.appointment_date.split('T')[0] : b.appointment_date;
+          const datePartA = a.appointment_date.includes('T')
+            ? a.appointment_date.split('T')[0]
+            : a.appointment_date;
+          const datePartB = b.appointment_date.includes('T')
+            ? b.appointment_date.split('T')[0]
+            : b.appointment_date;
           const timeA = new Date(`${datePartA}T${a.items[0]?.start_time || '00:00'}`).getTime();
           const timeB = new Date(`${datePartB}T${b.items[0]?.start_time || '00:00'}`).getTime();
           return timeA - timeB;
@@ -89,8 +98,12 @@ const CustomerAppointments: React.FC = () => {
 
         // Past: newest first (descending)
         past.sort((a, b) => {
-          const datePartA = a.appointment_date.includes('T') ? a.appointment_date.split('T')[0] : a.appointment_date;
-          const datePartB = b.appointment_date.includes('T') ? b.appointment_date.split('T')[0] : b.appointment_date;
+          const datePartA = a.appointment_date.includes('T')
+            ? a.appointment_date.split('T')[0]
+            : a.appointment_date;
+          const datePartB = b.appointment_date.includes('T')
+            ? b.appointment_date.split('T')[0]
+            : b.appointment_date;
           const timeA = new Date(`${datePartA}T${a.items[0]?.start_time || '00:00'}`).getTime();
           const timeB = new Date(`${datePartB}T${b.items[0]?.start_time || '00:00'}`).getTime();
           return timeB - timeA;
@@ -99,7 +112,10 @@ const CustomerAppointments: React.FC = () => {
         setAppointments([...upcoming, ...past]);
       }
     } catch (err: any) {
-      const message = err.response?.data?.error?.message || err.message || 'Failed to synchronize ritual history.';
+      const message =
+        err.response?.data?.error?.message ||
+        err.message ||
+        'Failed to synchronize ritual history.';
       setError(message);
     } finally {
       setIsLoading(false);
@@ -117,7 +133,10 @@ const CustomerAppointments: React.FC = () => {
       tags: [],
       serviceName: item.service.name,
       staffName: item.staff.full_name,
+      comment: '',
+      imageUrl: '',
     });
+    setImageError(null);
     setShowReviewModal(true);
   };
 
@@ -127,11 +146,14 @@ const CustomerAppointments: React.FC = () => {
         appointmentItemId: reviewForm.appointmentItemId,
         rating: reviewForm.rating,
         tags: reviewForm.tags,
+        comment: reviewForm.comment || undefined,
+        imageUrl: reviewForm.imageUrl || undefined,
       });
       setShowReviewModal(false);
       fetchAppointments();
     } catch (err: any) {
-      const message = err.response?.data?.error?.message || err.message || 'Failed to submit review.';
+      const message =
+        err.response?.data?.error?.message || err.message || 'Failed to submit review.';
       alert(message);
     }
   };
@@ -148,7 +170,8 @@ const CustomerAppointments: React.FC = () => {
       setShowCancelModal(false);
       fetchAppointments();
     } catch (err: any) {
-      const message = err.response?.data?.error?.message || err.message || 'Failed to cancel ritual.';
+      const message =
+        err.response?.data?.error?.message || err.message || 'Failed to cancel ritual.';
       alert(message);
     } finally {
       setIsCancelling(false);
@@ -256,14 +279,15 @@ const CustomerAppointments: React.FC = () => {
             const now = new Date();
 
             return appointments.map((apt) => {
-              const datePart = apt.appointment_date.includes('T') 
-                ? apt.appointment_date.split('T')[0] 
+              const datePart = apt.appointment_date.includes('T')
+                ? apt.appointment_date.split('T')[0]
                 : apt.appointment_date;
               const firstItemTime = apt.items[0]?.start_time || '00:00';
               const aptDateTime = new Date(`${datePart}T${firstItemTime}`);
-              
-              const isUpcoming = (apt.status === 'pending' || apt.status === 'confirmed') && aptDateTime >= now;
-              
+
+              const isUpcoming =
+                (apt.status === 'pending' || apt.status === 'confirmed') && aptDateTime >= now;
+
               let header = null;
               if (isUpcoming && !renderedUpcomingHeader) {
                 renderedUpcomingHeader = true;
@@ -288,9 +312,7 @@ const CustomerAppointments: React.FC = () => {
               return (
                 <React.Fragment key={apt.id}>
                   {header}
-                  <div
-                    className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 mb-8"
-                  >
+                  <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 mb-8">
                     <div className="flex items-center gap-4">
                       <div className="h-[1px] flex-grow bg-primary/10" />
                       <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-muted-foreground">
@@ -332,7 +354,8 @@ const CustomerAppointments: React.FC = () => {
                                     <User className="h-3 w-3" /> Artisan: {item.staff.full_name}
                                   </div>
                                   <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">
-                                    Technician Scheduled: {formatTime12h(item.start_time)} — {formatTime12h(item.end_time)}
+                                    Technician Scheduled: {formatTime12h(item.start_time)} —{' '}
+                                    {formatTime12h(item.end_time)}
                                   </p>
                                 </div>
 
@@ -469,6 +492,109 @@ const CustomerAppointments: React.FC = () => {
                     {tag}
                   </Badge>
                 ))}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+                Comments
+              </Label>
+              <Textarea
+                placeholder="Describe your experience (optional)..."
+                value={reviewForm.comment}
+                onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                className="rounded-none border-primary/10 min-h-[100px] text-sm focus-visible:ring-primary"
+              />
+            </div>
+
+            <div className="space-y-4">
+              <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+                Add a Photo
+              </Label>
+              <div className="flex items-center gap-4">
+                {reviewForm.imageUrl ? (
+                  <div className="relative w-24 h-24 border border-primary/10">
+                    <img
+                      src={reviewForm.imageUrl}
+                      alt="Review preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setReviewForm({ ...reviewForm, imageUrl: '' })}
+                      className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 shadow hover:bg-destructive/80 transition-colors"
+                      title="Remove photo"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <input
+                      ref={reviewFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setImageError(null);
+
+                        // Validate file type
+                        if (!file.type.startsWith('image/')) {
+                          setImageError('Please select an image file (JPG, PNG)');
+                          return;
+                        }
+
+                        // Validate file size (2MB max)
+                        if (file.size > 2 * 1024 * 1024) {
+                          setImageError('File size must be under 2MB');
+                          return;
+                        }
+
+                        setUploadingImage(true);
+                        try {
+                          const result = await uploadFile(file);
+                          if (result.data?.success) {
+                            setReviewForm((prev) => ({
+                              ...prev,
+                              imageUrl: result.data.data.url,
+                            }));
+                          } else {
+                            setImageError(result.data?.message || 'Upload failed');
+                          }
+                        } catch (err: any) {
+                          setImageError(err.message || 'Upload failed. Please try again.');
+                        } finally {
+                          setUploadingImage(false);
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => reviewFileInputRef.current?.click()}
+                      disabled={uploadingImage}
+                      className="rounded-none text-[9px] uppercase font-bold tracking-widest border-primary/10"
+                    >
+                      {uploadingImage ? (
+                        <>
+                          <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        'Upload Photo'
+                      )}
+                    </Button>
+                    {imageError && (
+                      <p className="text-[10px] text-destructive font-bold">{imageError}</p>
+                    )}
+                    <p className="text-[9px] text-muted-foreground italic">
+                      JPG or PNG, max 2MB.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
