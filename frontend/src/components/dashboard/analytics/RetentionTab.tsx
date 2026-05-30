@@ -124,7 +124,10 @@ export const RetentionTab: React.FC<RetentionTabProps> = ({ dateRange }) => {
                     tick={{ fontSize: 12, fill: '#666' }}
                     tickFormatter={(v) => `${v}%`}
                   />
-                  <Tooltip formatter={(value: any) => [`${value}%`, 'Retention Rate']} cursor={{ fill: '#f9fafb' }} />
+                  <Tooltip
+                    formatter={(value: any) => [`${value}%`, 'Retention Rate']}
+                    cursor={{ fill: '#f9fafb' }}
+                  />
                   <Line
                     type="monotone"
                     dataKey="rate"
@@ -225,7 +228,9 @@ export const RetentionTab: React.FC<RetentionTabProps> = ({ dateRange }) => {
                     key={i}
                     className="border-b border-gray-50 hover:bg-gray-50/80 transition-colors"
                   >
-                    <td className="px-6 py-4 text-sm font-semibold text-muted-foreground">{i + 1}</td>
+                    <td className="px-6 py-4 text-sm font-semibold text-muted-foreground">
+                      {i + 1}
+                    </td>
                     <td className="px-6 py-4 text-sm font-medium">{customer.name}</td>
                     <td className="px-6 py-4 text-sm font-semibold">{customer.visitCount}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">

@@ -12,7 +12,7 @@ interface PrismaError extends Error {
 export const submitReview = async (req: AuthRequest, res: Response) => {
   try {
     const userId = Number(req.user?.sub);
-    const { appointmentItemId, rating, tags } = req.body;
+    const { appointmentItemId, rating, tags, comment, imageUrl, image_url } = req.body;
 
     if (!appointmentItemId || !rating) {
       return res.status(400).json({ success: false, message: 'Missing required fields' });
@@ -48,6 +48,8 @@ export const submitReview = async (req: AuthRequest, res: Response) => {
         appointment_item_id: item.id,
         rating: parseInt(rating),
         tags: tags || [],
+        comment: comment || null,
+        image_url: imageUrl || image_url || null,
         is_approved_for_public: false,
       },
     });

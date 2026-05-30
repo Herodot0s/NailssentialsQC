@@ -29,12 +29,12 @@ export const exportComponentToPDF = async (elementId: string, filename: string) 
     actionButtons.forEach((btn) => ((btn as HTMLElement).style.visibility = 'visible'));
 
     const imgData = canvas.toDataURL('image/png');
-    
+
     // Calculate PDF dimensions
     const imgWidth = 210; // A4 width in mm
     const pageHeight = 297; // A4 height in mm
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    
+
     const pdf = new jsPDF('p', 'mm', 'a4');
     let heightLeft = imgHeight;
     let position = 0;

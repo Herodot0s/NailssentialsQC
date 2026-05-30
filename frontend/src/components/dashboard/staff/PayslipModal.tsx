@@ -39,7 +39,7 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({ isOpen, onClose, pay
               Payslip <span className="text-[#B8794E]">Details</span>
             </DialogTitle>
             <DialogDescription className="text-white/60 font-medium mt-2 text-[12px] uppercase tracking-widest">
-              {payroll.period 
+              {payroll.period
                 ? `${format(new Date(payroll.period.start_date), 'MMMM d')} - ${format(new Date(payroll.period.end_date), 'MMMM d, yyyy')}`
                 : 'Payroll Period'}
             </DialogDescription>
@@ -57,7 +57,10 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({ isOpen, onClose, pay
         <div className="p-8 md:p-12 space-y-12">
           {/* Summary Section */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <SummaryCard title="Gross Pay" value={Number(payroll.base_pay) + Number(payroll.commissions)} />
+            <SummaryCard
+              title="Gross Pay"
+              value={Number(payroll.base_pay) + Number(payroll.commissions)}
+            />
             <SummaryCard title="Commissions" value={payroll.commissions} highlight />
             <SummaryCard title="Deductions" value={payroll.deductions} color="text-[#cd4239]" />
             <SummaryCard title="Net Payout" value={payroll.net_pay} variant="dark" />
@@ -84,11 +87,19 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({ isOpen, onClose, pay
               {deductions.length > 0 ? (
                 <div className="space-y-4">
                   {deductions.map((item, idx) => (
-                    <BreakdownRow key={idx} label={item.component_name} value={item.amount} prefix="-₱" color="text-[#cd4239]" />
+                    <BreakdownRow
+                      key={idx}
+                      label={item.component_name}
+                      value={item.amount}
+                      prefix="-₱"
+                      color="text-[#cd4239]"
+                    />
                   ))}
                 </div>
               ) : (
-                <p className="text-sm italic text-[#6c6e63]">No deductions recorded for this period.</p>
+                <p className="text-sm italic text-[#6c6e63]">
+                  No deductions recorded for this period.
+                </p>
               )}
             </div>
           </div>
@@ -101,9 +112,16 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({ isOpen, onClose, pay
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
                 {Object.entries(payroll.daily_breakdown).map(([date, sales]) => (
-                  <div key={date} className="bg-white p-4 border border-[#bfc1b7] rounded-md text-center space-y-1">
-                    <p className="text-[10px] font-bold uppercase text-[#B8794E]">{format(new Date(date), 'EEE')}</p>
-                    <p className="text-sm font-bold text-[#23251d]">{format(new Date(date), 'MMM d')}</p>
+                  <div
+                    key={date}
+                    className="bg-white p-4 border border-[#bfc1b7] rounded-md text-center space-y-1"
+                  >
+                    <p className="text-[10px] font-bold uppercase text-[#B8794E]">
+                      {format(new Date(date), 'EEE')}
+                    </p>
+                    <p className="text-sm font-bold text-[#23251d]">
+                      {format(new Date(date), 'MMM d')}
+                    </p>
                     <p className="text-[16px] font-black tabular-nums">₱{sales.toLocaleString()}</p>
                   </div>
                 ))}
@@ -121,42 +139,51 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({ isOpen, onClose, pay
   );
 };
 
-const SummaryCard = ({ 
-  title, 
-  value, 
-  highlight, 
-  color, 
-  variant = 'light' 
-}: { 
-  title: string; 
-  value: number; 
-  highlight?: boolean; 
+const SummaryCard = ({
+  title,
+  value,
+  highlight,
+  color,
+  variant = 'light',
+}: {
+  title: string;
+  value: number;
+  highlight?: boolean;
   color?: string;
   variant?: 'light' | 'dark';
 }) => (
-  <div className={`p-6 rounded-md border ${variant === 'dark' ? 'bg-[#23251d] border-[#23251d] text-white' : 'bg-white border-[#bfc1b7] text-[#23251d]'} space-y-2 shadow-sm`}>
-    <p className={`text-[10px] font-bold uppercase tracking-widest ${variant === 'dark' ? 'text-white/60' : 'text-[#6c6e63]'}`}>{title}</p>
-    <p className={`text-2xl font-black tabular-nums ${color} ${highlight && !color ? 'text-[#B8794E]' : ''}`}>
+  <div
+    className={`p-6 rounded-md border ${variant === 'dark' ? 'bg-[#23251d] border-[#23251d] text-white' : 'bg-white border-[#bfc1b7] text-[#23251d]'} space-y-2 shadow-sm`}
+  >
+    <p
+      className={`text-[10px] font-bold uppercase tracking-widest ${variant === 'dark' ? 'text-white/60' : 'text-[#6c6e63]'}`}
+    >
+      {title}
+    </p>
+    <p
+      className={`text-2xl font-black tabular-nums ${color} ${highlight && !color ? 'text-[#B8794E]' : ''}`}
+    >
       ₱{Number(value).toLocaleString()}
     </p>
   </div>
 );
 
-const BreakdownRow = ({ 
-  label, 
-  value, 
-  prefix = '₱', 
-  color = 'text-[#23251d]' 
-}: { 
-  label: string; 
-  value: number; 
-  prefix?: string; 
+const BreakdownRow = ({
+  label,
+  value,
+  prefix = '₱',
+  color = 'text-[#23251d]',
+}: {
+  label: string;
+  value: number;
+  prefix?: string;
   color?: string;
 }) => (
   <div className="flex justify-between items-center bg-white/50 p-4 rounded-md border border-[#bfc1b7]/30">
     <span className="text-sm font-bold uppercase tracking-tight text-[#4d4f46]">{label}</span>
     <span className={`text-[16px] font-black tabular-nums ${color}`}>
-      {prefix}{Number(value).toLocaleString()}
+      {prefix}
+      {Number(value).toLocaleString()}
     </span>
   </div>
 );

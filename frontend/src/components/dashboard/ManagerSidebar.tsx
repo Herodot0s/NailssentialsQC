@@ -3,7 +3,6 @@ import {
   Users,
   Clock,
   Wallet,
-  Star,
   Settings,
   Image as ImageIcon,
   FileText,
@@ -34,7 +33,7 @@ const groups: SidebarGroup[] = [
     title: 'Customer Relations',
     items: [
       { id: 'customer-care', label: 'Client Care', icon: Heart },
-      { id: 'reviews', label: 'Public Reviews', icon: Star },
+      { id: 'customers', label: 'Customer Files', icon: Users },
     ],
   },
   {

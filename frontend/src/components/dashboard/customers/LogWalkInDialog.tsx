@@ -108,8 +108,8 @@ export const LogWalkInDialog: React.FC<LogWalkInDialogProps> = ({
     }
 
     // Check if all services fit within operating hours (end by 10 PM)
-    const tooLate = selectedItems.some(item => {
-      const service = services.find(s => s.id.toString() === item.serviceId);
+    const tooLate = selectedItems.some((item) => {
+      const service = services.find((s) => s.id.toString() === item.serviceId);
       const duration = service?.duration_minutes || 0;
       const startTimeDate = new Date(`1970-01-01T${walkInTime}:00`);
       const endTimeDate = new Date(startTimeDate.getTime() + duration * 60000);
@@ -119,7 +119,9 @@ export const LogWalkInDialog: React.FC<LogWalkInDialogProps> = ({
     });
 
     if (tooLate) {
-      setError('Time is too late for the duration of the selected treatments. Store closes at 10:00 PM.');
+      setError(
+        'Time is too late for the duration of the selected treatments. Store closes at 10:00 PM.',
+      );
       return;
     }
 

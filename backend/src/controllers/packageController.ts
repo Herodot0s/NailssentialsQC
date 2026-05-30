@@ -2,8 +2,6 @@ import { Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
 
-
-
 export const getAllPackages = async (req: AuthRequest, res: Response) => {
   try {
     const packages = await prisma.servicePackage.findMany({
@@ -395,12 +393,10 @@ export const deletePackage = async (req: AuthRequest, res: Response) => {
 
     const bookingCount = await prisma.appointmentItem.count({ where: { package_id: Number(id) } });
     if (bookingCount > 0) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: 'Cannot delete a package with existing bookings. Deactivate it instead.',
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete a package with existing bookings. Deactivate it instead.',
+      });
     }
 
     await prisma.servicePackage.delete({ where: { id: Number(id) } });

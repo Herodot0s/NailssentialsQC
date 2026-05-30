@@ -12,8 +12,6 @@ export interface StaffTableProps {
   onStaffClick: (staff: StaffMember) => void;
 }
 
-
-
 export interface AttendanceLedgerProps {
   attendance: AttendanceRecord[];
   staffMembers: StaffMember[];
@@ -35,7 +33,6 @@ export interface HistoricalData {
 export type ActiveView =
   | 'staff'
   | 'attendance'
-  | 'reviews'
   | 'exhibits'
   | 'content'
   | 'packages'
@@ -45,6 +42,7 @@ export type ActiveView =
   | 'customer-care'
   | 'performance'
   | 'service-history'
+  | 'customers'
   | 'payroll';
 
 export interface ManagerSidebarProps {
@@ -66,8 +64,6 @@ export interface OverviewViewProps {
   appointments: any[];
   staffMembers: StaffMember[];
 }
-
-
 
 export interface StaffDetailSheetProps {
   open: boolean;
@@ -112,4 +108,3 @@ export interface ShiftEditDialogProps {
   onFormChange: (form: ShiftEditDialogProps['form']) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
-

@@ -9,7 +9,15 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Plus, Trash2, Image as ImageIcon, ExternalLink, Sparkles, Pencil } from 'lucide-react';
+import {
+  Loader2,
+  Plus,
+  Trash2,
+  Image as ImageIcon,
+  ExternalLink,
+  Sparkles,
+  Pencil,
+} from 'lucide-react';
 import { getExhibits, deleteExhibit } from '@/api/apiClient';
 import type { Exhibit } from '@/types/api';
 import ExhibitForm from '@/components/gallery/ExhibitForm';
@@ -114,7 +122,7 @@ const ManageExhibits: React.FC = () => {
                 alt={ex.title}
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
               />
-              
+
               {/* Overlay with glass effect */}
               <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-6">
                 <div className="flex flex-col gap-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-75">
@@ -156,7 +164,7 @@ const ManageExhibits: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             <CardHeader className="p-6 space-y-3 relative bg-white">
               <div className="flex justify-between items-start gap-4">
                 <div className="space-y-1.5 flex-1 min-w-0">

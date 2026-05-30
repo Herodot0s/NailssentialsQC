@@ -164,12 +164,15 @@ export interface SubmitReviewRequest {
   rating: number;
   tags: string[];
   comment?: string;
+  imageUrl?: string;
 }
 
 export interface Review {
   id: number;
   rating: number;
   tags: string[];
+  comment?: string | null;
+  image_url?: string | null;
   is_approved_for_public: boolean;
   created_at: string;
   customer: { full_name: string };

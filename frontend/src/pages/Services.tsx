@@ -129,7 +129,9 @@ const Services: React.FC = () => {
         setCategories(catRes.data.data || []);
         setServices(svcRes.data.data || []);
       } catch (err: any) {
-        setError(err.response?.data?.error?.message || 'Failed to load services. Please try again later.');
+        setError(
+          err.response?.data?.error?.message || 'Failed to load services. Please try again later.',
+        );
       } finally {
         setIsLoading(false);
       }
@@ -263,7 +265,8 @@ const Services: React.FC = () => {
                         className="flex flex-col rounded-2xl md:rounded-3xl cursor-pointer group bg-surface-card border overflow-hidden"
                         style={{
                           borderColor: 'var(--color-hairline-soft)',
-                          backgroundColor: activeCategoryId === 'all' ? 'var(--color-surface-card)' : config.tint,
+                          backgroundColor:
+                            activeCategoryId === 'all' ? 'var(--color-surface-card)' : config.tint,
                         }}
                         whileHover={{
                           borderColor: config.color,
@@ -566,7 +569,12 @@ const Services: React.FC = () => {
                             serviceName: selectedService.name,
                             price: parseFloat(selectedService.price),
                             duration: selectedService.duration_minutes,
-                            imageUrl: selectedService.image_url || getOptimizedUrl(getCategoryConfig(selectedService.category_id).image, 600),
+                            imageUrl:
+                              selectedService.image_url ||
+                              getOptimizedUrl(
+                                getCategoryConfig(selectedService.category_id).image,
+                                600,
+                              ),
                           });
                         }}
                       >

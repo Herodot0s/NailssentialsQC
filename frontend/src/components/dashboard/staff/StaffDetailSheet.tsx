@@ -13,7 +13,16 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Briefcase, Check, Wallet, Fingerprint, Upload, Loader2, UserCheck, UserMinus } from 'lucide-react';
+import {
+  Briefcase,
+  Check,
+  Wallet,
+  Fingerprint,
+  Upload,
+  Loader2,
+  UserCheck,
+  UserMinus,
+} from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { uploadFile } from '@/api/apiClient';
 import { formatTime12h } from '@/lib/utils';
@@ -183,13 +192,17 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                               <div className="flex gap-1">
                                 <label className="cursor-pointer">
                                   <div className="h-5 px-2 bg-[#23251d] text-white text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 rounded-[4px] hover:bg-[#33342d] transition-colors">
-                                    {isUploading ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Upload className="h-2.5 w-2.5" />} 
+                                    {isUploading ? (
+                                      <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                                    ) : (
+                                      <Upload className="h-2.5 w-2.5" />
+                                    )}
                                     Upload
                                   </div>
-                                  <input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    className="hidden" 
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
                                     onChange={handlePhotoUpload}
                                     disabled={isUploading}
                                   />
@@ -240,8 +253,8 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                                 variant="outline"
                                 onClick={() => onStaffChange({ ...staff, isActive: true })}
                                 className={`flex-1 h-10 rounded-[4px] text-[10px] uppercase font-bold tracking-widest gap-2 transition-all ${
-                                  staff.isActive 
-                                    ? 'bg-[#d9eddf] text-[#2c8c66] border-[#2c8c66] hover:bg-[#d9eddf]' 
+                                  staff.isActive
+                                    ? 'bg-[#d9eddf] text-[#2c8c66] border-[#2c8c66] hover:bg-[#d9eddf]'
                                     : 'border-[#bfc1b7] text-[#9b9c92] hover:bg-gray-50'
                                 }`}
                               >
@@ -252,8 +265,8 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                                 variant="outline"
                                 onClick={() => onStaffChange({ ...staff, isActive: false })}
                                 className={`flex-1 h-10 rounded-[4px] text-[10px] uppercase font-bold tracking-widest gap-2 transition-all ${
-                                  !staff.isActive 
-                                    ? 'bg-[#f7d6d3] text-[#cd4239] border-[#cd4239] hover:bg-[#f7d6d3]' 
+                                  !staff.isActive
+                                    ? 'bg-[#f7d6d3] text-[#cd4239] border-[#cd4239] hover:bg-[#f7d6d3]'
                                     : 'border-[#bfc1b7] text-[#9b9c92] hover:bg-gray-50'
                                 }`}
                               >
@@ -348,7 +361,10 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                             onStaffChange({ ...staff, specializations: next.join(', ') });
                           }}
                           className={`px-4 py-1.5 rounded-full text-[11px] font-bold tracking-tight transition-all border ${
-                            staff.specializations?.split(',').map(s => s.trim()).includes('Hair')
+                            staff.specializations
+                              ?.split(',')
+                              .map((s) => s.trim())
+                              .includes('Hair')
                               ? 'bg-[#23251d] text-white border-[#23251d]'
                               : 'bg-white text-[#4d4f46] border-[#bfc1b7] hover:border-[#23251d]'
                           }`}
@@ -356,30 +372,33 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                           Hair
                         </button>
                         {categories
-                          .filter(cat => !cat.name.toLowerCase().includes('hair'))
+                          .filter((cat) => !cat.name.toLowerCase().includes('hair'))
                           .map((cat) => (
-                          <button
-                            key={cat.id}
-                            onClick={() => {
-                              const current = staff.specializations || '';
-                              const specs = current
-                                .split(',')
-                                .map((s) => s.trim())
-                                .filter(Boolean);
-                              const next = specs.includes(cat.name)
-                                ? specs.filter((s) => s !== cat.name)
-                                : [...specs, cat.name];
-                              onStaffChange({ ...staff, specializations: next.join(', ') });
-                            }}
-                            className={`px-4 py-1.5 rounded-full text-[11px] font-bold tracking-tight transition-all border ${
-                              staff.specializations?.split(',').map(s => s.trim()).includes(cat.name)
-                                ? 'bg-[#23251d] text-white border-[#23251d]'
-                                : 'bg-white text-[#4d4f46] border-[#bfc1b7] hover:border-[#23251d]'
-                            }`}
-                          >
-                            {cat.name}
-                          </button>
-                        ))}
+                            <button
+                              key={cat.id}
+                              onClick={() => {
+                                const current = staff.specializations || '';
+                                const specs = current
+                                  .split(',')
+                                  .map((s) => s.trim())
+                                  .filter(Boolean);
+                                const next = specs.includes(cat.name)
+                                  ? specs.filter((s) => s !== cat.name)
+                                  : [...specs, cat.name];
+                                onStaffChange({ ...staff, specializations: next.join(', ') });
+                              }}
+                              className={`px-4 py-1.5 rounded-full text-[11px] font-bold tracking-tight transition-all border ${
+                                staff.specializations
+                                  ?.split(',')
+                                  .map((s) => s.trim())
+                                  .includes(cat.name)
+                                  ? 'bg-[#23251d] text-white border-[#23251d]'
+                                  : 'bg-white text-[#4d4f46] border-[#bfc1b7] hover:border-[#23251d]'
+                              }`}
+                            >
+                              {cat.name}
+                            </button>
+                          ))}
                       </div>
                     </div>
                   </div>

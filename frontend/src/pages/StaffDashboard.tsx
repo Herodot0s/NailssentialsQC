@@ -54,7 +54,6 @@ import { Plus, Mail, Loader2, Eye } from 'lucide-react';
 import { PayslipModal } from '@/components/dashboard/staff/PayslipModal';
 import { formatTime12h, formatDuration } from '@/lib/utils';
 
-
 interface AttendanceStatus {
   isCheckedIn: boolean;
   checkInTime: string | null;
@@ -85,9 +84,9 @@ interface Appointment {
 }
 
 const StaffDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading, logout } = useAuth();
   const { user: clerkUser } = useUser();
-  
+
   // Prioritize actual username, then fallback to email prefix or full name
   const rawDisplayName = clerkUser?.username || user?.username || clerkUser?.fullName || 'Artisan';
   const displayName = rawDisplayName.includes('@') ? rawDisplayName.split('@')[0] : rawDisplayName;
@@ -382,12 +381,43 @@ const StaffDashboard: React.FC = () => {
     }
   };
 
-  if (isLoading || !user) {
+  if (isAuthLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gap-6 text-center px-6 bg-[#eeefe9]">
         <Loader2 className="h-10 w-10 animate-spin text-[#B8794E]" />
         <p className="text-[12px] tracking-widest uppercase font-bold text-[#4d4f46]">
-          {!user ? 'Authenticating...' : 'Loading Artisan Dashboard'}
+          Authenticating...
+        </p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gap-6 text-center px-6 bg-[#eeefe9]">
+        <div className="p-8 max-w-md bg-white border border-[#bfc1b7] rounded-md shadow-sm">
+          <h2 className="text-xl font-bold text-[#cd4239] mb-4">Sync Failure</h2>
+          <p className="text-sm text-[#4d4f46] mb-6 leading-relaxed">
+            Failed to synchronize your account with local database. Please ensure your manager has
+            registered your account, or try logging out and logging in again.
+          </p>
+          <Button
+            onClick={logout}
+            className="w-full rounded-md bg-[#23251d] hover:bg-[#33342d] text-white font-bold py-2.5 transition-all shadow-none"
+          >
+            Log Out
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gap-6 text-center px-6 bg-[#eeefe9]">
+        <Loader2 className="h-10 w-10 animate-spin text-[#B8794E]" />
+        <p className="text-[12px] tracking-widest uppercase font-bold text-[#4d4f46]">
+          Loading Artisan Dashboard...
         </p>
       </div>
     );
@@ -399,7 +429,7 @@ const StaffDashboard: React.FC = () => {
   };
 
   const todayStr = getLocalDateStr(new Date());
-  
+
   const todayAppointments = appointments.filter((a) => {
     const aptDateStr = getLocalDateStr(a.appointment_date);
     return aptDateStr === todayStr;
@@ -420,17 +450,17 @@ const StaffDashboard: React.FC = () => {
   // Helper to filter items for the current staff member
   const filterMyItems = (items: Appointment['items']) => {
     if (user?.role === 'manager') return items;
-    
+
     const filtered = items.filter(
       (i) =>
         i.staff_id === user?.staffProfileId ||
         (i.staff && i.staff.user_id === user?.id) ||
-        (user?.role === 'staff' && (!user?.staffProfileId || !i.staff_id)) // Fallback for staff
+        (user?.role === 'staff' && (!user?.staffProfileId || !i.staff_id)), // Fallback for staff
     );
-    
-    // If we found specific items for this staff, return them. 
+
+    // If we found specific items for this staff, return them.
     // Otherwise, if the user is staff, return ALL items (since backend already filtered the appointment)
-    return filtered.length > 0 ? filtered : (user?.role === 'staff' ? items : []);
+    return filtered.length > 0 ? filtered : user?.role === 'staff' ? items : [];
   };
 
   return (
@@ -555,7 +585,12 @@ const StaffDashboard: React.FC = () => {
                       Today's Appointments
                     </CardTitle>
                     <CardDescription className="text-[13px] md:text-[14px] text-[#4d4f46] mt-1 md:mt-2">
-                      Viewing {todayAppointments.reduce((acc, apt) => acc + filterMyItems(apt.items).length, 0)} scheduled services for today
+                      Viewing{' '}
+                      {todayAppointments.reduce(
+                        (acc, apt) => acc + filterMyItems(apt.items).length,
+                        0,
+                      )}{' '}
+                      scheduled services for today
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-0">
@@ -609,8 +644,9 @@ const StaffDashboard: React.FC = () => {
                                     className={`hover:bg-[#e5e7e0]/50 border-b border-[#bfc1b7] transition-all duration-200 ${isActive ? 'bg-[#B8794E]/5' : ''} ${isCurrentTimeSlot ? 'bg-[#dceaf6]/30' : ''}`}
                                   >
                                     <TableCell className="pl-8 py-6 font-bold text-sm tabular-nums text-[#23251d]">
-                                    {formatTime12h(item.start_time)} — {formatTime12h(item.end_time)}
-                                  </TableCell>
+                                      {formatTime12h(item.start_time)} —{' '}
+                                      {formatTime12h(item.end_time)}
+                                    </TableCell>
                                     <TableCell className="text-lg font-bold text-[#23251d]">
                                       {apt.customer.full_name}
                                     </TableCell>
@@ -618,11 +654,9 @@ const StaffDashboard: React.FC = () => {
                                       {item.service.name}
                                     </TableCell>
                                     <TableCell className="font-bold text-sm text-[#B8794E]">
-                                      {user?.role === 'manager' ? (
-                                        item.staff?.full_name || 'Unassigned'
-                                      ) : (
-                                        getStatusBadge(item.status)
-                                      )}
+                                      {user?.role === 'manager'
+                                        ? item.staff?.full_name || 'Unassigned'
+                                        : getStatusBadge(item.status)}
                                     </TableCell>
                                     <TableCell className="pr-8 text-right">
                                       {item.status !== 'completed' && (
@@ -666,7 +700,9 @@ const StaffDashboard: React.FC = () => {
                                   ? () => handleComplete(apt.id)
                                   : undefined
                               }
-                              technicianName={user?.role === 'manager' ? item.staff?.full_name : undefined}
+                              technicianName={
+                                user?.role === 'manager' ? item.staff?.full_name : undefined
+                              }
                             />
                           ));
                         })
@@ -732,7 +768,8 @@ const StaffDashboard: React.FC = () => {
                                     })}
                                   </TableCell>
                                   <TableCell className="py-6 font-bold text-sm tabular-nums text-[#23251d]">
-                                    {formatTime12h(item.start_time)} — {formatTime12h(item.end_time)}
+                                    {formatTime12h(item.start_time)} —{' '}
+                                    {formatTime12h(item.end_time)}
                                   </TableCell>
                                   <TableCell className="text-lg font-bold text-[#23251d]">
                                     {apt.customer.full_name}
@@ -779,7 +816,9 @@ const StaffDashboard: React.FC = () => {
                               status={item.status}
                               statusBadge={getStatusBadge(item.status)}
                               date={dateStr}
-                              technicianName={user?.role === 'manager' ? item.staff?.full_name : undefined}
+                              technicianName={
+                                user?.role === 'manager' ? item.staff?.full_name : undefined
+                              }
                             />
                           ));
                         })
@@ -828,16 +867,24 @@ const StaffDashboard: React.FC = () => {
                 <CardContent className="p-6 md:p-10">
                   <div className="space-y-4">
                     {commissionsList.slice(0, 5).map((c) => (
-                      <div key={c.id} className="flex justify-between items-center border-b border-[#bfc1b7] pb-4 last:border-0 last:pb-0">
+                      <div
+                        key={c.id}
+                        className="flex justify-between items-center border-b border-[#bfc1b7] pb-4 last:border-0 last:pb-0"
+                      >
                         <div>
                           <p className="text-sm font-bold text-[#23251d]">{c.service.name}</p>
                           <p className="text-[11px] text-[#6c6e63]">
-                            {new Date(c.commission_date).toLocaleDateString()} • {c.transaction.appointment.customer.full_name}
+                            {new Date(c.commission_date).toLocaleDateString()} •{' '}
+                            {c.transaction.appointment.customer.full_name}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold text-[#B8794E]">₱{Number(c.commission_amount).toLocaleString()}</p>
-                          <p className="text-[10px] font-medium text-[#6c6e63] uppercase tracking-wider">{Number(c.commission_rate)}% Rate</p>
+                          <p className="text-sm font-bold text-[#B8794E]">
+                            ₱{Number(c.commission_amount).toLocaleString()}
+                          </p>
+                          <p className="text-[10px] font-medium text-[#6c6e63] uppercase tracking-wider">
+                            {Number(c.commission_rate)}% Rate
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -863,24 +910,42 @@ const StaffDashboard: React.FC = () => {
                   <Table>
                     <TableHeader className="bg-[#e5e7e0] border-b border-[#bfc1b7]">
                       <TableRow className="hover:bg-transparent">
-                        <TableHead className="pl-8 h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Date</TableHead>
-                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Client</TableHead>
-                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Service</TableHead>
-                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Service Price</TableHead>
-                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">Rate</TableHead>
-                        <TableHead className="pr-8 h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">Commission</TableHead>
+                        <TableHead className="pl-8 h-12 font-bold text-[12px] uppercase text-[#6c6e63]">
+                          Date
+                        </TableHead>
+                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">
+                          Client
+                        </TableHead>
+                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">
+                          Service
+                        </TableHead>
+                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">
+                          Service Price
+                        </TableHead>
+                        <TableHead className="h-12 font-bold text-[12px] uppercase text-[#6c6e63]">
+                          Rate
+                        </TableHead>
+                        <TableHead className="pr-8 h-12 text-right font-bold text-[12px] uppercase text-[#6c6e63]">
+                          Commission
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {commissionsList.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-20 text-[#6c6e63] italic text-sm font-medium">
+                          <TableCell
+                            colSpan={6}
+                            className="text-center py-20 text-[#6c6e63] italic text-sm font-medium"
+                          >
                             No commission records found.
                           </TableCell>
                         </TableRow>
                       ) : (
                         commissionsList.map((c) => (
-                          <TableRow key={c.id} className="hover:bg-[#e5e7e0]/50 border-b border-[#bfc1b7] transition-all duration-200">
+                          <TableRow
+                            key={c.id}
+                            className="hover:bg-[#e5e7e0]/50 border-b border-[#bfc1b7] transition-all duration-200"
+                          >
                             <TableCell className="pl-8 py-6 font-bold text-sm text-[#23251d]">
                               {new Date(c.commission_date).toLocaleDateString()}
                             </TableCell>
@@ -910,18 +975,26 @@ const StaffDashboard: React.FC = () => {
                     <Card key={c.id} className="border border-[#bfc1b7] shadow-none p-4">
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <p className="text-[10px] font-bold text-[#B8794E] uppercase tracking-widest">{new Date(c.commission_date).toLocaleDateString()}</p>
+                          <p className="text-[10px] font-bold text-[#B8794E] uppercase tracking-widest">
+                            {new Date(c.commission_date).toLocaleDateString()}
+                          </p>
                           <h4 className="font-bold text-[#23251d]">{c.service.name}</h4>
                         </div>
-                        <Badge className="bg-[#B8794E] text-white border-none">{Number(c.commission_rate)}%</Badge>
+                        <Badge className="bg-[#B8794E] text-white border-none">
+                          {Number(c.commission_rate)}%
+                        </Badge>
                       </div>
                       <div className="flex justify-between items-center text-[12px] text-[#4d4f46] mb-3">
                         <span>{c.transaction.appointment.customer.full_name}</span>
                         <span>Service: ₱{Number(c.base_amount).toLocaleString()}</span>
                       </div>
                       <div className="pt-3 border-t border-[#bfc1b7] flex justify-between items-center">
-                        <span className="text-[10px] font-bold uppercase text-[#6c6e63]">Commission</span>
-                        <span className="text-lg font-bold text-[#B8794E]">₱{Number(c.commission_amount).toLocaleString()}</span>
+                        <span className="text-[10px] font-bold uppercase text-[#6c6e63]">
+                          Commission
+                        </span>
+                        <span className="text-lg font-bold text-[#B8794E]">
+                          ₱{Number(c.commission_amount).toLocaleString()}
+                        </span>
                       </div>
                     </Card>
                   ))}

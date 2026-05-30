@@ -23,8 +23,8 @@ export const getStaffPerformance = async (req: AuthRequest, res: Response) => {
         .json({ success: false, message: 'Start date and end date are required' });
     }
 
-    const start = startOfDay(new Date(startDate as string));
-    const end = endOfDay(new Date(endDate as string));
+    const start = new Date(`${String(startDate).split('T')[0]}T00:00:00Z`);
+    const end = new Date(`${String(endDate).split('T')[0]}T23:59:59.999Z`);
 
     // Aggregate revenue & commission per staff
     const commissionAgg = await prisma.commission.groupBy({
@@ -63,7 +63,7 @@ export const getStaffPerformance = async (req: AuthRequest, res: Response) => {
       .map((agg) => {
         const staffCategories = categoryBreakdownMap[agg.staff_id] || {};
         const fullCategoryBreakdown: Record<string, number> = {};
-        allCategoryNames.forEach(name => {
+        allCategoryNames.forEach((name) => {
           fullCategoryBreakdown[name] = staffCategories[name] || 0;
         });
 
@@ -98,8 +98,8 @@ export const getRetentionAnalytics = async (req: AuthRequest, res: Response) => 
         .json({ success: false, message: 'Start date and end date are required' });
     }
 
-    const start = startOfDay(new Date(startDate as string));
-    const end = endOfDay(new Date(endDate as string));
+    const start = new Date(`${String(startDate).split('T')[0]}T00:00:00Z`);
+    const end = new Date(`${String(endDate).split('T')[0]}T23:59:59.999Z`);
 
     // All completed appointments in the range
     const appointmentsInRange = await prisma.appointment.findMany({
@@ -248,11 +248,11 @@ export const getKpiSummary = async (req: AuthRequest, res: Response) => {
         .json({ success: false, message: 'Start date and end date are required' });
     }
 
-    const start = startOfDay(new Date(startDate as string));
-    const end = endOfDay(new Date(endDate as string));
-    const today = new Date();
-    const todayStart = startOfDay(today);
-    const todayEnd = endOfDay(today);
+    const start = new Date(`${String(startDate).split('T')[0]}T00:00:00Z`);
+    const end = new Date(`${String(endDate).split('T')[0]}T23:59:59.999Z`);
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStart = new Date(`${todayStr}T00:00:00Z`);
+    const todayEnd = new Date(`${todayStr}T23:59:59.999Z`);
 
     // Today's revenue
     const todaySales = await prisma.transaction.aggregate({
@@ -289,8 +289,8 @@ export const getKpiSummary = async (req: AuthRequest, res: Response) => {
 
     // Trend calculation — compare with previous period of same duration
     const periodDays = differenceInDays(end, start) || 1;
-    const prevStart = startOfDay(new Date(start.getTime() - periodDays * 24 * 60 * 60 * 1000));
-    const prevEnd = endOfDay(new Date(start.getTime() - 1));
+    const prevStart = new Date(start.getTime() - periodDays * 24 * 60 * 60 * 1000);
+    const prevEnd = new Date(start.getTime() - 1000);
 
     const prevMonthSales = await prisma.transaction.aggregate({
       where: {
@@ -301,11 +301,17 @@ export const getKpiSummary = async (req: AuthRequest, res: Response) => {
     });
     const prevMonthRevenue = Number(prevMonthSales._sum.amount || 0);
 
+    const yesterday = new Date();
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    const prevTodayStart = new Date(`${yesterdayStr}T00:00:00Z`);
+    const prevTodayEnd = new Date(`${yesterdayStr}T23:59:59.999Z`);
+
     const prevTodaySales = await prisma.transaction.aggregate({
       where: {
         transaction_date: {
-          gte: startOfDay(new Date(today.getTime() - 24 * 60 * 60 * 1000)),
-          lte: endOfDay(new Date(today.getTime() - 24 * 60 * 60 * 1000)),
+          gte: prevTodayStart,
+          lte: prevTodayEnd,
         },
         status: 'completed',
       },

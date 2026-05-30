@@ -141,14 +141,29 @@ export default function CartPackageItem({ item, staffList, slots }: CartPackageI
                     </SelectTrigger>
                     <SelectContent className="rounded-md border-hairline shadow-none bg-surface-card">
                       {staffList.map((staff) => {
-                        const isAvailable = !child.startTime || !slots.find(s => s.time === child.startTime)?.availableTechnicianIds || slots.find(s => s.time === child.startTime)?.availableTechnicianIds?.includes(staff.id);
+                        const isAvailable =
+                          !child.startTime ||
+                          !slots.find((s) => s.time === child.startTime)?.availableTechnicianIds ||
+                          slots
+                            .find((s) => s.time === child.startTime)
+                            ?.availableTechnicianIds?.includes(staff.id);
                         return (
-                          <SelectItem key={staff.id} value={staff.id.toString()} className="py-2.5" disabled={!isAvailable}>
+                          <SelectItem
+                            key={staff.id}
+                            value={staff.id.toString()}
+                            className="py-2.5"
+                            disabled={!isAvailable}
+                          >
                             <div className="flex flex-col">
                               <div className="flex items-center justify-between">
                                 <span className="body-md font-semibold">{staff.fullName}</span>
                                 {!isAvailable && (
-                                  <Badge variant="outline" className="text-[9px] uppercase border-accent-red/30 text-accent-red h-4">Taken</Badge>
+                                  <Badge
+                                    variant="outline"
+                                    className="text-[9px] uppercase border-accent-red/30 text-accent-red h-4"
+                                  >
+                                    Taken
+                                  </Badge>
                                 )}
                               </div>
                               {staff.specializations && (

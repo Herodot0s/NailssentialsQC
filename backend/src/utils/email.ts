@@ -35,10 +35,6 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
       subject,
       html,
     });
-    console.log('Message sent: %s', info.messageId);
-    if (process.env.SMTP_HOST === 'smtp.ethereal.email') {
-      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-    }
     return true;
   } catch (error: unknown) {
     console.error('Send email error:', error);

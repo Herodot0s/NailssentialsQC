@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useStaffPerformance } from './hooks/useAnalyticsData';
@@ -10,10 +19,26 @@ interface StaffTabProps {
 }
 
 const DIVERSE_COLORS = [
-  '#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#073b4c',
-  '#e07a5f', '#3d405b', '#81b29a', '#f2cc8f', '#9b5de5',
-  '#f15bb5', '#fee440', '#00bbf9', '#00f5d4', '#ff9f1c',
-  '#2ec4b6', '#ffbf69', '#8338ec', '#ff006e', '#8ac926',
+  '#ef476f',
+  '#ffd166',
+  '#06d6a0',
+  '#118ab2',
+  '#073b4c',
+  '#e07a5f',
+  '#3d405b',
+  '#81b29a',
+  '#f2cc8f',
+  '#9b5de5',
+  '#f15bb5',
+  '#fee440',
+  '#00bbf9',
+  '#00f5d4',
+  '#ff9f1c',
+  '#2ec4b6',
+  '#ffbf69',
+  '#8338ec',
+  '#ff006e',
+  '#8ac926',
 ];
 
 const formatCurrency = (v: number) =>
@@ -43,7 +68,10 @@ const StaffTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   return (
-    <div className="bg-white shadow-lg border border-gray-100 p-4 rounded-xl" style={{ borderRadius: '12px' }}>
+    <div
+      className="bg-white shadow-lg border border-gray-100 p-4 rounded-xl"
+      style={{ borderRadius: '12px' }}
+    >
       <p className="text-sm font-medium mb-1">{d?.fullName}</p>
       <p className="text-sm text-muted-foreground">
         {formatCurrency(d?.revenue)} revenue, {d?.serviceCount} services
@@ -123,12 +151,12 @@ export const StaffTab: React.FC<StaffTabProps> = ({ dateRange }) => {
                 tick={{ fontSize: 12, fill: '#666' }}
               />
               <Tooltip content={<StaffTooltip />} cursor={{ fill: '#f9fafb' }} />
-              <Bar
-                dataKey="revenue"
-                radius={[0, 4, 4, 0]}
-              >
+              <Bar dataKey="revenue" radius={[0, 4, 4, 0]}>
                 {safeData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={DIVERSE_COLORS[index % DIVERSE_COLORS.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={DIVERSE_COLORS[index % DIVERSE_COLORS.length]}
+                  />
                 ))}
               </Bar>
             </BarChart>
@@ -197,30 +225,34 @@ export const StaffTab: React.FC<StaffTabProps> = ({ dateRange }) => {
                                 Category Breakdown
                               </p>
                               <div className="space-y-3">
-                                {Object.entries(staff.categoryBreakdown).map(([cat, amount], idx) => {
-                                  const maxAmount = Math.max(
-                                    ...Object.values(staff.categoryBreakdown).map((v) => Number(v))
-                                  );
-                                  const amt = Number(amount);
-                                  const pct = maxAmount > 0 ? (amt / maxAmount) * 100 : 0;
-                                  const color = DIVERSE_COLORS[idx % DIVERSE_COLORS.length];
-                                  return (
-                                    <div key={cat} className="flex items-center gap-3">
-                                      <span className="text-xs text-muted-foreground w-20 shrink-0 truncate">
-                                        {cat}
-                                      </span>
-                                      <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
-                                        <div
-                                          className="h-full rounded-full transition-all duration-500"
-                                          style={{ width: `${pct}%`, backgroundColor: color }}
-                                        />
+                                {Object.entries(staff.categoryBreakdown).map(
+                                  ([cat, amount], idx) => {
+                                    const maxAmount = Math.max(
+                                      ...Object.values(staff.categoryBreakdown).map((v) =>
+                                        Number(v),
+                                      ),
+                                    );
+                                    const amt = Number(amount);
+                                    const pct = maxAmount > 0 ? (amt / maxAmount) * 100 : 0;
+                                    const color = DIVERSE_COLORS[idx % DIVERSE_COLORS.length];
+                                    return (
+                                      <div key={cat} className="flex items-center gap-3">
+                                        <span className="text-xs text-muted-foreground w-20 shrink-0 truncate">
+                                          {cat}
+                                        </span>
+                                        <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                                          <div
+                                            className="h-full rounded-full transition-all duration-500"
+                                            style={{ width: `${pct}%`, backgroundColor: color }}
+                                          />
+                                        </div>
+                                        <span className="text-xs font-semibold w-24 text-right">
+                                          {formatCurrency(amt)}
+                                        </span>
                                       </div>
-                                      <span className="text-xs font-semibold w-24 text-right">
-                                        {formatCurrency(amt)}
-                                      </span>
-                                    </div>
-                                  );
-                                })}
+                                    );
+                                  },
+                                )}
                               </div>
                             </div>
                           </motion.div>

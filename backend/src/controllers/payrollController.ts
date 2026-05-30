@@ -3,10 +3,20 @@ import { Prisma } from '@prisma/client';
 import * as ExcelJS from 'exceljs';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
-import { format, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, startOfISOWeek, endOfISOWeek, addDays, startOfDay, endOfDay } from 'date-fns';
+import {
+  format,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  startOfISOWeek,
+  endOfISOWeek,
+  addDays,
+  startOfDay,
+  endOfDay,
+} from 'date-fns';
 import { sendError } from '../utils/apiHelpers';
 import { logSystemAction } from '../utils/systemLog';
-import { evaluatePayrollFormula } from '../utils/payrollEvaluator';
 
 /**
  * Manager: Generate a new payroll period and calculate payroll for all staff.
@@ -32,7 +42,8 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
         where: { id: Number(payroll_period_id) },
       });
       if (!payrollPeriod) return sendError(res, 'NOT_FOUND', 'Payroll period not found', 404);
-      if (payrollPeriod.is_locked) return sendError(res, 'LOCKED', 'Cannot recalculate a locked period', 400);
+      if (payrollPeriod.is_locked)
+        return sendError(res, 'LOCKED', 'Cannot recalculate a locked period', 400);
       startDate = new Date(payrollPeriod.start_date);
       endDate = new Date(payrollPeriod.end_date);
     } else {
@@ -53,7 +64,8 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
           format(existingOverlap.end_date, 'yyyy-MM-dd') === format(endDate, 'yyyy-MM-dd')
         ) {
           payrollPeriod = existingOverlap;
-          if (payrollPeriod.is_locked) return sendError(res, 'LOCKED', 'Cannot recalculate a locked period', 400);
+          if (payrollPeriod.is_locked)
+            return sendError(res, 'LOCKED', 'Cannot recalculate a locked period', 400);
         } else {
           return sendError(res, 'OVERLAP', 'Payroll period overlaps with existing period', 400);
         }
@@ -69,11 +81,11 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
         },
       }),
       prisma.staffProfile.findMany({
-        where: { 
+        where: {
           is_available: true,
           user: {
-            role: { not: 'manager' }
-          }
+            role: { not: 'manager' },
+          },
         },
       }),
       prisma.commission.findMany({
@@ -134,17 +146,20 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
 
     // Rule: Weekly Hair Specialization Quota (20% if >= 6k hair sales in a week, else 10% for hair services)
     // Non-hair services use the Tiered Base Rate (already calculated in Commission table)
-    
+
     // Group commissions by staff and week to check Hair quota
     const staffWeeklyHairSales = new Map<string, number>(); // key: "staffId-weekNum"
     for (const c of currentPeriodCommissions) {
       const isHair = c.service?.category?.name?.toLowerCase().includes('hair');
-      const staff = staffProfiles.find(s => s.id === c.staff_id);
+      const staff = staffProfiles.find((s) => s.id === c.staff_id);
       const isHairSpecialist = staff?.specializations?.toLowerCase().includes('hair');
 
       if (isHair && isHairSpecialist) {
         const weekKey = `${c.staff_id}-${c.period_week}`;
-        staffWeeklyHairSales.set(weekKey, (staffWeeklyHairSales.get(weekKey) || 0) + Number(c.base_amount));
+        staffWeeklyHairSales.set(
+          weekKey,
+          (staffWeeklyHairSales.get(weekKey) || 0) + Number(c.base_amount),
+        );
       }
     }
 
@@ -152,7 +167,7 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       const sId = c.staff_id;
       const dKey = format(c.commission_date, 'yyyy-MM-dd');
       const isHair = c.service?.category?.name?.toLowerCase().includes('hair');
-      const staff = staffProfiles.find(s => s.id === c.staff_id);
+      const staff = staffProfiles.find((s) => s.id === c.staff_id);
       const isHairSpecialist = staff?.specializations?.toLowerCase().includes('hair');
 
       let finalCommissionAmount = Number(c.commission_amount);
@@ -163,10 +178,13 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
         const weeklyHairTotal = staffWeeklyHairSales.get(weekKey) || 0;
         const rate = weeklyHairTotal >= 6000 ? 0.2 : 0.1;
         finalCommissionAmount = Number(c.base_amount) * rate;
-        
+
         staffHairCommissions.set(sId, (staffHairCommissions.get(sId) || 0) + finalCommissionAmount);
       } else {
-        staffTieredCommissions.set(sId, (staffTieredCommissions.get(sId) || 0) + finalCommissionAmount);
+        staffTieredCommissions.set(
+          sId,
+          (staffTieredCommissions.get(sId) || 0) + finalCommissionAmount,
+        );
       }
 
       if (!staffDailyBreakdown.has(sId)) staffDailyBreakdown.set(sId, {});
@@ -200,10 +218,26 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       const manualDeductionTotal = manualDeductions.reduce((sum, d) => sum + Number(d.amount), 0);
 
       // --- Calculation Engine ---
-      const basePay = Number(staff.base_pay_per_week) * weeksInPeriod;
-      
-      const totalDeductions = tardinessDeduction + manualDeductionTotal;
-      const netPay = basePay + totalCommissions - totalDeductions;
+      const assignment = await prisma.salaryStructureAssignment.findFirst({
+        where: {
+          staff_id: staff.id,
+          is_active: true,
+          effective_from: { lte: endDate },
+        },
+        include: {
+          salary_structure: {
+            include: {
+              components: {
+                include: { salary_component: true },
+              },
+            },
+          },
+        },
+      });
+
+      let basePay = assignment
+        ? Number(assignment.base_pay) * weeksInPeriod
+        : Number(staff.base_pay_per_week) * weeksInPeriod;
 
       const payrollItems: any[] = [
         {
@@ -212,6 +246,48 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
           amount: basePay,
         },
       ];
+
+      let structureEarnings = 0;
+      let structureDeductions = 0;
+
+      if (assignment?.salary_structure?.components) {
+        const formulaContext = {
+          base: basePay,
+          total_sales: currentSales,
+          commissions: totalCommissions,
+          tardiness_deduction: tardinessDeduction,
+          weeks: weeksInPeriod,
+        };
+
+        for (const c of assignment.salary_structure.components) {
+          let amount = 0;
+          if (c.formula) {
+            // amount = evaluatePayrollFormula(c.formula, formulaContext);
+            amount = 0; // Formula evaluation disabled until a safe evaluator is restored
+          } else if (c.amount) {
+            amount = Number(c.amount) * weeksInPeriod;
+          }
+
+          if (amount > 0) {
+            payrollItems.push({
+              component_name: c.salary_component.name,
+              component_type: c.salary_component.type,
+              amount: amount,
+              formula_used: c.formula || 'Fixed Amount',
+            });
+
+            if (c.salary_component.type === 'earning') {
+              structureEarnings += amount;
+            } else {
+              structureDeductions += amount;
+            }
+          }
+        }
+      }
+
+      const totalDeductions = tardinessDeduction + manualDeductionTotal + structureDeductions;
+      const finalBasePay = basePay + structureEarnings;
+      const netPay = finalBasePay + totalCommissions - totalDeductions;
 
       if (tieredCommissions > 0) {
         payrollItems.push({
@@ -251,7 +327,7 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
         data: {
           staff_id: staff.id,
           payroll_period_id: payrollPeriod.id,
-          base_pay: basePay,
+          base_pay: finalBasePay,
           commissions: totalCommissions,
           deductions: totalDeductions,
           net_pay: netPay,
@@ -296,7 +372,6 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
     return res.status(201).json({ success: true, data: payrollPeriod });
   } catch (error: unknown) {
     console.error('Generate payroll error:', error);
-
 
     const message = error instanceof Error ? error.message : 'Failed to generate payroll';
     return res.status(500).json({ success: false, message });
@@ -353,9 +428,9 @@ export const getPayrollDetails = async (req: AuthRequest, res: Response) => {
       where: { id },
       include: {
         payrolls: {
-          include: { 
+          include: {
             staff: { select: { full_name: true, specializations: true } },
-            items: true
+            items: true,
           },
         },
         deductions: {
@@ -398,7 +473,7 @@ export const addDeduction = async (req: AuthRequest, res: Response) => {
 
     const staff = await prisma.staffProfile.findUnique({
       where: { id: parseInt(staff_id) },
-      include: { user: true }
+      include: { user: true },
     });
 
     if (!staff || staff.user.role === 'manager') {
@@ -445,9 +520,9 @@ export const getMyPayroll = async (req: AuthRequest, res: Response) => {
 
     const payrolls = await prisma.staffPayroll.findMany({
       where: { staff_id: staffProfile.id },
-      include: { 
+      include: {
         period: true,
-        items: true
+        items: true,
       },
       orderBy: { created_at: 'desc' },
     });
@@ -573,11 +648,14 @@ export const exportPayrollExcel = async (req: AuthRequest, res: Response) => {
     period.payrolls.forEach((p) => {
       const staffDailySales = commissions
         .filter((c) => c.staff_id === p.staff_id)
-        .reduce((acc, c) => {
-          const dateKey = format(c.commission_date, 'yyyy-MM-dd');
-          acc[dateKey] = (acc[dateKey] || 0) + Number(c.base_amount);
-          return acc;
-        }, {} as Record<string, number>);
+        .reduce(
+          (acc, c) => {
+            const dateKey = format(c.commission_date, 'yyyy-MM-dd');
+            acc[dateKey] = (acc[dateKey] || 0) + Number(c.base_amount);
+            return acc;
+          },
+          {} as Record<string, number>,
+        );
 
       const rowData: (string | number)[] = [p.staff.full_name];
 
@@ -605,7 +683,7 @@ export const exportPayrollExcel = async (req: AuthRequest, res: Response) => {
       const reloan = getDeduction('reloan');
       const lates = getDeduction('lates_early_out');
 
-      const totalDeductions = p.deductions;
+      const totalDeductions = Number(p.deductions);
       const netPay = p.net_pay;
 
       rowData.push(
@@ -613,12 +691,12 @@ export const exportPayrollExcel = async (req: AuthRequest, res: Response) => {
         Number(commPay),
         Number(basicPay),
         grossPay,
-        ca > 0 ? -ca : 0,
-        loan > 0 ? -loan : 0,
-        uniform > 0 ? -uniform : 0,
-        reloan > 0 ? -reloan : 0,
-        lates > 0 ? -lates : 0,
-        totalDeductions > 0 ? -totalDeductions : 0,
+        Number(ca) > 0 ? -Number(ca) : 0,
+        Number(loan) > 0 ? -Number(loan) : 0,
+        Number(uniform) > 0 ? -Number(uniform) : 0,
+        Number(reloan) > 0 ? -Number(reloan) : 0,
+        Number(lates) > 0 ? -Number(lates) : 0,
+        Number(totalDeductions) > 0 ? -Number(totalDeductions) : 0,
         Number(netPay),
       );
 
@@ -647,7 +725,6 @@ export const exportPayrollExcel = async (req: AuthRequest, res: Response) => {
 
     await workbook.xlsx.write(res);
     res.end();
-    res.end();
   } catch (error: unknown) {
     console.error('Export payroll error:', error);
     const message = error instanceof Error ? error.message : 'Failed to export payroll';
@@ -662,7 +739,7 @@ export const getDeductions = async (req: AuthRequest, res: Response) => {
   try {
     const deductions = await prisma.deductionLog.findMany({
       include: { staff: { select: { full_name: true } } },
-      orderBy: { created_at: 'desc' }
+      orderBy: { created_at: 'desc' },
     });
     return res.status(200).json({ success: true, data: deductions });
   } catch (error) {
@@ -678,16 +755,24 @@ export const deleteDeduction = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const idStr = Array.isArray(id) ? id[0] : id;
-    const idNum = parseInt(idStr as string);
-    
+    const idNum = parseInt(idStr as string, 10);
+    if (isNaN(idNum)) {
+      return res.status(400).json({ success: false, message: 'Invalid deduction ID parameter' });
+    }
+
     // Check if deduction is already part of a payroll period
     const existing = await prisma.deductionLog.findUnique({ where: { id: idNum } });
     if (!existing) return res.status(404).json({ success: false, message: 'Deduction not found' });
-    if (existing.payroll_period_id) return res.status(400).json({ success: false, message: 'Cannot delete deduction linked to a payroll period' });
-    
+    if (existing.payroll_period_id)
+      return res
+        .status(400)
+        .json({ success: false, message: 'Cannot delete deduction linked to a payroll period' });
+
     await prisma.deductionLog.delete({ where: { id: idNum } });
-    await logSystemAction(req as AuthRequest, 'DEDUCTION_DELETED', 'Deduction', idNum, { message: 'Deleted payroll deduction' });
-    
+    await logSystemAction(req as AuthRequest, 'DEDUCTION_DELETED', 'Deduction', idNum, {
+      message: 'Deleted payroll deduction',
+    });
+
     return res.status(200).json({ success: true, message: 'Deduction deleted successfully' });
   } catch (error) {
     console.error('Delete deduction error:', error);
@@ -718,7 +803,10 @@ export const generateNextPeriod = async (req: AuthRequest, res: Response) => {
       }
     } else {
       const body = req.body || {};
-      const baseDate = body.start_date || body.startDate ? new Date(body.start_date || body.startDate) : new Date();
+      const baseDate =
+        body.start_date || body.startDate
+          ? new Date(body.start_date || body.startDate)
+          : new Date();
       newStartDate = startOfDay(startOfISOWeek(baseDate));
     }
 
@@ -730,7 +818,7 @@ export const generateNextPeriod = async (req: AuthRequest, res: Response) => {
         end_date: newEndDate,
         total_salon_sales: 0,
         is_locked: false,
-      }
+      },
     });
 
     await logSystemAction(req as AuthRequest, 'PERIOD_GENERATED', 'PayrollPeriod', newPeriod.id, {
@@ -740,10 +828,9 @@ export const generateNextPeriod = async (req: AuthRequest, res: Response) => {
     return res.status(201).json({ success: true, data: newPeriod });
   } catch (error: any) {
     console.error('Generate next period error:', error);
-    return res.status(500).json({ 
-      success: false, 
-      message: error.message || 'Failed to generate next period' 
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to generate next period',
     });
   }
 };
-

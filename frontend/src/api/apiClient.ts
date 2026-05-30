@@ -53,7 +53,6 @@ apiClient.interceptors.request.use(
   },
 );
 
-
 // Response interceptor for handling errors
 apiClient.interceptors.response.use(
   (response) => response,
@@ -136,7 +135,7 @@ export const addDeduction = (data: {
 export const deleteDeduction = (id: number) => apiClient.delete(`/payroll/deductions/${id}`);
 export const generateNextPeriod = () => apiClient.post('/payroll/periods/generate');
 export const lockPayroll = (id: number) => apiClient.post(`/payroll/periods/${id}/lock`);
-export const exportPayrollExcel = (id: number) => 
+export const exportPayrollExcel = (id: number) =>
   apiClient.get(`/payroll/export/${id}`, { responseType: 'blob' });
 
 // Payroll Setup
@@ -167,6 +166,11 @@ export const searchCustomers = (query: string) =>
 export const getCustomerHistory = (id: number) => apiClient.get(`/customers/${id}/history`);
 export const updateCustomerProfile = (data: UpdateCustomerProfileRequest) =>
   apiClient.put('/customers/profile', data);
+export const getAllCustomers = (params?: { cursor?: string; limit?: number; search?: string }) =>
+  apiClient.get('/customers', { params });
+export const createCustomer = (data: any) => apiClient.post('/customers', data);
+export const updateCustomer = (id: number, data: any) => apiClient.put(`/customers/${id}`, data);
+export const deleteCustomer = (id: number) => apiClient.delete(`/customers/${id}`);
 
 // Attendance methods
 export const getAttendanceStatus = () => apiClient.get('/attendance/status');
@@ -279,13 +283,17 @@ export const deletePackage = (id: number) =>
   apiClient.delete<{ success: boolean; message: string }>(`/packages/${id}`);
 
 // Addon endpoints
-export const getAddons = (params?: { showAll?: boolean }) =>
-  apiClient.get('/addons', { params });
-export const createAddon = (data: { name: string; description?: string; price: number; is_active?: boolean }) =>
-  apiClient.post('/addons', data);
-export const updateAddon = (id: number, data: { name?: string; description?: string; price?: number; is_active?: boolean }) =>
-  apiClient.put(`/addons/${id}`, data);
-export const deleteAddon = (id: number) =>
-  apiClient.delete(`/addons/${id}`);
+export const getAddons = (params?: { showAll?: boolean }) => apiClient.get('/addons', { params });
+export const createAddon = (data: {
+  name: string;
+  description?: string;
+  price: number;
+  is_active?: boolean;
+}) => apiClient.post('/addons', data);
+export const updateAddon = (
+  id: number,
+  data: { name?: string; description?: string; price?: number; is_active?: boolean },
+) => apiClient.put(`/addons/${id}`, data);
+export const deleteAddon = (id: number) => apiClient.delete(`/addons/${id}`);
 
 export default apiClient;

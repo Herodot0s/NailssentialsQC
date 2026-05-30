@@ -76,7 +76,8 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
     }
     const userId = currentUser.userId;
     const role = currentUser.role;
-    const { items, date, notes, customerId, isWalkIn, phone, addons } = req.validatedBody || req.body;
+    const { items, date, notes, customerId, isWalkIn, phone, addons } =
+      req.validatedBody || req.body;
 
     if (!userId) {
       return sendError(res, 'UNAUTHORIZED', 'User not authenticated', 401);
@@ -97,7 +98,12 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
     // Or we check if clerk_id is present and they are authenticated.
     // For now, let's assume if they have a clerk_id and are active, they are verified.
     if (!user.is_active) {
-      return sendError(res, 'USER_NOT_VERIFIED', 'Your account must be verified before booking.', 403);
+      return sendError(
+        res,
+        'USER_NOT_VERIFIED',
+        'Your account must be verified before booking.',
+        403,
+      );
     }
 
     // 2. Mandatory phone number check (SET ASIDE FOR NOW per user request)
@@ -115,8 +121,6 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
       });
     }
     */
-
-
 
     if (!items || !Array.isArray(items) || items.length === 0 || !date) {
       return sendError(res, 'MISSING_FIELDS', 'Missing required fields (items, date)', 400);
@@ -204,6 +208,21 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
       }
     }
 
+    // Past Time Validation Security Check
+    const serverNow = new Date();
+    for (const item of items) {
+      const { startTime } = item;
+      const startDateTime = getFullDate(date, startTime);
+      if (startDateTime < serverNow) {
+        return sendError(
+          res,
+          'BAD_REQUEST',
+          'Selected date or time has already passed. Please select a future date and time.',
+          400,
+        );
+      }
+    }
+
     const appointment = await prisma.$transaction(async (tx) => {
       // 1. Operating Hours & Strict Availability Check (Conflict Prevention)
       const OPERATING_HOURS = { start: 12, end: 22 };
@@ -224,7 +243,9 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
           throw new Error(`Appointments cannot start before 12:00 PM.`);
         }
         if (endHour > OPERATING_HOURS.end || (endHour === OPERATING_HOURS.end && endMinutes > 0)) {
-          throw new Error(`Service "${service.name}" ends at ${format(endDateTime, 'h:mm a')}, which is past closing time (10:00 PM).`);
+          throw new Error(
+            `Service "${service.name}" ends at ${format(endDateTime, 'h:mm a')}, which is past closing time (10:00 PM).`,
+          );
         }
 
         const staffProfile = await tx.staffProfile.findFirst({
@@ -306,14 +327,14 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
           const addonDb = await tx.addon.findUnique({ where: { id: parseInt(adn.addonId) } });
           if (!addonDb) throw new Error(`Addon ${adn.addonId} not found`);
           if (!addonDb.is_active) throw new Error(`Addon "${addonDb.name}" is no longer available`);
-          
+
           await tx.appointmentAddon.create({
             data: {
               appointment_id: apt.id,
               addon_id: addonDb.id,
               price_at_booking: addonDb.price,
               quantity: parseInt(adn.quantity) || 1,
-            }
+            },
           });
         }
       }
@@ -373,12 +394,16 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
   } catch (error: unknown) {
     console.error('Create appointment error:', error);
     const message = error instanceof Error ? error.message : 'Failed to create appointment';
-    
+
     // Handle specific validation/conflict errors with 400 instead of 500
-    if (message.includes('already booked') || message.includes('not found') || message.includes('available')) {
+    if (
+      message.includes('already booked') ||
+      message.includes('not found') ||
+      message.includes('available')
+    ) {
       return sendError(res, 'BAD_REQUEST', message, 400);
     }
-    
+
     return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
   }
 };

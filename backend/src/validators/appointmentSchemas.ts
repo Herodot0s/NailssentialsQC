@@ -15,7 +15,6 @@ export const createAppointmentSchema = z.object({
   phone: z.string().optional(),
   customerId: z.number().int().positive().optional(),
   isWalkIn: z.boolean().optional(),
-
 });
 
 export const completeAppointmentSchema = z.object({

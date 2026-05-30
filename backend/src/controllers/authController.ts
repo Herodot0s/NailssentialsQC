@@ -12,7 +12,7 @@ export const getMe = async (req: AuthRequest, res: Response) => {
     if (!currentUser) {
       return sendError(res, 'UNAUTHORIZED', 'User not authenticated', 401);
     }
-    
+
     const userId = currentUser.userId;
 
     const user = await prisma.user.findUnique({

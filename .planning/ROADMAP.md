@@ -34,3 +34,12 @@
 2. Staff can download a PDF payslip for past weekly periods.
 3. Booking system blocks past times for today's date.
 4. Booking time slot selection and technician assignment clearly show availability.
+
+### Phase 12: Testing & Coverage
+**Goal:** Initialize testing environment and achieve high coverage across critical paths and regression scenarios.
+**Requirements:** TST-01, TST-02
+**Success Criteria:**
+1. Backend coverage >= 80% (Auth/Payroll 90%).
+2. Frontend coverage >= 70%.
+3. Regression tests for timezones, concurrency, and checkout are implemented and passing.
+4. Root-level `npm test` runs both suites.

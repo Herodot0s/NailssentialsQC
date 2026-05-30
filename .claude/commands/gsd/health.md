@@ -1,5 +1,5 @@
 ---
-name: gsd:health
+name: gsd-health
 description: Diagnose planning directory health and optionally repair issues
 argument-hint: "[--repair] [--context]"
 allowed-tools:
@@ -7,6 +7,7 @@ allowed-tools:
   - Bash
   - Write
   - AskUserQuestion
+requires: [thread]
 ---
 <objective>
 Validate `.planning/` directory integrity and report actionable issues. Checks for missing files, invalid configurations, inconsistent state, and orphaned plans.
@@ -25,6 +26,6 @@ Validate `.planning/` directory integrity and report actionable issues. Checks f
 </execution_context>
 
 <process>
-Execute the health workflow from @C:/Users/Administrator/Desktop/nailssentialsqc-system/.claude/get-shit-done/workflows/health.md end-to-end.
+Execute end-to-end.
 Parse `--repair` and `--context` flags from arguments and pass to workflow.
 </process>

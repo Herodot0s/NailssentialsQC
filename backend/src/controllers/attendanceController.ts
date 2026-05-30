@@ -287,27 +287,40 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
     }
 
     const now = new Date();
-    const { today } = getManilaToday();
 
-    const attendance = await prisma.attendance.update({
+    // Find the most recent active check-in record where check_out is null
+    const attendance = await prisma.attendance.findFirst({
       where: {
-        uk_staff_date: {
-          staff_id: staffProfile.id,
-          date: today,
-        },
+        staff_id: staffProfile.id,
+        check_out: null,
       },
+      orderBy: {
+        date: 'desc',
+      },
+    });
+
+    if (!attendance) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'NOT_CHECKED_IN', message: 'You must check in before checking out' },
+      });
+    }
+
+    const updatedAttendance = await prisma.attendance.update({
+      where: { id: attendance.id },
       data: {
         check_out: now,
       },
     });
 
     // Calculate if early out
-    const scheduledEndStr = attendance.scheduled_end || staffProfile.scheduled_end || '22:00:00';
+    const scheduledEndStr =
+      updatedAttendance.scheduled_end || staffProfile.scheduled_end || '22:00:00';
     const endParts = scheduledEndStr.split(':');
     const endHours = parseInt(endParts[0]);
     const endMinutes = parseInt(endParts[1]);
 
-    const scheduledEndTime = new Date(today);
+    const scheduledEndTime = new Date(updatedAttendance.date);
     scheduledEndTime.setUTCHours(endHours - 8, endMinutes, 0, 0);
 
     const earlyOutMinutes = Math.floor((scheduledEndTime.getTime() - now.getTime()) / (1000 * 60));

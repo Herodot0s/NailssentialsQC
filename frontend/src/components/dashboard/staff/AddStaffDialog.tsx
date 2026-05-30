@@ -95,8 +95,6 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
     }
   };
 
-
-
   const toggleSpecialization = (name: string) => {
     const current = form.specializations
       ? form.specializations
@@ -259,10 +257,12 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                         </Label>
                         <div className="flex gap-2">
                           <label className="cursor-pointer">
-                            <div className={cn(
-                              "h-9 px-4 bg-[#23251d] text-white text-[11px] font-[700] uppercase tracking-wider flex items-center gap-2 rounded-[4px] hover:bg-[#33342d] transition-all active:scale-95",
-                              isUploadingPhoto && "opacity-70 pointer-events-none"
-                            )}>
+                            <div
+                              className={cn(
+                                'h-9 px-4 bg-[#23251d] text-white text-[11px] font-[700] uppercase tracking-wider flex items-center gap-2 rounded-[4px] hover:bg-[#33342d] transition-all active:scale-95',
+                                isUploadingPhoto && 'opacity-70 pointer-events-none',
+                              )}
+                            >
                               {isUploadingPhoto ? (
                                 <Loader2 className="h-3 w-3 animate-spin" />
                               ) : (
@@ -304,7 +304,10 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                         onClick={() => toggleSpecialization('Hair')}
                         className={cn(
                           'px-5 py-2 rounded-full text-[13px] font-[700] transition-all border transform active:scale-95',
-                          form.specializations?.split(',').map(s => s.trim()).includes('Hair')
+                          form.specializations
+                            ?.split(',')
+                            .map((s) => s.trim())
+                            .includes('Hair')
                             ? 'bg-[#23251d] text-[#ffffff] border-[#23251d] shadow-lg shadow-[#23251d]/10'
                             : 'bg-transparent text-[#4d4f46] border-[#bfc1b7] hover:border-[#23251d]',
                         )}
@@ -312,33 +315,32 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                         Hair
                       </button>
                       {categories
-                        .filter(cat => !cat.name.toLowerCase().includes('hair'))
+                        .filter((cat) => !cat.name.toLowerCase().includes('hair'))
                         .map((cat) => {
-                        const isSelected = form.specializations
-                          .split(',')
-                          .map((s) => s.trim())
-                          .includes(cat.name);
-                        return (
-                          <button
-                            key={cat.id}
-                            type="button"
-                            onClick={() => toggleSpecialization(cat.name)}
-                            className={cn(
-                              'px-5 py-2 rounded-full text-[13px] font-[700] transition-all border transform active:scale-95',
-                              isSelected
-                                ? 'bg-[#23251d] text-[#ffffff] border-[#23251d] shadow-lg shadow-[#23251d]/10'
-                                : 'bg-transparent text-[#4d4f46] border-[#bfc1b7] hover:border-[#23251d]',
-                            )}
-                          >
-                            {cat.name}
-                          </button>
-                        );
-                      })}
+                          const isSelected = form.specializations
+                            .split(',')
+                            .map((s) => s.trim())
+                            .includes(cat.name);
+                          return (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => toggleSpecialization(cat.name)}
+                              className={cn(
+                                'px-5 py-2 rounded-full text-[13px] font-[700] transition-all border transform active:scale-95',
+                                isSelected
+                                  ? 'bg-[#23251d] text-[#ffffff] border-[#23251d] shadow-lg shadow-[#23251d]/10'
+                                  : 'bg-transparent text-[#4d4f46] border-[#bfc1b7] hover:border-[#23251d]',
+                              )}
+                            >
+                              {cat.name}
+                            </button>
+                          );
+                        })}
                     </div>
                   </div>
                 </div>
               </div>
-
 
               {/* Credentials Section */}
               <div
@@ -361,36 +363,49 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                     <CheckCircle2 className="h-4 w-4 text-[#2c8c66] animate-in zoom-in" />
                   )}
                 </div>
-                  <div className="space-y-4">
-                    <Label className="text-[11px] font-[800] uppercase tracking-[0.15em] text-[#6c6e63] ml-1 flex items-center gap-2">
-                      <ShieldCheck className="h-3 w-3 text-[#B8794E]" /> Assigned Role
-                    </Label>
-                    <div className="flex gap-4">
-                      {['staff', 'manager'].map((r) => (
-                        <button
-                          key={r}
-                          type="button"
-                          onClick={() => onFormChange({ ...form, role: r as 'staff' | 'manager' })}
-                          className={cn(
-                            'flex-1 py-3 rounded-[6px] text-[13px] font-[700] uppercase tracking-wider border transition-all active:scale-95',
-                            form.role === r
-                              ? 'bg-[#23251d] text-[#ffffff] border-[#23251d] shadow-lg shadow-[#23251d]/10'
-                              : 'bg-transparent text-[#4d4f46] border-[#bfc1b7] hover:border-[#23251d]',
-                          )}
-                        >
-                          {r}
-                        </button>
-                      ))}
-                    </div>
+                <div className="space-y-4">
+                  <Label className="text-[11px] font-[800] uppercase tracking-[0.15em] text-[#6c6e63] ml-1 flex items-center gap-2">
+                    <ShieldCheck className="h-3 w-3 text-[#B8794E]" /> Assigned Role
+                  </Label>
+                  <div className="flex gap-4">
+                    {['staff', 'manager'].map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => onFormChange({ ...form, role: r as 'staff' | 'manager' })}
+                        className={cn(
+                          'flex-1 py-3 rounded-[6px] text-[13px] font-[700] uppercase tracking-wider border transition-all active:scale-95',
+                          form.role === r
+                            ? 'bg-[#23251d] text-[#ffffff] border-[#23251d] shadow-lg shadow-[#23251d]/10'
+                            : 'bg-transparent text-[#4d4f46] border-[#bfc1b7] hover:border-[#23251d]',
+                        )}
+                      >
+                        {r}
+                      </button>
+                    ))}
                   </div>
+                </div>
+                <div className="relative group">
+                  <div className="p-4 bg-[#B8794E]/5 border border-[#B8794E]/20 rounded-[6px]">
+                    <p className="text-[12px] text-[#B8794E] font-[600] leading-relaxed">
+                      <Sparkles className="h-3 w-3 inline mr-1 mb-1" />
+                      Credentials will be managed via Clerk Auth. The user will receive an
+                      onboarding email at the address provided below.
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-4">
                   <div className="relative group">
-                    <div className="p-4 bg-[#B8794E]/5 border border-[#B8794E]/20 rounded-[6px]">
-                      <p className="text-[12px] text-[#B8794E] font-[600] leading-relaxed">
-                        <Sparkles className="h-3 w-3 inline mr-1 mb-1" />
-                        Credentials will be managed via Clerk Auth. The user will receive an
-                        onboarding email at the address provided below.
-                      </p>
-                    </div>
+                    <Input
+                      required
+                      type="password"
+                      value={form.password || ''}
+                      onFocus={() => setFocusedField('cre-password')}
+                      onBlur={() => setFocusedField(null)}
+                      onChange={(e) => onFormChange({ ...form, password: e.target.value })}
+                      placeholder="Initial Password"
+                      className="rounded-[6px] border-[#bfc1b7] h-12 bg-[#ffffff] font-['IBM_Plex_Sans_Variable'] text-[15px] px-5 focus:ring-0 focus:border-[#23251d] group-hover:border-[#6c6e63]"
+                    />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="relative group">
@@ -422,7 +437,7 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                   </div>
                 </div>
               </div>
-
+            </div>
 
             <div className="space-y-10">
               {/* Compliance Section */}
@@ -566,42 +581,42 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
               </div>
             </div>
           </div>
-        <DialogFooter className="pt-10 gap-5 sm:justify-end border-t border-[#dcdfd2] mt-12">
-          <Button
-            type="button"
-            variant="ghost"
-            className="rounded-[6px] h-14 px-10 text-[14px] font-[800] text-[#23251d] uppercase tracking-[0.15em] transition-all bg-[#e5e7e0] hover:bg-[#dcdfd2] active:scale-[0.97]"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className={cn(
-              'rounded-[6px] px-12 h-14 font-[800] text-[14px] uppercase tracking-[0.15em] transition-all relative overflow-hidden active:scale-[0.97]',
-              isSubmitting
-                ? 'bg-[#bfc1b7]'
-                : 'bg-[#B8794E] text-[#ffffff] hover:bg-[#23251d] shadow-xl shadow-[#B8794E]/20',
-            )}
-          >
-            <div className="flex items-center gap-3 relative z-10">
-              {isSubmitting ? (
-                <>
-                  <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Processing</span>
-                </>
-              ) : (
-                <>
-                  <span>Complete Intake</span>
-                  <Sparkles className="h-4 w-4" />
-                </>
+          <DialogFooter className="pt-10 gap-5 sm:justify-end border-t border-[#dcdfd2] mt-12">
+            <Button
+              type="button"
+              variant="ghost"
+              className="rounded-[6px] h-14 px-10 text-[14px] font-[800] text-[#23251d] uppercase tracking-[0.15em] transition-all bg-[#e5e7e0] hover:bg-[#dcdfd2] active:scale-[0.97]"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className={cn(
+                'rounded-[6px] px-12 h-14 font-[800] text-[14px] uppercase tracking-[0.15em] transition-all relative overflow-hidden active:scale-[0.97]',
+                isSubmitting
+                  ? 'bg-[#bfc1b7]'
+                  : 'bg-[#B8794E] text-[#ffffff] hover:bg-[#23251d] shadow-xl shadow-[#B8794E]/20',
               )}
-            </div>
-          </Button>
-        </DialogFooter>
-      </form>
-    </DialogContent>
+            >
+              <div className="flex items-center gap-3 relative z-10">
+                {isSubmitting ? (
+                  <>
+                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Processing</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Complete Intake</span>
+                    <Sparkles className="h-4 w-4" />
+                  </>
+                )}
+              </div>
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 };

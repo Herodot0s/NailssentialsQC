@@ -43,13 +43,11 @@ interface SelectedAddon {
   name: string;
 }
 
-
 const Booking: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { isSignedIn } = useUser();
-
 
   const { cart, removeFromCart, updateCartItem, clearCart, totalPrice } = useCart();
   const { user } = useAuth();
@@ -74,8 +72,6 @@ const Booking: React.FC = () => {
   const [isCustomTime, setIsCustomTime] = useState(false);
   const [availableAddons, setAvailableAddons] = useState<Addon[]>([]);
   const [selectedAddons, setSelectedAddons] = useState<SelectedAddon[]>([]);
-
-
 
   useEffect(() => {
     if (authLoading) return;
@@ -112,6 +108,8 @@ const Booking: React.FC = () => {
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(e.target.value);
+    setSelectedTime('');
+    setError(null);
   };
 
   const updateAddonQuantity = (addon: Addon, delta: number) => {
@@ -153,7 +151,7 @@ const Booking: React.FC = () => {
     // Operating Hours & Past Time Validation
     const now = new Date();
     const selectedDateTime = new Date(`${selectedDate}T${selectedTime}`);
-    
+
     if (selectedDateTime < now) {
       setError('Selected time has already passed. Please select a future time.');
       return;
@@ -166,7 +164,7 @@ const Booking: React.FC = () => {
     }
 
     // Check if all services fit within operating hours (end by 10 PM)
-    const tooLate = cart.some(item => {
+    const tooLate = cart.some((item) => {
       const duration = item.duration || 0;
       const startTimeDate = new Date(`1970-01-01T${selectedTime}:00`);
       const endTimeDate = new Date(startTimeDate.getTime() + duration * 60000);
@@ -176,7 +174,9 @@ const Booking: React.FC = () => {
     });
 
     if (tooLate) {
-      setError('Selected time is too late for the duration of one or more treatments. Store closes at 10:00 PM.');
+      setError(
+        'Selected time is too late for the duration of one or more treatments. Store closes at 10:00 PM.',
+      );
       return;
     }
 
@@ -208,12 +208,12 @@ const Booking: React.FC = () => {
         addons: selectedAddons.map((a) => ({ addonId: a.addonId, quantity: a.quantity })),
       });
 
-
       setSuccess(true);
       clearCart();
       setTimeout(() => navigate('/appointments'), 3000);
     } catch (err: any) {
-      const message = err.response?.data?.error?.message || err.message || 'Failed to book appointment.';
+      const message =
+        err.response?.data?.error?.message || err.message || 'Failed to book appointment.';
       setError(message);
     } finally {
       setIsSubmitting(false);
@@ -225,6 +225,24 @@ const Booking: React.FC = () => {
     () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     [],
   );
+
+  const minTimeForSelectedDate = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (selectedDate !== todayStr) {
+      return '12:00';
+    }
+    const now = new Date();
+    const currentHours = now.getHours().toString().padStart(2, '0');
+    const currentMinutes = now.getMinutes().toString().padStart(2, '0');
+    const currentTimeStr = `${currentHours}:${currentMinutes}`;
+    return currentTimeStr > '12:00' ? currentTimeStr : '12:00';
+  }, [selectedDate]);
+
+  const isSlotInPast = (dateStr: string, timeStr: string) => {
+    const now = new Date();
+    const slotDateTime = new Date(`${dateStr}T${timeStr}`);
+    return slotDateTime < now;
+  };
 
   const finalTotalPrice = useMemo(() => {
     return totalPrice + selectedAddons.reduce((sum, a) => sum + a.price * a.quantity, 0);
@@ -327,7 +345,7 @@ const Booking: React.FC = () => {
                         type="time"
                         value={selectedTime}
                         onChange={(e) => setSelectedTime(e.target.value)}
-                        min="12:00"
+                        min={minTimeForSelectedDate}
                         max="21:30"
                         className="h-9 rounded-md border-hairline focus:ring-2 focus:ring-accent-blue focus:border-accent-blue body-md bg-surface-card pr-10"
                       />
@@ -336,32 +354,42 @@ const Booking: React.FC = () => {
                       </div>
                     </div>
                   ) : (
-                    <Select value={selectedTime} onValueChange={(val) => setSelectedTime(val || '')}>
+                    <Select
+                      value={selectedTime}
+                      onValueChange={(val) => setSelectedTime(val || '')}
+                    >
                       <SelectTrigger className="h-9 rounded-md border-hairline focus:ring-2 focus:ring-accent-blue focus:border-accent-blue body-md bg-surface-card">
                         <SelectValue placeholder="Select Time">
                           {selectedTime ? formatTime12h(selectedTime) : undefined}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="rounded-md border-hairline shadow-none bg-surface-card max-h-64">
-                        {slots.map((slot) => (
-                          <SelectItem
-                            key={slot.time}
-                            value={slot.time}
-                            disabled={!slot.available}
-                            className="py-2.5"
-                          >
-                            <div className="flex items-center justify-between w-full gap-4">
-                              <div className="flex items-center gap-2">
-                                <span className="body-md">{formatTime12h(slot.time)}</span>
+                        {slots.map((slot) => {
+                          const slotPassed = isSlotInPast(selectedDate, slot.time);
+                          return (
+                            <SelectItem
+                              key={slot.time}
+                              value={slot.time}
+                              disabled={!slot.available || slotPassed}
+                              className="py-2.5"
+                            >
+                              <div className="flex items-center justify-between w-full gap-4">
+                                <div className="flex items-center gap-2">
+                                  <span className="body-md">{formatTime12h(slot.time)}</span>
+                                </div>
+                                {!slot.available ? (
+                                  <span className="utility-xs text-accent-red-soft bg-accent-red/10 px-2 py-0.5 rounded-sm">
+                                    UNAVAILABLE
+                                  </span>
+                                ) : slotPassed ? (
+                                  <span className="utility-xs text-accent-red-soft bg-accent-red/10 px-2 py-0.5 rounded-sm">
+                                    PASSED
+                                  </span>
+                                ) : null}
                               </div>
-                              {!slot.available && (
-                                <span className="utility-xs text-accent-red-soft bg-accent-red/10 px-2 py-0.5 rounded-sm">
-                                  UNAVAILABLE
-                                </span>
-                              )}
-                            </div>
-                          </SelectItem>
-                        ))}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   )}
@@ -444,7 +472,13 @@ const Booking: React.FC = () => {
                                     </SelectTrigger>
                                     <SelectContent className="rounded-md border-hairline shadow-none bg-surface-card">
                                       {staffList.map((staff) => {
-                                        const isAvailable = !selectedTime || !slots.find(s => s.time === selectedTime)?.availableTechnicianIds || slots.find(s => s.time === selectedTime)?.availableTechnicianIds?.includes(staff.id);
+                                        const isAvailable =
+                                          !selectedTime ||
+                                          !slots.find((s) => s.time === selectedTime)
+                                            ?.availableTechnicianIds ||
+                                          slots
+                                            .find((s) => s.time === selectedTime)
+                                            ?.availableTechnicianIds?.includes(staff.id);
                                         return (
                                           <SelectItem
                                             key={staff.id}
@@ -458,7 +492,12 @@ const Booking: React.FC = () => {
                                                   {staff.fullName}
                                                 </span>
                                                 {!isAvailable && (
-                                                  <Badge variant="outline" className="text-[9px] uppercase border-accent-red/30 text-accent-red h-4">Taken</Badge>
+                                                  <Badge
+                                                    variant="outline"
+                                                    className="text-[9px] uppercase border-accent-red/30 text-accent-red h-4"
+                                                  >
+                                                    Taken
+                                                  </Badge>
                                                 )}
                                               </div>
                                               {staff.specializations && (
@@ -551,8 +590,6 @@ const Booking: React.FC = () => {
                   onChange={(e) => setNotes(e.target.value)}
                 />
               </div>
-
-
             </div>
           </div>
 
@@ -584,9 +621,9 @@ const Booking: React.FC = () => {
                                   className="flex justify-between items-baseline"
                                 >
                                   <p className="body-sm text-body">{child.serviceName}</p>
-                                    <p className="utility-xs text-body/50">
-                                      {child.startTime ? formatTime12h(child.startTime) : '--:--'}
-                                    </p>
+                                  <p className="utility-xs text-body/50">
+                                    {child.startTime ? formatTime12h(child.startTime) : '--:--'}
+                                  </p>
                                 </div>
                               ))}
                             </div>
@@ -599,7 +636,8 @@ const Booking: React.FC = () => {
                           <div className="space-y-0.5">
                             <p className="body-strong text-ink">{item.serviceName}</p>
                             <p className="utility-xs text-body/50">
-                              {item.staffName || 'Unassigned'} • {item.startTime ? formatTime12h(item.startTime) : '--:--'}
+                              {item.staffName || 'Unassigned'} •{' '}
+                              {item.startTime ? formatTime12h(item.startTime) : '--:--'}
                             </p>
                           </div>
                           <p className="body-strong text-ink">₱{item.price.toLocaleString()}</p>
@@ -657,9 +695,7 @@ const Booking: React.FC = () => {
                 <CardFooter className="pb-6 px-6">
                   {!isSignedIn ? (
                     <SignInButton mode="modal" fallbackRedirectUrl={location.pathname}>
-                      <Button
-                        className="w-full h-11 rounded-md bg-primary text-white text-[10px] font-extrabold tracking-[0.2em] uppercase hover:bg-primary-pressed transition-colors shadow-none"
-                      >
+                      <Button className="w-full h-11 rounded-md bg-primary text-white text-[10px] font-extrabold tracking-[0.2em] uppercase hover:bg-primary-pressed transition-colors shadow-none">
                         Login to Schedule
                       </Button>
                     </SignInButton>
@@ -674,7 +710,7 @@ const Booking: React.FC = () => {
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           SUBMITTING...
                         </>
-                      ) : isSignedIn && !isAuthenticated && !authLoading ? (
+                      ) : isSignedIn && isLoading ? (
                         'FINISHING SYNC...'
                       ) : (
                         'SCHEDULE APPOINTMENT'

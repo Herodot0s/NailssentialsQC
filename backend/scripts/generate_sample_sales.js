@@ -10,12 +10,12 @@ async function main() {
 
   const staff = await prisma.staffProfile.findMany({
     include: { user: true },
-    where: { user: { role: 'staff', is_active: true } }
+    where: { user: { role: 'staff', is_active: true } },
   });
 
   const services = await prisma.service.findMany({
     where: { is_active: true },
-    take: 10
+    take: 10,
   });
 
   const customer = await prisma.customerProfile.findFirst();
@@ -42,10 +42,10 @@ async function main() {
     for (let i = 0; i < numApps; i++) {
       const randomStaff = staff[Math.floor(Math.random() * staff.length)];
       const randomService = services[Math.floor(Math.random() * services.length)];
-      
+
       const hour = 12 + Math.floor(Math.random() * 8);
       const minute = Math.random() > 0.5 ? 0 : 30;
-      
+
       const startTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`;
       const endHour = hour + Math.floor((randomService.duration_minutes + minute) / 60);
       const endMinute = (randomService.duration_minutes + minute) % 60;
@@ -65,9 +65,9 @@ async function main() {
               start_time: startTime,
               end_time: endTime,
               price_at_booking: randomService.price,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       const receiptNum = `REC-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -79,10 +79,10 @@ async function main() {
           status: 'completed',
           transaction_date: currentDate,
           receipt_number: receiptNum,
-        }
+        },
       });
 
-      const rate = Number(randomStaff.base_commission_rate) || 0.10;
+      const rate = Number(randomStaff.base_commission_rate) || 0.1;
       const commissionAmount = Number(randomService.price) * rate;
 
       await prisma.commission.create({
@@ -97,8 +97,8 @@ async function main() {
           period_week: 20,
           period_month: 5,
           period_year: 2026,
-          is_paid: false
-        }
+          is_paid: false,
+        },
       });
 
       totalGenerated++;

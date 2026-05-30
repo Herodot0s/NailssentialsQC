@@ -22,22 +22,24 @@ async function testPayroll() {
       const start = new Date();
       start.setDate(start.getDate() - 7);
       const end = new Date();
-      
+
       period = await prisma.payrollPeriod.create({
         data: {
           start_date: start,
           end_date: end,
           total_salon_sales: 0,
           is_locked: false,
-        }
+        },
       });
     }
 
-    console.log(`Testing with period ID: ${period.id} (${format(period.start_date, 'yyyy-MM-dd')} to ${format(period.end_date, 'yyyy-MM-dd')})`);
+    console.log(
+      `Testing with period ID: ${period.id} (${format(period.start_date, 'yyyy-MM-dd')} to ${format(period.end_date, 'yyyy-MM-dd')})`,
+    );
 
     // Let's simulate the controller logic for one staff
     const staff = await prisma.staffProfile.findFirst({
-      where: { is_available: true }
+      where: { is_available: true },
     });
 
     if (!staff) {
@@ -46,11 +48,11 @@ async function testPayroll() {
     }
 
     console.log(`Testing for staff: ${staff.full_name}`);
-    
+
     // Check daily breakdown field
     const payroll = await prisma.staffPayroll.findFirst({
       where: { payroll_period_id: period.id, staff_id: staff.id },
-      include: { items: true }
+      include: { items: true },
     });
 
     if (payroll) {
@@ -59,11 +61,12 @@ async function testPayroll() {
       console.log(`- Commissions: ${payroll.commissions}`);
       console.log(`- Net Pay: ${payroll.net_pay}`);
       console.log(`- Daily Breakdown: ${JSON.stringify(payroll.daily_breakdown)}`);
-      console.log(`- Items: ${payroll.items.map(i => i.component_name).join(', ')}`);
+      console.log(`- Items: ${payroll.items.map((i) => i.component_name).join(', ')}`);
     } else {
-      console.log('No payroll record found for this period/staff. Run generatePayroll via UI or API first.');
+      console.log(
+        'No payroll record found for this period/staff. Run generatePayroll via UI or API first.',
+      );
     }
-
   } catch (error) {
     console.error('Test failed:', error);
   } finally {

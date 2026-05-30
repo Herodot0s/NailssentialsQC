@@ -58,16 +58,19 @@ export const MobileCheckIn: React.FC<MobileCheckInProps> = (props) => {
         } else if (props.checkInTime) {
           // Fallback parsing
           const timeStr = props.checkInTime;
-          let h = 0, m = 0;
+          let h = 0,
+            m = 0;
           if (timeStr.includes(' ')) {
             const [base, ampm] = timeStr.split(' ');
             const [hs, ms] = base.split(':');
-            h = parseInt(hs); m = parseInt(ms);
+            h = parseInt(hs);
+            m = parseInt(ms);
             if (ampm === 'PM' && h < 12) h += 12;
             if (ampm === 'AM' && h === 12) h = 0;
           } else {
             const [hs, ms] = timeStr.split(':');
-            h = parseInt(hs || '0'); m = parseInt(ms || '0');
+            h = parseInt(hs || '0');
+            m = parseInt(ms || '0');
           }
           checkInDate = new Date(currentTime);
           checkInDate.setHours(h, m, 0, 0);
@@ -79,9 +82,15 @@ export const MobileCheckIn: React.FC<MobileCheckInProps> = (props) => {
         }
 
         const diff = Math.max(0, currentTime.getTime() - checkInDate.getTime());
-        const hh = Math.floor(diff / 3600000).toString().padStart(2, '0');
-        const mm = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-        const ss = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+        const hh = Math.floor(diff / 3600000)
+          .toString()
+          .padStart(2, '0');
+        const mm = Math.floor((diff % 3600000) / 60000)
+          .toString()
+          .padStart(2, '0');
+        const ss = Math.floor((diff % 60000) / 1000)
+          .toString()
+          .padStart(2, '0');
         setDuration(`${hh}:${mm}:${ss}`);
       } catch (e) {
         setDuration('--:--:--');

@@ -105,17 +105,21 @@ const ManageServices: React.FC = () => {
 
   const popularCount = useMemo(() => services.filter((s) => s.is_popular).length, [services]);
 
-  const getCategoryColor = (id: number | string) => {
+  const getCategoryColor = (id: number | string, alpha?: number) => {
     // Map category IDs to harmonious OKLCH colors aligned with the earthy palette
     const idNum = typeof id === 'string' ? parseInt(id) || 0 : id;
     const colors = [
-      'oklch(60% 0.08 40)', // Warm Terracotta
-      'oklch(55% 0.06 140)', // Muted Sage
-      'oklch(65% 0.10 70)', // Ochre
-      'oklch(50% 0.07 30)', // Deep Clay
-      'oklch(60% 0.05 230)', // Dusk Blue
+      { l: '60%', c: '0.08', h: '40' }, // Warm Terracotta
+      { l: '55%', c: '0.06', h: '140' }, // Muted Sage
+      { l: '65%', c: '0.10', h: '70' }, // Ochre
+      { l: '50%', c: '0.07', h: '30' }, // Deep Clay
+      { l: '60%', c: '0.05', h: '230' }, // Dusk Blue
     ];
-    return colors[idNum % colors.length];
+    const color = colors[idNum % colors.length];
+    if (alpha !== undefined) {
+      return `oklch(${color.l} ${color.c} ${color.h} / ${alpha})`;
+    }
+    return `oklch(${color.l} ${color.c} ${color.h})`;
   };
 
   const deferredSearch = useDeferredValue(searchQuery);
@@ -202,8 +206,8 @@ const ManageServices: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (!currentService) return;
 
     // Validation
@@ -216,7 +220,9 @@ const ManageServices: React.FC = () => {
       return;
     }
     if (parseInt(String(currentService.duration_minutes || '0')) > 600) {
-      setError('Service duration cannot exceed 10 hours (600 minutes), as it would not fit within store operating hours.');
+      setError(
+        'Service duration cannot exceed 10 hours (600 minutes), as it would not fit within store operating hours.',
+      );
       return;
     }
 
@@ -268,40 +274,37 @@ const ManageServices: React.FC = () => {
 
   // Floating Manage Services
   return (
-    <div className="container max-w-7xl mx-auto py-12 px-6">
+    <div className="w-full max-w-7xl mx-auto space-y-6 animate-in fade-in duration-700">
       <style>{scrollbarHideStyles}</style>
-      <div className="flex flex-col gap-8 mb-12">
-        <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-          <div className="space-y-1"></div>
-          <div className="flex gap-3">
-            <Button
-              onClick={() => setIsEditingCategories(true)}
-              variant="outline"
-              className="h-11 px-6 border-hairline text-body font-bold hover:bg-surface-soft/50"
-            >
-              <Tags className="mr-2 h-5 w-5" />
-              Manage Categories
-            </Button>
-            <Button
-              onClick={() => setIsEditingAddons(true)}
-              variant="outline"
-              className="h-11 px-6 border-hairline text-body font-bold hover:bg-surface-soft/50"
-            >
-              <Sparkles className="mr-2 h-5 w-5" />
-              Manage Addons
-            </Button>
-            <Button
-              onClick={handleAddNew}
-              className="h-11 px-8 bg-primary border-none shadow-sm hover:brightness-105 transition-all active:scale-95 text-white font-bold"
-            >
-              <Plus className="mr-2 h-5 w-5" />
-              New Service
-            </Button>
-          </div>
+      <div className="flex flex-col gap-6">
+        <div className="flex justify-end gap-3">
+          <Button
+            onClick={() => setIsEditingCategories(true)}
+            variant="outline"
+            className="h-11 px-6 border-hairline text-body font-bold hover:bg-surface-soft/50 rounded-xl"
+          >
+            <Tags className="mr-2 h-5 w-5" />
+            Manage Categories
+          </Button>
+          <Button
+            onClick={() => setIsEditingAddons(true)}
+            variant="outline"
+            className="h-11 px-6 border-hairline text-body font-bold hover:bg-surface-soft/50 rounded-xl"
+          >
+            <Sparkles className="mr-2 h-5 w-5" />
+            Manage Addons
+          </Button>
+          <Button
+            onClick={handleAddNew}
+            className="h-11 px-8 bg-primary border-none shadow-sm hover:brightness-105 transition-all active:scale-95 text-white font-bold rounded-xl"
+          >
+            <Plus className="mr-2 h-5 w-5" />
+            New Service
+          </Button>
         </div>
 
         {/* Artisan's Toolbar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-6 border-y border-hairline/20 bg-surface-soft/20 -mx-6 px-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-6 border border-hairline/20 bg-surface-soft/10 rounded-2xl">
           <div className="flex flex-1 items-center gap-6 w-full md:w-auto">
             <div className="relative flex-1 max-w-md group">
               <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-4 text-mute group-focus-within:text-primary transition-colors" />
@@ -335,9 +338,7 @@ const ManageServices: React.FC = () => {
                         : 'rgba(255,255,255,0.5)',
                     color: selectedCategoryId === cat.id ? 'white' : getCategoryColor(cat.id),
                     borderColor:
-                      selectedCategoryId === cat.id
-                        ? 'transparent'
-                        : `${getCategoryColor(cat.id)}30`,
+                      selectedCategoryId === cat.id ? 'transparent' : getCategoryColor(cat.id, 0.3),
                   }}
                   className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase whitespace-nowrap border transition-all hover:brightness-95`}
                 >
@@ -425,9 +426,9 @@ const ManageServices: React.FC = () => {
                     <TableCell>
                       <span
                         style={{
-                          backgroundColor: `${getCategoryColor(svc.category_id)}10`,
+                          backgroundColor: getCategoryColor(svc.category_id, 0.1),
                           color: getCategoryColor(svc.category_id),
-                          borderColor: `${getCategoryColor(svc.category_id)}20`,
+                          borderColor: getCategoryColor(svc.category_id, 0.2),
                         }}
                         className="text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full border"
                       >
@@ -501,8 +502,8 @@ const ManageServices: React.FC = () => {
       </Card>
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent className="max-w-[500px] sm:max-w-[500px] w-full p-0 overflow-hidden bg-canvas gap-0 border-none shadow-none">
-          <div className="grid grid-cols-1 h-[85vh]">
+        <DialogContent className="max-w-[500px] sm:max-w-[500px] w-full p-0 overflow-hidden bg-canvas gap-0 border border-hairline rounded-3xl shadow-premium">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 h-[85vh]">
             {/* LEFT PANE: Editor */}
             <div className="h-full overflow-y-auto p-8 bg-white no-scrollbar flex flex-col gap-8 relative">
               <div className="flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-md z-10 -mx-8 px-8 py-4 border-b border-hairline">
@@ -519,11 +520,7 @@ const ManageServices: React.FC = () => {
                   >
                     Cancel
                   </Button>
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={isLoading || isUploading}
-                    className="btn-primary"
-                  >
+                  <Button type="submit" disabled={isLoading || isUploading} className="btn-primary">
                     {isLoading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
                     Save Service
                   </Button>
@@ -655,6 +652,7 @@ const ManageServices: React.FC = () => {
                           id="price"
                           type="number"
                           step="0.01"
+                          min="0"
                           value={currentService?.price || ''}
                           onChange={(e) =>
                             setCurrentService({ ...currentService!, price: e.target.value })
@@ -671,6 +669,8 @@ const ManageServices: React.FC = () => {
                           <Input
                             id="duration"
                             type="number"
+                            min="1"
+                            max="600"
                             value={currentService?.duration_minutes || ''}
                             onChange={(e) =>
                               setCurrentService({
@@ -810,7 +810,7 @@ const ManageServices: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
       <ManageCategoriesDialog

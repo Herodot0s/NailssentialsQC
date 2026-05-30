@@ -1,23 +1,31 @@
 import { z } from 'zod';
 
-export const addDeductionSchema = z.object({
-  staff_id: z.union([z.number(), z.string().regex(/^\d+$/).transform(Number)]).optional(),
-  staffId: z.union([z.number(), z.string().regex(/^\d+$/).transform(Number)]).optional(),
-  payroll_period_id: z.union([z.number(), z.string().regex(/^\d+$/).transform(Number)]).optional(),
-  payrollPeriodId: z.union([z.number(), z.string().regex(/^\d+$/).transform(Number)]).optional(),
-  type: z.string().min(1, 'Type is required'),
-  amount: z.union([z.number(), z.string().transform(Number)]),
-  notes: z.string().optional(),
-}).passthrough();
+export const addDeductionSchema = z
+  .object({
+    staff_id: z.union([z.number(), z.string().regex(/^\d+$/).transform(Number)]).optional(),
+    staffId: z.union([z.number(), z.string().regex(/^\d+$/).transform(Number)]).optional(),
+    payroll_period_id: z
+      .union([z.number(), z.string().regex(/^\d+$/).transform(Number)])
+      .optional(),
+    payrollPeriodId: z.union([z.number(), z.string().regex(/^\d+$/).transform(Number)]).optional(),
+    type: z.string().min(1, 'Type is required'),
+    amount: z.union([z.number(), z.string().transform(Number)]),
+    notes: z.string().optional(),
+  })
+  .passthrough();
 
-export const generatePayrollSchema = z.object({
-  start_date: z.string().optional(),
-  startDate: z.string().optional(),
-  end_date: z.string().optional(),
-  endDate: z.string().optional(),
-  payroll_period_id: z.union([z.number(), z.string().regex(/^\d+$/).transform(Number)]).optional(),
-  payrollPeriodId: z.union([z.number(), z.string().regex(/^\d+$/).transform(Number)]).optional(),
-}).passthrough();
+export const generatePayrollSchema = z
+  .object({
+    start_date: z.string().optional(),
+    startDate: z.string().optional(),
+    end_date: z.string().optional(),
+    endDate: z.string().optional(),
+    payroll_period_id: z
+      .union([z.number(), z.string().regex(/^\d+$/).transform(Number)])
+      .optional(),
+    payrollPeriodId: z.union([z.number(), z.string().regex(/^\d+$/).transform(Number)]).optional(),
+  })
+  .passthrough();
 
 export const salaryComponentSchema = z.object({
   name: z.string().min(1, 'Name is required'),

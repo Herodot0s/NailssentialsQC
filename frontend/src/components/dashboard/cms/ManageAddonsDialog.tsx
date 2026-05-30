@@ -80,7 +80,7 @@ export const ManageAddonsDialog: React.FC<ManageAddonsDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[900px] p-0 overflow-hidden bg-canvas border-none shadow-none gap-0">
         <div className="flex flex-col md:flex-row h-[600px] md:h-[640px] border border-hairline rounded-md overflow-hidden bg-surface-card m-0">
-          <div className="w-full md:w-[170px] flex flex-col border-r border-hairline bg-canvas/30">
+          <div className="w-full md:w-[260px] flex flex-col border-r border-hairline bg-canvas/30">
             <div className="p-6 pb-4 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="bg-primary/10 p-1.5 rounded-md">
@@ -109,10 +109,11 @@ export const ManageAddonsDialog: React.FC<ManageAddonsDialogProps> = ({
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     onClick={() => setCurrentAddon(addon)}
-                    className={`group relative flex items-center justify-between p-3 px-3.5 rounded-md border transition-all cursor-pointer ${currentAddon?.id === addon.id
-                      ? 'bg-surface-card border-hairline shadow-[0_2px_4px_rgba(0,0,0,0.02)]'
-                      : 'bg-transparent border-transparent hover:bg-surface-soft/40'
-                      }`}
+                    className={`group relative flex items-center justify-between p-3 px-3.5 rounded-md border transition-all cursor-pointer ${
+                      currentAddon?.id === addon.id
+                        ? 'bg-surface-card border-hairline shadow-[0_2px_4px_rgba(0,0,0,0.02)]'
+                        : 'bg-transparent border-transparent hover:bg-surface-soft/40'
+                    }`}
                   >
                     <div className="flex flex-col gap-0.5 overflow-hidden">
                       <span

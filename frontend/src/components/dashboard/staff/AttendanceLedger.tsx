@@ -40,7 +40,6 @@ import type { StaffMember, ScheduleItem, AttendanceRecord } from '@/types/api';
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { formatTime12h } from '@/lib/utils';
 
-
 export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({
   attendance,
   staffMembers,
@@ -187,7 +186,9 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({
         date: format(day, 'MMM dd'),
         expected: expectedVal,
         actual: actualVal,
-        expectedStr: schedStart ? `${formatTime12h(schedStart)} - ${formatTime12h(schedEnd)}` : 'Off',
+        expectedStr: schedStart
+          ? `${formatTime12h(schedStart)} - ${formatTime12h(schedEnd)}`
+          : 'Off',
         actualStr: record?.check_in
           ? format(new Date(record.check_in), 'h:mm aa')
           : dateStr > format(new Date(), 'yyyy-MM-dd')

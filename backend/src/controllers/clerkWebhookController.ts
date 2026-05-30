@@ -28,7 +28,7 @@ export const handleClerkWebhook = async (req: Request, res: Response) => {
   }
 
   // Get the body
-  const payload = JSON.stringify(req.body);
+  const payload = (req as any).rawBody || JSON.stringify(req.body);
 
   // Create a new Svix instance with your secret.
   const wh = new Webhook(WEBHOOK_SECRET);
@@ -51,15 +51,15 @@ export const handleClerkWebhook = async (req: Request, res: Response) => {
   const { id } = evt.data;
   const eventType = evt.type;
 
-  console.log(`Webhook received: ${eventType} for user ${id}`);
-
   try {
     if (eventType === 'user.created' || eventType === 'user.updated') {
-      const { email_addresses, primary_email_address_id, first_name, last_name, public_metadata } = evt.data;
-      
-      const email = email_addresses.find((e: any) => e.id === primary_email_address_id)?.email_address 
-                 || email_addresses[0]?.email_address;
-      
+      const { email_addresses, primary_email_address_id, first_name, last_name, public_metadata } =
+        evt.data;
+
+      const email =
+        email_addresses.find((e: any) => e.id === primary_email_address_id)?.email_address ||
+        email_addresses[0]?.email_address;
+
       if (!email) return res.status(200).json({ success: true, message: 'No email, skipping' });
 
       const fullName = `${first_name || ''} ${last_name || ''}`.trim() || 'User';
@@ -67,12 +67,11 @@ export const handleClerkWebhook = async (req: Request, res: Response) => {
 
       // If user was just created and doesn't have a role in Clerk yet, set it to 'customer'
       if (eventType === 'user.created' && !public_metadata?.role) {
-        console.log(`Setting default role 'customer' for user ${id} in Clerk metadata`);
         try {
           await clerkClient.users.updateUserMetadata(id, {
             publicMetadata: {
-              role: 'customer'
-            }
+              role: 'customer',
+            },
           });
           role = 'customer';
         } catch (clerkError) {
@@ -87,7 +86,7 @@ export const handleClerkWebhook = async (req: Request, res: Response) => {
           where: { clerk_id: id },
           update: {
             email,
-            role: role, 
+            role: role,
           },
           create: {
             clerk_id: id,

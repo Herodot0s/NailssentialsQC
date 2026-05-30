@@ -30,7 +30,6 @@ export const AppointmentTimeline: React.FC<AppointmentTimelineProps> = ({
 }) => {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
 
-
   const safeAppointments = Array.isArray(appointments) ? appointments : [];
 
   const todayItems = safeAppointments

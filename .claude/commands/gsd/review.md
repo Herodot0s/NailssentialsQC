@@ -1,5 +1,5 @@
 ---
-name: gsd:review
+name: gsd-review
 description: Request cross-AI peer review of phase plans from external AI CLIs
 argument-hint: "--phase N [--gemini] [--claude] [--codex] [--opencode] [--qwen] [--cursor] [--all]"
 allowed-tools:
@@ -8,6 +8,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+requires: [config, phase, plan-phase]
 ---
 
 <objective>
@@ -36,5 +37,5 @@ Phase number: extracted from $ARGUMENTS (required)
 </context>
 
 <process>
-Execute the review workflow from @C:/Users/Administrator/Desktop/nailssentialsqc-system/.claude/get-shit-done/workflows/review.md end-to-end.
+Execute end-to-end.
 </process>

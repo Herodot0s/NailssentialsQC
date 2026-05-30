@@ -78,7 +78,7 @@ export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
       <DialogContent className="max-w-[900px] p-0 overflow-hidden bg-canvas border-none shadow-none gap-0">
         <div className="flex flex-col md:flex-row h-[600px] md:h-[640px] border border-hairline rounded-md overflow-hidden bg-surface-card m-0">
           {/* Left: List Pane (Sidebar style) */}
-          <div className="w-full md:w-[170px] flex flex-col border-r border-hairline bg-canvas/30">
+          <div className="w-full md:w-[260px] flex flex-col border-r border-hairline bg-canvas/30">
             <div className="p-6 pb-4 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="bg-primary/10 p-1.5 rounded-md">

@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetDescription 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
 } from '@/components/ui/sheet';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableRow 
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Trash2, Plus } from 'lucide-react';
 
 interface DeductionDetailSheetProps {
@@ -31,7 +32,7 @@ export const DeductionDetailSheet: React.FC<DeductionDetailSheetProps> = ({
   onOpenChange,
   staffPayroll,
   isLocked,
-  onAddDeduction
+  onAddDeduction,
 }) => {
   const [type, setType] = useState('cash_advance');
   const [amount, setAmount] = useState('');
@@ -64,7 +65,9 @@ export const DeductionDetailSheet: React.FC<DeductionDetailSheetProps> = ({
           <div className="flex-1 overflow-y-auto p-8 space-y-10">
             {/* Earnings Section */}
             <section className="space-y-4">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Earnings</h3>
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                Earnings
+              </h3>
               <div className="border border-gray-100 bg-gray-50/30">
                 <Table>
                   <TableBody>
@@ -84,7 +87,9 @@ export const DeductionDetailSheet: React.FC<DeductionDetailSheetProps> = ({
             {/* Deductions Section */}
             <section className="space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-destructive">Deductions</h3>
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-destructive">
+                  Deductions
+                </h3>
               </div>
               <div className="border border-gray-100 bg-gray-50/30">
                 <Table>
@@ -102,7 +107,9 @@ export const DeductionDetailSheet: React.FC<DeductionDetailSheetProps> = ({
                             <div className="flex flex-col">
                               <span className="text-[13px]">{item.component_name}</span>
                               {item.formula_used === 'Manual' && (
-                                <span className="text-[9px] text-muted-foreground uppercase tracking-widest">Manual Adjustment</span>
+                                <span className="text-[9px] text-muted-foreground uppercase tracking-widest">
+                                  Manual Adjustment
+                                </span>
                               )}
                             </div>
                           </TableCell>
@@ -111,9 +118,9 @@ export const DeductionDetailSheet: React.FC<DeductionDetailSheetProps> = ({
                           </TableCell>
                           {!isLocked && item.formula_used === 'Manual' && (
                             <TableCell className="text-right py-3 w-10">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 className="h-7 w-7 p-0 rounded-none text-muted-foreground hover:text-destructive"
                                 onClick={() => {
                                   // This is tricky because items are historical snapshots.
@@ -141,12 +148,16 @@ export const DeductionDetailSheet: React.FC<DeductionDetailSheetProps> = ({
               <section className="space-y-6 pt-6 border-t border-gray-50">
                 <div className="flex items-center gap-2 text-primary">
                   <Plus className="h-4 w-4" />
-                  <h3 className="text-[10px] font-bold uppercase tracking-[0.2em]">Add Manual Adjustment</h3>
+                  <h3 className="text-[10px] font-bold uppercase tracking-[0.2em]">
+                    Add Manual Adjustment
+                  </h3>
                 </div>
-                
+
                 <div className="space-y-4 bg-gray-50/50 p-6">
                   <div className="grid gap-2">
-                    <Label className="text-[9px] uppercase tracking-widest font-bold">Category</Label>
+                    <Label className="text-[9px] uppercase tracking-widest font-bold">
+                      Category
+                    </Label>
                     <Select value={type} onValueChange={(val) => setType(val || 'cash_advance')}>
                       <SelectTrigger className="rounded-none border-gray-200 h-10 text-xs">
                         <SelectValue placeholder="Select type" />
@@ -162,11 +173,13 @@ export const DeductionDetailSheet: React.FC<DeductionDetailSheetProps> = ({
                   </div>
 
                   <div className="grid gap-2">
-                    <Label className="text-[9px] uppercase tracking-widest font-bold">Amount (PHP)</Label>
-                    <Input 
-                      type="number" 
-                      placeholder="0.00" 
-                      value={amount} 
+                    <Label className="text-[9px] uppercase tracking-widest font-bold">
+                      Amount (PHP)
+                    </Label>
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                       className="rounded-none border-gray-200 h-10 text-xs"
                     />
@@ -174,15 +187,15 @@ export const DeductionDetailSheet: React.FC<DeductionDetailSheetProps> = ({
 
                   <div className="grid gap-2">
                     <Label className="text-[9px] uppercase tracking-widest font-bold">Notes</Label>
-                    <Input 
-                      placeholder="Optional notes..." 
-                      value={notes} 
+                    <Input
+                      placeholder="Optional notes..."
+                      value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       className="rounded-none border-gray-200 h-10 text-xs"
                     />
                   </div>
 
-                  <Button 
+                  <Button
                     onClick={handleAdd}
                     className="w-full rounded-none h-11 uppercase text-[10px] font-bold tracking-widest mt-4"
                   >
@@ -194,7 +207,9 @@ export const DeductionDetailSheet: React.FC<DeductionDetailSheetProps> = ({
 
             <div className="flex justify-between items-center p-6 bg-primary text-white">
               <span className="text-[10px] uppercase tracking-[0.2em] font-bold">Net Payable</span>
-              <span className="text-xl font-mono font-black">₱{Number(staffPayroll.net_pay).toLocaleString()}</span>
+              <span className="text-xl font-mono font-black">
+                ₱{Number(staffPayroll.net_pay).toLocaleString()}
+              </span>
             </div>
           </div>
         </div>

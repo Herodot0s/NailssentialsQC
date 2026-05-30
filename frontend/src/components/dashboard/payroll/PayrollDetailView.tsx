@@ -1,12 +1,12 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,7 +28,7 @@ export const PayrollDetailView: React.FC<PayrollDetailViewProps> = ({
   onExport,
   onLock,
   onRegenerate,
-  onStaffClick
+  onStaffClick,
 }) => {
   const payrolls = (period as any).payrolls || [];
 
@@ -41,7 +41,8 @@ export const PayrollDetailView: React.FC<PayrollDetailViewProps> = ({
           </Button>
           <div>
             <h2 className="text-2xl font-serif font-light text-foreground">
-              Period Details: {format(new Date(period.start_date), 'MMM d')} - {format(new Date(period.end_date), 'MMM d, yyyy')}
+              Period Details: {format(new Date(period.start_date), 'MMM d')} -{' '}
+              {format(new Date(period.end_date), 'MMM d, yyyy')}
             </h2>
             <div className="flex gap-3 items-center mt-1">
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
@@ -62,14 +63,14 @@ export const PayrollDetailView: React.FC<PayrollDetailViewProps> = ({
         <div className="flex gap-3">
           {!period.is_locked && (
             <>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={onRegenerate}
                 className="gap-2 rounded-none px-4 uppercase text-[9px] font-bold tracking-widest border-gray-100 h-10"
               >
                 <RefreshCw className="h-3.5 w-3.5" /> Recalculate
               </Button>
-              <Button 
+              <Button
                 onClick={onLock}
                 className="gap-2 rounded-none px-6 uppercase text-[9px] font-bold tracking-widest h-10"
               >
@@ -77,7 +78,7 @@ export const PayrollDetailView: React.FC<PayrollDetailViewProps> = ({
               </Button>
             </>
           )}
-          <Button 
+          <Button
             variant="outline"
             onClick={onExport}
             className="gap-2 rounded-none px-4 uppercase text-[9px] font-bold tracking-widest border-gray-100 h-10"
@@ -91,27 +92,49 @@ export const PayrollDetailView: React.FC<PayrollDetailViewProps> = ({
         <Table>
           <TableHeader className="bg-gray-50/50">
             <TableRow className="border-none hover:bg-transparent">
-              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4">Employee Name</TableHead>
-              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4">Commission</TableHead>
-              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4">Basic Pay</TableHead>
-              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4">Gross Pay</TableHead>
-              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4">Deductions</TableHead>
-              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4">Net Pay</TableHead>
-              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4 text-right">Actions</TableHead>
+              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4">
+                Employee Name
+              </TableHead>
+              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4">
+                Commission
+              </TableHead>
+              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4">
+                Basic Pay
+              </TableHead>
+              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4">
+                Gross Pay
+              </TableHead>
+              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4">
+                Deductions
+              </TableHead>
+              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4">
+                Net Pay
+              </TableHead>
+              <TableHead className="text-[9px] font-bold uppercase tracking-widest py-4 text-right">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {payrolls.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-32 text-center text-muted-foreground text-xs italic">
+                <TableCell
+                  colSpan={7}
+                  className="h-32 text-center text-muted-foreground text-xs italic"
+                >
                   No payroll records found for this period.
                 </TableCell>
               </TableRow>
             ) : (
               payrolls.map((p: any) => (
-                <TableRow key={p.id} className="group border-gray-50 hover:bg-gray-50/30 transition-colors">
+                <TableRow
+                  key={p.id}
+                  className="group border-gray-50 hover:bg-gray-50/30 transition-colors"
+                >
                   <TableCell className="py-4">
-                    <span className="text-[13px] font-bold text-foreground">{p.staff?.full_name || 'Unknown Staff'}</span>
+                    <span className="text-[13px] font-bold text-foreground">
+                      {p.staff?.full_name || 'Unknown Staff'}
+                    </span>
                   </TableCell>
                   <TableCell className="py-4 font-mono text-[13px]">
                     ₱{Number(p.commissions).toLocaleString()}
@@ -133,9 +156,9 @@ export const PayrollDetailView: React.FC<PayrollDetailViewProps> = ({
                     </span>
                   </TableCell>
                   <TableCell className="py-4 text-right">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="rounded-none text-[9px] uppercase font-bold tracking-wider h-8 px-3"
                       onClick={() => onStaffClick(p)}
                     >
