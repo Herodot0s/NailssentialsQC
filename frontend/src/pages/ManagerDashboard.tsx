@@ -22,7 +22,6 @@ import {
 
 import { StaffTable } from '@/components/dashboard/staff/StaffTable';
 import { AttendanceLedger } from '@/components/dashboard/staff/AttendanceLedger';
-import { ReviewModeration } from '@/components/dashboard/customers/ReviewModeration';
 import { CustomerCareView } from '@/components/dashboard/customers/CustomerCareView';
 import { AppointmentHistory } from '@/components/dashboard/customers/AppointmentHistory';
 import { StaffPerformanceView } from '@/components/dashboard/analytics/StaffPerformanceView';
@@ -826,12 +825,6 @@ const ManagerDashboard: React.FC = () => {
         {activeView === 'service-history' && (
           <div className="animate-in fade-in duration-700">
             <AppointmentHistory appointments={appointments} />
-          </div>
-        )}
-
-        {activeView === 'reviews' && (
-          <div className="animate-in fade-in duration-700">
-            <ReviewModeration reviews={reviews} onModerateReview={handleModerateReview} />
           </div>
         )}
 
