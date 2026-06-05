@@ -1,7 +1,6 @@
 import request from 'supertest';
 import app from '../src/index';
 import prisma from '../src/utils/prisma';
-import { generateAccessToken } from '../src/utils/jwt';
 
 // Mock Vercel Blob
 jest.mock('@vercel/blob', () => ({
@@ -24,10 +23,11 @@ describe('Exhibit Controller', () => {
         username: 'testmanager',
         password_hash: 'hash',
         role: 'manager',
+        clerk_id: 'clerk_manager',
       },
     });
 
-    managerToken = `Bearer ${generateAccessToken({ sub: managerUser.id, email: managerUser.email || '', role: 'manager' })}`;
+    managerToken = `Bearer clerk_manager`;
 
     // Create a staff user and profile
     const staffUser = await prisma.user.create({

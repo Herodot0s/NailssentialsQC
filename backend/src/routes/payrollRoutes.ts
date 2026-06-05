@@ -85,6 +85,13 @@ router.delete(
   deleteDeduction,
 );
 router.post('/periods/generate', authenticateToken, authorizeRoles('manager'), generateNextPeriod);
+router.patch(
+  '/periods/:id/lock',
+  authenticateToken,
+  authorizeRoles('manager'),
+  validateIdParam,
+  lockPayroll,
+);
 router.post(
   '/periods/:id/lock',
   authenticateToken,

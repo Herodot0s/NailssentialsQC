@@ -361,6 +361,16 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
       }
     }
 
+    // Mark commissions as paid
+    await prisma.commission.updateMany({
+      where: {
+        commission_date: { gte: startDate, lte: endDate },
+      },
+      data: {
+        is_paid: true,
+      },
+    });
+
     await logSystemAction(
       req as AuthRequest,
       'PAYROLL_GENERATED',

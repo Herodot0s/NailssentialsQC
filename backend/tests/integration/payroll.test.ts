@@ -43,9 +43,37 @@ describe('Payroll Integration Tests', () => {
     });
 
     // We need to move the profile from customer to staff
-    await prisma.customerProfile.delete({
+    await prisma.customerProfile.deleteMany({
       where: { user_id: staffUserId },
     });
+
+    const existingProfile = await prisma.staffProfile.findUnique({
+      where: { user_id: staffUserId },
+    });
+    if (existingProfile) {
+      await prisma.staffPayroll.deleteMany({
+        where: { staff_id: existingProfile.id },
+      });
+      await prisma.salaryStructureAssignment.deleteMany({
+        where: { staff_id: existingProfile.id },
+      });
+      await prisma.commission.deleteMany({
+        where: { staff_id: existingProfile.id },
+      });
+      await prisma.deductionLog.deleteMany({
+        where: { staff_id: existingProfile.id },
+      });
+      await prisma.attendance.deleteMany({
+        where: { staff_id: existingProfile.id },
+      });
+      await prisma.staffProfile.delete({
+        where: { id: existingProfile.id },
+      });
+    }
+
+    await prisma.deductionLog.deleteMany({});
+    await prisma.staffPayroll.deleteMany({});
+    await prisma.payrollPeriod.deleteMany({});
 
     const staffProfile = await prisma.staffProfile.create({
       data: {
@@ -75,12 +103,11 @@ describe('Payroll Integration Tests', () => {
         },
       });
 
-      const customer = await prisma.customerProfile.create({
-        data: {
-          user_id: (await prisma.user.findFirst({ where: { role: 'manager' } }))!.id, // Reuse manager user for simplicity
-          full_name: 'Test Customer',
-        },
-      });
+      const managerUser = (await prisma.user.findFirst({
+        where: { role: 'manager' },
+        include: { customer_profile: true },
+      }))!;
+      const customer = managerUser.customer_profile!;
 
       const appointment = await prisma.appointment.create({
         data: {
@@ -101,8 +128,8 @@ describe('Payroll Integration Tests', () => {
       });
 
       const today = new Date();
-      const lastMonth = subMonths(today, 1);
-      const prevMonthStart = startOfMonth(lastMonth);
+      const startDate = startOfMonth(today);
+      const endDate = new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000 + 3600000); // 6 days + 1 hour to ensure > 6 days
 
       await prisma.commission.create({
         data: {
@@ -110,12 +137,12 @@ describe('Payroll Integration Tests', () => {
           transaction_id: transaction.id,
           service_id: service.id,
           base_amount: 1000,
-          commission_rate: 40,
-          commission_amount: 400, // Should result in 100 commission for the period (400/4)
-          commission_date: prevMonthStart,
+          commission_rate: 10,
+          commission_amount: 100, // 100 commission for the period
+          commission_date: startDate,
           period_week: 1,
-          period_month: prevMonthStart.getMonth() + 1,
-          period_year: prevMonthStart.getFullYear(),
+          period_month: startDate.getMonth() + 1,
+          period_year: startDate.getFullYear(),
           is_paid: false,
         },
       });
@@ -124,15 +151,13 @@ describe('Payroll Integration Tests', () => {
       await prisma.deductionLog.create({
         data: {
           staff_id: staffId,
-          type: 'Advance',
+          type: 'cash_advance',
           amount: 50,
           notes: 'Advance payment',
         },
       });
 
       // 3. Generate payroll for a 1-week period
-      const startDate = startOfMonth(today);
-      const endDate = new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000 + 3600000); // 6 days + 1 hour to ensure > 6 days
 
       const response = await request(app)
         .post('/api/v1/payroll/generate')
@@ -197,7 +222,7 @@ describe('Payroll Integration Tests', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toContain('overlap');
+      expect(response.body.error.message).toContain('overlaps');
     });
   });
 
@@ -229,7 +254,7 @@ describe('Payroll Integration Tests', () => {
 
       // Verify audit log
       const auditLog = await prisma.systemLog.findFirst({
-        where: { action: 'PAYROLL_LOCKED', target_id: periodId },
+        where: { action: 'PAYROLL_LOCKED', entity_id: periodId },
       });
       expect(auditLog).toBeDefined();
     });

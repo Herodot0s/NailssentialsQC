@@ -305,13 +305,19 @@ export const createCustomer = async (req: Request, res: Response) => {
     return sendSuccess(
       res,
       {
-        message: 'Customer profile created successfully',
-        data: {
+        id: newUser.id,
+        allergies: newUser.customer_profile?.allergies,
+        notes: newUser.customer_profile?.notes,
+        preferences: newUser.customer_profile?.preferences,
+        isActive: newUser.is_active,
+        user: {
           id: newUser.id,
-          fullName: newUser.customer_profile?.full_name,
+          username: newUser.username,
           email: newUser.email,
           phone: newUser.phone,
+          role: newUser.role,
           isActive: newUser.is_active,
+          fullName: newUser.customer_profile?.full_name,
         },
       },
       201,
@@ -410,13 +416,20 @@ export const updateCustomer = async (req: Request, res: Response) => {
     });
 
     return sendSuccess(res, {
-      message: 'Customer profile updated successfully',
-      data: {
+      id: updatedUser.id,
+      fullName: updatedUser.customer_profile?.full_name,
+      allergies: updatedUser.customer_profile?.allergies,
+      notes: updatedUser.customer_profile?.notes,
+      preferences: updatedUser.customer_profile?.preferences,
+      isActive: updatedUser.is_active,
+      user: {
         id: updatedUser.id,
-        fullName: updatedUser.customer_profile?.full_name,
+        username: updatedUser.username,
         email: updatedUser.email,
         phone: updatedUser.phone,
+        role: updatedUser.role,
         isActive: updatedUser.is_active,
+        fullName: updatedUser.customer_profile?.full_name,
       },
     });
   } catch (error: unknown) {

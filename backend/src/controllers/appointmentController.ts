@@ -399,7 +399,9 @@ export const createAppointment = async (req: AuthRequest, res: Response) => {
     if (
       message.includes('already booked') ||
       message.includes('not found') ||
-      message.includes('available')
+      message.includes('available') ||
+      message.includes('start before') ||
+      message.includes('past closing')
     ) {
       return sendError(res, 'BAD_REQUEST', message, 400);
     }

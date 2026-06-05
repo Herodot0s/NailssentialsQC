@@ -42,9 +42,21 @@ describe('Salary Structure and Component Management Integration Tests', () => {
     });
 
     // We need to move the profile from customer to staff
-    await prisma.customerProfile.delete({
+    await prisma.customerProfile.deleteMany({
       where: { user_id: staffUserId },
     });
+
+    const existingProfile = await prisma.staffProfile.findUnique({
+      where: { user_id: staffUserId },
+    });
+    if (existingProfile) {
+      await prisma.salaryStructureAssignment.deleteMany({
+        where: { staff_id: existingProfile.id },
+      });
+      await prisma.staffProfile.delete({
+        where: { id: existingProfile.id },
+      });
+    }
 
     const staffProfile = await prisma.staffProfile.create({
       data: {

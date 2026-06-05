@@ -1,7 +1,6 @@
 import request from 'supertest';
 import app from '../../src/index';
 import prisma from '../../src/utils/prisma';
-import { generateAuthToken } from '../helpers/auth';
 
 describe('Misc Controllers Integration Tests', () => {
   let authToken: string;
@@ -10,13 +9,18 @@ describe('Misc Controllers Integration Tests', () => {
   beforeAll(async () => {
     testUser = await prisma.user.create({
       data: {
+        username: 'testuser',
         email: 'testuser@nailssentialsqc.com',
-        name: 'Test User',
-        password_hash: '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36n4/tJ2W1N5dD9aYv6pXmG', // password123
-        role: 'CUSTOMER',
+        role: 'customer',
+        clerk_id: 'clerk_testuser',
+        customer_profile: {
+          create: {
+            full_name: 'Test User',
+          },
+        },
       },
     });
-    authToken = generateAuthToken(testUser.id);
+    authToken = 'clerk_testuser';
   });
 
   describe('Notifications', () => {
@@ -50,7 +54,7 @@ describe('Misc Controllers Integration Tests', () => {
       });
 
       const res = await request(app)
-        .patch(`/api/v1/notifications/${notification.id}/read`)
+        .put(`/api/v1/notifications/${notification.id}/read`)
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(res.status).toBe(200);

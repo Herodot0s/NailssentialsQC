@@ -208,12 +208,9 @@ export const createStaff = async (req: Request, res: Response) => {
     return sendSuccess(
       res,
       {
-        message: 'Staff member created successfully',
-        data: {
-          id: newUser.id,
-          fullName: newUser.staff_profile?.full_name,
-          email: newUser.email,
-        },
+        id: newUser.id,
+        fullName: newUser.staff_profile?.full_name,
+        email: newUser.email,
       },
       201,
     );
@@ -420,11 +417,14 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
     // Consolidate staff existence check
     const staff = await prisma.user.findUnique({
       where: { id: staffId },
+      include: { staff_profile: true },
     });
 
-    if (!staff) {
-      return sendError(res, 'NOT_FOUND', 'Staff member not found', 404);
+    if (!staff || !staff.staff_profile) {
+      return sendError(res, 'NOT_FOUND', 'Staff member profile not found', 404);
     }
+
+    const staffProfileId = staff.staff_profile.id;
 
     // Use a transaction to update all schedules for the staff
     type ScheduleItem = {
@@ -449,7 +449,7 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
           // Temporary workaround pending prisma generate
           where: {
             staff_day_unique: {
-              staff_id: staffId,
+              staff_id: staffProfileId,
               day_of_week: s.day_of_week,
             },
           },
@@ -459,7 +459,7 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
             is_active: s.is_active,
           },
           create: {
-            staff_id: staffId,
+            staff_id: staffProfileId,
             day_of_week: s.day_of_week,
             start_time: normalizeTime(s.start_time),
             end_time: normalizeTime(s.end_time),
@@ -487,7 +487,7 @@ export const updateStaffSchedule = async (req: AuthRequest, res: Response) => {
         // Use exact date object to match @db.Date behavior in Prisma/Postgres
         await prisma.attendance.updateMany({
           where: {
-            staff_id: staffId,
+            staff_id: staffProfileId,
             date: today,
           },
           data: {

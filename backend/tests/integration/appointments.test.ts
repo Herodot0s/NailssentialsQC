@@ -9,6 +9,7 @@ describe('Appointment Integration Tests', () => {
   let managerToken: string;
   let customerId: number;
   let staffId: number;
+  let staffUserId: number;
   let serviceId: number;
   let categoryId: number;
 
@@ -73,6 +74,7 @@ describe('Appointment Integration Tests', () => {
         },
       });
       staffId = profile.id;
+      staffUserId = user.id;
     }
 
     const response = await request(app).post('/api/v1/auth/login').send({
@@ -98,11 +100,11 @@ describe('Appointment Integration Tests', () => {
         const appointmentDate = new Date();
         appointmentDate.setDate(appointmentDate.getDate() + 1);
         const payload = {
-          date: appointmentDate.toISOString(),
+          date: format(appointmentDate, 'yyyy-MM-dd'),
           items: [
             {
               serviceId: serviceId,
-              staffId: staffId,
+              staffId: staffUserId,
               startTime: '14:00',
             },
           ],
@@ -130,15 +132,15 @@ describe('Appointment Integration Tests', () => {
       });
 
       it('should successfully create a walk-in appointment as a manager', async () => {
-        const appointmentDate = new Date().toISOString();
+        const appointmentDate = format(new Date(), 'yyyy-MM-dd');
         const payload = {
           date: appointmentDate,
           isWalkIn: true,
           items: [
             {
               serviceId: serviceId,
-              staffId: staffId,
-              startTime: '10:00',
+              staffId: staffUserId,
+              startTime: '13:00',
             },
           ],
         };
@@ -290,7 +292,7 @@ describe('Appointment Integration Tests', () => {
       const response = await request(app)
         .post(`/api/v1/appointments/${appointmentId}/complete`)
         .set('Authorization', `Bearer ${managerToken}`)
-        .send({ paymentMethod: 'cash' });
+        .send({ paymentMethod: 'cash', servicePhotoUrl: 'https://example.com/photo.jpg' });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -310,7 +312,7 @@ describe('Appointment Integration Tests', () => {
       expect(transaction).toBeDefined();
       expect(transaction!.amount.toNumber()).toBe(1000);
       expect(transaction!.payment_method).toBe('cash');
-      expect(transaction!.receipt_number).toMatch(/^REC-\d{6}-\d{4}$/);
+      expect(transaction!.receipt_number).toMatch(/^REC-\d{6}-\d{4}-\d+$/);
 
       // Verify Commission
       const commission = await prisma.commission.findFirst({
@@ -334,6 +336,31 @@ describe('Appointment Integration Tests', () => {
     });
 
     it('should calculate higher commission rate when specialty quota is met', async () => {
+      // 1. Create a Hair category
+      const hairCategory = await prisma.serviceCategory.create({
+        data: { name: 'Hair ' + Date.now(), description: 'Hair services' },
+      });
+      // 2. Create a Hair service
+      const hairService = await prisma.service.create({
+        data: {
+          name: 'Hair Cut ' + Date.now(),
+          description: 'Hair cut service',
+          price: 1000,
+          duration_minutes: 60,
+          category_id: hairCategory.id,
+        },
+      });
+      // 3. Update staff profile to have specialization 'hair'
+      await prisma.staffProfile.update({
+        where: { id: staffId },
+        data: { specializations: 'hair' },
+      });
+      // 4. Update the appointment item to be this hair service
+      await prisma.appointmentItem.updateMany({
+        where: { appointment_id: appointmentId },
+        data: { service_id: hairService.id },
+      });
+
       // Setup: Create 6000 worth of sales for this staff this month
       // We need to create completed commissions for this staff
       const dummyTransaction = await prisma.transaction.create({
@@ -346,16 +373,17 @@ describe('Appointment Integration Tests', () => {
         },
       });
 
+      const { getISOWeek } = require('date-fns');
       await prisma.commission.create({
         data: {
           transaction_id: dummyTransaction.id,
           staff_id: staffId,
-          service_id: serviceId,
+          service_id: hairService.id,
           base_amount: 6000,
           commission_rate: 5,
           commission_amount: 300,
           commission_date: new Date(),
-          period_week: 1,
+          period_week: getISOWeek(new Date()),
           period_month: new Date().getMonth() + 1,
           period_year: new Date().getFullYear(),
         },
@@ -364,7 +392,7 @@ describe('Appointment Integration Tests', () => {
       const response = await request(app)
         .post(`/api/v1/appointments/${appointmentId}/complete`)
         .set('Authorization', `Bearer ${managerToken}`)
-        .send({ paymentMethod: 'gcash' });
+        .send({ paymentMethod: 'gcash', servicePhotoUrl: 'https://example.com/photo.jpg', gcashReferenceNo: '1234567890' });
 
       expect(response.status).toBe(200);
       const commission = await prisma.commission.findFirst({

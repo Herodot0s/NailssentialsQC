@@ -7,6 +7,7 @@ export const createAppointmentSchema = z.object({
         serviceId: z.number().int().positive('Service ID must be a positive integer'),
         staffId: z.number().int().positive('Staff ID must be a positive integer'),
         startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Start time must be in HH:MM format'),
+        packageId: z.number().int().positive().optional(),
       }),
     )
     .min(1, 'At least one item is required'),
@@ -15,6 +16,14 @@ export const createAppointmentSchema = z.object({
   phone: z.string().optional(),
   customerId: z.number().int().positive().optional(),
   isWalkIn: z.boolean().optional(),
+  addons: z
+    .array(
+      z.object({
+        addonId: z.number().int().positive('Addon ID must be a positive integer'),
+        quantity: z.number().int().positive('Quantity must be a positive integer'),
+      }),
+    )
+    .optional(),
 });
 
 export const completeAppointmentSchema = z.object({
