@@ -85,7 +85,7 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
         <Avatar className="w-24 h-24 rounded-none border-2 border-primary/10">
           <AvatarImage src={preview || currentUrl} className="object-cover" />
           <AvatarFallback className="bg-primary/5 font-serif text-3xl text-primary">
-            {fullName.charAt(0)}
+            {(fullName || '').charAt(0) || '?'}
           </AvatarFallback>
         </Avatar>
         <div className="flex flex-col gap-2">

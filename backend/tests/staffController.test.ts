@@ -82,13 +82,16 @@ describe('Staff Controller Integration Tests', () => {
         // Verify salt rounds by checking password_hash
         const updatedUser = await prisma.user.findUnique({
           where: { id: staffId },
-          select: { password_hash: true }
+          select: { password_hash: true },
         });
 
         expect(updatedUser?.password_hash).toBeDefined();
 
         // bcrypt hashes starting with $2b$12$ or $2a$12$ indicate 12 rounds
-        const passwordMatch = await bcrypt.compare(updatePayload.password, updatedUser!.password_hash!);
+        const passwordMatch = await bcrypt.compare(
+          updatePayload.password,
+          updatedUser!.password_hash!,
+        );
         expect(passwordMatch).toBe(true);
 
         // Indirectly verify salt rounds by checking the hash prefix (bcrypt standard)
@@ -107,15 +110,15 @@ describe('Staff Controller Integration Tests', () => {
             day_of_week: 1, // Monday
             start_time: '09:00:00',
             end_time: '18:00:00',
-            is_active: true
+            is_active: true,
           },
           {
             day_of_week: 2, // Tuesday
             start_time: '09:00:00',
             end_time: '18:00:00',
-            is_active: true
-          }
-        ]
+            is_active: true,
+          },
+        ],
       };
 
       const response = await request(app)
@@ -129,14 +132,14 @@ describe('Staff Controller Integration Tests', () => {
 
       // Verify in DB
       const staffProfile = await prisma.staffProfile.findUnique({
-        where: { user_id: staffId }
+        where: { user_id: staffId },
       });
       const schedules = await prisma.staffSchedule.findMany({
-        where: { staff_id: staffProfile!.id }
+        where: { staff_id: staffProfile!.id },
       });
 
       expect(schedules.length).toBe(2);
-      expect(schedules.find(s => s.day_of_week === 1)?.start_time).toBe('09:00:00');
+      expect(schedules.find((s) => s.day_of_week === 1)?.start_time).toBe('09:00:00');
     });
 
     it('should fetch staff schedule', async () => {

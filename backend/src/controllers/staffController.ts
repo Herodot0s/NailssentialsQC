@@ -337,7 +337,7 @@ export const updateStaff = async (req: Request, res: Response) => {
           // This is complex in Clerk (usually requires verification),
           // but we can try to update the primary email if the manager is forced.
           // For now, just log it.
-        // Sync email change
+          // Sync email change
         }
       } catch (clerkError: any) {
         console.error('Clerk sync error during update:', clerkError);

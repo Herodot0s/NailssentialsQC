@@ -392,7 +392,11 @@ describe('Appointment Integration Tests', () => {
       const response = await request(app)
         .post(`/api/v1/appointments/${appointmentId}/complete`)
         .set('Authorization', `Bearer ${managerToken}`)
-        .send({ paymentMethod: 'gcash', servicePhotoUrl: 'https://example.com/photo.jpg', gcashReferenceNo: '1234567890' });
+        .send({
+          paymentMethod: 'gcash',
+          servicePhotoUrl: 'https://example.com/photo.jpg',
+          gcashReferenceNo: '1234567890',
+        });
 
       expect(response.status).toBe(200);
       const commission = await prisma.commission.findFirst({

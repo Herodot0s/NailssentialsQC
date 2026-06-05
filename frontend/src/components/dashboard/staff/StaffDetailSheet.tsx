@@ -107,7 +107,7 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                       className="object-cover"
                     />
                     <AvatarFallback className="bg-[#e5e7e0] text-[#23251d] font-bold text-2xl">
-                      {staff.fullName.charAt(0)}
+                      {(staff.fullName || staff.username || '?').charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="px-2 py-1 bg-white border border-[#bfc1b7] rounded-full text-[10px] uppercase tracking-wider font-bold text-[#4d4f46]">
@@ -116,7 +116,7 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                 </div>
                 <div>
                   <SheetTitle className="text-3xl font-extrabold text-[#23251d] tracking-tight leading-tight">
-                    {staff.fullName}
+                    {staff.fullName || staff.username}
                   </SheetTitle>
                   <SheetDescription className="text-[#4d4f46] text-sm mt-1 flex items-center gap-2 font-medium">
                     <Briefcase className="h-3.5 w-3.5 opacity-60" /> Senior Artisan • Joined{' '}

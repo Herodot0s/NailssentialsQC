@@ -11,6 +11,9 @@ console.log('2. Loading from root (../../.env):', process.env.DATABASE_URL ? 'FO
 
 if (process.env.DATABASE_URL) {
   console.log('Value starts with:', process.env.DATABASE_URL.substring(0, 30));
-  console.log('Value ends with:', process.env.DATABASE_URL.substring(process.env.DATABASE_URL.length - 10));
+  console.log(
+    'Value ends with:',
+    process.env.DATABASE_URL.substring(process.env.DATABASE_URL.length - 10),
+  );
   console.log('Length:', process.env.DATABASE_URL.length);
 }

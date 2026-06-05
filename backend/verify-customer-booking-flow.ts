@@ -21,7 +21,7 @@ const originalRequire = Module.prototype.require;
             let role = 'customer';
             if (userId.includes('manager')) role = 'manager';
             else if (userId.includes('staff')) role = 'staff';
-            
+
             return {
               id: userId,
               emailAddresses: [
@@ -39,7 +39,7 @@ const originalRequire = Module.prototype.require;
           },
           updateUserMetadata: async (userId: string, data: any) => {
             return {};
-          }
+          },
         },
       },
     };
@@ -94,33 +94,37 @@ async function verifyBookingFlow() {
         name: `${prefix}Manicure`,
         category_id: category.id,
         description: 'Standard manicure service',
-        price: 350.00,
+        price: 350.0,
         duration_minutes: 45,
         is_active: true,
       },
     });
     createdServiceIds.push(serviceMani.id);
-    console.log(`✔ Service 1: ${serviceMani.name} (ID: ${serviceMani.id}, Duration: 45m, Price: 350)`);
+    console.log(
+      `✔ Service 1: ${serviceMani.name} (ID: ${serviceMani.id}, Duration: 45m, Price: 350)`,
+    );
 
     const servicePedi = await prisma.service.create({
       data: {
         name: `${prefix}Pedicure`,
         category_id: category.id,
         description: 'Standard pedicure service',
-        price: 450.00,
+        price: 450.0,
         duration_minutes: 60,
         is_active: true,
       },
     });
     createdServiceIds.push(servicePedi.id);
-    console.log(`✔ Service 2: ${servicePedi.name} (ID: ${servicePedi.id}, Duration: 60m, Price: 450)`);
+    console.log(
+      `✔ Service 2: ${servicePedi.name} (ID: ${servicePedi.id}, Duration: 60m, Price: 450)`,
+    );
 
     // 0.3 Addon
     const addonGel = await prisma.addon.create({
       data: {
         name: `${prefix}Gel_Upgrade`,
         description: 'Upgrade manicure or pedicure with gel polish',
-        price: 150.00,
+        price: 150.0,
         is_active: true,
       },
     });
@@ -132,18 +136,17 @@ async function verifyBookingFlow() {
       data: {
         name: `${prefix}Mani_Pedi_Combo`,
         description: 'Combo package for manicures and pedicures',
-        price: 700.00,
+        price: 700.0,
         is_active: true,
         items: {
-          create: [
-            { service_id: serviceMani.id },
-            { service_id: servicePedi.id },
-          ],
+          create: [{ service_id: serviceMani.id }, { service_id: servicePedi.id }],
         },
       },
     });
     createdPackageIds.push(servicePackageCombo.id);
-    console.log(`✔ Service Package: ${servicePackageCombo.name} (ID: ${servicePackageCombo.id}, Price: 700)`);
+    console.log(
+      `✔ Service Package: ${servicePackageCombo.name} (ID: ${servicePackageCombo.id}, Price: 700)`,
+    );
 
     // 0.5 Technician (Staff User)
     const staffUsername = `qa_staff_${Date.now()}`;
@@ -159,7 +162,7 @@ async function verifyBookingFlow() {
           create: {
             full_name: 'QA Test Staff Technician',
             is_available: true,
-            base_commission_rate: 0.10, // 10%
+            base_commission_rate: 0.1, // 10%
           },
         },
       },
@@ -167,7 +170,9 @@ async function verifyBookingFlow() {
     });
     createdUserIds.push(staffUser.id);
     const staffProfile = staffUser.staff_profile!;
-    console.log(`✔ Staff User: ${staffUser.username} (User ID: ${staffUser.id}, Staff Profile ID: ${staffProfile.id})`);
+    console.log(
+      `✔ Staff User: ${staffUser.username} (User ID: ${staffUser.id}, Staff Profile ID: ${staffProfile.id})`,
+    );
 
     // Setup schedule for the test date
     const testDateObj = addDays(new Date(), 2);
@@ -203,7 +208,9 @@ async function verifyBookingFlow() {
       },
     });
     createdUserIds.push(customerUser.id);
-    console.log(`✔ Customer User pre-created (User ID: ${customerUser.id}, Clerk ID: ${customerClerkId})`);
+    console.log(
+      `✔ Customer User pre-created (User ID: ${customerUser.id}, Clerk ID: ${customerClerkId})`,
+    );
 
     const managerClerkId = `qa_manager_clerk_${Date.now()}`;
     const managerUser = await prisma.user.create({
@@ -222,8 +229,9 @@ async function verifyBookingFlow() {
       },
     });
     createdUserIds.push(managerUser.id);
-    console.log(`✔ Manager User pre-created (User ID: ${managerUser.id}, Clerk ID: ${managerClerkId})`);
-
+    console.log(
+      `✔ Manager User pre-created (User ID: ${managerUser.id}, Clerk ID: ${managerClerkId})`,
+    );
 
     // --------------------------------------------------
     // STEP 1: BROWSE SERVICES
@@ -241,7 +249,6 @@ async function verifyBookingFlow() {
     }
     console.log('✔ Successfully retrieved service list and confirmed seeded services exist.');
 
-
     // --------------------------------------------------
     // STEP 2: BROWSE ACTIVE PACKAGES
     // --------------------------------------------------
@@ -257,24 +264,29 @@ async function verifyBookingFlow() {
     }
     console.log('✔ Successfully retrieved active packages and confirmed combo package exists.');
 
-
     // --------------------------------------------------
     // STEP 3: CHECK TECHNICIAN AVAILABILITY
     // --------------------------------------------------
     console.log('\n[Step 3] Checking Technician Availability...');
-    const availabilityRes = await request(app)
-      .get(`/api/v1/appointments/availability?date=${dateStr}&duration=45`);
+    const availabilityRes = await request(app).get(
+      `/api/v1/appointments/availability?date=${dateStr}&duration=45`,
+    );
     if (availabilityRes.status !== 200) {
       throw new Error(`Availability check failed with status: ${availabilityRes.status}`);
     }
-    
+
     const slots = availabilityRes.body.data;
     const slot1400 = slots.find((s: any) => s.time === '14:00');
-    if (!slot1400 || !slot1400.available || !slot1400.availableTechnicianIds.includes(staffProfile.id)) {
-      throw new Error('Technician should be available at 14:00, but slot is unavailable or technician is missing.');
+    if (
+      !slot1400 ||
+      !slot1400.available ||
+      !slot1400.availableTechnicianIds.includes(staffProfile.id)
+    ) {
+      throw new Error(
+        'Technician should be available at 14:00, but slot is unavailable or technician is missing.',
+      );
     }
     console.log('✔ Successfully verified availability: technician is free at 14:00.');
-
 
     // --------------------------------------------------
     // STEP 4: BOOK APPOINTMENT (Happy Path - Single Service)
@@ -318,11 +330,15 @@ async function verifyBookingFlow() {
 
     console.log('Retrieved dbAppt details:', JSON.stringify(dbAppt, null, 2));
 
-    if (!dbAppt || dbAppt.status !== 'pending' || dbAppt.items.length !== 1 || dbAppt.addons.length !== 1) {
+    if (
+      !dbAppt ||
+      dbAppt.status !== 'pending' ||
+      dbAppt.items.length !== 1 ||
+      dbAppt.addons.length !== 1
+    ) {
       throw new Error('Database appointment record does not match expected structure.');
     }
     console.log('✔ Database records validated successfully for single service appointment.');
-
 
     // --------------------------------------------------
     // STEP 5: ENFORCE COLLISION PREVENTION
@@ -349,12 +365,11 @@ async function verifyBookingFlow() {
     console.log('✔ Overlapping booking successfully blocked with 400 Bad Request.');
     console.log(`- Error details: ${overlapRes.body.error.message}`);
 
-
     // --------------------------------------------------
     // STEP 6: ENFORCE OPERATING HOURS CONSTRAINT
     // --------------------------------------------------
     console.log('\n[Step 6] Checking Operating Hours Constraints...');
-    
+
     // 6.1 Booking before opening (12:00 PM)
     const earlyRes = await request(app)
       .post('/api/v1/appointments')
@@ -395,7 +410,6 @@ async function verifyBookingFlow() {
     }
     console.log('✔ Late booking successfully blocked (21:30 PM Pedicure extends past closing).');
 
-
     // --------------------------------------------------
     // STEP 7: ENFORCE PAST TIME CONSTRAINT
     // --------------------------------------------------
@@ -419,12 +433,11 @@ async function verifyBookingFlow() {
     }
     console.log('✔ Past booking successfully blocked (Booking date 2020-01-01 is in the past).');
 
-
     // --------------------------------------------------
     // STEP 8: BOOK SERVICE PACKAGE (Combo Booking)
     // --------------------------------------------------
     console.log('\n[Step 8] Booking Service Package (Mani + Pedi Combo)...');
-    
+
     // Tech is booked 14:00-14:45. Let's book package at 15:00 and 16:00
     const packageBookingRes = await request(app)
       .post('/api/v1/appointments')
@@ -466,11 +479,10 @@ async function verifyBookingFlow() {
     if (!dbPkgAppt || dbPkgAppt.items.length !== 2) {
       throw new Error('Database package appointment record does not contain exactly 2 items.');
     }
-    if (dbPkgAppt.items.some(item => item.package_id !== servicePackageCombo.id)) {
+    if (dbPkgAppt.items.some((item) => item.package_id !== servicePackageCombo.id)) {
       throw new Error('Package ID is missing from one or more child service items.');
     }
     console.log('✔ Database records validated successfully for package appointment.');
-
 
     // --------------------------------------------------
     // STEP 9: GET APPOINTMENTS (Customer List)
@@ -490,7 +502,6 @@ async function verifyBookingFlow() {
       throw new Error('One or both booked appointments not found in customer list.');
     }
     console.log('✔ Successfully listed customer appointments and verified both show in history.');
-
 
     // --------------------------------------------------
     // STEP 10: CANCEL SINGLE APPOINTMENT (Customer Flow)
@@ -516,11 +527,10 @@ async function verifyBookingFlow() {
     if (cancelledAppt?.status !== 'cancelled') {
       throw new Error('Appointment status did not update to cancelled.');
     }
-    if (cancelledAppt.items.some(item => item.status !== 'cancelled')) {
+    if (cancelledAppt.items.some((item) => item.status !== 'cancelled')) {
       throw new Error('Child appointment items were not updated to cancelled.');
     }
     console.log('✔ Appointment successfully cancelled. Customer cancellation flow functional.');
-
 
     // --------------------------------------------------
     // STEP 11: COMPLETE PACKAGE APPOINTMENT (Manager Flow)
@@ -568,20 +578,25 @@ async function verifyBookingFlow() {
     // In completeAppointment, commission is created per service item.
     // Let's verify commissions were created.
     if (transaction.commissions.length !== 2) {
-      throw new Error(`Commissions were not created for all completed services. Got: ${transaction.commissions.length}`);
+      throw new Error(
+        `Commissions were not created for all completed services. Got: ${transaction.commissions.length}`,
+      );
     }
 
     console.log('✔ Appointment status is completed.');
-    console.log(`✔ Transaction created: ID ${transaction.id}, Receipt: ${transaction.receipt_number}`);
+    console.log(
+      `✔ Transaction created: ID ${transaction.id}, Receipt: ${transaction.receipt_number}`,
+    );
     console.log('✔ Commissions successfully calculated and saved:');
     transaction.commissions.forEach((comm, idx) => {
-      console.log(`  - Commission ${idx + 1}: Staff ID ${comm.staff_id}, Rate: ${comm.commission_rate}, Amt: ${comm.commission_amount}`);
+      console.log(
+        `  - Commission ${idx + 1}: Staff ID ${comm.staff_id}, Rate: ${comm.commission_rate}, Amt: ${comm.commission_amount}`,
+      );
     });
 
     console.log('\n==================================================');
     console.log('   ALL CUSTOMER BOOKING FLOW VALIDATIONS PASSED   ');
     console.log('==================================================');
-
   } catch (error) {
     console.error('\n❌ CUSTOMER BOOKING FLOW VALIDATION FAILED:');
     console.error(error);
@@ -596,7 +611,7 @@ async function verifyBookingFlow() {
         const txs = await prisma.transaction.findMany({
           where: { appointment_id: { in: createdAppointmentIds } },
         });
-        const txIds = txs.map(t => t.id);
+        const txIds = txs.map((t) => t.id);
 
         if (txIds.length > 0) {
           await prisma.commission.deleteMany({ where: { transaction_id: { in: txIds } } });

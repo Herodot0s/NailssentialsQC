@@ -53,18 +53,20 @@ export const StaffTable: React.FC<StaffTableProps> = ({ staffMembers, onStaffCli
                   className="hover:bg-bisque-wash/20 cursor-pointer border-kiln-border transition-all duration-300 group hover:translate-x-1"
                   onClick={() => onStaffClick(staff)}
                   role="button"
-                  aria-label={`View file for ${staff.fullName}`}
+                  aria-label={`View file for ${staff.fullName || staff.username}`}
                 >
                   <TableCell className="pl-8 py-6">
                     <div className="flex items-center gap-4">
                       <Avatar className="w-12 h-12 rounded-xl border border-kiln-border shadow-sm group-hover:scale-105 transition-transform duration-300">
                         <AvatarImage src={staff.profilePictureUrl} className="object-cover" />
                         <AvatarFallback className="bg-primary/5 font-serif text-xl text-primary">
-                          {staff.fullName.charAt(0)}
+                          {(staff.fullName || staff.username || '?').charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-bold text-sm tracking-tight">{staff.fullName}</p>
+                        <p className="font-bold text-sm tracking-tight">
+                          {staff.fullName || staff.username}
+                        </p>
                         <p className="text-[11px] text-warm-stone uppercase tracking-[0.1em]">
                           {staff.email || 'No email'}
                         </p>

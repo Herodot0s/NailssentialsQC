@@ -118,8 +118,8 @@ describe('Salary Structure and Component Management Integration Tests', () => {
             {
               salary_component_id: componentId,
               amount: 500,
-            }
-          ]
+            },
+          ],
         });
 
       expect(structureResponse.status).toBe(201);
@@ -154,7 +154,7 @@ describe('Salary Structure and Component Management Integration Tests', () => {
         .set('Authorization', `Bearer ${managerToken}`)
         .send({
           name: 'Remote Package',
-          components: [{ salary_component_id: componentId, amount: 200 }]
+          components: [{ salary_component_id: componentId, amount: 200 }],
         });
 
       const structureId = structureResponse.body.data.id;
@@ -167,7 +167,7 @@ describe('Salary Structure and Component Management Integration Tests', () => {
           staff_id: staffId,
           salary_structure_id: structureId,
           base_pay: 3000,
-          effective_from: new Date().toISOString()
+          effective_from: new Date().toISOString(),
         });
 
       expect(assignmentResponse.status).toBe(201);
@@ -187,10 +187,10 @@ describe('Salary Structure and Component Management Integration Tests', () => {
     it('should apply assigned salary structure during payroll generation', async () => {
       // 1. Create structure with earning and deduction components
       const earningComp = await prisma.salaryComponent.create({
-        data: { name: 'Earning Comp', type: 'earning' }
+        data: { name: 'Earning Comp', type: 'earning' },
       });
       const deductionComp = await prisma.salaryComponent.create({
-        data: { name: 'Deduction Comp', type: 'deduction' }
+        data: { name: 'Deduction Comp', type: 'deduction' },
       });
 
       const structure = await prisma.salaryStructure.create({
@@ -199,10 +199,10 @@ describe('Salary Structure and Component Management Integration Tests', () => {
           components: {
             create: [
               { salary_component_id: earningComp.id, amount: 500 },
-              { salary_component_id: deductionComp.id, amount: 100 }
-            ]
-          }
-        }
+              { salary_component_id: deductionComp.id, amount: 100 },
+            ],
+          },
+        },
       });
 
       // 2. Assign to staff
@@ -216,7 +216,7 @@ describe('Salary Structure and Component Management Integration Tests', () => {
           staff_id: staffId,
           salary_structure_id: structure.id,
           base_pay: 2000,
-          effective_from: effectiveDate.toISOString()
+          effective_from: effectiveDate.toISOString(),
         });
 
       // 3. Generate payroll
@@ -237,7 +237,7 @@ describe('Salary Structure and Component Management Integration Tests', () => {
       // 4. Verify payroll items and calculations
       const payroll = await prisma.staffPayroll.findFirst({
         where: { staff_id: staffId, payroll_period_id: response.body.data.id },
-        include: { items: true }
+        include: { items: true },
       });
 
       expect(payroll).toBeDefined();
@@ -251,7 +251,7 @@ describe('Salary Structure and Component Management Integration Tests', () => {
       expect(Number(payroll?.deductions)).toBe(100);
       expect(Number(payroll?.net_pay)).toBe(2400);
 
-      const itemNames = payroll?.items.map(i => i.component_name);
+      const itemNames = payroll?.items.map((i) => i.component_name);
       expect(itemNames).toContain('Base Pay');
       expect(itemNames).toContain('Earning Comp');
       expect(itemNames).toContain('Deduction Comp');

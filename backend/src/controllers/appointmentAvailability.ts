@@ -29,8 +29,14 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
     const allSlots = [];
 
     // Generate slots based on increment
-    let currentSlot = getFullDate(dateOnly, `${OPERATING_HOURS.start.toString().padStart(2, '0')}:00`);
-    const endOfDayTime = getFullDate(dateOnly, `${OPERATING_HOURS.end.toString().padStart(2, '0')}:00`);
+    let currentSlot = getFullDate(
+      dateOnly,
+      `${OPERATING_HOURS.start.toString().padStart(2, '0')}:00`,
+    );
+    const endOfDayTime = getFullDate(
+      dateOnly,
+      `${OPERATING_HOURS.end.toString().padStart(2, '0')}:00`,
+    );
 
     while (currentSlot < endOfDayTime) {
       const hours = currentSlot.getHours().toString().padStart(2, '0');

@@ -590,9 +590,7 @@ const CustomerAppointments: React.FC = () => {
                     {imageError && (
                       <p className="text-[10px] text-destructive font-bold">{imageError}</p>
                     )}
-                    <p className="text-[9px] text-muted-foreground italic">
-                      JPG or PNG, max 2MB.
-                    </p>
+                    <p className="text-[9px] text-muted-foreground italic">JPG or PNG, max 2MB.</p>
                   </div>
                 )}
               </div>

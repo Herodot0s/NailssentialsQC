@@ -181,7 +181,7 @@ const ExhibitForm: React.FC<ExhibitFormProps> = ({ initialData, onSuccess, onCan
                     value={s.staffProfileId.toString()}
                     className="rounded-none py-3"
                   >
-                    {s.fullName}
+                    {s.fullName || s.username}
                   </SelectItem>
                 ))}
               </SelectContent>

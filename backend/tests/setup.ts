@@ -11,7 +11,9 @@ jest.mock('exceljs', () => {
 
 beforeEach(() => {
   const mockWorksheet = {
-    addRow: jest.fn().mockReturnValue({ font: {}, fill: {}, getCell: jest.fn().mockReturnValue({ font: {} }) }),
+    addRow: jest
+      .fn()
+      .mockReturnValue({ font: {}, fill: {}, getCell: jest.fn().mockReturnValue({ font: {} }) }),
     columns: [],
   };
   const mockWorkbook = {
@@ -79,8 +81,8 @@ jest.mock('@clerk/express', () => {
                 firstName: 'Mock',
                 lastName: role.toUpperCase(),
                 publicMetadata: { role },
-              }
-            ]
+              },
+            ],
           };
         },
         createUser: async (data: any) => {
@@ -129,7 +131,7 @@ if (!isUnitTest) {
     try {
       const { email, username, fullName, phone } = req.body;
       const clerkId = `clerk_${email ? email.split('@')[0] : Date.now()}`;
-      
+
       // Check if user exists by any unique fields
       const conditions = [];
       if (email) conditions.push({ email });

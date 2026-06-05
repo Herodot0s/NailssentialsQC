@@ -268,7 +268,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({
                   />
                   <div>
                     <p className="font-serif text-lg font-medium tracking-tight">
-                      {staff.fullName}
+                      {staff.fullName || staff.username}
                     </p>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-warm-stone">
                       {staff.role}
@@ -329,7 +329,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({
                           onClick={() => onUpdateAttendance(todayRecord.id, 'Present')}
                           variant="outline"
                           className="rounded-xl min-h-[44px] text-[11px] font-semibold uppercase tracking-widest border-forest-confirm/20 text-forest-confirm hover:bg-forest-confirm hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-                          aria-label={`Time in ${staff.fullName}`}
+                          aria-label={`Time in ${staff.fullName || staff.username}`}
                         >
                           Time In
                         </Button>
@@ -339,7 +339,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({
                           onClick={() => onUpdateAttendance(todayRecord.id, 'Absent')}
                           variant="outline"
                           className="rounded-xl min-h-[44px] text-[11px] font-semibold uppercase tracking-widest border-brick-error/20 text-brick-error hover:bg-brick-error hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-                          aria-label={`Time out ${staff.fullName}`}
+                          aria-label={`Time out ${staff.fullName || staff.username}`}
                         >
                           Time Out
                         </Button>
@@ -358,7 +358,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({
                     variant="outline"
                     size="icon"
                     className="rounded-xl h-11 w-11 border-kiln-border hover:bg-bisque-wash/50 hover:scale-[1.05] active:scale-[0.95] transition-all duration-200"
-                    aria-label={`View dossier for ${staff.fullName}`}
+                    aria-label={`View dossier for ${staff.fullName || staff.username}`}
                   >
                     <CalendarDays className="w-4 h-4 text-warm-stone" />
                   </Button>
@@ -378,7 +378,7 @@ export const AttendanceLedger: React.FC<AttendanceLedgerProps> = ({
               </div>
               <div>
                 <DialogTitle className="font-serif text-3xl font-medium tracking-tight text-foreground">
-                  {selectedStaff?.fullName}
+                  {selectedStaff?.fullName || selectedStaff?.username}
                 </DialogTitle>
                 <DialogDescription className="text-xs font-semibold uppercase tracking-widest mt-1 text-muted-foreground">
                   Attendance & Performance Records

@@ -21,7 +21,7 @@ const originalRequire = Module.prototype.require;
             let role = 'customer';
             if (userId.includes('manager')) role = 'manager';
             else if (userId.includes('staff')) role = 'staff';
-            
+
             return {
               id: userId,
               emailAddresses: [
@@ -39,7 +39,7 @@ const originalRequire = Module.prototype.require;
           },
           updateUserMetadata: async (userId: string, data: any) => {
             return {};
-          }
+          },
         },
       },
     };
@@ -87,7 +87,7 @@ async function verifyWalkInFlow() {
       data: {
         name: `${prefix}UnderarmWax`,
         category_id: category.id,
-        price: 350.00,
+        price: 350.0,
         duration_minutes: 30,
         is_active: true,
       },
@@ -109,8 +109,8 @@ async function verifyWalkInFlow() {
       data: {
         user_id: staffUser.id,
         full_name: 'Walkin Staff Agent',
-        base_pay_per_week: 2500.00,
-        base_commission_rate: 0.10,
+        base_pay_per_week: 2500.0,
+        base_commission_rate: 0.1,
         is_available: true,
       },
     });
@@ -158,7 +158,9 @@ async function verifyWalkInFlow() {
       .send(bookingPayload);
 
     if (bookingResponse.status !== 201) {
-      throw new Error(`Booking failed with status ${bookingResponse.status}: ${JSON.stringify(bookingResponse.body)}`);
+      throw new Error(
+        `Booking failed with status ${bookingResponse.status}: ${JSON.stringify(bookingResponse.body)}`,
+      );
     }
 
     const appointment = bookingResponse.body.data;
@@ -171,7 +173,9 @@ async function verifyWalkInFlow() {
 
     // Verify status is immediately in_progress
     if (appointment.status !== 'in_progress') {
-      throw new Error(`Expected walk-in status to be 'in_progress', but got '${appointment.status}'`);
+      throw new Error(
+        `Expected walk-in status to be 'in_progress', but got '${appointment.status}'`,
+      );
     }
 
     // Verify it resolved to the guest walk-in customer profile
@@ -181,7 +185,9 @@ async function verifyWalkInFlow() {
     });
     console.log(`- Customer Profile resolved to: "${dbAppointment?.customer.full_name}"`);
     if (dbAppointment?.customer.full_name !== 'Walk-in Customer') {
-      throw new Error(`Expected Customer profile to be 'Walk-in Customer', but got '${dbAppointment?.customer.full_name}'`);
+      throw new Error(
+        `Expected Customer profile to be 'Walk-in Customer', but got '${dbAppointment?.customer.full_name}'`,
+      );
     }
 
     // --------------------------------------------------
@@ -199,7 +205,9 @@ async function verifyWalkInFlow() {
       .send(completionPayload);
 
     if (completeResponse.status !== 200) {
-      throw new Error(`Completion failed with status ${completeResponse.status}: ${JSON.stringify(completeResponse.body)}`);
+      throw new Error(
+        `Completion failed with status ${completeResponse.status}: ${JSON.stringify(completeResponse.body)}`,
+      );
     }
 
     console.log('✔ Walk-in Appointment completed successfully!');
@@ -214,7 +222,9 @@ async function verifyWalkInFlow() {
     if (!transaction) {
       throw new Error('No transaction was created for the completed walk-in!');
     }
-    console.log(`✔ Transaction created: ID ${transaction.id}, Receipt: ${transaction.receipt_number}, Amount: ₱${transaction.amount}`);
+    console.log(
+      `✔ Transaction created: ID ${transaction.id}, Receipt: ${transaction.receipt_number}, Amount: ₱${transaction.amount}`,
+    );
 
     const commissions = await prisma.commission.findMany({
       where: { transaction_id: transaction.id },
@@ -225,13 +235,14 @@ async function verifyWalkInFlow() {
 
     console.log('✔ Commission successfully generated for the staff technician:');
     for (const comm of commissions) {
-      console.log(`  - Staff ID: ${comm.staff_id}, Rate: ${comm.commission_rate}, Calculated Amount: ₱${comm.commission_amount}`);
+      console.log(
+        `  - Staff ID: ${comm.staff_id}, Rate: ${comm.commission_rate}, Calculated Amount: ₱${comm.commission_amount}`,
+      );
     }
 
     console.log('\n==================================================');
     console.log('   ALL WALK-IN APPOINTMENT FLOW VALIDATIONS PASSED ');
     console.log('==================================================');
-
   } catch (error) {
     console.error('\n❌ Walk-in flow validation failed:', error);
   } finally {
@@ -239,7 +250,7 @@ async function verifyWalkInFlow() {
     // STEP 5: CLEAN UP SEEDED DATA
     // --------------------------------------------------
     console.log('\n[Step 5] Cleaning up seeded test database items...');
-    
+
     if (createdAppointmentId) {
       await prisma.commission.deleteMany({
         where: { transaction: { appointment_id: createdAppointmentId } },

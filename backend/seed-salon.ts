@@ -88,8 +88,8 @@ async function seedSalon() {
             full_name: 'Nailssentials Stylist',
             specializations: 'Nail Art & Spa Services',
             is_available: false, // Prevents showing up in booking calendar
-            base_pay_per_week: 0.00,
-            base_commission_rate: 0.00,
+            base_pay_per_week: 0.0,
+            base_commission_rate: 0.0,
           },
         },
       },
@@ -125,13 +125,19 @@ async function seedSalon() {
       data: { name: 'Nails', description: 'Nail extensions, gel manicures, and classic nail care' },
     });
     const catHandSpa = await prisma.serviceCategory.create({
-      data: { name: 'Hand Spa', description: 'Nourishing treatments, massages, and scrubs for hands' },
+      data: {
+        name: 'Hand Spa',
+        description: 'Nourishing treatments, massages, and scrubs for hands',
+      },
     });
     const catFootSpa = await prisma.serviceCategory.create({
       data: { name: 'Foot Spa', description: 'Soothing foot spas, scrubs, and classic pedicures' },
     });
     const catWaxing = await prisma.serviceCategory.create({
-      data: { name: 'Waxing & Threading', description: 'Gentle waxing and eyebrow mapping/threading' },
+      data: {
+        name: 'Waxing & Threading',
+        description: 'Gentle waxing and eyebrow mapping/threading',
+      },
     });
     console.log('✔ 4 allowed categories seeded successfully.');
 
@@ -139,40 +145,94 @@ async function seedSalon() {
     // STEP 4: CREATE SERVICES
     // --------------------------------------------------
     console.log('\n[Step 4] Seeding salon services...');
-    
+
     // Nails Category
     const svcClassicMani = await prisma.service.create({
-      data: { name: 'Classic Manicure', category_id: catNails.id, price: 350.00, duration_minutes: 45, is_popular: true },
+      data: {
+        name: 'Classic Manicure',
+        category_id: catNails.id,
+        price: 350.0,
+        duration_minutes: 45,
+        is_popular: true,
+      },
     });
     const svcGelNails = await prisma.service.create({
-      data: { name: 'Gel Nail Art', category_id: catNails.id, price: 800.00, duration_minutes: 90, is_popular: true },
+      data: {
+        name: 'Gel Nail Art',
+        category_id: catNails.id,
+        price: 800.0,
+        duration_minutes: 90,
+        is_popular: true,
+      },
     });
     const svcFrenchTips = await prisma.service.create({
-      data: { name: 'French Tips', category_id: catNails.id, price: 500.00, duration_minutes: 60, is_popular: false },
+      data: {
+        name: 'French Tips',
+        category_id: catNails.id,
+        price: 500.0,
+        duration_minutes: 60,
+        is_popular: false,
+      },
     });
     const svcAcrylicExt = await prisma.service.create({
-      data: { name: 'Acrylic Extension', category_id: catNails.id, price: 1200.00, duration_minutes: 90, is_popular: true },
+      data: {
+        name: 'Acrylic Extension',
+        category_id: catNails.id,
+        price: 1200.0,
+        duration_minutes: 90,
+        is_popular: true,
+      },
     });
 
     // Hand Spa Category
     const svcHandSpa = await prisma.service.create({
-      data: { name: 'Hand Spa Treatment', category_id: catHandSpa.id, price: 450.00, duration_minutes: 45, is_popular: false },
+      data: {
+        name: 'Hand Spa Treatment',
+        category_id: catHandSpa.id,
+        price: 450.0,
+        duration_minutes: 45,
+        is_popular: false,
+      },
     });
 
     // Foot Spa Category
     const svcSpaPedi = await prisma.service.create({
-      data: { name: 'Spa Pedicure', category_id: catFootSpa.id, price: 600.00, duration_minutes: 75, is_popular: true },
+      data: {
+        name: 'Spa Pedicure',
+        category_id: catFootSpa.id,
+        price: 600.0,
+        duration_minutes: 75,
+        is_popular: true,
+      },
     });
     const svcFootScrub = await prisma.service.create({
-      data: { name: 'Foot Scrub & Polish', category_id: catFootSpa.id, price: 500.00, duration_minutes: 60, is_popular: false },
+      data: {
+        name: 'Foot Scrub & Polish',
+        category_id: catFootSpa.id,
+        price: 500.0,
+        duration_minutes: 60,
+        is_popular: false,
+      },
     });
 
     // Waxing Category
     const svcUnderarmWax = await prisma.service.create({
-      data: { name: 'Underarm Waxing', category_id: catWaxing.id, price: 300.00, duration_minutes: 20, is_popular: true },
+      data: {
+        name: 'Underarm Waxing',
+        category_id: catWaxing.id,
+        price: 300.0,
+        duration_minutes: 20,
+        is_popular: true,
+      },
     });
     const svcEyebrowThread = await prisma.service.create({
-      data: { name: 'Eyebrow Threading', category_id: catWaxing.id, price: 250.00, duration_minutes: 15, is_popular: false },
+      data: {
+        name: 'Eyebrow Threading',
+        category_id: catWaxing.id,
+        price: 250.0,
+        duration_minutes: 15,
+        is_popular: false,
+      },
     });
 
     console.log('✔ Services seeded under respective categories.');
@@ -184,31 +244,36 @@ async function seedSalon() {
     const exhibits = [
       {
         title: 'Midnight Bloom Gel Art',
-        image_url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&q=80&w=1200',
+        image_url:
+          'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&q=80&w=1200',
         staff_id: artistProfile.id,
         service_id: svcGelNails.id,
       },
       {
         title: 'Elegance French Tips',
-        image_url: 'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&q=80&w=1200',
+        image_url:
+          'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&q=80&w=1200',
         staff_id: artistProfile.id,
         service_id: svcFrenchTips.id,
       },
       {
         title: 'Golden Hour Ombré Nails',
-        image_url: 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&q=80&w=1200',
+        image_url:
+          'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&q=80&w=1200',
         staff_id: artistProfile.id,
         service_id: svcGelNails.id,
       },
       {
         title: 'Lavender Foot Spa Pedicure',
-        image_url: 'https://images.unsplash.com/photo-1604902396830-aca29e19b067?auto=format&fit=crop&q=80&w=1200',
+        image_url:
+          'https://images.unsplash.com/photo-1604902396830-aca29e19b067?auto=format&fit=crop&q=80&w=1200',
         staff_id: artistProfile.id,
         service_id: svcSpaPedi.id,
       },
       {
         title: 'Perfect Arch Eyebrow Threading',
-        image_url: 'https://images.unsplash.com/photo-1610992015732-2449b76344bc?auto=format&fit=crop&q=80&w=1200',
+        image_url:
+          'https://images.unsplash.com/photo-1610992015732-2449b76344bc?auto=format&fit=crop&q=80&w=1200',
         staff_id: artistProfile.id,
         service_id: svcEyebrowThread.id,
       },
@@ -223,35 +288,66 @@ async function seedSalon() {
     // STEP 6: SEED COMPENSATION & SALARY STRUCTURES
     // --------------------------------------------------
     console.log('\n[Step 6] Seeding salary components & structures...');
-    
+
     // Earnings components
     const compBasic = await prisma.salaryComponent.create({
       data: { name: 'Basic Pay', type: 'earning', description: 'Weekly base salary component' },
     });
     const compCommission = await prisma.salaryComponent.create({
-      data: { name: 'Commissions', type: 'earning', description: 'Commissions from completed appointments' },
+      data: {
+        name: 'Commissions',
+        type: 'earning',
+        description: 'Commissions from completed appointments',
+      },
     });
 
     // Deductions components
     const compLateDeduction = await prisma.salaryComponent.create({
-      data: { name: 'Late Deductions', type: 'deduction', description: 'Deductions calculated based on tardiness minutes' },
+      data: {
+        name: 'Late Deductions',
+        type: 'deduction',
+        description: 'Deductions calculated based on tardiness minutes',
+      },
     });
     const compAbsentDeduction = await prisma.salaryComponent.create({
-      data: { name: 'Absenteeism', type: 'deduction', description: 'Flat deductions for unexcused absences' },
+      data: {
+        name: 'Absenteeism',
+        type: 'deduction',
+        description: 'Flat deductions for unexcused absences',
+      },
     });
 
     // Create a Standard Salon Structure
     const structureStandard = await prisma.salaryStructure.create({
-      data: { name: 'Standard Stylist Package', description: 'Base pay ₱2500/week + 10% commission on services' },
+      data: {
+        name: 'Standard Stylist Package',
+        description: 'Base pay ₱2500/week + 10% commission on services',
+      },
     });
 
     // Map components to structure
     await prisma.salaryStructureComponent.createMany({
       data: [
-        { salary_structure_id: structureStandard.id, salary_component_id: compBasic.id, amount: 2500.00 },
-        { salary_structure_id: structureStandard.id, salary_component_id: compCommission.id, formula: 'COMMISSION_RATE * TOTAL_SALES' },
-        { salary_structure_id: structureStandard.id, salary_component_id: compLateDeduction.id, formula: 'TARDINESS_MINUTES * 3.33' },
-        { salary_structure_id: structureStandard.id, salary_component_id: compAbsentDeduction.id, amount: 500.00 },
+        {
+          salary_structure_id: structureStandard.id,
+          salary_component_id: compBasic.id,
+          amount: 2500.0,
+        },
+        {
+          salary_structure_id: structureStandard.id,
+          salary_component_id: compCommission.id,
+          formula: 'COMMISSION_RATE * TOTAL_SALES',
+        },
+        {
+          salary_structure_id: structureStandard.id,
+          salary_component_id: compLateDeduction.id,
+          formula: 'TARDINESS_MINUTES * 3.33',
+        },
+        {
+          salary_structure_id: structureStandard.id,
+          salary_component_id: compAbsentDeduction.id,
+          amount: 500.0,
+        },
       ],
     });
 

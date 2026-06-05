@@ -1,7 +1,14 @@
 import { Request, Response } from 'express';
 import { generatePayroll, getPayrollPeriods, addDeduction } from '../controllers/payrollController';
 import prisma from '../utils/prisma';
-import { mockStaffProfiles, mockCommissions, mockDeductionLogs, mockSalaryAssignments, mockAttendance, mockPayrollPeriod } from './payroll.mock';
+import {
+  mockStaffProfiles,
+  mockCommissions,
+  mockDeductionLogs,
+  mockSalaryAssignments,
+  mockAttendance,
+  mockPayrollPeriod,
+} from './payroll.mock';
 
 // Mock Prisma
 jest.mock('../utils/prisma', () => ({
@@ -85,7 +92,9 @@ describe('Payroll Controller Tests', () => {
       (prisma.payrollPeriod.create as jest.Mock).mockResolvedValue(mockPayrollPeriod);
       (prisma.deductionLog.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.attendance.findMany as jest.Mock).mockResolvedValue(mockAttendance);
-      (prisma.salaryStructureAssignment.findFirst as jest.Mock).mockResolvedValue(mockSalaryAssignments[0]);
+      (prisma.salaryStructureAssignment.findFirst as jest.Mock).mockResolvedValue(
+        mockSalaryAssignments[0],
+      );
 
       await generatePayroll(req, res);
 
@@ -94,7 +103,7 @@ describe('Payroll Controller Tests', () => {
         expect.objectContaining({
           success: true,
           data: expect.objectContaining({ id: mockPayrollPeriod.id }),
-        })
+        }),
       );
     });
   });
@@ -118,7 +127,7 @@ describe('Payroll Controller Tests', () => {
         expect.objectContaining({
           success: true,
           data: expect.objectContaining({ id: mockDeductionLogs[0].id }),
-        })
+        }),
       );
     });
   });

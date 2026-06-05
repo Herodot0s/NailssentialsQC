@@ -79,7 +79,9 @@ describe('Appointment Controller Tests', () => {
 
       // Mock sequence of prisma calls
       prismaMock.user.findUnique.mockResolvedValue(mockCustomerUser as any);
-      prismaMock.customerProfile.findUnique.mockResolvedValue(mockCustomerUser.customer_profile as any);
+      prismaMock.customerProfile.findUnique.mockResolvedValue(
+        mockCustomerUser.customer_profile as any,
+      );
       prismaMock.service.findUnique.mockResolvedValue(mockService as any);
       prismaMock.staffProfile.findFirst.mockResolvedValue(mockStaffUser.staff_profile as any);
       prismaMock.appointmentItem.findMany.mockResolvedValue([]); // No conflicts
@@ -125,7 +127,9 @@ describe('Appointment Controller Tests', () => {
       } as unknown as AuthRequest;
 
       prismaMock.user.findUnique.mockResolvedValue(mockCustomerUser as any);
-      prismaMock.customerProfile.findUnique.mockResolvedValue(mockCustomerUser.customer_profile as any);
+      prismaMock.customerProfile.findUnique.mockResolvedValue(
+        mockCustomerUser.customer_profile as any,
+      );
       prismaMock.service.findUnique.mockResolvedValue(mockService as any);
       prismaMock.staffProfile.findFirst.mockResolvedValue(mockStaffUser.staff_profile as any);
 
@@ -214,9 +218,7 @@ describe('Appointment Controller Tests', () => {
         },
       } as unknown as Request;
 
-      const technicians = [
-        { id: 1, full_name: 'Tech 1', is_available: true },
-      ];
+      const technicians = [{ id: 1, full_name: 'Tech 1', is_available: true }];
 
       prismaMock.staffProfile.findMany.mockResolvedValue(technicians as any);
 
@@ -253,7 +255,7 @@ describe('Appointment Controller Tests', () => {
             service_id: 1,
             staff: { user_id: 2, specializations: 'Nails' },
             service: {
-              category: { name: 'Nails' }
+              category: { name: 'Nails' },
             },
           },
         ],

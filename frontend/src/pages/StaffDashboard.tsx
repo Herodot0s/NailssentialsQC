@@ -334,7 +334,9 @@ const StaffDashboard: React.FC = () => {
     }
   };
 
-  const sortedStaff = [...staff].sort((a, b) => a.fullName.localeCompare(b.fullName));
+  const sortedStaff = [...staff].sort((a, b) =>
+    (a.fullName || a.username || '').localeCompare(b.fullName || b.username || ''),
+  );
 
   const getStatusBadge = (status: string) => {
     const s = status.toLowerCase();
@@ -1127,10 +1129,12 @@ const StaffDashboard: React.FC = () => {
                   >
                     <SelectTrigger className="rounded-xl border-primary/10 h-14 active:scale-98 transition-all hover:bg-primary/5 text-xs">
                       <SelectValue placeholder="Select staff member">
-                        {
-                          sortedStaff.find((s) => s.id.toString() === newMessage.receiverId)
-                            ?.fullName
-                        }
+                        {(() => {
+                          const found = sortedStaff.find(
+                            (s) => s.id.toString() === newMessage.receiverId,
+                          );
+                          return found ? found.fullName || found.username : '';
+                        })()}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-none shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-2">
@@ -1140,7 +1144,7 @@ const StaffDashboard: React.FC = () => {
                           value={s.id.toString()}
                           className="rounded-lg h-10 text-xs"
                         >
-                          {s.fullName} ({s.role})
+                          {s.fullName || s.username} ({s.role})
                         </SelectItem>
                       ))}
                     </SelectContent>

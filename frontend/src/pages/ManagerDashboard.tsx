@@ -185,15 +185,14 @@ const ManagerDashboard: React.FC = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [salesRes, staffRes, reviewsRes, attRes, catRes, appRes] =
-        await Promise.allSettled([
-          getDailySales(),
-          getAllStaff(),
-          getAllReviews(),
-          getAllAttendance({ startDate: dateRange.start }),
-          getCategories(),
-          getAppointments(),
-        ]);
+      const [salesRes, staffRes, reviewsRes, attRes, catRes, appRes] = await Promise.allSettled([
+        getDailySales(),
+        getAllStaff(),
+        getAllReviews(),
+        getAllAttendance({ startDate: dateRange.start }),
+        getCategories(),
+        getAppointments(),
+      ]);
 
       if (salesRes.status === 'fulfilled' && salesRes.value.data.success)
         setSalesStats(salesRes.value.data.data);

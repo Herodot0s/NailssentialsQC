@@ -4,7 +4,9 @@ async function testDebug() {
   try {
     console.log('--- START TEST DEBUG ---');
     // Truncate tables first
-    await prisma.$executeRawUnsafe('TRUNCATE TABLE "users", "customer_profiles", "staff_profiles", "staff_schedules" CASCADE;');
+    await prisma.$executeRawUnsafe(
+      'TRUNCATE TABLE "users", "customer_profiles", "staff_profiles", "staff_schedules" CASCADE;',
+    );
     console.log('✔ Truncated tables.');
 
     // 1. Create a user

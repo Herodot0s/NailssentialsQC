@@ -11,7 +11,9 @@ dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL?.includes('sslmode=require') ? { rejectUnauthorized: false } : false,
+  ssl: process.env.DATABASE_URL?.includes('sslmode=require')
+    ? { rejectUnauthorized: false }
+    : false,
 });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
@@ -39,7 +41,7 @@ async function main() {
 
   const catMap: Record<string, number> = {};
   const allCats = await prisma.serviceCategory.findMany();
-  allCats.forEach(c => catMap[c.name] = c.id);
+  allCats.forEach((c) => (catMap[c.name] = c.id));
 
   // 2. Define Services
   const services = [
@@ -61,8 +63,18 @@ async function main() {
     { category: 'Spa Services', name: 'Classic Hand Spa', price: 300, duration: 30 },
     { category: 'Spa Services', name: 'Foot Paraffin Wax', price: 450, duration: 40 },
     { category: 'Spa Services', name: 'Hand Paraffin Wax', price: 400, duration: 30 },
-    { category: 'Spa Services', name: 'Package: Classic Foot spa with pedicure', price: 500, duration: 75 },
-    { category: 'Spa Services', name: 'Package: Foot Spa with Foot Paraffin Wax', price: 750, duration: 90 },
+    {
+      category: 'Spa Services',
+      name: 'Package: Classic Foot spa with pedicure',
+      price: 500,
+      duration: 75,
+    },
+    {
+      category: 'Spa Services',
+      name: 'Package: Foot Spa with Foot Paraffin Wax',
+      price: 750,
+      duration: 90,
+    },
 
     // Hair Services (Single)
     { category: 'Hair Services', name: 'Haircut', price: 199, duration: 30 },
@@ -110,8 +122,8 @@ async function main() {
       where: {
         name_category_id: {
           name: s.name,
-          category_id: catMap[s.category]
-        }
+          category_id: catMap[s.category],
+        },
       },
       update: {
         price: s.price,
