@@ -48,54 +48,59 @@ async function seedSalon() {
     console.log('✔ All existing database tables cleared successfully.');
 
     // --------------------------------------------------
-    // STEP 2: CREATE ACCOUNTS (MANAGERS ONLY)
+    // STEP 2: CREATE ACCOUNTS (MANAGERS & SYSTEM ACCOUNTS)
     // --------------------------------------------------
-    console.log('\n[Step 2] Seeding manager accounts & profiles...');
+    console.log('\n[Step 2] Seeding manager accounts...');
     const defaultPasswordHash = await bcrypt.hash('password123', 10);
 
-    // 2.1 Managers
-    const manager1 = await prisma.user.create({
+    // 2.1 Managers (Created without staff profiles to avoid showing as booking technicians)
+    await prisma.user.create({
       data: {
         username: 'manager1',
         email: 'manager@nailssentials.com',
         password_hash: defaultPasswordHash,
         role: 'manager',
-        staff_profile: {
-          create: {
-            full_name: 'Maria Santos',
-            specializations: 'Management, High-End Nail Art',
-            base_pay_per_week: 5000.00,
-            base_commission_rate: 0.15,
-          },
-        },
       },
-      include: { staff_profile: true },
     });
 
-    const testManager = await prisma.user.create({
+    await prisma.user.create({
       data: {
         username: 'test_manager',
         email: 'test_manager@nailssentialsqc.com',
         password_hash: defaultPasswordHash,
         role: 'manager',
+      },
+    });
+
+    console.log('✔ Managers created (clean without StaffProfile relations).');
+
+    // 2.2 House Artist Account (Non-bookable profile used solely to own portfolio exhibits)
+    console.log('\n[Step 2.2] Seeding house artist for exhibits...');
+    const houseArtistUser = await prisma.user.create({
+      data: {
+        username: 'nailssentials_artist',
+        email: 'artist@nailssentials.com',
+        password_hash: defaultPasswordHash,
+        role: 'staff',
+        is_active: true,
         staff_profile: {
           create: {
-            full_name: 'Sophia Lim',
-            specializations: 'Operations & Styling',
-            base_pay_per_week: 5000.00,
-            base_commission_rate: 0.15,
+            full_name: 'Nailssentials Stylist',
+            specializations: 'Nail Art & Spa Services',
+            is_available: false, // Prevents showing up in booking calendar
+            base_pay_per_week: 0.00,
+            base_commission_rate: 0.00,
           },
         },
       },
       include: { staff_profile: true },
     });
 
-    const managerProfile = manager1.staff_profile!;
+    const artistProfile = houseArtistUser.staff_profile!;
+    console.log('✔ House artist profile seeded (is_available = false).');
 
-    console.log('✔ Managers created.');
-
-    // 2.2 System Walk-in Guest Profile (Required for walk-in bookings)
-    console.log('\n[Step 2.2] Seeding system walk-in customer profile...');
+    // 2.3 System Walk-in Guest Profile (Required for walk-in bookings)
+    console.log('\n[Step 2.3] Seeding system walk-in customer profile...');
     const walkInUser = await prisma.user.create({
       data: {
         username: 'walkin_guest',
@@ -180,31 +185,31 @@ async function seedSalon() {
       {
         title: 'Midnight Bloom Gel Art',
         image_url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&q=80&w=1200',
-        staff_id: managerProfile.id,
+        staff_id: artistProfile.id,
         service_id: svcGelNails.id,
       },
       {
         title: 'Elegance French Tips',
         image_url: 'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&q=80&w=1200',
-        staff_id: managerProfile.id,
+        staff_id: artistProfile.id,
         service_id: svcFrenchTips.id,
       },
       {
         title: 'Golden Hour Ombré Nails',
         image_url: 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&q=80&w=1200',
-        staff_id: managerProfile.id,
+        staff_id: artistProfile.id,
         service_id: svcGelNails.id,
       },
       {
         title: 'Lavender Foot Spa Pedicure',
         image_url: 'https://images.unsplash.com/photo-1604902396830-aca29e19b067?auto=format&fit=crop&q=80&w=1200',
-        staff_id: managerProfile.id,
+        staff_id: artistProfile.id,
         service_id: svcSpaPedi.id,
       },
       {
         title: 'Perfect Arch Eyebrow Threading',
         image_url: 'https://images.unsplash.com/photo-1610992015732-2449b76344bc?auto=format&fit=crop&q=80&w=1200',
-        staff_id: managerProfile.id,
+        staff_id: artistProfile.id,
         service_id: svcEyebrowThread.id,
       },
     ];
