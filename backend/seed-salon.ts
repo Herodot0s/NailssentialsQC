@@ -1,6 +1,5 @@
 import prisma from './src/utils/prisma';
 import bcrypt from 'bcrypt';
-import { addDays } from 'date-fns';
 
 async function seedSalon() {
   try {
@@ -49,9 +48,9 @@ async function seedSalon() {
     console.log('✔ All existing database tables cleared successfully.');
 
     // --------------------------------------------------
-    // STEP 2: CREATE ACCOUNTS (MANAGER, STAFF, CUSTOMERS)
+    // STEP 2: CREATE ACCOUNTS (MANAGERS ONLY)
     // --------------------------------------------------
-    console.log('\n[Step 2] Seeding user accounts & profiles...');
+    console.log('\n[Step 2] Seeding manager accounts & profiles...');
     const defaultPasswordHash = await bcrypt.hash('password123', 10);
 
     // 2.1 Managers
@@ -88,93 +87,35 @@ async function seedSalon() {
           },
         },
       },
+      include: { staff_profile: true },
     });
+
+    const managerProfile = manager1.staff_profile!;
 
     console.log('✔ Managers created.');
 
-    // 2.2 Staff
-    const staffAccounts = [
-      { username: 'sarah_tech', email: 'sarah_tech@nailssentialsqc.com', name: 'Sarah Santos', specs: 'Gel Nails, Nail Art' },
-      { username: 'angela_nails', email: 'angela_nails@nailssentialsqc.com', name: 'Angela Cruz', specs: 'Manicure, Pedicure, Gel Polish' },
-      { username: 'liza_wax', email: 'liza_wax@nailssentialsqc.com', name: 'Liza Reyes', specs: 'Body Waxing, Eyebrow Threading' },
-      { username: 'janedoe', email: 'jane@nailssentials.com', name: 'Jane Doe', specs: 'Nail Art, Acrylic Extensions' },
-      { username: 'anareyes', email: 'ana@nailssentials.com', name: 'Ana Reyes', specs: 'Hand & Foot Spa, Massages' },
-      { username: 'test_staff', email: 'test_staff@nailssentialsqc.com', name: 'Staff Tester', specs: 'General Salon Services' },
-    ];
-
-    const staffProfiles = [];
-    for (const s of staffAccounts) {
-      const staffUser = await prisma.user.create({
-        data: {
-          username: s.username,
-          email: s.email,
-          password_hash: defaultPasswordHash,
-          role: 'staff',
-          staff_profile: {
-            create: {
-              full_name: s.name,
-              specializations: s.specs,
-              base_pay_per_week: 2500.00,
-              base_commission_rate: 0.10,
-            },
-          },
-        },
-        include: { staff_profile: true },
-      });
-      if (staffUser.staff_profile) {
-        staffProfiles.push(staffUser.staff_profile);
-      }
-    }
-    console.log('✔ Staff accounts created.');
-
-    // 2.3 Customers
-    const customerAccounts = [
-      { username: 'testcustomer', email: 'customer@test.com', name: 'Alice Smith' },
-      { username: 'charlie_brown', email: 'charlie_brown@example.com', name: 'Charlie Brown' },
-      { username: 'diana_prince', email: 'diana_prince@example.com', name: 'Diana Prince' },
-      { username: 'test_customer', email: 'test_customer@nailssentialsqc.com', name: 'Customer Tester' },
-    ];
-
-    for (const c of customerAccounts) {
-      await prisma.user.create({
-        data: {
-          username: c.username,
-          email: c.email,
-          password_hash: defaultPasswordHash,
-          role: 'customer',
-          customer_profile: {
-            create: {
-              full_name: c.name,
-            },
-          },
-        },
-      });
-    }
-    console.log('✔ Customer accounts created.');
+    // 2.2 System Walk-in Guest Profile (Required for walk-in bookings)
+    console.log('\n[Step 2.2] Seeding system walk-in customer profile...');
+    const walkInUser = await prisma.user.create({
+      data: {
+        username: 'walkin_guest',
+        password_hash: defaultPasswordHash,
+        role: 'customer',
+        is_active: false,
+      },
+    });
+    await prisma.customerProfile.create({
+      data: {
+        user_id: walkInUser.id,
+        full_name: 'Walk-in Customer',
+      },
+    });
+    console.log('✔ Walk-in Customer profile registered.');
 
     // --------------------------------------------------
-    // STEP 3: CREATE STAFF SCHEDULES
+    // STEP 3: CREATE SERVICE CATEGORIES
     // --------------------------------------------------
-    console.log('\n[Step 3] Seeding staff schedules...');
-    for (const profile of staffProfiles) {
-      for (let day = 0; day <= 6; day++) {
-        await prisma.staffSchedule.create({
-          data: {
-            staff_id: profile.id,
-            day_of_week: day,
-            start_time: '12:00',
-            end_time: '22:00',
-            is_active: true,
-          },
-        });
-      }
-    }
-    console.log('✔ Active schedules (12:00 PM - 10:00 PM) seeded for all staff.');
-
-    // --------------------------------------------------
-    // STEP 4: CREATE SERVICE CATEGORIES
-    // --------------------------------------------------
-    console.log('\n[Step 4] Seeding service categories...');
+    console.log('\n[Step 3] Seeding service categories...');
     const catNails = await prisma.serviceCategory.create({
       data: { name: 'Nails', description: 'Nail extensions, gel manicures, and classic nail care' },
     });
@@ -190,9 +131,9 @@ async function seedSalon() {
     console.log('✔ 4 allowed categories seeded successfully.');
 
     // --------------------------------------------------
-    // STEP 5: CREATE SERVICES
+    // STEP 4: CREATE SERVICES
     // --------------------------------------------------
-    console.log('\n[Step 5] Seeding salon services...');
+    console.log('\n[Step 4] Seeding salon services...');
     
     // Nails Category
     const svcClassicMani = await prisma.service.create({
@@ -232,38 +173,38 @@ async function seedSalon() {
     console.log('✔ Services seeded under respective categories.');
 
     // --------------------------------------------------
-    // STEP 6: SEED EXHIBITS (GALLERY PORTFOLIO)
+    // STEP 5: SEED EXHIBITS (GALLERY PORTFOLIO)
     // --------------------------------------------------
-    console.log('\n[Step 6] Seeding salon exhibits...');
+    console.log('\n[Step 5] Seeding salon exhibits...');
     const exhibits = [
       {
         title: 'Midnight Bloom Gel Art',
         image_url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&q=80&w=1200',
-        staff_id: staffProfiles[0].id, // Sarah Santos
+        staff_id: managerProfile.id,
         service_id: svcGelNails.id,
       },
       {
         title: 'Elegance French Tips',
         image_url: 'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&q=80&w=1200',
-        staff_id: staffProfiles[1].id, // Angela Cruz
+        staff_id: managerProfile.id,
         service_id: svcFrenchTips.id,
       },
       {
         title: 'Golden Hour Ombré Nails',
         image_url: 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&q=80&w=1200',
-        staff_id: staffProfiles[3].id, // Jane Doe
+        staff_id: managerProfile.id,
         service_id: svcGelNails.id,
       },
       {
         title: 'Lavender Foot Spa Pedicure',
         image_url: 'https://images.unsplash.com/photo-1604902396830-aca29e19b067?auto=format&fit=crop&q=80&w=1200',
-        staff_id: staffProfiles[4].id, // Ana Reyes
+        staff_id: managerProfile.id,
         service_id: svcSpaPedi.id,
       },
       {
         title: 'Perfect Arch Eyebrow Threading',
         image_url: 'https://images.unsplash.com/photo-1610992015732-2449b76344bc?auto=format&fit=crop&q=80&w=1200',
-        staff_id: staffProfiles[2].id, // Liza Reyes
+        staff_id: managerProfile.id,
         service_id: svcEyebrowThread.id,
       },
     ];
@@ -274,9 +215,9 @@ async function seedSalon() {
     console.log('✔ 5 high-quality exhibits seeded.');
 
     // --------------------------------------------------
-    // STEP 7: SEED COMPENSATION & SALARY STRUCTURES
+    // STEP 6: SEED COMPENSATION & SALARY STRUCTURES
     // --------------------------------------------------
-    console.log('\n[Step 7] Seeding salary components & structures...');
+    console.log('\n[Step 6] Seeding salary components & structures...');
     
     // Earnings components
     const compBasic = await prisma.salaryComponent.create({
@@ -309,101 +250,14 @@ async function seedSalon() {
       ],
     });
 
-    // Assign structure to all staff
-    const today = new Date();
-    for (const staff of staffProfiles) {
-      await prisma.salaryStructureAssignment.create({
-        data: {
-          staff_id: staff.id,
-          salary_structure_id: structureStandard.id,
-          base_pay: staff.base_pay_per_week,
-          effective_from: addDays(today, -30),
-          is_active: true,
-        },
-      });
-    }
-    console.log('✔ Compensation models and salary structure assignments completed.');
-
-    // --------------------------------------------------
-    // STEP 8: SEED ATTENDANCE RECORDS (PAST 14 DAYS)
-    // --------------------------------------------------
-    console.log('\n[Step 8] Seeding staff attendance records (past 14 days)...');
-    const pastDays = 14;
-
-    for (const staff of staffProfiles) {
-      for (let i = pastDays; i >= 0; i--) {
-        const date = addDays(today, -i);
-        const dbDayOfWeek = date.getDay();
-
-        // Check schedule
-        const schedule = await prisma.staffSchedule.findFirst({
-          where: { staff_id: staff.id, day_of_week: dbDayOfWeek, is_active: true },
-        });
-
-        if (!schedule) continue; // Off duty
-
-        // 5% chance to be absent (unless it's today)
-        if (i > 0 && Math.random() < 0.05) {
-          const startOfDate = new Date(date);
-          startOfDate.setHours(0, 0, 0, 0);
-
-          await prisma.attendance.create({
-            data: {
-              staff_id: staff.id,
-              date: startOfDate,
-              check_in: null,
-              check_out: null,
-              tardiness_minutes: 0,
-              deduction_amount: 500.00,
-              scheduled_start: '12:00',
-              scheduled_end: '22:00',
-              notes: 'Unexcused Absence',
-            },
-          });
-          continue;
-        }
-
-        // Present
-        const checkInTime = new Date(date);
-        // Random arrival: between 10 mins before to 25 mins after 12:00
-        const arrivalOffsetMins = Math.floor(Math.random() * 35) - 10;
-        checkInTime.setHours(12, arrivalOffsetMins, 0, 0);
-
-        const tardiness = Math.max(0, arrivalOffsetMins);
-        const deduction = tardiness > 0 ? tardiness * 3.33 : 0;
-
-        const checkOutTime = new Date(date);
-        // Random departure: 0-15 mins after 22:00
-        const departOffsetMins = Math.floor(Math.random() * 15);
-        checkOutTime.setHours(22, departOffsetMins, 0, 0);
-
-        const startOfDate = new Date(date);
-        startOfDate.setHours(0, 0, 0, 0);
-
-        await prisma.attendance.create({
-          data: {
-            staff_id: staff.id,
-            date: startOfDate,
-            check_in: checkInTime,
-            check_out: i === 0 ? null : checkOutTime, // Today has not checked out yet
-            tardiness_minutes: tardiness,
-            deduction_amount: deduction,
-            scheduled_start: '12:00',
-            scheduled_end: '22:00',
-          },
-        });
-      }
-    }
-    console.log('✔ Attendance history successfully populated.');
+    console.log('✔ Compensation structures successfully initialized.');
 
     console.log('\n==================================================');
     console.log('  DATABASE SEEDING COMPLETED SUCCESSFULLY         ');
     console.log('==================================================');
     console.log('Credentials Summary:');
     console.log('  Manager:  manager1 / password123');
-    console.log('  Staff:    sarah_tech / password123');
-    console.log('  Staff:    angela_nails / password123');
-    console.log('  Customer: testcustomer / password123\n');
+    console.log('  Manager:  test_manager / password123\n');
   } catch (error) {
     console.error('Fatal seeding error:', error);
   } finally {
