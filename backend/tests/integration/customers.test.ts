@@ -166,7 +166,7 @@ describe('Customer CRUD Integration Tests', () => {
 
       // Verify deletion from db
       const profile = await prisma.customerProfile.findUnique({
-        where: { id: testCustomerId },
+        where: { user_id: testCustomerId },
       });
       expect(profile).toBeNull();
     });

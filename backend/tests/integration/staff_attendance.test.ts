@@ -55,7 +55,8 @@ describe('Staff & Attendance Integration Tests', () => {
     });
 
     // Cleanup customer profile and create staff profile
-    await prisma.customerProfile.delete({ where: { user_id: staffUserId } });
+    await prisma.customerProfile.deleteMany({ where: { user_id: staffUserId } });
+    await prisma.staffProfile.deleteMany({ where: { user_id: staffUserId } });
     const profile = await prisma.staffProfile.create({
       data: {
         user_id: staffUserId,

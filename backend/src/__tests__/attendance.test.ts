@@ -1,9 +1,4 @@
-import { Request, Response } from 'express';
-import * as attendanceController from '../controllers/attendanceController';
-import prisma from '../utils/prisma';
-import { AuthRequest } from '../middleware/authMiddleware';
-
-// Mock prisma
+// Mock prisma and notificationController first
 jest.mock('../utils/prisma', () => ({
   __esModule: true,
   default: {
@@ -29,10 +24,14 @@ jest.mock('../utils/prisma', () => ({
   },
 }));
 
-// Mock notificationController
 jest.mock('../controllers/notificationController', () => ({
   createNotification: jest.fn(),
 }));
+
+import { Response } from 'express';
+import * as attendanceController from '../controllers/attendanceController';
+import prisma from '../utils/prisma';
+import { AuthRequest } from '../middleware/authMiddleware';
 
 describe('Attendance Controller', () => {
   let mockRequest: Partial<AuthRequest>;
@@ -56,9 +55,6 @@ describe('Attendance Controller', () => {
       status: statusSpy,
       json: jsonSpy,
     };
-
-    // Default mock for getManilaToday logic implicitly used in controllers
-    // We'll control dates in specific tests
   });
 
   describe('getAttendanceStatus', () => {
@@ -83,6 +79,7 @@ describe('Attendance Controller', () => {
         check_out: null,
         scheduled_start: '12:00:00',
         scheduled_end: '22:00:00',
+        date: new Date()
       });
       (prisma.staffSchedule.findUnique as jest.Mock).mockResolvedValue(null);
       (prisma.attendance.findMany as jest.Mock).mockResolvedValue([]);

@@ -1,12 +1,14 @@
-import { Response } from 'express';
 import { prismaMock } from '../__mocks__/prisma';
-import * as reviewController from '../controllers/reviewController';
-import { AuthRequest } from '../middleware/authMiddleware';
+const mockPrisma = prismaMock;
 
 jest.mock('../utils/prisma', () => ({
   __esModule: true,
-  default: prismaMock,
+  default: mockPrisma,
 }));
+
+import { Response } from 'express';
+import * as reviewController from '../controllers/reviewController';
+import { AuthRequest } from '../middleware/authMiddleware';
 
 describe('Review Controller Tests', () => {
   let mockRes: Partial<Response>;

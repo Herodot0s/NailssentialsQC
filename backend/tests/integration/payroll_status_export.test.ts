@@ -4,22 +4,6 @@ import prisma from '../../src/utils/prisma';
 import { subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import * as ExcelJS from 'exceljs';
 
-// Mock ExcelJS to avoid actual file generation and test the response stream
-jest.mock('exceljs', () => {
-  const mockWorksheet = {
-    addRow: jest.fn().mockReturnValue({ font: {}, fill: {}, getCell: jest.fn().mockReturnValue({ font: {} }) }),
-    columns: [],
-  };
-  const mockWorkbook = {
-    addWorksheet: jest.fn().mockReturnValue(mockWorksheet),
-    xlsx: {
-      write: jest.fn().mockResolvedValue(undefined),
-    },
-  };
-  return {
-    Workbook: jest.fn().mockImplementation(() => mockWorkbook),
-  };
-});
 
 describe('Payroll Status and Export Tests', () => {
   let managerToken: string;
@@ -61,7 +45,11 @@ describe('Payroll Status and Export Tests', () => {
       data: { role: 'staff' },
     });
 
-    await prisma.customerProfile.delete({
+    await prisma.customerProfile.deleteMany({
+      where: { user_id: staffUserId },
+    });
+
+    await prisma.staffProfile.deleteMany({
       where: { user_id: staffUserId },
     });
 
@@ -120,7 +108,7 @@ describe('Payroll Status and Export Tests', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toContain('locked');
+      expect(response.body.error.message).toContain('locked');
     });
   });
 
@@ -138,10 +126,10 @@ describe('Payroll Status and Export Tests', () => {
       expect(response.header['content-disposition']).toContain('.xlsx');
 
       // Verify ExcelJS was used
-      const mockWorkbook = new ExcelJS.Workbook();
       expect(ExcelJS.Workbook).toHaveBeenCalled();
-      expect(mockWorkbook.addWorksheet).toHaveBeenCalledWith('Payroll Report');
-      expect(mockWorkbook.xlsx.write).toHaveBeenCalled();
+      const mockWorkbookInstance = (ExcelJS.Workbook as jest.Mock).mock.results[0].value;
+      expect(mockWorkbookInstance.addWorksheet).toHaveBeenCalledWith('Payroll Report');
+      expect(mockWorkbookInstance.xlsx.write).toHaveBeenCalled();
     });
 
     it('should return 404 for non-existent period export', async () => {

@@ -160,6 +160,13 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    if (existingAttendance?.check_in) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'ALREADY_CHECKED_IN', message: 'You have already checked in for today' },
+      });
+    }
+
     // Fetch day-specific schedule
     const daySchedule = await prisma.staffSchedule.findUnique({
       where: {
@@ -322,6 +329,17 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
 
     const scheduledEndTime = new Date(updatedAttendance.date);
     scheduledEndTime.setUTCHours(endHours - 8, endMinutes, 0, 0);
+
+    const scheduledStartStr =
+      updatedAttendance.scheduled_start || staffProfile.scheduled_start || '12:00:00';
+    const [startHours, startMinutes] = scheduledStartStr.split(':').map(Number);
+    const startVal = startHours * 60 + startMinutes;
+    const endVal = endHours * 60 + endMinutes;
+
+    if (endVal < startVal) {
+      // Shift spans midnight; scheduled end time is on the next calendar day
+      scheduledEndTime.setUTCDate(scheduledEndTime.getUTCDate() + 1);
+    }
 
     const earlyOutMinutes = Math.floor((scheduledEndTime.getTime() - now.getTime()) / (1000 * 60));
     const isEarlyOut = earlyOutMinutes > 0;
