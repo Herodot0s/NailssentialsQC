@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NailssentialsQC - Operations Manual & Technical Handover</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=Source+Code+Pro&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #B8794E;
+      --canvas: #eeefe9;
+      --ink: #23251d;
+      --body: #4d4f46;
+      --surface-card: #ffffff;
+      --hairline: #bfc1b7;
+      --accent-blue-soft: #dceaf6;
+      --accent-red-soft: #f7d6d3;
+    }
+    body {
+      background-color: var(--canvas);
+      color: var(--body);
+      font-family: 'IBM Plex Sans', sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 60px 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .card {
+      background-color: var(--surface-card);
+      border: 1px solid var(--hairline);
+      border-radius: 6px;
+      padding: 48px;
+      margin-bottom: 24px;
+      box-shadow: none;
+    }
+    h1, h2, h3 {
+      color: var(--ink);
+      font-weight: 700;
+      margin-top: 0;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    h2 {
+      font-size: 22px;
+      border-bottom: 1px solid var(--hairline);
+      padding-bottom: 8px;
+      margin-top: 40px;
+      margin-bottom: 16px;
+    }
+    h3 {
+      font-size: 17px;
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+    p {
+      font-size: 15px;
+      margin: 14px 0;
+      color: var(--body);
+    }
+    strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+    ul, ol {
+      padding-left: 24px;
+      margin: 12px 0;
+    }
+    li {
+      margin: 8px 0;
+      font-size: 15px;
+    }
+    .inline-code {
+      background-color: #e5e7e0;
+      color: var(--ink);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Source Code Pro', monospace;
+      font-size: 13.5px;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid var(--hairline);
+      margin: 32px 0;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 12px;
+      color: var(--body);
+    }
+    
+    @media print {
+      body {
+        background-color: #ffffff;
+        color: #000000;
+        padding: 0;
+      }
+      .card {
+        border: none;
+        padding: 0;
+        margin: 0;
+      }
+      h2 {
+        page-break-before: always;
+      }
+      .inline-code {
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>NailssentialsQC - Client Operations Manual &amp; Technical Handover</h1>
+
+<p>Welcome to the operations manual for the <strong>NailssentialsQC Salon Management System</strong>. This document details how to operate the system for business use and provides the technical details of your hosting, database setup, and support warranty.</p>
+
+<hr />
+
+<h2>1. System Overview &amp; Access</h2>
+
+<p>NailssentialsQC is a custom-built, modern management platform designed specifically for your nail salon. The system integrates online customer booking, technician scheduling, attendance tracking, payroll processing, and financial dashboards into a single application.</p>
+
+<h3>Accessing the System</h3>
+<ul><li><strong>Customer Booking Portal</strong>: Accessible by visiting your website domain. Customers can book appointments directly from the landing page.</li><li><strong>Staff &amp; Manager Portal</strong>: Staff and managers access their respective dashboards by clicking <strong>Login</strong> in the navigation bar.</li><li><strong>Authentication Service</strong>: Secured via Clerk. Access is partitioned using Role-Based Access Control (RBAC) to ensure that staff and customers cannot access manager tools.</li></ul>
+
+<hr />
+
+<h2>2. Manager Operations (Salon Management Guide)</h2>
+
+<p>The <strong>Manager Dashboard</strong> (<code class="inline-code">/manager</code>) is the control center for your salon's daily business operations.</p>
+
+<h3>2.1 Workforce &amp; Staff Management</h3>
+<p>To manage your salon staff:</p>
+<ul><li>Navigate to the <strong>Staff Management</strong> tab on the Manager Dashboard.</li><li><strong>Add a Staff Member</strong>: Click the "Add Staff" button, input their full name, role, email, phone number, and basic hourly pay rate.</li><li><strong>Set Schedules</strong>: Assign default working hours and shift days for each technician. The booking engine uses these schedules to show technician availability.</li><li><strong>Suspending Staff</strong>: If a technician is on leave or no longer with the salon, they can be suspended to temporarily block them from receiving new bookings.</li></ul>
+
+<h3>2.2 Catalog Management (Services &amp; Packages)</h3>
+<p>To manage what services are offered to customers:</p>
+<ul><li>Go to the <strong>Manage Services</strong> page (<code class="inline-code">/manage-services</code>).</li><li><strong>Add a Service</strong>: Click "New Service". Enter the service name, duration (in minutes), price (in Philippine Peso ₱), commission rate (percentage paid to the technician), and category (e.g., Manicure, Pedicure, Nail Art).</li><li><strong>Packages &amp; Bundles</strong>: Group multiple services into a single promotional package (e.g., "Mani-Pedi Classic Combo") with custom combo pricing.</li><li><strong>Visibility Toggle</strong>: You can hide services from the online booking catalog by toggling the "Visible" switch. Hidden services are kept in the database but cannot be booked by the public.</li></ul>
+
+<h3>2.3 CMS &amp; Salon Policies</h3>
+<p>To update website content and rules:</p>
+<ul><li><strong>Gallery Management</strong>: Use the <strong>Manage Exhibits</strong> page (<code class="inline-code">/manage-exhibits</code>) to upload photos of nail art to the public showcase.</li><li><strong>Policies</strong>: Set scheduling policies (e.g., minimum notice required for cancellation, booking guidelines) which appear on the customer page (<code class="inline-code">/policies</code>).</li></ul>
+
+<h3>2.4 Payroll &amp; Financial Automation</h3>
+<p>NailssentialsQC automates salary calculations based on your salon's operational formulas:</p>
+<ul><li>Go to the <strong>Payroll</strong> tab on the Manager Dashboard.</li><li><strong>Select Period</strong>: Choose the start and end dates for the payroll cycle (e.g., bi-monthly or monthly).</li><li><strong>Run Payroll</strong>: Click "Generate Payroll". The system will calculate:</li><li><strong>Base Earnings</strong>: Calculated from clocked attendance hours and basic hourly pay rates.</li><li><strong>Commissions</strong>: Automatically compiled from completed appointments. For each service performed, the technician is credited their custom commission rate (e.g., 20% of the service price).</li><li><strong>Deductions</strong>: Standard tax, late clock-ins, or custom deductions manually inputted.</li><li><strong>Export Slips</strong>: Managers can download individual itemized salary slips and the overall spreadsheet for business accounting.</li></ul>
+
+<h3>2.5 Business Analytics</h3>
+<ul><li><strong>Revenue Dashboard</strong>: View charts tracking weekly, monthly, and yearly revenue growth.</li><li><strong>Performance Metrics</strong>: Inspect which services are most popular and view a ranking of top-performing technicians by booking volume and commissions earned.</li></ul>
+
+<hr />
+
+<h2>3. Staff Operations (Technician Guide)</h2>
+
+<p>Technicians access the <strong>Staff Portal</strong> (<code class="inline-code">/dashboard</code>) on their mobile phones or tablets on the salon floor.</p>
+
+<h3>3.1 Attendance System (Clocking In/Out)</h3>
+<p>Technicians must log their shifts for payroll accuracy:</p>
+<ul><li>Upon arriving at the salon, log into the portal and click the large green <strong>Clock In</strong> button.</li><li>At the end of the shift, click the red <strong>Clock Out</strong> button.</li><li>The system automatically logs shift start, shift end, and total hours to calculate basic wages.</li></ul>
+
+<h3>3.2 Technician Calendar &amp; Workload</h3>
+<ul><li><strong>Daily Agenda</strong>: Technicians can view their scheduled appointments in real-time, including the service requested, customer name, and booking notes.</li><li><strong>Status Updates</strong>: Technicians mark appointments as <strong>Completed</strong> once the service is finished. Marking an appointment completed triggers the commission calculation and sends an email receipt to the customer.</li></ul>
+
+<h3>3.3 Commission Tracker</h3>
+<ul><li>Technicians can monitor their cumulative commission earnings for the current pay period directly on their dashboard, ensuring complete transparency.</li></ul>
+
+<hr />
+
+<h2>4. Customer Experience &amp; Online Booking</h2>
+
+<p>Customers can book services on any device without staff intervention.</p>
+
+<h3>4.1 Real-Time Scheduling</h3>
+<ul><li>The customer visits the booking page (<code class="inline-code">/booking</code>).</li><li>They select a category (e.g., Manicure) and choose their desired service(s).</li><li>They select a preferred technician (or choose "Any Available").</li><li>The scheduling engine displays available time slots based on the chosen technician's schedule and existing appointments.</li><li>The customer inputs their contact information and clicks "Confirm Booking".</li></ul>
+
+<h3>4.2 Automated Receipts &amp; Notifications</h3>
+<ul><li><strong>Booking Email</strong>: An automated confirmation email is sent containing the date, time, and service details.</li><li><strong>Receipt Email</strong>: On service completion, the system automatically sends a receipt email with the transaction number and total amount paid.</li><li><strong>Customer Portal</strong>: Registered customers can view their active bookings, booking history, and cancel appointments via the <code class="inline-code">/appointments</code> page.</li></ul>
+
+<hr />
+
+<h2>5. Technical Handover &amp; Service Level Agreement (SLA)</h2>
+
+<p>As part of the system transition, we have documented your infrastructure limits and operational capacity to ensure a smooth business handover.</p>
+
+<h3>5.1 Domain Information</h3>
+<ul><li><strong>Domain Expiration</strong>: Your custom domain is registered and set to expire in <strong>May 2027</strong>. </li><li><strong>Renewal</strong>: To prevent service interruption, the domain must be renewed before this date.</li></ul>
+
+<h3>5.2 Hosting Platform (Vercel Free Tier)</h3>
+<p>The frontend application and serverless backend routes are hosted on Vercel's Free Tier.</p>
+<ul><li><strong>Bandwidth Limit</strong>: 100 GB per month.</li><li><strong>Serverless Invocations Limit</strong>: 100 GB-hours of execution time per month.</li><li><strong>Capacity Estimation</strong>: </li><li>The compiled system is highly optimized. An average user session consumes approximately <strong>500 KB</strong> of bandwidth.</li><li>Under these conditions, your 100 GB monthly bandwidth allowance can support up to <strong>200,000 page views per month</strong>.</li><li>For a single salon location, this capacity is extremely generous and is highly unlikely to be exhausted.</li></ul>
+
+<h3>5.3 Relational Database (Neon Free Tier)</h3>
+<p>Your system's PostgreSQL database is hosted on the Neon Free Tier.</p>
+<ul><li><strong>Storage Limit</strong>: 500 MB (0.5 GiB).</li></ul>
+<p>    <em>   </em>Capacity Estimate*: In PostgreSQL, text-based relational records (like appointments, staff list, and attendance logs) are small. A single appointment record consumes about <strong>1 to 2 KB</strong> of space.</p>
+<p>    <em>   </em>Lifespan*: 500 MB of storage can hold approximately <strong>250,000 individual appointments</strong> or attendance logs. This capacity will easily last your salon multiple years. Note: Image files are uploaded to Vercel Blob storage, keeping database storage consumption minimal.</p>
+<ul><li><strong>Compute Limit</strong>: 190 hours of active database CPU compute per month.</li></ul>
+<p>    <em>   </em>Auto-Suspend Feature*: Neon conserves compute by putting the database to sleep after <strong>5 minutes of inactivity</strong>.</p>
+<p>    <em>   </em>Cold Start Warning*: The first request sent to the site after a period of inactivity will trigger a "cold start" database wakeup. This causes a minor loading delay of <strong>3 to 5 seconds</strong> for the first user, after which it operates at full speed.</p>
+<p>    <em>   </em>Compute Hours Lifetime<em>: The 190 hours compute budget translates to 6.3 hours of </em>continuous* database activity per day. Because the database auto-suspends during quiet hours, this budget is ample for your business. Avoid configuring external automated monitoring services (like uptime bots) to ping the site every minute, as this will prevent auto-suspend and exhaust the compute hours.</p>
+
+<h3>5.4 Identity Management (Clerk Free Tier)</h3>
+<ul><li><strong>Monthly Active Users (MAU) Limit</strong>: 10,000 users.</li><li><strong>Capacity Estimate</strong>: Your system can support up to 10,000 unique customer, staff, and manager logins per month. If your customer database grows beyond this active threshold, you can upgrade Clerk's plan.</li></ul>
+
+<hr />
+
+<h2>6. Technical Warranty &amp; Maintenance Agreement</h2>
+
+<p>To support the transition of NailssentialsQC into your daily operations, we provide the following technical support terms:</p>
+
+<h3>6.1 Three-Month Technical Warranty</h3>
+<ul><li><strong>Included Duration</strong>: 3 months from the date of final system handover.</li><li><strong>Coverage</strong>: </li><li>Fixing software bugs or unexpected errors in the original code.</li><li>Addressing server deployment issues on Vercel or database connectivity errors on Neon.</li><li>Ensuring email delivery (Nodemailer) and authentication (Clerk) services operate as intended.</li><li><strong>Exclusions</strong>: This warranty does not cover new feature requests, styling modifications, or issues caused by third-party services changing their platform policies (e.g., changes to Clerk's free tier).</li></ul>
+
+<h3>6.2 Post-Warranty Maintenance</h3>
+<ul><li><strong>Paid Support</strong>: After the 3-month warranty period expires, any technical assistance, updates, or troubleshooting will be billed as active work.</li><li><strong>Pricing</strong>: Post-warranty support will be billed on an <strong>hourly rate</strong>, subject to mutual negotiation.</li><li><strong>On-Demand Services</strong>: You may request small fixes, feature expansions, or maintenance as needed.</li></ul>
+
+    </div>
+    <div class="footer">
+      NailssentialsQC Operating Manual &copy; 2026. Generated on 6/8/2026.
+    </div>
+  </div>
+</body>
+</html>
