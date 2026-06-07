@@ -214,6 +214,15 @@ function generateHtml() {
 
   fs.writeFileSync(htmlOutputPath, fullHtml, 'utf-8');
   console.log('HTML Manual compiled successfully to docs/CLIENT_MANUAL.html');
+
+  // Also write to frontend/public/manual/index.html
+  const publicManualDir = path.join(__dirname, '../frontend/public/manual');
+  if (!fs.existsSync(publicManualDir)) {
+    fs.mkdirSync(publicManualDir, { recursive: true });
+  }
+  const publicManualPath = path.join(publicManualDir, 'index.html');
+  fs.writeFileSync(publicManualPath, fullHtml, 'utf-8');
+  console.log('HTML Manual successfully copied to frontend/public/manual/index.html');
 }
 
 generateHtml();
