@@ -20,10 +20,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Mail, Send, Loader2, Search } from 'lucide-react';
-import { getMyMessages, sendMessage, getAllStaff } from '../../api/apiClient';
+import { getMyMessages, sendMessage, getAllStaff, markMessageRead } from '../../api/apiClient';
+import { useAuth } from '../../context/AuthContext';
 import type { Message, StaffMember } from '@/types/api';
 
 export const MessagesView: React.FC = () => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,6 +66,22 @@ export const MessagesView: React.FC = () => {
       fetchData();
     } catch (err) {
       alert('Failed to send message.');
+    }
+  };
+
+  const handleMarkAsRead = async (msgId: number, receiverId: number, isRead: boolean) => {
+    if (isRead) return;
+    if (!user || user.id !== receiverId) return;
+
+    try {
+      const res = await markMessageRead(msgId);
+      if (res.data.success) {
+        setMessages((prev) =>
+          prev.map((msg) => (msg.id === msgId ? { ...msg, is_read: true } : msg)),
+        );
+      }
+    } catch (err) {
+      console.error('Failed to mark message as read:', err);
     }
   };
 
@@ -124,6 +142,7 @@ export const MessagesView: React.FC = () => {
             {filteredMessages.map((msg) => (
               <div
                 key={msg.id}
+                onClick={() => handleMarkAsRead(msg.id, msg.receiver_id, msg.is_read)}
                 className={`p-6 md:p-8 hover:bg-[#eeefe9]/50 transition-colors cursor-pointer group ${!msg.is_read ? 'bg-[#dceaf6]/30' : ''}`}
               >
                 <div className="flex justify-between items-start mb-3">

@@ -286,7 +286,15 @@ export interface UpdateCustomerProfileRequest {
 // Message API types
 export interface Message {
   id: number;
+  sender_id: number;
+  receiver_id: number;
   sender: {
+    id: number;
+    username: string;
+    role: string;
+  };
+  receiver: {
+    id: number;
     username: string;
     role: string;
   };
