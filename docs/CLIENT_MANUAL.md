@@ -13,6 +13,11 @@ NailssentialsQC is a custom-built, modern management platform designed specifica
 *   **Staff & Manager Portal**: Staff and managers access their respective dashboards by clicking **Login** in the navigation bar.
 *   **Authentication Service**: Secured via Clerk. Access is partitioned using Role-Based Access Control (RBAC) to ensure that staff and customers cannot access manager tools.
 
+### 1.1 Mandatory Pilot Testing
+*   **Prerequisite**: Before fully implementing and launching the system for live business use, **it is a must to run a pilot test**.
+*   **Protocol**: Run the system in a simulated environment (e.g., with staff logging test hours, mock customer appointments, and trial payroll calculations) for at least 1 to 2 weeks.
+*   **Purpose**: Pilot testing ensures that your staff is fully trained on how to use the dashboards and prevents live data errors or configuration issues during active business operations.
+
 ---
 
 ## 2. Manager Operations (Salon Management Guide)
