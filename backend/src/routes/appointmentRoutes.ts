@@ -4,6 +4,7 @@ import {
   getAppointments,
   createAppointment,
   cancelAppointment,
+  markAppointmentNoShow,
 } from '../controllers/appointmentController';
 import {
   getAvailableSlots,
@@ -72,6 +73,13 @@ router.patch(
   validateIdParam,
   validateZod(cancelAppointmentSchema),
   cancelAppointment,
+);
+router.patch(
+  '/:id/no-show',
+  authenticateToken,
+  authorizeRoles('staff', 'manager'),
+  validateIdParam,
+  markAppointmentNoShow
 );
 
 export default router;

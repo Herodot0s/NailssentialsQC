@@ -512,3 +512,73 @@ export const cancelAppointment = async (req: AuthRequest, res: Response) => {
     return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
   }
 };
+
+export const markAppointmentNoShow = async (req: AuthRequest, res: Response) => {
+  try {
+    const id = req.validatedParams?.id || req.params.id;
+    const currentUser = getCurrentUser(req);
+
+    if (!currentUser) {
+      return sendError(res, 'UNAUTHORIZED', 'User not authenticated', 401);
+    }
+
+    const appointment = await prisma.appointment.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!appointment) {
+      return sendError(res, 'NOT_FOUND', 'Appointment not found', 404);
+    }
+
+    if (appointment.status !== 'pending' && appointment.status !== 'confirmed') {
+      return sendError(
+        res,
+        'BAD_REQUEST',
+        'Only pending or confirmed appointments can be marked as No-Show',
+        400
+      );
+    }
+
+    // Check if scheduled date is strictly in the future compared to today
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const scheduledDateStr = format(new Date(appointment.appointment_date), 'yyyy-MM-dd');
+
+    if (scheduledDateStr > todayStr) {
+      return sendError(
+        res,
+        'BAD_REQUEST',
+        'Cannot mark future appointments as No-Show',
+        400
+      );
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.appointment.update({
+        where: { id: Number(id) },
+        data: { status: 'no_show' },
+      });
+
+      await tx.appointmentItem.updateMany({
+        where: { appointment_id: Number(id) },
+        data: { status: 'no_show' },
+      });
+
+      await tx.systemLog.create({
+        data: {
+          user_id: currentUser.userId,
+          action: 'MARK_NO_SHOW',
+          entity_type: 'appointment',
+          entity_id: Number(id),
+          details: { markedBy: currentUser.role },
+        },
+      });
+    });
+
+    return sendSuccess(res, { message: 'Appointment marked as No-Show successfully' }, 200);
+  } catch (error: unknown) {
+    console.error('Mark no-show error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to mark appointment as No-Show';
+    return sendError(res, 'INTERNAL_SERVER_ERROR', message, 500);
+  }
+};
+
