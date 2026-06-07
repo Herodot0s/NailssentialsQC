@@ -532,7 +532,7 @@ export const StaffDetailSheet: React.FC<StaffDetailSheetProps> = ({
                 className="flex-1 rounded-[6px] border-[#bfc1b7] h-12 text-[10px] uppercase font-bold tracking-widest text-[#cd4239] hover:bg-[#f7d6d3] hover:text-[#cd4239] transition-all"
                 onClick={() => onOpenChange(false)}
               >
-                Suspend
+                Close
               </Button>
               <Button
                 onClick={onUpdateBaseline}
