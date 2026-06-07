@@ -26,7 +26,7 @@ graph TD
     classDef db fill:#ebf3fa,stroke:#316192,stroke-width:2px;
 
     %% Nodes
-    subgraph Client Layer (Vite + React)
+    subgraph "Client Layer (Vite + React)"
         A[Customer App]:::client
         B[Staff Portal]:::client
         C[Manager Dashboard]:::client
@@ -36,7 +36,7 @@ graph TD
         D[Clerk Identity Proxy]:::gateway
     end
 
-    subgraph API Core (Express + Node.js)
+    subgraph "API Core (Express + Node.js)"
         E[REST API Middleware]:::app
         F[Prisma Client ORM]:::app
     end
