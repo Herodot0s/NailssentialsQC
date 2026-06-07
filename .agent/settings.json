@@ -21,7 +21,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"C:/Program Files/nodejs/node.exe\" .agent/hooks/gsd-update-banner.js"
+            "command": "\"C:/Program Files/nodejs/node.exe\" \".agent/hooks/gsd-update-banner.js\""
           }
         ]
       }
@@ -90,7 +90,7 @@
         ]
       },
       {
-        "matcher": "Write|Edit",
+        "matcher": "Bash|Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",
@@ -105,6 +105,16 @@
           {
             "type": "command",
             "command": "bash .agent/hooks/gsd-validate-commit.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"C:/Program Files/nodejs/node.exe\" .agent/hooks/gsd-worktree-path-guard.js",
             "timeout": 5
           }
         ]

@@ -286,10 +286,61 @@ describe('Appointment Controller Tests', () => {
       expect(prismaMock.appointment.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 501 },
-          data: expect.objectContaining({ status: 'completed' }),
+          data: {
+            status: 'completed',
+            service_photo_url: 'http://example.com/photo.jpg',
+          },
         }),
       );
       expect(prismaMock.commission.create).toHaveBeenCalled();
+    });
+
+    it('should overwrite appointmentItem end_time with the current system time in HH:mm format', async () => {
+      const mockAppt = {
+        id: 502,
+        status: 'pending',
+        customer_id: 101,
+        customer: { user_id: 1 },
+        items: [
+          {
+            id: 602,
+            price_at_booking: 500,
+            staff_id: 201,
+            service_id: 1,
+            staff: { user_id: 2, specializations: 'Nails' },
+            service: {
+              category: { name: 'Nails' },
+            },
+          },
+        ],
+      };
+
+      const mockReq = {
+        params: { id: '502' },
+        body: {
+          paymentMethod: 'cash',
+          servicePhotoUrl: 'http://example.com/photo.jpg',
+        },
+      } as unknown as AuthRequest;
+
+      prismaMock.appointment.findUnique.mockResolvedValue(mockAppt as any);
+      prismaMock.transaction.aggregate.mockResolvedValue({ _sum: { amount: 60000 } } as any);
+      prismaMock.$transaction.mockImplementation(async (callback) => callback(prismaMock));
+      prismaMock.transaction.count.mockResolvedValue(10);
+      prismaMock.transaction.create.mockResolvedValue({ id: 702 } as any);
+      prismaMock.commission.create.mockResolvedValue({ id: 802 } as any);
+
+      await appointmentCompletion.completeAppointment(mockReq, mockRes as Response);
+
+      expect(prismaMock.appointmentItem.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { appointment_id: 502 },
+          data: expect.objectContaining({
+            status: 'completed',
+            end_time: expect.stringMatching(/^\d{2}:\d{2}$/),
+          }),
+        })
+      );
     });
   });
 });

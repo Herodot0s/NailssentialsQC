@@ -5,7 +5,13 @@
       "id": "2026-05-11-first-time-baseline-scan",
       "appliedAt": "2026-05-30T02:01:20.974Z",
       "journal": "gsd-migration-journal/2026-05-30T02-01-20-974Z-5d9482ed0824be71.json",
-      "checksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67"
+      "checksum": "sha256:4ec58d35b30dbf39cc56e3972146086d8d31861ecd800cf0b37a7aa94fe74c2a"
+    },
+    {
+      "id": "2026-06-02-rename-get-shit-done-to-gsd-core",
+      "appliedAt": "2026-06-05T17:53:32.368Z",
+      "journal": "gsd-migration-journal/2026-06-05T17-53-32-368Z-7814e5bb261800c3.json",
+      "checksum": "sha256:3a9f1d97f64097fb313203d19c6d93a187a38df61dd299afa5eef73e16124e95"
     }
   ]
 }

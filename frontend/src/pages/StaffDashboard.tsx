@@ -556,13 +556,12 @@ const StaffDashboard: React.FC = () => {
               <div className="lg:col-span-8 space-y-[80px]">
                 {attendanceMessage && (
                   <div
-                    className={`p-8 text-[14px] font-medium border rounded-md ${
-                      attendanceMessage.type === 'error'
+                    className={`p-8 text-[14px] font-medium border rounded-md ${attendanceMessage.type === 'error'
                         ? 'bg-[#f7d6d3] text-[#cd4239] border-[#cd4239]/20'
                         : attendanceMessage.type === 'warning'
                           ? 'bg-[#fcf8e3] text-[#8a6d3b] border-[#faebcc]'
                           : 'bg-[#d9eddf] text-[#2c8c66] border-[#2c8c66]/20'
-                    }`}
+                      }`}
                   >
                     <p className="flex items-center gap-3">
                       {attendanceMessage.type === 'error' ? '⚠️' : '💡'}
@@ -1268,11 +1267,10 @@ const StaffDashboard: React.FC = () => {
                   <Button
                     onClick={() => setSelectedPaymentMethod('cash')}
                     variant={selectedPaymentMethod === 'cash' ? 'default' : 'outline'}
-                    className={`h-16 rounded-md flex flex-col gap-1 border-[#bfc1b7] transition-all ${
-                      selectedPaymentMethod === 'cash'
+                    className={`h-16 rounded-md flex flex-col gap-1 border-[#bfc1b7] transition-all ${selectedPaymentMethod === 'cash'
                         ? 'bg-[#23251d] text-white'
                         : 'bg-white text-[#23251d] hover:bg-[#eeefe9]'
-                    }`}
+                      }`}
                   >
                     <span className="text-xl font-bold">₱</span>
                     <span className="text-[10px] uppercase tracking-widest font-bold">Cash</span>
@@ -1280,11 +1278,10 @@ const StaffDashboard: React.FC = () => {
                   <Button
                     onClick={() => setSelectedPaymentMethod('gcash')}
                     variant={selectedPaymentMethod === 'gcash' ? 'default' : 'outline'}
-                    className={`h-16 rounded-md flex flex-col gap-1 border-[#bfc1b7] transition-all ${
-                      selectedPaymentMethod === 'gcash'
+                    className={`h-16 rounded-md flex flex-col gap-1 border-[#bfc1b7] transition-all ${selectedPaymentMethod === 'gcash'
                         ? 'bg-[#007DFE] text-white border-none'
                         : 'bg-white text-[#007DFE] hover:bg-[#eeefe9]'
-                    }`}
+                      }`}
                   >
                     <span className="text-sm font-black italic tracking-tighter">GCash</span>
                     <span className="text-[10px] uppercase tracking-widest font-bold">Digital</span>

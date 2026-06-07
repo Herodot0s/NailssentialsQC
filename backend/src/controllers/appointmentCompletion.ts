@@ -183,9 +183,13 @@ export const completeAppointment = async (req: AuthRequest, res: Response) => {
       });
 
       // Also update all items to completed
+      const nowTimeStr = format(new Date(), 'HH:mm');
       await tx.appointmentItem.updateMany({
         where: { appointment_id: parseInt(id as string) },
-        data: { status: 'completed' },
+        data: {
+          status: 'completed',
+          end_time: nowTimeStr,
+        },
       });
 
       // Create transaction
