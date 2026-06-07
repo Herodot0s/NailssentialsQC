@@ -17,6 +17,7 @@ NailssentialsQC is a custom-built, modern management platform designed specifica
 *   **Prerequisite**: Before fully implementing and launching the system for live business use, **it is a must to run a pilot test**.
 *   **Protocol**: Run the system in a simulated environment (e.g., with staff logging test hours, mock customer appointments, and trial payroll calculations) for at least 1 to 2 weeks.
 *   **Purpose**: Pilot testing ensures that your staff is fully trained on how to use the dashboards and prevents live data errors or configuration issues during active business operations.
+*   **Feedback & Adjustments**: During the testing period, open communication with our development team is essential so we can perform necessary adjustments, configurations, and fixes before the final business launch.
 
 ---
 
