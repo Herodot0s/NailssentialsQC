@@ -17,6 +17,7 @@ import {
 } from 'date-fns';
 import { sendError } from '../utils/apiHelpers';
 import { logSystemAction } from '../utils/systemLog';
+import { evaluatePayrollFormula } from '../utils/payrollEvaluator';
 
 /**
  * Manager: Generate a new payroll period and calculate payroll for all staff.
@@ -262,8 +263,7 @@ export const generatePayroll = async (req: AuthRequest, res: Response) => {
         for (const c of assignment.salary_structure.components) {
           let amount = 0;
           if (c.formula) {
-            // amount = evaluatePayrollFormula(c.formula, formulaContext);
-            amount = 0; // Formula evaluation disabled until a safe evaluator is restored
+            amount = evaluatePayrollFormula(c.formula, formulaContext);
           } else if (c.amount) {
             amount = Number(c.amount) * weeksInPeriod;
           }

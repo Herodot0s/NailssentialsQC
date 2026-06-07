@@ -30,6 +30,7 @@ jest.mock('../utils/prisma', () => ({
     },
     commission: {
       findMany: jest.fn(),
+      updateMany: jest.fn(),
     },
     deductionLog: {
       findMany: jest.fn(),

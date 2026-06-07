@@ -7,8 +7,8 @@ export const evaluatePayrollFormula = (
   context: Record<string, number>,
 ): number => {
   try {
-    // Basic sanitization: only allow alphanumeric, dots, and common operators
-    const sanitizedFormula = formula.replace(/[^a-zA-Z0-9\s\.\+\-\*\/\(\)]/g, '');
+    // Basic sanitization: only allow alphanumeric, underscores, dots, and common operators
+    const sanitizedFormula = formula.replace(/[^a-zA-Z0-9_\s\.\+\-\*\/\(\)]/g, '');
 
     // Replace variables with values
     let evalString = sanitizedFormula;

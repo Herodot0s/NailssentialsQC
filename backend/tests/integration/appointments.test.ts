@@ -132,7 +132,8 @@ describe('Appointment Integration Tests', () => {
       });
 
       it('should successfully create a walk-in appointment as a manager', async () => {
-        const appointmentDate = format(new Date(), 'yyyy-MM-dd');
+        const tomorrow = addDays(new Date(), 1);
+        const appointmentDate = format(tomorrow, 'yyyy-MM-dd');
         const payload = {
           date: appointmentDate,
           isWalkIn: true,

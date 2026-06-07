@@ -52,10 +52,10 @@ describe('Staff Controller Integration Tests', () => {
 
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.data.id).toBeDefined();
-      expect(response.body.data.data.fullName).toBe(staffPayload.fullName);
+      expect(response.body.data.id).toBeDefined();
+      expect(response.body.data.fullName).toBe(staffPayload.fullName);
 
-      staffId = response.body.data.data.id;
+      staffId = response.body.data.id;
     });
   });
 
