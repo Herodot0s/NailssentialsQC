@@ -13,6 +13,7 @@ interface AppointmentCardProps {
   status: string;
   statusBadge: React.ReactNode;
   onComplete?: () => void;
+  onNoShow?: () => void;
   date?: string;
   technicianName?: string;
 }
@@ -24,6 +25,7 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
   serviceName,
   statusBadge,
   onComplete,
+  onNoShow,
   date,
   technicianName,
 }) => {
@@ -57,14 +59,25 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
           )}
         </div>
 
-        {onComplete && (
-          <div className="pt-2">
-            <Button
-              onClick={onComplete}
-              className="w-full rounded-md h-11 bg-[#23251d] hover:bg-[#33342d] text-white text-[13px] font-bold uppercase tracking-widest"
-            >
-              Complete Service
-            </Button>
+        {(onComplete || onNoShow) && (
+          <div className="pt-2 flex flex-col gap-2">
+            {onComplete && (
+              <Button
+                onClick={onComplete}
+                className="w-full rounded-md h-11 bg-[#23251d] hover:bg-[#33342d] text-white text-[13px] font-bold uppercase tracking-widest"
+              >
+                Complete Service
+              </Button>
+            )}
+            {onNoShow && (
+              <Button
+                onClick={onNoShow}
+                variant="outline"
+                className="w-full rounded-md h-11 border-amber-600 text-amber-600 hover:bg-amber-50 hover:text-amber-700 text-[13px] font-bold uppercase tracking-widest"
+              >
+                Mark No-Show
+              </Button>
+            )}
           </div>
         )}
       </CardContent>

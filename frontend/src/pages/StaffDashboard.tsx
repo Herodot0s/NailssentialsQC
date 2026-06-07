@@ -5,6 +5,7 @@ import {
   checkIn,
   checkOut,
   completeAppointment,
+  markAppointmentNoShow,
   sendMessage,
   uploadFile,
   getStaffDashboard,
@@ -99,6 +100,7 @@ const StaffDashboard: React.FC = () => {
   const [showWalkInModal, setShowWalkInModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [paymentAptId, setPaymentAptId] = useState<number | null>(null);
+  const [noShowApptId, setNoShowApptId] = useState<number | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [newMessage, setNewMessage] = useState({ receiverId: '', subject: '', body: '' });
   const [attendanceMessage, setAttendanceMessage] = useState<{
@@ -281,6 +283,19 @@ const StaffDashboard: React.FC = () => {
       alert(msg);
     } finally {
       setIsProcessingPayment(false);
+    }
+  };
+
+  const handleNoShowConfirm = async () => {
+    if (!noShowApptId) return;
+    try {
+      await markAppointmentNoShow(noShowApptId);
+      setNoShowApptId(null);
+      fetchDashboardData();
+    } catch (err: any) {
+      const msg = err.response?.data?.error?.message || err.message;
+      console.error('Failed to mark no-show:', msg);
+      alert(msg);
     }
   };
 
@@ -650,14 +665,24 @@ const StaffDashboard: React.FC = () => {
                                         : getStatusBadge(item.status)}
                                     </TableCell>
                                     <TableCell className="pr-8 text-right">
-                                      {item.status !== 'completed' && (
-                                        <Button
-                                          onClick={() => handleComplete(apt.id)}
-                                          size="sm"
-                                          className="rounded-md h-9 text-[12px] font-bold uppercase px-6 bg-[#23251d] hover:bg-[#33342d] text-white transition-all shadow-none"
-                                        >
-                                          Complete Service
-                                        </Button>
+                                      {!['completed', 'cancelled', 'no_show'].includes(item.status) && (
+                                        <div className="flex justify-end gap-2">
+                                          <Button
+                                            onClick={() => handleComplete(apt.id)}
+                                            size="sm"
+                                            className="rounded-md h-9 text-[12px] font-bold uppercase px-4 bg-[#23251d] hover:bg-[#33342d] text-white transition-all shadow-none"
+                                          >
+                                            Complete
+                                          </Button>
+                                          <Button
+                                            onClick={() => setNoShowApptId(apt.id)}
+                                            size="sm"
+                                            variant="outline"
+                                            className="rounded-md h-9 text-[12px] font-bold uppercase px-4 border-amber-600 text-amber-600 hover:bg-amber-50 hover:text-amber-700 transition-all shadow-none"
+                                          >
+                                            Mark No-Show
+                                          </Button>
+                                        </div>
                                       )}
                                     </TableCell>
                                   </TableRow>
@@ -687,8 +712,13 @@ const StaffDashboard: React.FC = () => {
                               status={item.status}
                               statusBadge={getStatusBadge(item.status)}
                               onComplete={
-                                item.status !== 'completed'
+                                !['completed', 'cancelled', 'no_show'].includes(item.status)
                                   ? () => handleComplete(apt.id)
+                                  : undefined
+                              }
+                              onNoShow={
+                                !['completed', 'cancelled', 'no_show'].includes(item.status)
+                                  ? () => setNoShowApptId(apt.id)
                                   : undefined
                               }
                               technicianName={
@@ -1328,6 +1358,39 @@ const StaffDashboard: React.FC = () => {
                 variant="ghost"
                 className="w-full rounded-md h-10 text-[10px] uppercase tracking-widest font-bold text-[#5C544F]"
                 onClick={() => setPaymentAptId(null)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={noShowApptId !== null} onOpenChange={(open) => !open && setNoShowApptId(null)}>
+          <DialogContent className="max-w-md border-none shadow-2xl rounded-md p-8 space-y-8 bg-[#eeefe9]">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-[#23251d]">
+                Confirm No-Show
+              </DialogTitle>
+              <DialogDescription className="text-[12px] uppercase tracking-widest font-bold text-[#6c6e63]">
+                Appointment Cancellation
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="text-sm font-medium text-[#4d4f46]">
+              Are you sure you want to mark this appointment as a No-Show? This action will mark all scheduled items as no-show and record this event in the system log.
+            </div>
+
+            <div className="flex flex-col gap-3 pt-4">
+              <Button
+                onClick={handleNoShowConfirm}
+                className="w-full rounded-md h-12 bg-amber-600 hover:bg-amber-700 text-white text-[13px] font-bold uppercase tracking-widest shadow-none"
+              >
+                Confirm No-Show
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full rounded-md h-10 text-[10px] uppercase tracking-widest font-bold text-[#5C544F]"
+                onClick={() => setNoShowApptId(null)}
               >
                 Cancel
               </Button>
