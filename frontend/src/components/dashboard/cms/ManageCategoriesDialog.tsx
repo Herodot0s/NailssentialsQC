@@ -75,7 +75,7 @@ export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[900px] p-0 overflow-hidden bg-canvas border-none shadow-none gap-0">
+      <DialogContent className="max-w-[900px] sm:max-w-[900px] p-0 overflow-hidden bg-canvas border-none shadow-none gap-0">
         <div className="flex flex-col md:flex-row h-[600px] md:h-[640px] border border-hairline rounded-md overflow-hidden bg-surface-card m-0">
           {/* Left: List Pane (Sidebar style) */}
           <div className="w-full md:w-[260px] flex flex-col border-r border-hairline bg-canvas/30">
@@ -157,9 +157,9 @@ export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
               <DialogTitle className="heading-sm-mixed text-mute">
                 {currentCategory
                   ? currentCategory.id
-                    ? 'Editing Details'
-                    : 'New Creation'
-                  : 'Studio Settings'}
+                    ? 'Editing Category'
+                    : 'New Category'
+                  : 'Categories Settings'}
               </DialogTitle>
               <Button
                 variant="ghost"
@@ -171,7 +171,7 @@ export const ManageCategoriesDialog: React.FC<ManageCategoriesDialogProps> = ({
               </Button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-8 pt-10 no-scrollbar">
+            <div className="flex-1 overflow-y-auto p-8 pt-6">
               <AnimatePresence mode="wait">
                 {currentCategory ? (
                   <motion.div

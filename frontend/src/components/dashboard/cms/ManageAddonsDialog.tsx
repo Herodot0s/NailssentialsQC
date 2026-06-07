@@ -78,7 +78,7 @@ export const ManageAddonsDialog: React.FC<ManageAddonsDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[900px] p-0 overflow-hidden bg-canvas border-none shadow-none gap-0">
+      <DialogContent className="max-w-[900px] sm:max-w-[900px] p-0 overflow-hidden bg-canvas border-none shadow-none gap-0">
         <div className="flex flex-col md:flex-row h-[600px] md:h-[640px] border border-hairline rounded-md overflow-hidden bg-surface-card m-0">
           <div className="w-full md:w-[260px] flex flex-col border-r border-hairline bg-canvas/30">
             <div className="p-6 pb-4 flex items-center justify-between">
@@ -171,7 +171,7 @@ export const ManageAddonsDialog: React.FC<ManageAddonsDialogProps> = ({
               </Button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-8 pt-10 no-scrollbar">
+            <div className="flex-1 overflow-y-auto p-8 pt-6">
               <AnimatePresence mode="wait">
                 {currentAddon ? (
                   <motion.div
