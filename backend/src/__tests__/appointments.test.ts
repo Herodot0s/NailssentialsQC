@@ -343,4 +343,73 @@ describe('Appointment Controller Tests', () => {
       );
     });
   });
+
+  describe('markAppointmentNoShow', () => {
+    it('should successfully mark appointment and items as no_show and log it', async () => {
+      const todayStr = format(new Date(), 'yyyy-MM-dd');
+      const mockAppt = {
+        id: 901,
+        status: 'pending',
+        appointment_date: todayStr,
+      };
+
+      const mockReq = {
+        user: { sub: 2, role: 'staff' },
+        validatedParams: { id: 901 },
+      } as unknown as AuthRequest;
+
+      prismaMock.appointment.findUnique.mockResolvedValue(mockAppt as any);
+      prismaMock.$transaction.mockImplementation(async (callback) => callback(prismaMock));
+      prismaMock.appointment.update.mockResolvedValue({ ...mockAppt, status: 'no_show' } as any);
+      prismaMock.systemLog.create.mockResolvedValue({ id: 1001 } as any);
+
+      await appointmentController.markAppointmentNoShow(mockReq, mockRes as Response);
+
+      expect(prismaMock.appointment.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 901 },
+          data: { status: 'no_show' },
+        })
+      );
+      expect(prismaMock.appointmentItem.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { appointment_id: 901 },
+          data: { status: 'no_show' },
+        })
+      );
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+    });
+
+    it('should fail if appointment scheduled date is in the future', async () => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
+      
+      const mockAppt = {
+        id: 902,
+        status: 'pending',
+        appointment_date: tomorrowStr,
+      };
+
+      const mockReq = {
+        user: { sub: 2, role: 'staff' },
+        validatedParams: { id: 902 },
+      } as unknown as AuthRequest;
+
+      prismaMock.appointment.findUnique.mockResolvedValue(mockAppt as any);
+
+      await appointmentController.markAppointmentNoShow(mockReq, mockRes as Response);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          error: expect.objectContaining({
+            message: 'Cannot mark future appointments as No-Show',
+          }),
+        })
+      );
+    });
+  });
 });
+
