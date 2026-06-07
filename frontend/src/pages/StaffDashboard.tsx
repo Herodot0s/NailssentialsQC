@@ -2,17 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useUser } from '@clerk/clerk-react';
 import {
-  getAttendanceStatus,
   checkIn,
   checkOut,
-  getAppointments,
   completeAppointment,
-  getCommissionSummary,
-  getStaffCommissions,
-  getMyPayroll,
   sendMessage,
-  getAllStaff,
   uploadFile,
+  getStaffDashboard,
 } from '../api/apiClient';
 import { MessagesView } from '@/components/dashboard/MessagesView';
 import { LogWalkInDialog } from '@/components/dashboard/customers/LogWalkInDialog';
@@ -122,31 +117,26 @@ const StaffDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setIsLoading(true);
-      const [attRes, aptRes, commRes, payrollRes] = await Promise.all([
-        getAttendanceStatus(),
-        getAppointments(),
-        getCommissionSummary(),
-        getMyPayroll(),
-      ]);
+      const res = await getStaffDashboard();
+      if (res.data.success) {
+        const {
+          attendanceStatus,
+          appointments,
+          commissionSummary,
+          payrolls,
+          commissionsList,
+          staffList,
+        } = res.data.data;
 
-      if (attRes.data.success) {
-        setStatus(attRes.data.data.status);
-      }
-      if (aptRes.data.success) {
-        const aptData = aptRes.data.data;
-        const aptItems = Array.isArray(aptData) ? aptData : aptData?.items || [];
+        setStatus(attendanceStatus);
+
+        const aptItems = Array.isArray(appointments) ? appointments : appointments?.items || [];
         setAppointments(aptItems);
-      }
-      if (commRes.data.success) setCommission(commRes.data.data);
-      if (payrollRes.data.success) setMyPayrolls(payrollRes.data.data);
 
-      const commListRes = await getStaffCommissions();
-      if (commListRes.data.success) setCommissionsList(commListRes.data.data);
-
-      const staffRes = await getAllStaff();
-      if (staffRes.data.success) {
-        const staffData = staffRes.data.data;
-        setStaff(Array.isArray(staffData) ? staffData : staffData?.items || []);
+        setCommission(commissionSummary);
+        setMyPayrolls(payrolls);
+        setCommissionsList(commissionsList);
+        setStaff(staffList);
       }
     } catch (err: any) {
       console.error('Fetch error:', err.response?.data?.error?.message || err.message);

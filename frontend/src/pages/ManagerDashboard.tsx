@@ -2,22 +2,18 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, Plus, Menu, AlertTriangle } from 'lucide-react';
 import {
-  getDailySales,
-  getAllStaff,
   createStaff,
   updateStaff,
-  getAllReviews,
   moderateReview,
-  getCategories,
-  getAllAttendance,
   updateAttendance,
   getStaffSchedule,
   updateStaffSchedule,
-  getAppointments,
   getAllCustomers,
   createCustomer,
   updateCustomer,
   deleteCustomer,
+  getManagerDashboard,
+  getAllAttendance,
 } from '../api/apiClient';
 
 import { StaffTable } from '@/components/dashboard/staff/StaffTable';
@@ -185,33 +181,29 @@ const ManagerDashboard: React.FC = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [salesRes, staffRes, reviewsRes, attRes, catRes, appRes] = await Promise.allSettled([
-        getDailySales(),
-        getAllStaff(),
-        getAllReviews(),
-        getAllAttendance({ startDate: dateRange.start }),
-        getCategories(),
-        getAppointments(),
-      ]);
+      const res = await getManagerDashboard({ startDate: dateRange.start });
+      if (res.data.success) {
+        const {
+          salesStats,
+          staffMembers,
+          reviews,
+          attendance,
+          categories,
+          appointments,
+        } = res.data.data;
 
-      if (salesRes.status === 'fulfilled' && salesRes.value.data.success)
-        setSalesStats(salesRes.value.data.data);
+        if (salesStats) setSalesStats(salesStats);
+        if (staffMembers) {
+          setStaffMembers(Array.isArray(staffMembers) ? staffMembers : staffMembers?.items || []);
+        }
+        if (reviews) setReviews(reviews);
+        if (attendance) setAttendance(attendance);
+        if (categories) setCategories(categories);
 
-      if (staffRes.status === 'fulfilled' && staffRes.value.data.success) {
-        const staffData = staffRes.value.data.data;
-        setStaffMembers(Array.isArray(staffData) ? staffData : staffData?.items || []);
-      }
-
-      if (reviewsRes.status === 'fulfilled' && reviewsRes.value.data.success)
-        setReviews(reviewsRes.value.data.data);
-      if (attRes.status === 'fulfilled' && attRes.value.data.success)
-        setAttendance(attRes.value.data.data);
-      if (catRes.status === 'fulfilled' && catRes.value.data.success)
-        setCategories(catRes.value.data.data);
-
-      if (appRes.status === 'fulfilled' && appRes.value.data.success) {
-        const appData = appRes.value.data.data;
-        setAppointments(Array.isArray(appData) ? appData : appData?.items || []);
+        if (appointments) {
+          const appItems = Array.isArray(appointments) ? appointments : appointments?.items || [];
+          setAppointments(appItems);
+        }
       }
     } catch (err: any) {
       console.error('Fetch error:', err.response?.data?.error?.message || err.message);

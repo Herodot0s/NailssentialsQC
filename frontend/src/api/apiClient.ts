@@ -201,6 +201,11 @@ export const getRetentionAnalytics = (params: { startDate: string; endDate: stri
 export const getKpiSummary = (params: { startDate: string; endDate: string }) =>
   apiClient.get<{ success: boolean; data: KpiSummaryData }>('/reports/kpi-summary', { params });
 
+// Dashboard methods
+export const getStaffDashboard = () => apiClient.get('/dashboard/staff');
+export const getManagerDashboard = (params?: { startDate?: string; endDate?: string }) =>
+  apiClient.get('/dashboard/manager', { params });
+
 // Notification methods
 export const getNotifications = () => apiClient.get('/notifications');
 export const markNotificationRead = (id: number) => apiClient.put(`/notifications/${id}/read`);
