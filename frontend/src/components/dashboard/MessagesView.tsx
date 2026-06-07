@@ -187,11 +187,11 @@ export const MessagesView: React.FC = () => {
       </Card>
 
       <Dialog open={showMessageModal} onOpenChange={setShowMessageModal}>
-        <DialogContent className="max-w-md border-none shadow-2xl rounded-md p-0 overflow-hidden bg-[#eeefe9]">
-          <div className="bg-[#23251d] p-8 md:p-10 text-white">
+        <DialogContent className="max-w-md border-none shadow-2xl rounded-xl p-0 overflow-hidden bg-[#eeefe9]">
+          <div className="bg-[#23251d] p-8 md:p-10 text-white relative">
             <DialogHeader>
-              <DialogTitle className="text-3xl md:text-4xl font-extrabold tracking-tight">
-                Internal <span className="text-[#B8794E]">Dispatch</span>
+              <DialogTitle className="text-3xl font-extrabold tracking-[0.15em] text-[#B8794E]">
+                DISPATCH
               </DialogTitle>
               <DialogDescription className="text-white/60 font-bold mt-2 text-[10px] uppercase tracking-[0.2em]">
                 Secure Staff Correspondence
@@ -201,7 +201,7 @@ export const MessagesView: React.FC = () => {
           <form onSubmit={handleSendMessage} className="p-8 md:p-10 space-y-6">
             <div className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-[10px] uppercase tracking-widest font-bold text-[#6c6e63]">
+                <Label className="text-[10px] font-bold text-[#5C544F] uppercase tracking-[0.25em] mb-1 block">
                   Recipient
                 </Label>
                 <Select
@@ -210,17 +210,17 @@ export const MessagesView: React.FC = () => {
                     setNewMessage({ ...newMessage, receiverId: val || '' })
                   }
                 >
-                  <SelectTrigger className="rounded-md border-[#bfc1b7] h-12 bg-white">
+                  <SelectTrigger className="w-full flex justify-between items-center rounded-xl border border-[#bfc1b7] h-14 bg-white px-5 text-sm font-medium transition-all hover:bg-neutral-50/50 focus:outline-none focus:ring-2 focus:ring-[#B8794E]/20 focus:border-[#B8794E]">
                     <SelectValue placeholder="Select Staff Member">
                       {staff.find((s) => s.id.toString() === newMessage.receiverId)?.fullName}
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="rounded-md border-none shadow-2xl max-h-64">
+                  <SelectContent className="rounded-xl border border-[#bfc1b7]/40 shadow-2xl max-h-64 bg-white p-1">
                     {staff.map((s) => (
                       <SelectItem
                         key={s.id}
                         value={s.id.toString()}
-                        className="text-xs font-bold py-3"
+                        className="text-xs font-bold py-3 px-4 rounded-lg hover:bg-[#eeefe9]/60 cursor-pointer"
                       >
                         {s.fullName} ({s.role})
                       </SelectItem>
@@ -230,7 +230,7 @@ export const MessagesView: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[10px] uppercase tracking-widest font-bold text-[#6c6e63]">
+                <Label className="text-[10px] font-bold text-[#5C544F] uppercase tracking-[0.25em] mb-1 block">
                   Subject
                 </Label>
                 <Input
@@ -238,37 +238,37 @@ export const MessagesView: React.FC = () => {
                   value={newMessage.subject}
                   onChange={(e) => setNewMessage({ ...newMessage, subject: e.target.value })}
                   placeholder="Inquiry / schedule update"
-                  className="rounded-md border-[#bfc1b7] h-12 bg-white"
+                  className="w-full rounded-xl border border-[#bfc1b7] h-14 bg-white px-5 text-sm font-medium transition-all hover:bg-neutral-50/50 focus:outline-none focus:ring-2 focus:ring-[#B8794E]/20 focus:border-[#B8794E]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[10px] uppercase tracking-widest font-bold text-[#6c6e63]">
+                <Label className="text-[10px] font-bold text-[#5C544F] uppercase tracking-[0.25em] mb-1 block">
                   Message Body
                 </Label>
                 <textarea
                   required
                   value={newMessage.body}
                   onChange={(e) => setNewMessage({ ...newMessage, body: e.target.value })}
-                  className="w-full min-h-[160px] rounded-md border border-[#bfc1b7] p-4 focus:outline-none focus:ring-2 focus:ring-[#B8794E]/10 font-medium text-sm bg-white resize-none"
+                  className="w-full min-h-[160px] rounded-xl border border-[#bfc1b7] p-5 focus:outline-none focus:ring-2 focus:ring-[#B8794E]/20 focus:border-[#B8794E] font-medium text-sm bg-white resize-none transition-all hover:bg-neutral-50/50"
                   placeholder="Enter message details..."
                 />
               </div>
             </div>
-            <DialogFooter className="pt-6 gap-3">
+            <DialogFooter className="pt-6 flex justify-between items-center gap-4">
               <Button
                 type="button"
                 variant="ghost"
-                className="rounded-md text-[12px] uppercase font-bold tracking-widest text-[#6c6e63] hover:bg-[#e5e7e0]"
+                className="rounded-xl h-14 px-8 text-[12px] uppercase font-bold tracking-widest text-[#6c6e63] hover:bg-[#e5e7e0] transition-all"
                 onClick={() => setShowMessageModal(false)}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="rounded-md px-8 h-12 font-bold uppercase tracking-widest text-[12px] bg-[#23251d] hover:bg-[#33342d] text-white shadow-none"
+                className="rounded-xl px-10 h-14 font-bold uppercase tracking-widest text-[12px] bg-[#23251d] hover:bg-[#33342d] text-white shadow-none transition-all flex items-center justify-center gap-2"
               >
-                <Send className="h-4 w-4 mr-2" /> Send Message
+                <Send className="h-4 w-4" /> Send Message
               </Button>
             </DialogFooter>
           </form>
